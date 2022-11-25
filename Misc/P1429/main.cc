@@ -17,8 +17,11 @@ class Point
 public:
     float x, y;
 
-    Point();
+    Point(){}
+    Point(float _x, float _y) : x(_x), y(_y) {}
 };
+
+vector<Point> points;
 
 int main()
 {
@@ -45,8 +48,11 @@ int main()
         cin >> x >> y;
 #endif
 
-
+        points.push_back(Point(x, y));
     }
+
+    // sort
+    
 
 #if DEBUG
     inFile.close();

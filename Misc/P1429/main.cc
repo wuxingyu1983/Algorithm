@@ -12,6 +12,8 @@ using namespace std;
 
 #define DEBUG   0
 
+const int k = 2;
+
 bool compare_float(float x, float y, float epsilon = 0.0001f)
 {
     if (fabs(x - y) < epsilon)
@@ -46,7 +48,6 @@ bool cmp(Point &a, Point &b)
         }
     }
     
-
     return ret;
 }
 
@@ -55,6 +56,96 @@ float distance(Point &a, Point &b)
     float ret;
 
     ret = sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+
+    return ret;
+}
+
+// kd-tree node
+class Node
+{
+public:
+    float point[k];
+    float min[k];
+    float max[k];
+    Node *left, *right;
+
+    Node(float arr[]);
+};
+
+Node::Node(float arr[])
+{
+    for (size_t i = 0; i < k; i++)
+    {
+        point[i] = min[i] = max[i] = arr[i];
+    }
+
+    left = right = NULL;
+}
+
+bool cmp0(Point &a, Point &b)
+{
+    return (a.x < b.x);
+}
+
+bool cmp1(Point &a, Point &b)
+{
+    return (a.y < b.y);
+}
+Node *buildKDTree(vector<Point>::iterator ps, int ps_size, int curr_level)
+{
+    Node *ret = NULL;
+
+    int mid_idx = ps_size / 2;
+    if (0 >= curr_level)
+    {
+        nth_element(ps, ps + mid_idx, ps + ps_size, cmp0);
+    }
+    else
+    {
+        nth_element(ps, ps + mid_idx, ps + ps_size, cmp1);
+    }
+
+    Point mid = *(ps + mid_idx);
+    float arr[] = {mid.x, mid.y};
+    ret = new Node(arr);
+
+    if (0 < mid_idx)
+    {
+        // left
+        ret->left = buildKDTree(ps, mid_idx, curr_level + 1);
+
+        for (size_t i = 0; i < k; i++)
+        {
+            if (ret->min[i] > ret->left->min[i])
+            {
+                ret->min[i] = ret->left->min[i];
+            }
+
+            if (ret->max[i] < ret->left->max[i])
+            {
+                ret->max[i] = ret->left->max[i];
+            }
+        }
+    }
+
+    if (mid_idx + 1 < ps_size)
+    {
+        // right
+        ret->right = buildKDTree(ps + mid_idx + 1, ps_size - mid_idx - 1, curr_level + 1);
+
+        for (size_t i = 0; i < k; i++)
+        {
+            if (ret->min[i] > ret->right->min[i])
+            {
+                ret->min[i] = ret->right->min[i];
+            }
+
+            if (ret->max[i] < ret->right->max[i])
+            {
+                ret->max[i] = ret->right->max[i];
+            }
+        }
+    }
 
     return ret;
 }
@@ -125,6 +216,9 @@ int main()
     {
         // build kd-tree
 
+        Node *root = NULL;
+
+        root = buildKDTree(points.begin(), points.size(), -1);
     }
 
     cout << fixed << setprecision(4) << min << endl;

@@ -150,6 +150,25 @@ Node *buildKDTree(vector<Point>::iterator ps, int ps_size, int curr_level)
     return ret;
 }
 
+void findMin(Node &node, Point &point, float &min)
+{
+    if (point.x >= node.min[0] && point.x <= node.max[0] && point.y >= node.min[1] && point.y <= node.max[1])
+    {
+        // in rect
+        Point np = Point(node.point[0], node.point[1]);
+        float tmp = distance(np, point);
+        if (tmp < min)
+        {
+            min = tmp;
+        }
+    }
+    else
+    {
+        // not in rect
+
+    }
+}
+
 int main()
 {
     int n;
@@ -194,7 +213,7 @@ int main()
         }
         else
         {
-            float tmp = distance(pre, it);
+            float tmp = distance(*pre, *it);
             if (compare_float(tmp, 0))
             {
                 min = tmp;
@@ -215,10 +234,15 @@ int main()
     if (false == compare_float(min, 0))
     {
         // build kd-tree
-
         Node *root = NULL;
 
         root = buildKDTree(points.begin(), points.size(), -1);
+
+        // find min
+        for (vector<Point>::iterator it = points.begin(); it != points.end(); it++)
+        {
+            findMin(*root, *it, min);
+        }
     }
 
     cout << fixed << setprecision(4) << min << endl;

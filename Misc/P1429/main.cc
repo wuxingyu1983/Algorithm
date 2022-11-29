@@ -152,9 +152,7 @@ Node *buildKDTree(vector<Point>::iterator ps, int ps_size, int curr_level)
 
 void findMin(Node &node, Point &point, float &min)
 {
-    if (point.x >= node.min[0] && point.x <= node.max[0] && point.y >= node.min[1] && point.y <= node.max[1])
     {
-        // in rect
         Point np = Point(node.point[0], node.point[1]);
         float tmp = distance(np, point);
         if (tmp < min)
@@ -162,10 +160,89 @@ void findMin(Node &node, Point &point, float &min)
             min = tmp;
         }
     }
-    else
-    {
-        // not in rect
 
+    Node *children[] = {node.left, node.right};
+
+    for (size_t i = 0; i < 2; i++)
+    {
+        Node *child = children[i];
+
+        if (child)
+        {
+            if (point.x >= child->min[0] && point.x <= child->max[0] && point.y >= child->min[1] && point.y <= child->max[1])
+            {
+                // in rect
+                // find min from child
+                findMin(*child, point, min);                
+            }
+            else if (point.x >= child->min[0] && point.x <= child->max[0])
+            {
+                float tmp_min = fabs(point.y - child->min[1]);
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                    continue;
+                }
+
+                tmp_min = fabs(point.y - child->max[1]);
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                }
+            }
+            else if (point.y >= child->min[1] && point.y <= child->max[1])
+            {
+                float tmp_min = fabs(point.x - child->min[0]);
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                    continue;
+                }
+
+                tmp_min = fabs(point.x - child->max[0]);
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                }
+            }
+            else
+            {
+                Point tmp_p = Point(child->min[0], child->min[1]);
+                float tmp_min = distance(tmp_p, point);
+
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                    continue;
+                }
+
+                tmp_p = Point(child->min[0], child->max[1]);
+                tmp_min = distance(tmp_p, point);
+
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                    continue;
+                }
+
+                tmp_p = Point(child->max[0], child->min[1]);
+                tmp_min = distance(tmp_p, point);
+
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                    continue;
+                }
+
+                tmp_p = Point(child->max[0], child->max[1]);
+                tmp_min = distance(tmp_p, point);
+
+                if (tmp_min < min)
+                {
+                    findMin(*child, point, min);
+                }
+            }
+        }
     }
 }
 

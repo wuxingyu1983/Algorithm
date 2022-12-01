@@ -15,7 +15,7 @@ using namespace std;
 
 const int k = 2;
 
-bool compare_double(double x, double y, double epsilon = 0.0001f)
+bool compare_double(double x, double y, double epsilon = 0.00001)
 {
     if (fabs(x - y) < epsilon)
         return true; // they are same
@@ -56,7 +56,7 @@ double distance(Point &a, Point &b)
 {
     double ret;
 
-    ret = sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+    ret = sqrt(pow(a.x - b.x, 2.0) + pow(a.y - b.y, 2.0));
 
     return ret;
 }
@@ -92,12 +92,13 @@ bool cmp1(Point &a, Point &b)
 {
     return (a.y < b.y);
 }
+
 Node *buildKDTree(vector<Point>::iterator ps, int ps_size, int curr_level)
 {
     Node *ret = NULL;
 
     int mid_idx = ps_size / 2;
-    if (0 >= curr_level)
+    if (0 > curr_level || 0 == curr_level % 2)
     {
         nth_element(ps, ps + mid_idx, ps + ps_size, cmp0);
     }
@@ -286,14 +287,10 @@ int main()
     vector<Point>::iterator pre = points.end();
     while (it != points.end())
     {
-        if (pre == points.end())
-        {
-            pre = it;
-        }
-        else
+        if (points.end() != pre)
         {
             double tmp = distance(*pre, *it);
-            if (compare_double(tmp, 0))
+            if (true == compare_double(tmp, 0.0))
             {
                 min = tmp;
                 break;
@@ -307,6 +304,7 @@ int main()
             }
         }
 
+        pre = it;
         it ++;
     }
     

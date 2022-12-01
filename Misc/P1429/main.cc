@@ -7,6 +7,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ using namespace std;
 
 const int k = 2;
 
-bool compare_float(float x, float y, float epsilon = 0.0001f)
+bool compare_double(double x, double y, double epsilon = 0.0001f)
 {
     if (fabs(x - y) < epsilon)
         return true; // they are same
@@ -24,10 +25,10 @@ bool compare_float(float x, float y, float epsilon = 0.0001f)
 class Point
 {
 public:
-    float x, y;
+    double x, y;
 
     Point(){}
-    Point(float _x, float _y) : x(_x), y(_y) {}
+    Point(double _x, double _y) : x(_x), y(_y) {}
 };
 
 vector<Point> points;
@@ -40,7 +41,7 @@ bool cmp(Point &a, Point &b)
     {
         ret = true;
     }
-    else if (compare_float(a.x, b.x))
+    else if (compare_double(a.x, b.x))
     {
         if (a.y < b.y)
         {
@@ -51,9 +52,9 @@ bool cmp(Point &a, Point &b)
     return ret;
 }
 
-float distance(Point &a, Point &b)
+double distance(Point &a, Point &b)
 {
-    float ret;
+    double ret;
 
     ret = sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
 
@@ -64,15 +65,15 @@ float distance(Point &a, Point &b)
 class Node
 {
 public:
-    float point[k];
-    float min[k];
-    float max[k];
+    double point[k];
+    double min[k];
+    double max[k];
     Node *left, *right;
 
-    Node(float arr[]);
+    Node(double arr[]);
 };
 
-Node::Node(float arr[])
+Node::Node(double arr[])
 {
     for (size_t i = 0; i < k; i++)
     {
@@ -106,7 +107,7 @@ Node *buildKDTree(vector<Point>::iterator ps, int ps_size, int curr_level)
     }
 
     Point mid = *(ps + mid_idx);
-    float arr[] = {mid.x, mid.y};
+    double arr[] = {mid.x, mid.y};
     ret = new Node(arr);
 
     if (0 < mid_idx)
@@ -150,11 +151,12 @@ Node *buildKDTree(vector<Point>::iterator ps, int ps_size, int curr_level)
     return ret;
 }
 
-void findMin(Node &node, Point &point, float &min)
+void findMin(Node &node, Point &point, double &min)
 {
+    if (false == compare_double(node.point[0], point.x) || false == compare_double(node.point[1], point.y))
     {
         Point np = Point(node.point[0], node.point[1]);
-        float tmp = distance(np, point);
+        double tmp = distance(np, point);
         if (tmp < min)
         {
             min = tmp;
@@ -173,11 +175,11 @@ void findMin(Node &node, Point &point, float &min)
             {
                 // in rect
                 // find min from child
-                findMin(*child, point, min);                
+                findMin(*child, point, min);
             }
             else if (point.x >= child->min[0] && point.x <= child->max[0])
             {
-                float tmp_min = fabs(point.y - child->min[1]);
+                double tmp_min = fabs(point.y - child->min[1]);
                 if (tmp_min < min)
                 {
                     findMin(*child, point, min);
@@ -192,7 +194,7 @@ void findMin(Node &node, Point &point, float &min)
             }
             else if (point.y >= child->min[1] && point.y <= child->max[1])
             {
-                float tmp_min = fabs(point.x - child->min[0]);
+                double tmp_min = fabs(point.x - child->min[0]);
                 if (tmp_min < min)
                 {
                     findMin(*child, point, min);
@@ -208,7 +210,7 @@ void findMin(Node &node, Point &point, float &min)
             else
             {
                 Point tmp_p = Point(child->min[0], child->min[1]);
-                float tmp_min = distance(tmp_p, point);
+                double tmp_min = distance(tmp_p, point);
 
                 if (tmp_min < min)
                 {
@@ -263,7 +265,7 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
-        float x, y;
+        double x, y;
 
 #if DEBUG
         inFile >> x >> y;
@@ -277,7 +279,7 @@ int main()
     // sort
     sort(points.begin(), points.end(), cmp);
 
-    float min = -1;
+    double min = -1;
 
     // pre-find min
     vector<Point>::iterator it = points.begin();
@@ -290,8 +292,8 @@ int main()
         }
         else
         {
-            float tmp = distance(*pre, *it);
-            if (compare_float(tmp, 0))
+            double tmp = distance(*pre, *it);
+            if (compare_double(tmp, 0))
             {
                 min = tmp;
                 break;
@@ -305,10 +307,10 @@ int main()
             }
         }
 
-        it ++; 
+        it ++;
     }
     
-    if (false == compare_float(min, 0))
+    if (false == compare_double(min, 0))
     {
         // build kd-tree
         Node *root = NULL;

@@ -94,7 +94,6 @@ void update(int n, int len, int idx, int val)
     for (int i = idx; i <= n; i += lowbit(i))
     {
         // update tree
-//        tr[i] += val;
         if (0 == tree_arr[i].l && 0 == tree_arr[i].r)
         {
             // init
@@ -102,6 +101,103 @@ void update(int n, int len, int idx, int val)
             tree_arr[i].r = len;
         }
     }
+}
+
+int query(vector<Node *> &lower, vector<Node *> &upper, int k)
+{
+    int ret = 0;
+
+    if (!lower.empty())
+    {
+        if (lower[0]->l == lower[0]->r)
+        {
+            return lower[0]->l;
+        }
+    }
+    else
+    {
+        if (!upper.empty())
+        {
+            if (upper[0]->l == upper[0]->r)
+            {
+                return upper[0]->l;
+            }
+        }
+    }
+
+    int sum_l = 0;
+    for (size_t i = 0; i < lower.size(); i++)
+    {
+        Node * nd = lower[i];
+        if (nd->left)
+        {
+            sum_l += nd->left->sum;
+        }
+    }
+
+    int sum_u = 0;
+    for (size_t i = 0; i < upper.size(); i++)
+    {
+        Node * nd = upper[i];
+        if (nd->left)
+        {
+            sum_u += nd->left->sum;
+        }
+    }
+
+    unsigned int x = sum_u - sum_l;
+    if (x >= k)
+    {
+        // left
+        vector<Node *> l_left;
+        for (size_t i = 0; i < lower.size(); i++)
+        {
+            Node *nd = lower[i];
+            if (nd->left)
+            {
+                l_left.push_back(nd->left);
+            }
+        }
+
+        vector<Node *> u_left;
+        for (size_t i = 0; i < upper.size(); i++)
+        {
+            Node *nd = upper[i];
+            if (nd->left)
+            {
+                u_left.push_back(nd->left);
+            }
+        }
+
+        ret = query(l_left, u_left, k);
+    }
+    else
+    {
+        // right
+        vector<Node *> l_right;
+        for (size_t i = 0; i < lower.size(); i++)
+        {
+            Node *nd = lower[i];
+            if (nd->right)
+            {
+                l_right.push_back(nd->right);
+            }
+        }
+
+        vector<Node *> u_right;
+        for (size_t i = 0; i < upper.size(); i++)
+        {
+            Node *nd = upper[i];
+            if (nd->right)
+            {
+                u_right.push_back(nd->right);
+            }
+        }
+
+        ret = query(l_right, u_right, k - x);
+    } 
+
+    return ret;
 }
 
 int main()
@@ -196,13 +292,32 @@ int main()
                 int idx = lower_bound(as.begin(), as.begin() + len + 1, x) - as.begin();
                 update(n, len, idx, -1);
 
-                idx = lower_bound(as.begin(), as.begin() + len + 1, y) - as.begin();
+                idx = lower_bound(as.begin(), as.begin() + len + 1, ops[i].y) - as.begin();
                 update(n, len, idx, 1);
             }
         }
         else
         {
             // Q
+            vector<Node *> ql;
+            vector<Node *> qr;
+            
+            if (1 < ops[i].l)
+            {
+                for (int i_l = ops[i].l; i_l > 0; i_l -= lowbit(i_l))
+                {
+                    ql.push_back(&(tree_arr[i_l]));
+                }
+            }
+
+            for (int i_r = ops[i].r; i_r > 0; i_r -= lowbit(i_r))
+            {
+                qr.push_back(&(tree_arr[i_r]));
+            }
+
+            int rt_idx = query(ql, qr, ops[i].k);
+
+            cout << as[rt_idx] << endl;
         }
     }
 

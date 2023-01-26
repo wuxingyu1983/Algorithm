@@ -38,33 +38,31 @@ public:
     Node *left, *right;
 
     // range
-    unsigned int l, r;
+//    unsigned int l, r;
 
     Node()
     {
         sum = 0;
-        l = r = 0;
+//        l = r = 0;
         left = right = NULL;
     }
 };
 
-void updateTree(Node &rot, int idx, int val)
+void updateTree(Node &rot, int l, int r, int idx, int val)
 {
     rot.sum += val;
-    if (rot.l != rot.r)
+    if (l != r)
     {
-        unsigned int mid = rot.l + ((rot.r - rot.l) >> 1);
+        unsigned int mid = l + ((r - l) >> 1);
         if (idx <= mid)
         {
             // left
             if (NULL == rot.left)
             {
                 rot.left = new Node();
-                rot.left->l = rot.l;
-                rot.left->r = mid;
             }
 
-            updateTree(*(rot.left), idx, val);
+            updateTree(*(rot.left), l, mid, idx, val);
         }
         else
         {
@@ -72,11 +70,9 @@ void updateTree(Node &rot, int idx, int val)
             if (NULL == rot.right)
             {
                 rot.right = new Node();
-                rot.right->l = mid + 1;
-                rot.right->r = rot.r;
             }
 
-            updateTree(*(rot.right), idx, val);
+            updateTree(*(rot.right), mid + 1, r, idx, val);
         }
     }
 }
@@ -93,38 +89,17 @@ void update(int n, int i_n, int len, int idx, int val)
 {
     for (int i = i_n; i <= n; i += lowbit(i))
     {
-        // update tree
-        if (0 == tree_arr[i].l && 0 == tree_arr[i].r)
-        {
-            // init
-            tree_arr[i].l = 1;
-            tree_arr[i].r = len;
-        }
-
-        updateTree(tree_arr[i], idx, val);
+        updateTree(tree_arr[i], 1, len, idx, val);
     }
 }
 
-int query(vector<Node *> &lower, vector<Node *> &upper, int k)
+int query(vector<Node *> &lower, vector<Node *> &upper, int l, int r, int k)
 {
     int ret = 0;
 
-    if (!lower.empty())
+    if (l == r)
     {
-        if (lower[0]->l == lower[0]->r)
-        {
-            return lower[0]->l;
-        }
-    }
-    else
-    {
-        if (!upper.empty())
-        {
-            if (upper[0]->l == upper[0]->r)
-            {
-                return upper[0]->l;
-            }
-        }
+        return l;
     }
 
     int sum_l = 0;
@@ -147,6 +122,7 @@ int query(vector<Node *> &lower, vector<Node *> &upper, int k)
         }
     }
 
+    unsigned int mid = l + ((r - l) >> 1);
     unsigned int x = sum_u - sum_l;
     if (x >= k)
     {
@@ -171,7 +147,7 @@ int query(vector<Node *> &lower, vector<Node *> &upper, int k)
             }
         }
 
-        ret = query(l_left, u_left, k);
+        ret = query(l_left, u_left, l, mid, k);
     }
     else
     {
@@ -196,7 +172,7 @@ int query(vector<Node *> &lower, vector<Node *> &upper, int k)
             }
         }
 
-        ret = query(l_right, u_right, k - x);
+        ret = query(l_right, u_right, mid + 1, r, k - x);
     }
 
     return ret;
@@ -319,7 +295,7 @@ int main()
                 qr.push_back(&(tree_arr[i_r]));
             }
 
-            int rt_idx = query(ql, qr, ops[i].k);
+            int rt_idx = query(ql, qr, 1, len, ops[i].k);
 
             cout << as[rt_idx] << endl;
         }

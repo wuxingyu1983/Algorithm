@@ -12,8 +12,8 @@
 
 using namespace std;
 
-#define DEBUG   0
-#define MAX_NM  100005
+#define DEBUG 1
+#define MAX_NM 100005
 
 class Op
 {
@@ -35,12 +35,12 @@ class Node
 {
 public:
     unsigned int sum;
-    Node * left, * right;
+    Node *left, *right;
 
     // range
     unsigned int l, r;
 
-    Node() 
+    Node()
     {
         sum = 0;
         l = r = 0;
@@ -61,7 +61,7 @@ void updateTree(Node &rot, int idx, int val)
             {
                 rot.left = new Node();
                 rot.left->l = rot.l;
-                rot.left->r= mid;
+                rot.left->r = mid;
             }
 
             updateTree(*(rot.left), idx, val);
@@ -73,7 +73,7 @@ void updateTree(Node &rot, int idx, int val)
             {
                 rot.right = new Node();
                 rot.right->l = mid + 1;
-                rot.right->r= rot.r;
+                rot.right->r = rot.r;
             }
 
             updateTree(*(rot.right), idx, val);
@@ -89,9 +89,9 @@ int lowbit(int x)
     return x & (-x);
 }
 
-void update(int n, int len, int idx, int val)
+void update(int n, int i_n, int len, int idx, int val)
 {
-    for (int i = idx; i <= n; i += lowbit(i))
+    for (int i = i_n; i <= n; i += lowbit(i))
     {
         // update tree
         if (0 == tree_arr[i].l && 0 == tree_arr[i].r)
@@ -100,6 +100,8 @@ void update(int n, int len, int idx, int val)
             tree_arr[i].l = 1;
             tree_arr[i].r = len;
         }
+
+        updateTree(tree_arr[i], idx, val);
     }
 }
 
@@ -128,7 +130,7 @@ int query(vector<Node *> &lower, vector<Node *> &upper, int k)
     int sum_l = 0;
     for (size_t i = 0; i < lower.size(); i++)
     {
-        Node * nd = lower[i];
+        Node *nd = lower[i];
         if (nd->left)
         {
             sum_l += nd->left->sum;
@@ -138,7 +140,7 @@ int query(vector<Node *> &lower, vector<Node *> &upper, int k)
     int sum_u = 0;
     for (size_t i = 0; i < upper.size(); i++)
     {
-        Node * nd = upper[i];
+        Node *nd = upper[i];
         if (nd->left)
         {
             sum_u += nd->left->sum;
@@ -195,7 +197,7 @@ int query(vector<Node *> &lower, vector<Node *> &upper, int k)
         }
 
         ret = query(l_right, u_right, k - x);
-    } 
+    }
 
     return ret;
 }
@@ -279,7 +281,7 @@ int main()
     for (size_t i = 1; i <= n; i++)
     {
         int idx = lower_bound(as.begin(), as.begin() + len + 1, inputs[i]) - as.begin();
-        update(n, len, idx, 1);
+        update(n, i, len, idx, 1);
     }
 
     for (size_t i = 0; i < m; i++)
@@ -290,10 +292,12 @@ int main()
             if (x != ops[i].y)
             {
                 int idx = lower_bound(as.begin(), as.begin() + len + 1, x) - as.begin();
-                update(n, len, idx, -1);
+                update(n, ops[i].x, len, idx, -1);
 
                 idx = lower_bound(as.begin(), as.begin() + len + 1, ops[i].y) - as.begin();
-                update(n, len, idx, 1);
+                update(n, ops[i].x, len, idx, 1);
+
+                inputs[ops[i].x] = ops[i].y;
             }
         }
         else
@@ -301,10 +305,10 @@ int main()
             // Q
             vector<Node *> ql;
             vector<Node *> qr;
-            
+
             if (1 < ops[i].l)
             {
-                for (int i_l = ops[i].l; i_l > 0; i_l -= lowbit(i_l))
+                for (int i_l = ops[i].l - 1; i_l > 0; i_l -= lowbit(i_l))
                 {
                     ql.push_back(&(tree_arr[i_l]));
                 }

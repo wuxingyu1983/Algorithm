@@ -101,7 +101,6 @@ int main()
     unsigned int cnt = n - k;
 
     vector<unsigned int> targets(k);
-    set<unsigned int> targets_set;
     for (size_t i_k = 0; i_k < k; i_k++)
     {
 #if DEBUG
@@ -110,7 +109,6 @@ int main()
         cin >> targets[i_k];
 #endif
 
-        targets_set.insert(targets[i_k]);
         set_size[targets[i_k]] = 0;
     }
     
@@ -182,11 +180,6 @@ int main()
                     }
                 }
             }
-        }
-
-        {
-            auto pr = targets_set.find(*rit);
-            targets_set.erase(pr);
         }
 
         cnts.push_back(cnt);

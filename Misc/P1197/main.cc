@@ -91,6 +91,15 @@ int main()
     cin >> k;
 #endif
 
+    // init
+    vector<unsigned int> pa(n);
+    iota(pa.begin(), pa.end(), 0);
+
+    vector<unsigned int> set_size(n, 1);
+
+    multimap<unsigned int, unsigned int> targets_map;
+    unsigned int cnt = n - k;
+
     vector<unsigned int> targets(k);
     set<unsigned int> targets_set;
     for (size_t i_k = 0; i_k < k; i_k++)
@@ -102,19 +111,12 @@ int main()
 #endif
 
         targets_set.insert(targets[i_k]);
+        set_size[targets[i_k]] = 0;
     }
-
-    // init
-    vector<unsigned int> pa(n);
-    iota(pa.begin(), pa.end(), 0);
-
-    vector<unsigned int> set_size(n, 1);
-
-    multimap<unsigned int, unsigned int> targets_map;
-    unsigned int cnt = n - k;
+    
     for (size_t i_m = 0; i_m < m; i_m++)
     {
-        if (targets_set.end() == targets_set.find(edges[i_m].x) && targets_set.end() == targets_set.find(edges[i_m].y))
+        if (set_size[edges[i_m].x] && set_size[edges[i_m].y])
         {
             // x, y not in targets
             unsigned int pa_x = find(pa, edges[i_m].x);
@@ -148,6 +150,7 @@ int main()
 
     for (vector<unsigned int>::reverse_iterator rit = targets.rbegin(); rit != targets.rend(); rit++)
     {
+        set_size[*rit] = 1;
         cnt ++;
 
         {
@@ -156,7 +159,7 @@ int main()
             {
                 for (auto iter = pr.first; iter != pr.second; ++iter)
                 {
-                    if (std::end(targets_set) == targets_set.find(iter->second))
+                    if (set_size[iter->second])
                     {
                         unsigned int pa_x = find(pa, *rit);
                         unsigned int pa_y = find(pa, iter->second);

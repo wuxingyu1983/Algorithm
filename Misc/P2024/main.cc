@@ -126,7 +126,10 @@ int main()
         }
         else
         {
-            if (x == y)
+            unsigned int pax = find(pa, x);
+            unsigned int pay = find(pa, y);
+
+            if (pax == pay)
             {
                 cnt ++;
                 continue;

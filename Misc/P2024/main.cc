@@ -16,20 +16,45 @@ using namespace std;
 
 #define DEBUG 1
 
-bool cmp(const unsigned int * x, const unsigned int * y)
-{
-    return (*x) < (*y);
-}
-
 unsigned int find(vector<unsigned int> &pa, unsigned int x)
 {
     return pa[x] == x ? x : pa[x] = find(pa, pa[x]);
 }
 
 // set x => set y
-void unite(vector<unsigned int> &pa, unsigned int x, unsigned int y)
+unsigned int unite(vector<unsigned int> &pa, unsigned int x, unsigned int y)
 {
-    pa[find(pa, x)] = find(pa, y);
+    if (0 == x)
+    {
+        return y;
+    }
+    if (0 == y)
+    {
+        return x;
+    }
+    return pa[find(pa, x)] = find(pa, y);
+}
+
+void merge(vector<unsigned int> &pa, vector<unsigned int> &hunter, vector<unsigned int> &prey, unsigned int pax, unsigned int pay)
+{
+    unsigned int a = pax, b = pay;
+
+    if (a > b)
+    {
+        swap(a, b);
+    }
+
+    // update hunter
+    unite(pa, hunter[a], hunter[b]);
+    
+    // update prey
+    unite(pa, prey[a], prey[b]);
+    
+    // a => b
+    unite(pa, a, b);
+
+    hunter[hunter[b]] = prey[b];
+    prey[prey[b]] = hunter[b];
 }
 
 int main()
@@ -51,9 +76,9 @@ int main()
     iota(pa.begin(), pa.end(), 0);
 
     // 吃其他的关系
-    vector< set<unsigned int> > hunter;
+    vector<unsigned int> hunter(n + 1, 0);
     // 被其他吃的关系
-    vector< set<unsigned int> > prey;
+    vector<unsigned int> prey(n + 1, 0);
 
     unsigned int cnt = 0;
     for (size_t i_k = 0; i_k < k; i_k++)
@@ -78,50 +103,20 @@ int main()
             if (pax != pay)
             {
                 // 查看 pax、pay 之间是否有猎杀关系
-                if (hunter[pax].end() != hunter[pax].find(pay))
+                if (hunter[pax] == pay)
                 {
                     cnt ++;
                     continue;
                 }
 
-                if (hunter[pay].end() != hunter[pay].find(pax))
+                if (hunter[pay] == pax)
                 {
                     cnt ++;
                     continue;
                 }
 
                 // 合并
-                {
-                    unsigned int a = pax, b = pay;
-
-                    if (hunter[b].size() < hunter[a].size())
-                    {
-                        swap(a, b);
-                    }
-
-                    // update hunter
-                    for (set<unsigned int>::iterator it = hunter[a].begin(); it != hunter[a].end(); it++)
-                    {
-                        prey[*it].erase(a);
-                        prey[*it].insert(b);
-
-                        hunter[b].insert(*it);
-                    }
-                    hunter[a].clear();
-
-                    // update prey
-                    for (set<unsigned int>::iterator it = prey[a].begin(); it != prey[a].end(); it++)
-                    {
-                        hunter[*it].erase(a);
-                        hunter[*it].insert(b);
-
-                        prey[b].insert(*it);
-                    }
-                    prey[a].clear();
-
-                    // a => b
-                    unite(pa, a, b);
-                }
+                merge(pa, hunter, prey, pax, pay);
             }
         }
         else

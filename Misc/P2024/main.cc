@@ -35,26 +35,44 @@ unsigned int unite(vector<unsigned int> &pa, unsigned int x, unsigned int y)
     return pa[find(pa, x)] = find(pa, y);
 }
 
-void merge(vector<unsigned int> &pa, vector<unsigned int> &hunter, vector<unsigned int> &prey, unsigned int pax, unsigned int pay)
+void comb(vector<unsigned int> &hunter, vector<unsigned int> &prey, unsigned int c, unsigned int h, unsigned int p)
 {
-    unsigned int a = pax, b = pay;
+    if (h)
+    {
+        hunter[c] = h;
+        prey[h] = c;
+    }
 
+    if (p)
+    {
+        hunter[p] = c;
+        prey[c] = p;
+    }
+
+    if (p && h)
+    {
+        hunter[h] = p;
+        prey[p] = h;
+    }
+}
+
+void merge(vector<unsigned int> &pa, vector<unsigned int> &hunter, vector<unsigned int> &prey, unsigned int a, unsigned int b)
+{
     if (a > b)
     {
         swap(a, b);
     }
 
     // update hunter
-    unite(pa, hunter[a], hunter[b]);
+    unsigned int h = unite(pa, hunter[a], hunter[b]);
     
     // update prey
-    unite(pa, prey[a], prey[b]);
+    unsigned int p = unite(pa, prey[a], prey[b]);
     
     // a => b
-    unite(pa, a, b);
+    unsigned int c = unite(pa, a, b);
 
-    hunter[hunter[b]] = prey[b];
-    prey[prey[b]] = hunter[b];
+    comb(hunter, prey, c, h, p);
 }
 
 int main()
@@ -129,6 +147,23 @@ int main()
                 cnt ++;
                 continue;
             }
+
+            if (hunter[pax] == pay)
+            {
+                continue;
+            }
+            
+            if (hunter[pay] == pax)
+            {
+                cnt ++;
+                continue;
+            }
+
+            unsigned int c = unite(pa, pax, prey[pay]);
+            unsigned int h = unite(pa, hunter[pax], pay);
+            unsigned int p = unite(pa, prey[pax], hunter[pay]);
+
+            comb(hunter, prey, c, h, p);
         }
     }
 

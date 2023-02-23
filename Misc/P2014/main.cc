@@ -62,7 +62,7 @@ int main()
         subs[k].followups.push_back(i);
     }
 
-
+    
 
 #if DEBUG
     inFile.close();

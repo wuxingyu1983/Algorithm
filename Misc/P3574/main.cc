@@ -23,7 +23,6 @@ public:
     unsigned int t;
     unsigned int max;
     int diff;
-    vector<House *> children;
 
     House()
     {
@@ -41,6 +40,8 @@ multimap<int, int> edges;
 
 void init_houses(int curr, int parent)
 {
+    vector<House *> children;
+
     pair<multimap<int, int>::iterator, multimap<int, int>::iterator> ret = edges.equal_range(curr);
 
     for(multimap<int, int>::iterator it = ret.first; it != ret.second; ++it)
@@ -48,19 +49,19 @@ void init_houses(int curr, int parent)
         if (parent != it->second)
         {
             init_houses(it->second, curr);
-            houses[curr].children.push_back(&(houses[it->second]));
+            children.push_back(&(houses[it->second]));
         }
     }
 
-    if (0 < houses[curr].children.size())
+    if (0 < children.size())
     {
         // sort, desc
-        sort(houses[curr].children.begin(), houses[curr].children.end(), comp);
+        sort(children.begin(), children.end(), comp);
 
         int t = 0;
         int max = 0;
 
-        for (vector<House *>::iterator it = houses[curr].children.begin(); it != houses[curr].children.end(); it++)
+        for (vector<House *>::iterator it = children.begin(); it != children.end(); it++)
         {
             if (t + (*it)->max + 1 > max)
             {
@@ -95,7 +96,6 @@ void init_houses(int curr, int parent)
 
         houses[curr].diff = houses[curr].max - houses[curr].t;
     }
-    
 }
 
 int main()
@@ -146,4 +146,3 @@ int main()
 
     return 0;
 }
-

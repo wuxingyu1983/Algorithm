@@ -14,8 +14,8 @@
 
 using namespace std;
 
-#define DEBUG       0
-#define MAX_N       500002
+#define DEBUG 0
+#define MAX_N 500002
 
 class House
 {
@@ -30,38 +30,45 @@ public:
     }
 };
 
-bool comp(House * a, House * b)
+inline bool comp(House *a, House *b)
 {
     return (a->diff > b->diff);
 }
 
 vector<House> houses(MAX_N);
 multimap<int, int> edges;
+vector<House *> children(MAX_N);
 
 void init_houses(int curr, int parent)
 {
-    vector<House *> children;
-
     pair<multimap<int, int>::iterator, multimap<int, int>::iterator> ret = edges.equal_range(curr);
 
-    for(multimap<int, int>::iterator it = ret.first; it != ret.second; ++it)
+    int size = 0;
+    for (multimap<int, int>::iterator it = ret.first; it != ret.second; ++it)
     {
         if (parent != it->second)
         {
             init_houses(it->second, curr);
-            children.push_back(&(houses[it->second]));
         }
     }
 
-    if (0 < children.size())
+    for (multimap<int, int>::iterator it = ret.first; it != ret.second; ++it)
+    {
+        if (parent != it->second)
+        {
+            children[size++] = &(houses[it->second]);
+        }
+    }
+
+    if (0 < size)
     {
         // sort, desc
-        sort(children.begin(), children.end(), comp);
+        sort(children.begin(), children.begin() + size, comp);
 
         int t = 0;
         int max = 0;
 
-        for (vector<House *>::iterator it = children.begin(); it != children.end(); it++)
+        for (vector<House *>::iterator it = children.begin(); it != children.begin() + size; it++)
         {
             if (t + (*it)->max + 1 > max)
             {
@@ -74,17 +81,14 @@ void init_houses(int curr, int parent)
         houses[curr].t = t;
         if (1 != curr)
         {
-            if (houses[curr].max > max)
-            {
-            }
-            else
+            if (houses[curr].max < max)
             {
                 houses[curr].max = max;
             }
         }
         else
         {
-            if (houses[curr].max + houses[curr].t  > max)
+            if (houses[curr].max + houses[curr].t > max)
             {
                 houses[curr].max = houses[curr].max + houses[curr].t;
             }
@@ -135,7 +139,7 @@ int main()
         edges.insert(pair<int, int>(a, b));
         edges.insert(pair<int, int>(b, a));
     }
-    
+
     init_houses(1, 0);
 
     cout << houses[1].max << endl;

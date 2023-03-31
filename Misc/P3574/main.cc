@@ -21,19 +21,18 @@ class House
 {
 public:
     unsigned int t;
-    unsigned long long c, max;
-    vector<House> children;
+    unsigned int max;
+    vector<House *> children;
 
     House()
     {
-        c = max = 0;
-        t = 0;
+        t = max = 0;
     }
 };
 
-bool comp(House &a, House &b)
+bool comp(House * a, House * b)
 {
-    return (a.max - a.t > b.max - b.t);
+    return (a->max - a->t > b->max - b->t);
 }
 
 vector<House> houses(MAX_N);
@@ -48,7 +47,7 @@ void init_houses(int curr, int parent)
         if (parent != it->second)
         {
             init_houses(it->second, curr);
-            houses[curr].children.push_back(houses[it->second]);
+            houses[curr].children.push_back(&(houses[it->second]));
         }
     }
 
@@ -60,22 +59,32 @@ void init_houses(int curr, int parent)
         int t = 0;
         int max = 0;
 
-        for (vector<House>::iterator it = houses[curr].children.begin(); it != houses[curr].children.end(); it++)
+        for (vector<House *>::iterator it = houses[curr].children.begin(); it != houses[curr].children.end(); it++)
         {
-            if (t + (*it).max + 1 > max)
+            if (t + (*it)->max + 1 > max)
             {
-                max = t + (*it).max + 1;
+                max = t + (*it)->max + 1;
             }
 
-            t += (*it).t + 2;
+            t += (*it)->t + 2;
         }
 
         houses[curr].t = t;
-        if (1 != curr) 
+        if (1 != curr)
         {
-            if (houses[curr].c > max)
+            if (houses[curr].max > max)
             {
-                houses[curr].max = houses[curr].c;
+            }
+            else
+            {
+                houses[curr].max = max;
+            }
+        }
+        else
+        {
+            if (houses[curr].max + houses[curr].t  > max)
+            {
+                houses[curr].max = houses[curr].max + houses[curr].t;
             }
             else
             {
@@ -109,7 +118,7 @@ int main()
         cin >> c;
 #endif
 
-        houses[i].max = houses[i].c = c;
+        houses[i].max = c;
     }
 
     for (size_t i = 1; i < n; i++)
@@ -126,7 +135,7 @@ int main()
     
     init_houses(1, 0);
 
-    cout << houses[1].c + houses[1].max << endl;
+    cout << houses[1].max << endl;
 
 #if DEBUG
     inFile.close();
@@ -134,3 +143,4 @@ int main()
 
     return 0;
 }
+

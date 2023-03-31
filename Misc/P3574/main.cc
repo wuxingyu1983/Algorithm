@@ -26,9 +26,15 @@ public:
 
     House()
     {
-        c = max = t = 0;
+        c = max = 0;
+        t = 0;
     }
 };
+
+bool comp(House &a, House &b)
+{
+    return (a.max - a.t > b.max - b.t);
+}
 
 vector<House> houses(MAX_N);
 multimap<int, int> edges;
@@ -46,6 +52,38 @@ void init_houses(int curr, int parent)
         }
     }
 
+    if (0 < houses[curr].children.size())
+    {
+        // sort, desc
+        sort(houses[curr].children.begin(), houses[curr].children.end(), comp);
+
+        int t = 0;
+        int max = 0;
+
+        for (vector<House>::iterator it = houses[curr].children.begin(); it != houses[curr].children.end(); it++)
+        {
+            if (t + (*it).max + 1 > max)
+            {
+                max = t + (*it).max + 1;
+            }
+
+            t += (*it).t + 2;
+        }
+
+        houses[curr].t = t;
+        if (1 != curr) 
+        {
+            if (houses[curr].c > max)
+            {
+                houses[curr].max = houses[curr].c;
+            }
+            else
+            {
+                houses[curr].max = max;
+            }
+        }
+    }
+    
 }
 
 int main()
@@ -71,7 +109,7 @@ int main()
         cin >> c;
 #endif
 
-        houses[i].c = c;
+        houses[i].max = houses[i].c = c;
     }
 
     for (size_t i = 1; i < n; i++)
@@ -87,6 +125,8 @@ int main()
     }
     
     init_houses(1, 0);
+
+    cout << houses[1].c + houses[1].max << endl;
 
 #if DEBUG
     inFile.close();

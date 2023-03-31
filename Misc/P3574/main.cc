@@ -22,17 +22,18 @@ class House
 public:
     unsigned int t;
     unsigned int max;
+    int diff;
     vector<House *> children;
 
     House()
     {
-        t = max = 0;
+        diff = t = max = 0;
     }
 };
 
 bool comp(House * a, House * b)
 {
-    return (a->max - a->t > b->max - b->t);
+    return (a->diff > b->diff);
 }
 
 vector<House> houses(MAX_N);
@@ -91,6 +92,8 @@ void init_houses(int curr, int parent)
                 houses[curr].max = max;
             }
         }
+
+        houses[curr].diff = houses[curr].max - houses[curr].t;
     }
     
 }
@@ -118,7 +121,7 @@ int main()
         cin >> c;
 #endif
 
-        houses[i].max = c;
+        houses[i].max = houses[i].diff = c;
     }
 
     for (size_t i = 1; i < n; i++)

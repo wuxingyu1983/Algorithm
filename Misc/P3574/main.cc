@@ -46,7 +46,7 @@ inline bool compDepth(House * a, House * b)
 
 vector<House> raws(MAX_N);
 vector<House *> houses(MAX_N);
-multimap<int, int> edges;
+vector< vector<int> > edges(MAX_N);
 
 int main()
 {
@@ -83,8 +83,8 @@ int main()
 #else
         cin >> a >> b;
 #endif
-        edges.insert(pair<int, int>(a, b));
-        edges.insert(pair<int, int>(b, a));
+        edges[a].push_back(b);
+        edges[b].push_back(a);
     }
 
     houses[1]->depth = 1;
@@ -96,14 +96,13 @@ int main()
         int curr = que.front();
         int depth = houses[curr]->depth;
 
-        pair<multimap<int, int>::iterator, multimap<int, int>::iterator> ret = edges.equal_range(curr);
-        for (multimap<int, int>::iterator it = ret.first; it != ret.second; ++it)
+        for (vector<int>::iterator it = edges[curr].begin(); it != edges[curr].end(); it++)
         {
-            if (0 == houses[it->second]->depth)
+            if (0 == houses[*it]->depth)
             {
-                houses[curr]->children.push_back(houses[it->second]);
-                houses[it->second]->depth = depth + 1;
-                que.push(it->second);
+                houses[curr]->children.push_back(houses[*it]);
+                houses[*it]->depth = depth + 1;
+                que.push(*it);
             }
         }
 
@@ -117,7 +116,7 @@ int main()
     {
         if (0 < houses[curr]->children.size())
         {
-            // sort, desc
+            // sort, desc, greedy
             sort(houses[curr]->children.begin(), houses[curr]->children.end(), comp);
 
             int t = 0;

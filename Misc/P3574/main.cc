@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iomanip>
 #include <numeric>
+#include <queue>
 
 using namespace std;
 
@@ -46,21 +47,6 @@ inline bool compDepth(House * a, House * b)
 vector<House> raws(MAX_N);
 vector<House *> houses(MAX_N);
 multimap<int, int> edges;
-
-void init_tree(int curr, int parent, int depth)
-{
-    houses[curr]->depth = depth;
-    pair<multimap<int, int>::iterator, multimap<int, int>::iterator> ret = edges.equal_range(curr);
-
-    for (multimap<int, int>::iterator it = ret.first; it != ret.second; ++it)
-    {
-        if (parent != it->second)
-        {
-            init_tree(it->second, curr, depth + 1);
-            houses[curr]->children.push_back(houses[it->second]);
-        }
-    }
-}
 
 int main()
 {
@@ -101,8 +87,28 @@ int main()
         edges.insert(pair<int, int>(b, a));
     }
 
-    init_tree(1, 0, 0);
-//    init_houses(1, 0);
+    houses[1]->depth = 1;
+
+    queue<int> que;
+    que.push(1);
+    while (0 < que.size())
+    {
+        int curr = que.front();
+        int depth = houses[curr]->depth;
+
+        pair<multimap<int, int>::iterator, multimap<int, int>::iterator> ret = edges.equal_range(curr);
+        for (multimap<int, int>::iterator it = ret.first; it != ret.second; ++it)
+        {
+            if (0 == houses[it->second]->depth)
+            {
+                houses[curr]->children.push_back(houses[it->second]);
+                houses[it->second]->depth = depth + 1;
+                que.push(it->second);
+            }
+        }
+
+        que.pop();
+    }
 
     // sort houses by depth desc
     sort(houses.begin() + 1, houses.begin() + 1 + n, compDepth);

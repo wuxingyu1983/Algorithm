@@ -27,7 +27,6 @@ unsigned int cnt[MAX_N];
 unsigned int n, k;
 stack<unsigned int> nodes;
 unsigned int parents[MAX_N];
-vector<int> mins(MAX_N, MAX_K);
 
 void init(unsigned int node, unsigned int parent)
 {
@@ -83,7 +82,6 @@ int main()
                 // not root, leaf, no children
                 dp[node][0][0] = 1;
                 dp[node][2][1] = 1;
-                mins[node] = 0;
             }
             else
             {
@@ -95,7 +93,6 @@ int main()
                 }
 
                 cnt[node] += cnt[*it];
-                mins[node] = mins[*it];
 
                 // first
                 {
@@ -106,21 +103,13 @@ int main()
                         upper = cnt[node];
                     }
 
-                    for (int num = upper; num >= mins[node]; num--)
+                    for (int num = upper; num >= 0; num--)
                     {
                         // type : 0, no equipment in node, and node is not monitored
                         dp[node][0][num] = dp[*it][1][num];
-                        if (0 < dp[node][0][num])
-                        {
-                            mins[node] = mins[node] > num ? num : mins[node];
-                        }
 
                         // type : 1,  no equipment in node, and node is monitored
                         dp[node][1][num] = dp[*it][3][num];
-                        if (0 < dp[node][1][num])
-                        {
-                            mins[node] = mins[node] > num ? num : mins[node];
-                        }
 
                         if (0 < num)
                         {
@@ -132,22 +121,12 @@ int main()
                                 dp[node][2][num] %= MOD;
                             }
 
-                            if (0 < dp[node][2][num])
-                            {
-                                mins[node] = mins[node] > num ? num : mins[node];
-                            }
-
                             // type : 3, equipment in node, and node is monitored
                             dp[node][3][num] = dp[*it][2][num - 1] + dp[*it][3][num - 1];
 
                             if (MOD < dp[node][3][num])
                             {
                                 dp[node][3][num] %= MOD;
-                            }
-
-                            if (0 < dp[node][3][num])
-                            {
-                                mins[node] = mins[node] > num ? num : mins[node];
                             }
                         }
                     }
@@ -158,7 +137,6 @@ int main()
                     if (parents[node] != *it)
                     {
                         cnt[node] += cnt[*it];
-                        mins[node] += mins[*it];
 
                         unsigned int upper = k;
 
@@ -167,11 +145,12 @@ int main()
                             upper = cnt[node];
                         }
 
-                        for (int num = upper; num >= mins[node]; num--)
+                        for (int num = upper; num >= 0; num--)
                         {
                             for (int i = num; i >= 0; i--)
                             {
                                 unsigned long long tmp = 0;
+
                                 // type : 0, no equipment in node, and node is not monitored
                                 if (num == i)
                                 {
@@ -188,11 +167,6 @@ int main()
                                 }
 
                                 dp[node][0][num] = tmp;
-
-                                if (0 < dp[node][0][num])
-                                {
-                                    mins[node] = mins[node] > num ? num : mins[node];
-                                }
 
                                 // type : 1,  no equipment in node, and node is monitored
                                 if (num == i)
@@ -213,11 +187,6 @@ int main()
 
                                 dp[node][1][num] = tmp;
 
-                                if (0 < dp[node][1][num])
-                                {
-                                    mins[node] = mins[node] > num ? num : mins[node];
-                                }
-
                                 // type : 2, equipment in node, and node is not monitored
                                 if (num == i)
                                 {
@@ -237,15 +206,12 @@ int main()
 
                                 dp[node][2][num] = tmp;
 
-                                if (0 < dp[node][2][num])
-                                {
-                                    mins[node] = mins[node] > num ? num : mins[node];
-                                }
-
                                 // type : 3, equipment in node, and node is monitored
                                 if (num == i)
                                 {
-                                    tmp = (unsigned long long)dp[node][2][i] * (unsigned long long)(dp[*it][2][num - i] + dp[*it][3][num - i]) + (unsigned long long)dp[node][3][i] * (unsigned long long)(dp[*it][0][num - i] + dp[*it][1][num - i] + dp[*it][2][num - i] + dp[*it][3][num - i]);
+                                    tmp = (unsigned long long)dp[node][2][i] * (unsigned long long)(dp[*it][2][num - i] + dp[*it][3][num - i]) +
+                                          (unsigned long long)dp[node][3][i] * (unsigned long long)(dp[*it][0][num - i] + dp[*it][1][num - i] +
+                                                                                                    dp[*it][2][num - i] + dp[*it][3][num - i]);
                                 }
                                 else
                                 {
@@ -258,11 +224,6 @@ int main()
                                 }
 
                                 dp[node][3][num] = tmp;
-
-                                if (0 < dp[node][3][num])
-                                {
-                                    mins[node] = mins[node] > num ? num : mins[node];
-                                }
                             }
                         }
                     }

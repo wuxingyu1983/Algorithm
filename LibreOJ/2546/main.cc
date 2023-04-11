@@ -15,20 +15,23 @@
 
 using namespace std;
 
-#define DEBUG   0
-#define MAX_N   100001
-#define MAX_K   101
-#define MOD     1000000007
+#define DEBUG 0
+#define MAX_N 100001
+#define MAX_K 101
+#define MOD 1000000007
 
-unsigned long long dp[MAX_N][2][4][MAX_K];      // [index][active][type][num]
-unsigned char active[MAX_N];    // 0, 1
+unsigned long long dp[MAX_N][2][4][MAX_K]; // [index][active][type][num]
+unsigned char active[MAX_N];               // 0, 1
 vector< vector<unsigned int> > vertexes(MAX_N);
+unsigned int cnt[MAX_N];
 unsigned int n, k;
 
 void func(unsigned int node, unsigned int parent)
 {
     unsigned char act = active[node];
-    if (1 == vertexes[node].size())
+
+    cnt[node] = 1;
+    if (0 < parent && 1 == vertexes[node].size())
     {
         // leaf, no children
         dp[node][act][0][0] = 1;
@@ -40,14 +43,22 @@ void func(unsigned int node, unsigned int parent)
 
         if (parent == *it)
         {
-            it ++;
+            it++;
         }
+
+        func(*it, node);
+        cnt[node] += cnt[*it];
 
         // first
         {
             unsigned char chact = active[*it];
 
-            for (size_t num = 0; num <= k; num++)
+            unsigned int upper = k;
+            if(k > cnt[node])
+            {
+                upper = cnt[node];
+            }
+            for (size_t num = 0; num <= upper; num++)
             {
                 // type : 0, no equipment in node, and node is not monitored
                 dp[node][act][0][num] = dp[*it][chact][1][num];
@@ -66,19 +77,51 @@ void func(unsigned int node, unsigned int parent)
             }
         }
 
-        for (; it != vertexes[node].end(); it++)
+        for (it++; it != vertexes[node].end(); it++)
         {
             if (parent != *it)
             {
+                func(*it, node);
+                cnt[node] += cnt[*it];
+
                 act = 1 - act;
                 unsigned char chact = active[*it];
 
-                // type : 0, no equipment in node, and node is not monitored
-                for (size_t num = 0; num <= k; num ++)
-                {
+                // clear
+                memset(dp[node][act], 0, 4 * sizeof(unsigned long long) * MAX_K);
 
+                unsigned int upper = k;
+                if (k > cnt[node])
+                {
+                    upper = cnt[node];
                 }
-                
+                for (size_t num = 0; num <= upper; num++)
+                {
+                    for (size_t i = 0; i <= num; i++)
+                    {
+                        // type : 0, no equipment in node, and node is not monitored
+                        dp[node][act][0][num] += dp[node][1 - act][0][i] * dp[*it][chact][1][num - i];
+                        dp[node][act][0][num] %= MOD;
+
+                        // type : 1,  no equipment in node, and node is monitored
+                        dp[node][act][1][num] += dp[node][1 - act][0][i] * dp[*it][chact][3][num - i];
+                        dp[node][act][1][num] += dp[node][1 - act][1][i] * (dp[*it][chact][3][num - i] + dp[*it][chact][1][num - i]);
+                        dp[node][act][1][num] %= MOD;
+
+                        //                        if (0 < num && i < num)
+                        {
+                            // type : 2, equipment in node, and node is not monitored
+                            dp[node][act][2][num] += dp[node][1 - act][2][i] * (dp[*it][chact][0][num - i] + dp[*it][chact][1][num - i]);
+                            dp[node][act][2][num] %= MOD;
+
+                            // type : 3, equipment in node, and node is monitored
+                            dp[node][act][3][num] += dp[node][1 - act][2][i] * (dp[*it][chact][2][num - i] + dp[*it][chact][3][num - i]);
+                            dp[node][act][3][num] += dp[node][1 - act][3][i] * (dp[*it][chact][0][num - i] + dp[*it][chact][1][num - i] +
+                                                                                dp[*it][chact][2][num - i] + dp[*it][chact][3][num - i]);
+                            dp[node][act][3][num] %= MOD;
+                        }
+                    }
+                }
             }
         }
 
@@ -111,6 +154,15 @@ int main()
         vertexes[v1].push_back(v2);
         vertexes[v2].push_back(v1);
     }
+
+    unsigned long long ans = 0;
+
+    func(1, 0);
+
+    ans = dp[1][active[1]][1][k] + dp[1][active[1]][3][k];
+    ans %= MOD;
+
+    printf("%llu\n", ans);
 
 #if DEBUG
     fclose(fp);

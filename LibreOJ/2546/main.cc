@@ -41,6 +41,17 @@ void init(unsigned int node, unsigned int parent)
     }
 }
 
+void procMin(unsigned int val, int num, int &lo)
+{
+    if (0 < val)
+    {
+        if (num < lo)
+        {
+            lo = num;
+        }
+    }
+}
+
 int main()
 {
 #if DEBUG
@@ -94,6 +105,8 @@ int main()
 
                 cnt[node] += cnt[*it];
 
+                int lo = MAX_K;
+
                 // first
                 {
                     unsigned int upper = k;
@@ -107,9 +120,11 @@ int main()
                     {
                         // type : 0, no equipment in node, and node is not monitored
                         dp[node][0][num] = dp[*it][1][num];
+                        procMin(dp[node][0][num], num, lo);
 
                         // type : 1,  no equipment in node, and node is monitored
                         dp[node][1][num] = dp[*it][3][num];
+                        procMin(dp[node][1][num], num, lo);
 
                         if (0 < num)
                         {
@@ -121,6 +136,8 @@ int main()
                                 dp[node][2][num] %= MOD;
                             }
 
+                            procMin(dp[node][2][num], num, lo);
+
                             // type : 3, equipment in node, and node is monitored
                             dp[node][3][num] = dp[*it][2][num - 1] + dp[*it][3][num - 1];
 
@@ -128,6 +145,8 @@ int main()
                             {
                                 dp[node][3][num] %= MOD;
                             }
+
+                            procMin(dp[node][3][num], num, lo);
                         }
                     }
                 }
@@ -137,6 +156,8 @@ int main()
                     if (parents[node] != *it)
                     {
                         cnt[node] += cnt[*it];
+                        int last_lo = lo;
+                        lo = MAX_K;
 
                         unsigned int upper = k;
 
@@ -145,9 +166,9 @@ int main()
                             upper = cnt[node];
                         }
 
-                        for (int num = upper; num >= 0; num--)
+                        for (int num = upper; num >= last_lo; num--)
                         {
-                            for (int i = num; i >= 0; i--)
+                            for (int i = num; i >= last_lo; i--)
                             {
                                 unsigned long long tmp = 0;
 
@@ -167,6 +188,7 @@ int main()
                                 }
 
                                 dp[node][0][num] = tmp;
+                                procMin(dp[node][0][num], num, lo);
 
                                 // type : 1,  no equipment in node, and node is monitored
                                 if (num == i)
@@ -186,6 +208,7 @@ int main()
                                 }
 
                                 dp[node][1][num] = tmp;
+                                procMin(dp[node][1][num], num, lo);
 
                                 // type : 2, equipment in node, and node is not monitored
                                 if (num == i)
@@ -205,6 +228,7 @@ int main()
                                 }
 
                                 dp[node][2][num] = tmp;
+                                procMin(dp[node][2][num], num, lo);
 
                                 // type : 3, equipment in node, and node is monitored
                                 if (num == i)
@@ -224,6 +248,7 @@ int main()
                                 }
 
                                 dp[node][3][num] = tmp;
+                                procMin(dp[node][3][num], num, lo);
                             }
                         }
                     }

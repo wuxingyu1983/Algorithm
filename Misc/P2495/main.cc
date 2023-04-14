@@ -22,8 +22,8 @@
 using namespace std;
 
 #define DEBUG 0
-//#define MAX_N 250001
-#define MAX_N 11
+#define MAX_N 250001
+//#define MAX_N 11
 
 unsigned int n;
 vector<unsigned int> path(2 * MAX_N);    // path island index
@@ -35,6 +35,7 @@ vector<unsigned int> firsInPath(MAX_N);      // first in path
 map<unsigned long long, unsigned int> weights;
 vector< vector<unsigned int> > roads(MAX_N);
 vector< vector<unsigned int> > hIdx(MAX_N);
+vector< vector<unsigned int> > nIdx(MAX_N);
 
 class Node
 {
@@ -140,10 +141,20 @@ void buildPath(unsigned int node, unsigned int parent, unsigned int depth, unsig
     firsInPath[node] = idx;
     path[idx] = node;
     hIdx[depth].push_back(idx);
+    nIdx[node].push_back(idx);
 
     // update depth
     update(heights, lazyheights, idx, idx, depth, 1, 2 * n - 1, 1);
-
+    
+    if (1 < idx)
+    {
+        // update weight
+        unsigned long long key = getKey(path[idx], path[idx - 1]);
+        unsigned int w = weights[key];
+        
+        update(minwgt, lazyminwgt, idx, idx, w, 1, 2 * n - 1, 1);
+    }
+    
     for (vector<unsigned int>::iterator it = roads[node].begin(); it != roads[node].end(); it++)
     {
         if (parent != *it)
@@ -152,12 +163,13 @@ void buildPath(unsigned int node, unsigned int parent, unsigned int depth, unsig
 
             path[++ idx] = node;
             hIdx[depth].push_back(idx);
+            nIdx[node].push_back(idx);
 
             // update depth
             update(heights, lazyheights, idx, idx, depth, 1, 2 * n - 1, 1);
 
             // update weight
-            unsigned int key = getKey(path[idx], path[idx - 1]);
+            unsigned long long key = getKey(path[idx], path[idx - 1]);
             unsigned int w = weights[key];
 
             update(minwgt, lazyminwgt, idx, idx, w, 1, 2 * n - 1, 1);
@@ -186,7 +198,7 @@ unsigned int getLca(unsigned int x, unsigned int y)
 
     return path[*idx];
 }
-/*
+
 unsigned int getMinWeight(unsigned int x, unsigned int y)
 {
     unsigned int l = firsInPath[x];
@@ -197,10 +209,13 @@ unsigned int getMinWeight(unsigned int x, unsigned int y)
         swap(l, r);
     }
 
-    unsigned int idxInPath = getMin(minwgt, lazyminwgt, l, r, 1, 2 * n - 2, 1);
-    return getMin(minwgt, lazyminwgt, idxInPath, idxInPath, 1, 2 * n - 2, 1);
+    vector<unsigned int>::iterator idx = lower_bound(nIdx[path[l]].begin(), nIdx[path[l]].end(), r);
+    idx --;
+    l = *idx;
+
+    return getMin(minwgt, lazyminwgt, l + 1, r, 1, 2 * n - 1, 1);
 }
-*/
+
 void func(vector<unsigned int> &hs)
 {
     // sort by depth
@@ -274,9 +289,6 @@ int main()
         weights.insert(pair<unsigned long long, unsigned int>(key, w));
     }
 
-    // init path
-    update(minwgt, lazyminwgt, 1, 1, MAX_N + 1, 1, n, 1);
-
     unsigned int idxInPath = 1;
     buildPath(1, 0, 1, idxInPath);
 /*
@@ -290,8 +302,7 @@ int main()
         for (size_t j = i + 1; j <= n; j++)
         {
             unsigned int lca = getLca(i, j);
-//            unsigned int w = getMinWeight(i, j);
-            unsigned int w = 0;
+            unsigned int w = getMinWeight(i, j);
 
             printf("the lac of %zu and %zu is %u, the min weight from %zu to %zu is %u\n", i, j, lca, i, j, w);
         }

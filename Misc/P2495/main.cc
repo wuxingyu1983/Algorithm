@@ -221,9 +221,11 @@ void dpFunc(unsigned int idx)
     }
 }
 
+vector<unsigned int> stk(MAX_N, 0);
+
 void func(vector<unsigned int> &hs, int m)
 {
-    memset(dp, 0, sizeof(unsigned long long) * MAX_N);
+    memset(dp, 0, sizeof(unsigned long long) * (n + 1));
 
     // sort by dfs
     vector<Node *> tmps;
@@ -240,7 +242,6 @@ void func(vector<unsigned int> &hs, int m)
     sort(tmps.begin(), tmps.end(), cmp);
 
     // build virtual tree
-    vector<unsigned int> stk(MAX_N, 0);
     int top = 0;
     stk[top] = 1;   // push node 1 first
     nodes[1].children.clear();

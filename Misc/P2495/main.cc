@@ -25,14 +25,14 @@ using namespace std;
 #define MAX_N 250001
 
 unsigned int n;
-vector<unsigned int> path(2 * MAX_N);    // path island index
-vector<unsigned int> heights(2 * MAX_N * 4); // path island height, segment tree
+vector<unsigned int> path(2 * MAX_N);            // path island index
+vector<unsigned int> heights(2 * MAX_N * 4);     // path island height, segment tree
 vector<unsigned int> lazyheights(2 * MAX_N * 4); // path island height, segment tree
-vector<unsigned int> firsInPath(MAX_N);      // first in path
+vector<unsigned int> firsInPath(MAX_N);          // first in path
 map<unsigned long long, unsigned int> weights;
 vector< vector<unsigned int> > roads(MAX_N);
 vector< vector<unsigned int> > hIdx(MAX_N);
-vector<unsigned int> me(MAX_N, MAX_N);  // path 1 -- n, min weight
+vector<unsigned int> me(MAX_N, MAX_N); // path 1 -- n, min weight
 unsigned long long dp[MAX_N];
 
 class Node
@@ -51,7 +51,7 @@ public:
     }
 
     Node(unsigned int _idx, unsigned int _depth)
-    :idx(_idx), depth(_depth)
+        : idx(_idx), depth(_depth)
     {
         flag = dfs = 0;
     }
@@ -80,7 +80,7 @@ inline unsigned long long getKey(unsigned int u, unsigned int v)
 }
 
 // segment tree func
-void update(vector<unsigned int>& d, vector<unsigned int>& b, int l, int r, unsigned int c, int s, int t, int p)
+void update(vector<unsigned int> &d, vector<unsigned int> &b, int l, int r, unsigned int c, int s, int t, int p)
 {
     if (l <= s && t <= r)
     {
@@ -104,7 +104,7 @@ void update(vector<unsigned int>& d, vector<unsigned int>& b, int l, int r, unsi
         d[p] = d[p * 2 + 1];
 }
 
-unsigned int getMin(vector<unsigned int>& d, vector<unsigned int>& b, int l, int r, int s, int t, int p)
+unsigned int getMin(vector<unsigned int> &d, vector<unsigned int> &b, int l, int r, int s, int t, int p)
 {
     if (l <= s && t <= r)
     {
@@ -160,24 +160,23 @@ void buildPath(unsigned int node, unsigned int parent, unsigned int depth, unsig
 
     // update depth
     update(heights, lazyheights, idx, idx, depth, 1, 2 * n - 1, 1);
-    
+
     for (vector<unsigned int>::iterator it = roads[node].begin(); it != roads[node].end(); it++)
     {
         if (parent != *it)
         {
             buildPath(*it, node, depth + 1, ++idx);
 
-            path[++ idx] = node;
+            path[++idx] = node;
             hIdx[depth].push_back(idx);
 
             // update depth
             update(heights, lazyheights, idx, idx, depth, 1, 2 * n - 1, 1);
         }
     }
-    
 }
 
-inline bool cmp(Node * x, Node * y)
+inline bool cmp(Node *x, Node *y)
 {
     return x->dfs < y->dfs;
 }
@@ -226,8 +225,6 @@ vector<Node *> tmps(MAX_N, NULL);
 
 void func(vector<unsigned int> &hs, int k, int m)
 {
-    memset(dp, 0, sizeof(unsigned long long) * (n + 1));
-
     // sort by dfs
     for (size_t i = 0; i < k; i++)
     {
@@ -242,9 +239,10 @@ void func(vector<unsigned int> &hs, int k, int m)
 
     // build virtual tree
     int top = 0;
-    stk[top] = 1;   // push node 1 first
+    stk[top] = 1; // push node 1 first
     nodes[1].children.clear();
     nodes[1].flag = m;
+    dp[1] = 0;
 
     for (size_t i = 0; i < k; i++)
     {
@@ -258,6 +256,7 @@ void func(vector<unsigned int> &hs, int k, int m)
             {
                 nodes[tmps[i]->idx].flag = m;
                 nodes[tmps[i]->idx].children.clear();
+                dp[tmps[i]->idx] = 0;
             }
         }
         else
@@ -268,9 +267,9 @@ void func(vector<unsigned int> &hs, int k, int m)
                 nodes[stk[top - 1]].children.push_back(stk[top]);
 
                 // pop from stack;
-                top --;
+                top--;
             }
-            
+
             if (nodes[lca].dfs > nodes[stk[top - 1]].dfs)
             {
                 // connect lca and stk[top]
@@ -278,26 +277,27 @@ void func(vector<unsigned int> &hs, int k, int m)
                 {
                     nodes[lca].flag = m;
                     nodes[lca].children.clear();
+                    dp[lca] = 0;
                 }
                 nodes[lca].children.push_back(stk[top]);
 
                 // pop
-                top --;
+                top--;
 
-                stk[++ top] = lca;
+                stk[++top] = lca;
 
-                stk[++ top] = tmps[i]->idx;
+                stk[++top] = tmps[i]->idx;
             }
             else
             {
                 // ==
                 // connect stk[top] and stk[top - 1]
                 nodes[stk[top - 1]].children.push_back(stk[top]);
-                
+
                 // pop from stack;
-                top --;
-                
-                stk[++ top] = tmps[i]->idx;
+                top--;
+
+                stk[++top] = tmps[i]->idx;
             }
         }
     }
@@ -307,7 +307,7 @@ void func(vector<unsigned int> &hs, int k, int m)
         // conect stk[top] and stk[top - 1]
         nodes[stk[top - 1]].children.push_back(stk[top]);
 
-        top --;
+        top--;
     }
 
     // dp
@@ -321,7 +321,7 @@ int main()
 #if DEBUG
     FILE *fp = fopen("input.txt", "r");
 #endif
-    
+
 #if DEBUG
     fscanf(fp, "%u", &n);
 #else
@@ -365,7 +365,7 @@ int main()
 #endif
 
         vector<unsigned int> hs;
-        
+
         for (size_t j = 0; j < k; j++)
         {
             unsigned int h;

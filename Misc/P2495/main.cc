@@ -209,7 +209,7 @@ void dpFunc(unsigned int idx)
             tmp += dp[*it];
         }
 
-        if (tmp < me[idx])
+        if (1 == idx || tmp < me[idx])
         {
             dp[idx] = tmp;
         }

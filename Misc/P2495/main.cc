@@ -29,13 +29,11 @@ unsigned int n;
 vector<unsigned int> path(2 * MAX_N);    // path island index
 vector<unsigned int> heights(2 * MAX_N * 4); // path island height, segment tree
 vector<unsigned int> lazyheights(2 * MAX_N * 4); // path island height, segment tree
-vector<unsigned int> minwgt(2 * MAX_N * 4);  // min weight, segment tree
-vector<unsigned int> lazyminwgt(2 * MAX_N * 4);  // min weight, segment tree
 vector<unsigned int> firsInPath(MAX_N);      // first in path
 map<unsigned long long, unsigned int> weights;
 vector< vector<unsigned int> > roads(MAX_N);
 vector< vector<unsigned int> > hIdx(MAX_N);
-vector< vector<unsigned int> > nIdx(MAX_N);
+vector<unsigned int> me(MAX_N, MAX_N);  // path 1 -- n, min weight
 
 class Node
 {
@@ -141,19 +139,24 @@ void buildPath(unsigned int node, unsigned int parent, unsigned int depth, unsig
     firsInPath[node] = idx;
     path[idx] = node;
     hIdx[depth].push_back(idx);
-    nIdx[node].push_back(idx);
+
+    if (1 < node)
+    {
+        unsigned long long key = getKey(node, parent);
+        unsigned int w = weights[key];
+
+        if (w < me[parent])
+        {
+            me[node] = w;
+        }
+        else
+        {
+            me[node] = me[parent];
+        }
+    }
 
     // update depth
     update(heights, lazyheights, idx, idx, depth, 1, 2 * n - 1, 1);
-    
-    if (1 < idx)
-    {
-        // update weight
-        unsigned long long key = getKey(path[idx], path[idx - 1]);
-        unsigned int w = weights[key];
-        
-        update(minwgt, lazyminwgt, idx, idx, w, 1, 2 * n - 1, 1);
-    }
     
     for (vector<unsigned int>::iterator it = roads[node].begin(); it != roads[node].end(); it++)
     {
@@ -163,16 +166,9 @@ void buildPath(unsigned int node, unsigned int parent, unsigned int depth, unsig
 
             path[++ idx] = node;
             hIdx[depth].push_back(idx);
-            nIdx[node].push_back(idx);
 
             // update depth
             update(heights, lazyheights, idx, idx, depth, 1, 2 * n - 1, 1);
-
-            // update weight
-            unsigned long long key = getKey(path[idx], path[idx - 1]);
-            unsigned int w = weights[key];
-
-            update(minwgt, lazyminwgt, idx, idx, w, 1, 2 * n - 1, 1);
         }
     }
     
@@ -197,23 +193,6 @@ unsigned int getLca(unsigned int x, unsigned int y)
     vector<unsigned int>::iterator idx = lower_bound(hIdx[minDepth].begin(), hIdx[minDepth].end(), l);
 
     return path[*idx];
-}
-
-unsigned int getMinWeight(unsigned int x, unsigned int y)
-{
-    unsigned int l = firsInPath[x];
-    unsigned int r = firsInPath[y];
-
-    if (l > r)
-    {
-        swap(l, r);
-    }
-
-    vector<unsigned int>::iterator idx = lower_bound(nIdx[path[l]].begin(), nIdx[path[l]].end(), r);
-    idx --;
-    l = *idx;
-
-    return getMin(minwgt, lazyminwgt, l + 1, r, 1, 2 * n - 1, 1);
 }
 
 void func(vector<unsigned int> &hs)
@@ -291,20 +270,15 @@ int main()
 
     unsigned int idxInPath = 1;
     buildPath(1, 0, 1, idxInPath);
-/*
-    for (size_t i = 1; i <= 2 * n - 1; i++) {
-        printf("the depth of path[%zu] is %u\n", i, getMin(heights, lazyheights, i, i, 1, 2 * n - 1, 1));
-    }
-*/
+
     // debug
     for (size_t i = 1; i <= n; i++)
     {
         for (size_t j = i + 1; j <= n; j++)
         {
             unsigned int lca = getLca(i, j);
-            unsigned int w = getMinWeight(i, j);
 
-            printf("the lac of %zu and %zu is %u, the min weight from %zu to %zu is %u\n", i, j, lca, i, j, w);
+            printf("the lac of %zu and %zu is %u\n", i, j, lca);
         }
     }
 

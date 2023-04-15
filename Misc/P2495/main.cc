@@ -222,24 +222,23 @@ void dpFunc(unsigned int idx)
 }
 
 vector<unsigned int> stk(MAX_N, 0);
+vector<Node *> tmps(MAX_N, NULL);
 
-void func(vector<unsigned int> &hs, int m)
+void func(vector<unsigned int> &hs, int k, int m)
 {
     memset(dp, 0, sizeof(unsigned long long) * (n + 1));
 
     // sort by dfs
-    vector<Node *> tmps;
-    
-    for (vector<unsigned int>::iterator it = hs.begin(); it != hs.end(); it++)
+    for (size_t i = 0; i < k; i++)
     {
-        nodes[*it].flag = m;
-        nodes[*it].children.clear();
-        tmps.push_back(&(nodes[*it]));
+        nodes[hs[i]].flag = m;
+        nodes[hs[i]].children.clear();
+        tmps[i] = &(nodes[hs[i]]);
 
-        dp[*it] = me[*it];
+        dp[hs[i]] = me[hs[i]];
     }
 
-    sort(tmps.begin(), tmps.end(), cmp);
+    sort(tmps.begin(), tmps.begin() + k, cmp);
 
     // build virtual tree
     int top = 0;
@@ -247,18 +246,18 @@ void func(vector<unsigned int> &hs, int m)
     nodes[1].children.clear();
     nodes[1].flag = m;
 
-    for (vector<Node *>::iterator it = tmps.begin(); it != tmps.end(); it++)
+    for (size_t i = 0; i < k; i++)
     {
-        unsigned int lca = getLca((*it)->idx, stk[top]);
+        unsigned int lca = getLca(tmps[i]->idx, stk[top]);
 
         if (lca == stk[top])
         {
             // push to stack
-            stk[++top] = (*it)->idx;
-            if (m != nodes[(*it)->idx].flag)
+            stk[++top] = tmps[i]->idx;
+            if (m != nodes[tmps[i]->idx].flag)
             {
-                nodes[(*it)->idx].flag = m;
-                nodes[(*it)->idx].children.clear();
+                nodes[tmps[i]->idx].flag = m;
+                nodes[tmps[i]->idx].children.clear();
             }
         }
         else
@@ -287,7 +286,7 @@ void func(vector<unsigned int> &hs, int m)
 
                 stk[++ top] = lca;
 
-                stk[++ top] = (*it)->idx;
+                stk[++ top] = tmps[i]->idx;
             }
             else
             {
@@ -298,7 +297,7 @@ void func(vector<unsigned int> &hs, int m)
                 // pop from stack;
                 top --;
                 
-                stk[++ top] = (*it)->idx;
+                stk[++ top] = tmps[i]->idx;
             }
         }
     }
@@ -379,7 +378,7 @@ int main()
             hs.push_back(h);
         }
 
-        func(hs, i);
+        func(hs, k, i);
     }
 
 #if DEBUG

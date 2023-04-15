@@ -23,7 +23,6 @@ using namespace std;
 
 #define DEBUG 0
 #define MAX_N 250001
-//#define MAX_N 11
 
 unsigned int n;
 vector<unsigned int> path(2 * MAX_N);    // path island index
@@ -34,24 +33,27 @@ map<unsigned long long, unsigned int> weights;
 vector< vector<unsigned int> > roads(MAX_N);
 vector< vector<unsigned int> > hIdx(MAX_N);
 vector<unsigned int> me(MAX_N, MAX_N);  // path 1 -- n, min weight
+unsigned long long dp[MAX_N];
 
 class Node
 {
 public:
     unsigned int idx;
     unsigned int depth;
+    unsigned int flag;
+    unsigned int dfs;
 
     vector<unsigned int> children;
-    vector<unsigned int> weights;
 
     Node()
     {
-        idx = depth = 0;
+        idx = depth = flag = dfs = 0;
     }
 
     Node(unsigned int _idx, unsigned int _depth)
     :idx(_idx), depth(_depth)
     {
+        flag = dfs = 0;
     }
 };
 
@@ -137,6 +139,7 @@ void buildPath(unsigned int node, unsigned int parent, unsigned int depth, unsig
     nodes[node].idx = node;
     nodes[node].depth = depth;
     firsInPath[node] = idx;
+    nodes[node].dfs = idx;
     path[idx] = node;
     hIdx[depth].push_back(idx);
 
@@ -176,7 +179,7 @@ void buildPath(unsigned int node, unsigned int parent, unsigned int depth, unsig
 
 inline bool cmp(Node * x, Node * y)
 {
-    return x->depth < y->depth;
+    return x->dfs < y->dfs;
 }
 
 unsigned int getLca(unsigned int x, unsigned int y)
@@ -195,49 +198,122 @@ unsigned int getLca(unsigned int x, unsigned int y)
     return path[*idx];
 }
 
-void func(vector<unsigned int> &hs)
+void dpFunc(unsigned int idx)
 {
-    // sort by depth
+    if (0 == dp[idx])
+    {
+        unsigned long long tmp = 0;
+
+        for (vector<unsigned int>::iterator it = nodes[idx].children.begin(); it != nodes[idx].children.end(); it++)
+        {
+            dpFunc(*it);
+            tmp += dp[*it];
+        }
+
+        if (tmp < me[idx])
+        {
+            dp[idx] = tmp;
+        }
+        else
+        {
+            dp[idx] = me[idx];
+        }
+    }
+}
+
+void func(vector<unsigned int> &hs, int m)
+{
+    memset(dp, 0, sizeof(unsigned long long) * MAX_N);
+
+    // sort by dfs
     vector<Node *> tmps;
     
     for (vector<unsigned int>::iterator it = hs.begin(); it != hs.end(); it++)
     {
+        nodes[*it].flag = m;
+        nodes[*it].children.clear();
         tmps.push_back(&(nodes[*it]));
+
+        dp[*it] = me[*it];
     }
 
     sort(tmps.begin(), tmps.end(), cmp);
 
     // build virtual tree
     vector<unsigned int> stk(MAX_N, 0);
-    unsigned int top = 0;
-    stk[top] = 1;   // push node 1
-
-    vector<Node *> vtree(MAX_N, NULL);
-    vtree[1] = new Node(1, 1);
+    int top = 0;
+    stk[top] = 1;   // push node 1 first
+    nodes[1].children.clear();
+    nodes[1].flag = m;
 
     for (vector<Node *>::iterator it = tmps.begin(); it != tmps.end(); it++)
     {
-/*
-        unsigned int l = firsInPath[(*it)->idx];
-        unsigned int r = firsInPath[stk[top]];
-        if (l > r)
-        {
-            unsigned int tmp = l;
-            l = r;
-            r = l;
-        }
-        unsigned int lca_idx = getMin(heights, lazyheights, l, r, 1, n, 1);
-        unsigned int lac = path[lca_idx];
+        unsigned int lca = getLca((*it)->idx, stk[top]);
 
-        if (lac == stk[top])
+        if (lca == stk[top])
         {
+            // push to stack
             stk[++top] = (*it)->idx;
+            if (m != nodes[(*it)->idx].flag)
+            {
+                nodes[(*it)->idx].flag = m;
+                nodes[(*it)->idx].children.clear();
+            }
         }
         else
         {
+            while (nodes[lca].dfs < nodes[stk[top - 1]].dfs)
+            {
+                // connect stk[top] and stk[top - 1]
+                nodes[stk[top - 1]].children.push_back(stk[top]);
+
+                // pop from stack;
+                top --;
+            }
+            
+            if (nodes[lca].dfs > nodes[stk[top - 1]].dfs)
+            {
+                // connect lca and stk[top]
+                if (m != nodes[lca].flag)
+                {
+                    nodes[lca].flag = m;
+                    nodes[lca].children.clear();
+                }
+                nodes[lca].children.push_back(stk[top]);
+
+                // pop
+                top --;
+
+                stk[++ top] = lca;
+
+                stk[++ top] = (*it)->idx;
+            }
+            else
+            {
+                // ==
+                // connect stk[top] and stk[top - 1]
+                nodes[stk[top - 1]].children.push_back(stk[top]);
+                
+                // pop from stack;
+                top --;
+                
+                stk[++ top] = (*it)->idx;
+            }
         }
-*/
     }
+
+    while (0 < top)
+    {
+        // conect stk[top] and stk[top - 1]
+        nodes[stk[top - 1]].children.push_back(stk[top]);
+
+        top --;
+    }
+
+    // dp
+    dpFunc(1);
+
+    printf("%llu\n", dp[1]);
 }
 
 int main()
@@ -271,19 +347,6 @@ int main()
     unsigned int idxInPath = 1;
     buildPath(1, 0, 1, idxInPath);
 
-    // debug
-    for (size_t i = 1; i <= n; i++)
-    {
-        for (size_t j = i + 1; j <= n; j++)
-        {
-            unsigned int lca = getLca(i, j);
-
-            printf("the lac of %zu and %zu is %u\n", i, j, lca);
-        }
-    }
-
-    return 0;
-
     unsigned int m;
 #if DEBUG
     fscanf(fp, "%u", &m);
@@ -291,7 +354,7 @@ int main()
     scanf("%u", &m);
 #endif
 
-    for (size_t i = 0; i < m; i++)
+    for (size_t i = 1; i <= m; i++)
     {
         unsigned int k;
 
@@ -315,7 +378,7 @@ int main()
             hs.push_back(h);
         }
 
-        func(hs);
+        func(hs, i);
     }
 
 #if DEBUG

@@ -171,13 +171,17 @@ vector<Node *> tmps(MAX_N, NULL);
 
 unsigned int minDep[MAX_N];
 unsigned int maxDep[MAX_N];
+unsigned long long sumDep[MAX_N];
 
 void dpFunc(unsigned int idx, int m)
 {
+    dpSum[idx] = 0;
+    sumDep[idx] = 0;
+
     if (m == flags[idx])
     {
         // key node
-        nodes[idx].cnt = 1;
+        nodes[idx].cnt = 0;
         minDep[idx] = nodes[idx].depth;
         maxDep[idx] = nodes[idx].depth;
     }
@@ -253,6 +257,29 @@ void dpFunc(unsigned int idx, int m)
         }
 
         // sum
+        dpSum[idx] += dpSum[*it];
+
+        if (m == flags[idx])
+        {
+            // key node
+            unsigned long long tmp = sumDep[*it] - (unsigned long long)nodes[idx].depth * (unsigned long long)nodes[*it].cnt;
+            dpSum[idx] += tmp;
+        }
+
+        {
+            unsigned long long tmp = (sumDep[idx] - (unsigned long long)nodes[idx].depth * (unsigned long long)nodes[idx].cnt) * nodes[*it].cnt;
+            tmp += (sumDep[*it] - (unsigned long long)nodes[idx].depth * (unsigned long long)nodes[*it].cnt) * nodes[idx].cnt;
+            dpSum[idx] += tmp;
+        }
+
+        nodes[idx].cnt += nodes[*it].cnt;
+        sumDep[idx] += sumDep[*it];
+    }
+
+    if (m == flags[idx])
+    {
+        sumDep[idx] += nodes[idx].depth;
+        nodes[idx].cnt ++;
     }
 }
 

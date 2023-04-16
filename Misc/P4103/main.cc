@@ -188,11 +188,10 @@ void dpFunc(unsigned int idx, int m)
         maxDep[idx] = 0;
     }
 
-    unsigned int min, max;
-    min = MAX_N;
-    max = 0;
     for (vector<unsigned int>::iterator it = nodes[idx].children.begin(); it != nodes[idx].children.end(); it++)
     {
+        dpFunc(*it, m);
+
         // max
         if (dpMax[idx] < dpMax[*it])
         {
@@ -211,7 +210,7 @@ void dpFunc(unsigned int idx, int m)
                 dpMax[idx] = tmp;
             }
 
-            if (maxDep[*it] < maxDep[idx])
+            if (maxDep[*it] > maxDep[idx])
             {
                 maxDep[idx] = maxDep[*it];
             }
@@ -257,6 +256,8 @@ void dpFunc(unsigned int idx, int m)
     }
 }
 
+unsigned int root = 1;
+
 void func(vector<unsigned int> &hs, int k, int m)
 {
     // sort by dfs
@@ -268,7 +269,7 @@ void func(vector<unsigned int> &hs, int k, int m)
 
         flags[hs[i]] = m;   // key node
 
-        dpMin[hs[i]] = 0;
+        dpMin[hs[i]] = MAX_N * 2;
         dpMax[hs[i]] = 0;
         dpSum[hs[i]] = 0;
     }
@@ -277,15 +278,20 @@ void func(vector<unsigned int> &hs, int k, int m)
 
     // build virtual tree
     int top = 0;
-    stk[top] = 1; // push node 1 first
-    nodes[1].children.clear();
-    nodes[1].flag = m;
-    dpMin[1] = 0;
-    dpMax[1] = 0;
-    dpSum[1] = 0;
+    stk[top] = root; // push node 1 first
+    nodes[root].children.clear();
+    nodes[root].flag = m;
+    dpMin[root] = MAX_N * 2;
+    dpMax[root] = 0;
+    dpSum[root] = 0;
 
     for (size_t i = 0; i < k; i++)
     {
+        if (1 == tmps[i]->idx)
+        {
+            continue;
+        }
+        
         unsigned int lca = getLca(tmps[i]->idx, stk[top]);
 
         if (lca == stk[top])
@@ -297,7 +303,7 @@ void func(vector<unsigned int> &hs, int k, int m)
                 nodes[tmps[i]->idx].flag = m;
                 nodes[tmps[i]->idx].children.clear();
 
-                dpMin[tmps[i]->idx] = 0;
+                dpMin[tmps[i]->idx] = MAX_N * 2;
                 dpMax[tmps[i]->idx] = 0;
                 dpSum[tmps[i]->idx] = 0;
             }
@@ -321,7 +327,7 @@ void func(vector<unsigned int> &hs, int k, int m)
                     nodes[lca].flag = m;
                     nodes[lca].children.clear();
 
-                    dpMin[lca] = 0;
+                    dpMin[lca] = MAX_N * 2;
                     dpMax[lca] = 0;
                     dpSum[lca] = 0;
                 }
@@ -357,9 +363,9 @@ void func(vector<unsigned int> &hs, int k, int m)
     }
 
     // dp
-    dpFunc(1, m);
+    dpFunc(root, m);
 
-//    printf("%llu\n", dp[1]);
+    printf("%llu %u %u\n", dpSum[root], dpMin[root], dpMax[root]);
 }
 
 int main()
@@ -397,7 +403,7 @@ int main()
     scanf("%u", &q);
 #endif
 
-    for (size_t i = 1; i < q; i++)
+    for (size_t i = 1; i <= q; i++)
     {
         unsigned int k;
 

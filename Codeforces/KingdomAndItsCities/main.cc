@@ -165,27 +165,9 @@ unsigned int getLca(unsigned int x, unsigned int y)
 vector<unsigned int> stk(MAX_N, 0);
 vector<Node *> tmps(MAX_N, NULL);
 
-void dpFunc(unsigned int idx, int m)
-{
-    if (m == flags[idx])
-    {
-        // key node
-    }
-    else
-    {
-    }
-
-    for (vector<unsigned int>::iterator it = nodes[idx].children.begin(); it != nodes[idx].children.end(); it++)
-    {
-        dpFunc(*it, m);
-        
-    }
-}
-
-unsigned int root = 1;
-
 void func(vector<unsigned int> &hs, int k, int m)
 {
+    int cnt = 0;
     // sort by dfs
     for (size_t i = 0; i < k; i++)
     {
@@ -200,17 +182,10 @@ void func(vector<unsigned int> &hs, int k, int m)
 
     // build virtual tree
     int top = 0;
-    stk[top] = root; // push node 1 first
-    nodes[root].children.clear();
-    nodes[root].flag = m;
+    stk[top] = hs[0]; // push first node
 
-    for (size_t i = 0; i < k; i++)
+    for (size_t i = 1; i < k; i++)
     {
-        if (1 == tmps[i]->idx)
-        {
-            continue;
-        }
-        
         unsigned int lca = getLca(tmps[i]->idx, stk[top]);
 
         if (lca == stk[top])
@@ -219,6 +194,7 @@ void func(vector<unsigned int> &hs, int k, int m)
             stk[++top] = tmps[i]->idx;
             if (m != nodes[tmps[i]->idx].flag)
             {
+                cnt ++;
                 nodes[tmps[i]->idx].flag = m;
                 nodes[tmps[i]->idx].children.clear();
             }
@@ -228,6 +204,18 @@ void func(vector<unsigned int> &hs, int k, int m)
             while (nodes[lca].dfs < nodes[stk[top - 1]].dfs)
             {
                 // connect stk[top] and stk[top - 1]
+                if (m == flags[stk[top - 1]] && m == flags[stk[top]])
+                {
+                    if (nodes[stk[top - 1]].depth + 1 == nodes[stk[top]].depth)
+                    {
+                        cnt = 0;
+                        goto finish;
+                    }
+                    else
+                    {
+                        cnt ++;
+                    }
+                }
                 nodes[stk[top - 1]].children.push_back(stk[top]);
 
                 // pop from stack;
@@ -239,8 +227,22 @@ void func(vector<unsigned int> &hs, int k, int m)
                 // connect lca and stk[top]
                 if (m != nodes[lca].flag)
                 {
+                    cnt ++;
                     nodes[lca].flag = m;
                     nodes[lca].children.clear();
+                }
+
+                if (m == flags[lca] && m == flags[top])
+                {
+                    if (nodes[lca].depth + 1 == nodes[stk[top]].depth)
+                    {
+                        cnt = 0;
+                        goto finish;
+                    }
+                    else
+                    {
+                        cnt ++;
+                    }
                 }
                 nodes[lca].children.push_back(stk[top]);
 
@@ -255,6 +257,18 @@ void func(vector<unsigned int> &hs, int k, int m)
             {
                 // ==
                 // connect stk[top] and stk[top - 1]
+                if (m == flags[stk[top - 1]] && m == flags[stk[top]])
+                {
+                    if (nodes[stk[top - 1]].depth + 1 == nodes[stk[top]].depth)
+                    {
+                        cnt = 0;
+                        goto finish;
+                    }
+                    else
+                    {
+                        cnt ++;
+                    }
+                }
                 nodes[stk[top - 1]].children.push_back(stk[top]);
 
                 // pop from stack;
@@ -268,15 +282,32 @@ void func(vector<unsigned int> &hs, int k, int m)
     while (0 < top)
     {
         // conect stk[top] and stk[top - 1]
+        if (m == flags[stk[top - 1]] && m == flags[stk[top]])
+        {
+            if (nodes[stk[top - 1]].depth + 1 == nodes[stk[top]].depth)
+            {
+                cnt = 0;
+                goto finish;
+            }
+            else
+            {
+                cnt++;
+            }
+        }
         nodes[stk[top - 1]].children.push_back(stk[top]);
 
         top--;
     }
 
-    // dp
-    dpFunc(root, m);
-
-//    printf("%llu %u %u\n", dpSum[root], dpMin[root], dpMax[root]);
+finish:
+    if (0 == cnt)
+    {
+        printf("-1\n");
+    }
+    else
+    {
+        printf("%i\n", cnt);
+    }
 }
 
 int main()
@@ -291,7 +322,7 @@ int main()
     scanf("%u", &n);
 #endif
 
-    for (size_t i = 1; i <= n; i++)
+    for (size_t i = 0; i < n - 1; i++)
     {
         unsigned int u, v;
 
@@ -315,7 +346,7 @@ int main()
     scanf("%u", &q);
 #endif
 
-    for (size_t i = 0; i < q; i++)
+    for (size_t i = 1; i <= q; i++)
     {
         unsigned int k;
 #if DEBUG

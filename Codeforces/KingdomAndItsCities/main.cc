@@ -165,9 +165,48 @@ unsigned int getLca(unsigned int x, unsigned int y)
 vector<unsigned int> stk(MAX_N, 0);
 vector<Node *> tmps(MAX_N, NULL);
 
+void dpFunc(unsigned int idx, int m, int &cnt)
+{
+    if (m == flags[idx])
+    {
+        // key node
+        for (vector<unsigned int>::iterator it = nodes[idx].children.begin(); it != nodes[idx].children.end(); it++)
+        {
+            dpFunc(*it, m, cnt);
+            
+            if (m == flags[*it])
+            {
+                cnt ++;
+            }
+        }
+    }
+    else
+    {
+        unsigned int tmp = 0;
+        for (vector<unsigned int>::iterator it = nodes[idx].children.begin(); it != nodes[idx].children.end(); it++)
+        {
+            dpFunc(*it, m, cnt);
+            
+            if (m == flags[*it])
+            {
+                tmp ++;
+            }
+        }
+
+        if (1 < tmp)
+        {
+            cnt ++;
+        }
+        else if (1 == tmp)
+        {
+            flags[idx] = m;
+        }
+    }
+}
+
 void func(vector<unsigned int> &hs, int k, int m)
 {
-    int cnt = 0;
+    int cnt = -1;
     // sort by dfs
     for (size_t i = 0; i < k; i++)
     {
@@ -182,10 +221,16 @@ void func(vector<unsigned int> &hs, int k, int m)
 
     // build virtual tree
     int top = 0;
-    stk[top] = hs[0]; // push first node
+    stk[top] = 1; // push node 1 first
+    nodes[1].children.clear();
 
-    for (size_t i = 1; i < k; i++)
+    for (size_t i = 0; i < k; i++)
     {
+        if (1 == tmps[i]->idx)
+        {
+            continue;
+        }
+        
         unsigned int lca = getLca(tmps[i]->idx, stk[top]);
 
         if (lca == stk[top])
@@ -194,7 +239,6 @@ void func(vector<unsigned int> &hs, int k, int m)
             stk[++top] = tmps[i]->idx;
             if (m != nodes[tmps[i]->idx].flag)
             {
-                cnt ++;
                 nodes[tmps[i]->idx].flag = m;
                 nodes[tmps[i]->idx].children.clear();
             }
@@ -208,12 +252,7 @@ void func(vector<unsigned int> &hs, int k, int m)
                 {
                     if (nodes[stk[top - 1]].depth + 1 == nodes[stk[top]].depth)
                     {
-                        cnt = 0;
                         goto finish;
-                    }
-                    else
-                    {
-                        cnt ++;
                     }
                 }
                 nodes[stk[top - 1]].children.push_back(stk[top]);
@@ -227,7 +266,6 @@ void func(vector<unsigned int> &hs, int k, int m)
                 // connect lca and stk[top]
                 if (m != nodes[lca].flag)
                 {
-                    cnt ++;
                     nodes[lca].flag = m;
                     nodes[lca].children.clear();
                 }
@@ -236,12 +274,7 @@ void func(vector<unsigned int> &hs, int k, int m)
                 {
                     if (nodes[lca].depth + 1 == nodes[stk[top]].depth)
                     {
-                        cnt = 0;
                         goto finish;
-                    }
-                    else
-                    {
-                        cnt ++;
                     }
                 }
                 nodes[lca].children.push_back(stk[top]);
@@ -261,12 +294,7 @@ void func(vector<unsigned int> &hs, int k, int m)
                 {
                     if (nodes[stk[top - 1]].depth + 1 == nodes[stk[top]].depth)
                     {
-                        cnt = 0;
                         goto finish;
-                    }
-                    else
-                    {
-                        cnt ++;
                     }
                 }
                 nodes[stk[top - 1]].children.push_back(stk[top]);
@@ -286,28 +314,19 @@ void func(vector<unsigned int> &hs, int k, int m)
         {
             if (nodes[stk[top - 1]].depth + 1 == nodes[stk[top]].depth)
             {
-                cnt = 0;
                 goto finish;
-            }
-            else
-            {
-                cnt++;
             }
         }
         nodes[stk[top - 1]].children.push_back(stk[top]);
 
         top--;
     }
+    
+    cnt = 0;
+    dpFunc(1, m, cnt);
 
 finish:
-    if (0 == cnt)
-    {
-        printf("-1\n");
-    }
-    else
-    {
-        printf("%i\n", cnt);
-    }
+    printf("%i\n", cnt);
 }
 
 int main()

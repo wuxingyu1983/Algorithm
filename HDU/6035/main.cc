@@ -26,11 +26,11 @@ using namespace std;
 #define MAX_N   200001
 
 unsigned int n;
-vector<unsigned int> colors(MAX_N);     // color count
-vector<unsigned int> nodes(MAX_N);
+unsigned int colors[MAX_N];     // color count
+unsigned int nodes[MAX_N];
 vector< vector<unsigned int> > roads(MAX_N);
-vector<unsigned int> sz(MAX_N);
-vector<unsigned long long> sum(MAX_N);
+unsigned int sz[MAX_N];
+unsigned long long sum[MAX_N];
 
 unsigned int func(const unsigned int idx, const unsigned int parent, unsigned long long &cnt)
 {
@@ -61,17 +61,16 @@ int main()
     
     unsigned int testcase = 1;
 #if DEBUG
-    while (fscanf(fp, "%u", &n))
+    while (EOF != fscanf(fp, "%u", &n))
 #else
-    while (scanf("%u", &n))
+    while (EOF != scanf("%u", &n))
 #endif
     {
         unsigned long long colorCnt = 0;
 
         // init
-        colors.assign(n + 1, 0);
-        sz.assign(n + 1, 0);
-        sum.assign(n + 1, 0);
+        memset(colors, 0, sizeof(unsigned int) * (n + 1));
+        memset(sum, 0, sizeof(unsigned long long) * (n + 1));
 
         for (size_t i = 1; i <= n; i++)
         {

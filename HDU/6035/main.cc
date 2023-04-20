@@ -1,4 +1,5 @@
 // http://acm.hdu.edu.cn/showproblem.php?pid=6035
+// https://cloud.tencent.com/developer/article/1087961
 // Virtual Tree : https://oi-wiki.org/graph/virtual-tree/
 // LCA : https://cp-algorithms.com/graph/lca.html#the-idea-of-the-algorithm
 // Segment Tree : https://oi-wiki.org/ds/seg/
@@ -28,43 +29,28 @@ unsigned int n;
 vector<unsigned int> colors(MAX_N);     // color count
 vector<unsigned int> nodes(MAX_N);
 vector< vector<unsigned int> > roads(MAX_N);
+vector<unsigned int> sz(MAX_N);
+vector<unsigned long long> sum(MAX_N);
 
-unsigned int func(const unsigned int idx, const unsigned int parent, const unsigned int c, unsigned long long &cnt)
+unsigned int func(const unsigned int idx, const unsigned int parent, unsigned long long &cnt)
 {
-    unsigned int ret = 0;
+    sz[idx] = 1;
 
-    if (c != nodes[idx])
-    {
-        ret ++;
-    }
-
+    unsigned long long all = 0;
     for (vector<unsigned int>::iterator it = roads[idx].begin(); it != roads[idx].end(); it ++)
     {
         if (parent != *it)
         {
-            unsigned int subRet = func(*it, idx, c, cnt);
-
-            if (c == nodes[idx])
-            {
-                if (0 < subRet)
-                {
-                    cnt += (unsigned long long)subRet * (unsigned long long)(subRet - 1) / 2;
-                }
-            }
-            else
-            {
-                ret += subRet;
-            }
+            unsigned long long last = sum[nodes[idx]];
+            sz[idx] += func(*it, idx, cnt);
+            unsigned long long add = sum[nodes[idx]] - last;
+            cnt += (sz[*it] - add) * (sz[*it] - add - 1) / 2;
+            all += sz[*it] - add;
         }
     }
+    sum[nodes[idx]] += all + 1; 
 
-    if (1 == idx && c != nodes[idx])
-    {
-        // root and not == color
-        cnt += (unsigned long long)ret * (unsigned long long)(ret - 1) / 2;
-    }
-
-    return ret;
+    return sz[idx];
 }
 
 int main()
@@ -80,8 +66,12 @@ int main()
     while (scanf("%u", &n))
 #endif
     {
+        unsigned long long colorCnt = 0;
+
         // init
         colors.assign(n + 1, 0);
+        sz.assign(n + 1, 0);
+        sum.assign(n + 1, 0);
 
         for (size_t i = 1; i <= n; i++)
         {
@@ -91,7 +81,10 @@ int main()
 #else
             scanf("%u", &c);
 #endif
-
+            if (0 == colors[c])
+            {
+                colorCnt ++;
+            }
             colors[c] ++;
             nodes[i] = c;
             roads[i].clear();
@@ -109,16 +102,14 @@ int main()
             roads[y].push_back(x);
         }
 
-        unsigned long long colorCnt = 0;
         unsigned long long ans = 0;
+        func(1, 0, ans);
 
         for (size_t i = 1; i <= n; i++)
         {
             if (0 < colors[i])
             {
-                colorCnt ++;
-
-                func(1, 0, i, ans);
+                ans += (n - sum[i]) * (n - sum[i] - 1) / 2;
             }
         }
 

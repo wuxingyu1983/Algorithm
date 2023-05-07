@@ -103,7 +103,7 @@ void insertDeque(deque<Elem> &dq, Elem * elm, int minS)
     }
 }
 
-void proc(unsigned int d, int p, deque<Elem> &buy, deque<Elem> &sell)
+void proc(unsigned int d, unsigned int pre, int p, deque<Elem> &buy, deque<Elem> &sell)
 {
     if (0 == p)
     {
@@ -111,7 +111,7 @@ void proc(unsigned int d, int p, deque<Elem> &buy, deque<Elem> &sell)
         for (size_t i = p + 1; i <= maxp && i <= p + days[d].bs; i++)
         {
             Elem elm;
-            elm.p = profit[d - 1][i] + i * days[d].bp;
+            elm.p = profit[pre][i] + i * days[d].bp;
             elm.s = i;
             insertDeque(sell, &elm, p + 1);
         }
@@ -122,7 +122,7 @@ void proc(unsigned int d, int p, deque<Elem> &buy, deque<Elem> &sell)
         // buy deque
         {
             Elem elm;
-            elm.p = profit[d - 1][p - 1] + (p - 1) * days[d].ap;
+            elm.p = profit[pre][p - 1] + (p - 1) * days[d].ap;
             elm.s = p - 1;
             insertDeque(buy, &elm, p - days[d].as);
         }
@@ -132,7 +132,7 @@ void proc(unsigned int d, int p, deque<Elem> &buy, deque<Elem> &sell)
             if (p + days[d].bs <= maxp)
             {
                 Elem elm;
-                elm.p = profit[d - 1][p + days[d].bs] + (p + days[d].bs) * days[d].bp;
+                elm.p = profit[pre][p + days[d].bs] + (p + days[d].bs) * days[d].bp;
                 elm.s = p + days[d].bs;
                 insertDeque(sell, &elm, p + 1);
             }
@@ -170,12 +170,13 @@ int main()
         days[i].bs = bs;
     }
 
-    long long ans = LLONG_MIN;
+    long long ans = 0;
 
     for (size_t i = 1; i <= t; i++)
     {
         if (1 == i)
         {
+            profit[i][0] = 0;
             for (size_t j = 1; j <= days[i].as; j++)
             {
                 profit[i][j] = 0 - j * days[i].ap;
@@ -183,6 +184,7 @@ int main()
         }
         else if (i < 1 + w + 1)
         {
+            profit[i][0] = profit[i - 1][0];
             for (size_t j = 1; j <= days[i].as; j++)
             {
                 profit[i][j] = 0 - j * days[i].ap;
@@ -203,13 +205,9 @@ int main()
             for (size_t j = 0; j <= maxp; j++)
             {
                 profit[i][j] = profit[i - 1][j];
-                if (t == i && ans < profit[i][j])
-                {
-                    ans = profit[i][j];
-                }
 
                 // proc buy, sell deque
-                proc(i, j, buy, sell);
+                proc(i, pre, j, buy, sell);
 
                 if (false == buy.empty())
                 {

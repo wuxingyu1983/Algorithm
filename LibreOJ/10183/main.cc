@@ -22,9 +22,9 @@
 
 using namespace std;
 
-#define DEBUG   1
-#define MAX_T   2001
-#define MAX_P   2001
+#define DEBUG   0
+#define MAX_T   2010
+#define MAX_P   2010
 
 vector< vector<long long> > profit(MAX_T, vector<long long>(MAX_P, LLONG_MIN));
 
@@ -223,6 +223,10 @@ int main()
             for (int j = 0; j <= maxp; j++)
             {
                 profit[i][j] = profit[i - 1][j];
+                if (t == i && ans < profit[i][j])
+                {
+                    ans = profit[i][j];
+                }
 
                 // proc buy, sell deque
                 proc(i, pre, j, buy, sell);

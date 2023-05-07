@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#define DEBUG   0
+#define DEBUG   1
 #define MAX_T   2001
 #define MAX_P   2001
 
@@ -108,8 +108,12 @@ void proc(unsigned int d, unsigned int pre, int p, deque<Elem> &buy, deque<Elem>
     if (0 == p)
     {
         // init sell deque
-        for (size_t i = p + 1; i <= maxp && i <= p + days[d].bs; i++)
+        for (int i = p + 1; i <= maxp && i <= p + days[d].bs; i++)
         {
+            if (LLONG_MIN == profit[pre][i])
+            {
+                break;
+            }
             Elem elm;
             elm.p = profit[pre][i] + i * days[d].bp;
             elm.s = i;
@@ -121,20 +125,34 @@ void proc(unsigned int d, unsigned int pre, int p, deque<Elem> &buy, deque<Elem>
         // 0 < p
         // buy deque
         {
-            Elem elm;
-            elm.p = profit[pre][p - 1] + (p - 1) * days[d].ap;
-            elm.s = p - 1;
-            insertDeque(buy, &elm, p - days[d].as);
+            if (LLONG_MIN < profit[pre][p - 1])
+            {
+                Elem elm;
+                elm.p = profit[pre][p - 1] + (p - 1) * days[d].ap;
+                elm.s = p - 1;
+                insertDeque(buy, &elm, p - days[d].as);
+            }
+            else
+            {
+                insertDeque(buy, NULL, p - days[d].as);
+            }
         }
 
         // sell deque
         {
             if (p + days[d].bs <= maxp)
             {
-                Elem elm;
-                elm.p = profit[pre][p + days[d].bs] + (p + days[d].bs) * days[d].bp;
-                elm.s = p + days[d].bs;
-                insertDeque(sell, &elm, p + 1);
+                if (LLONG_MIN < profit[pre][p + days[d].bs])
+                {
+                    Elem elm;
+                    elm.p = profit[pre][p + days[d].bs] + (p + days[d].bs) * days[d].bp;
+                    elm.s = p + days[d].bs;
+                    insertDeque(sell, &elm, p + 1);
+                }
+                else
+                {
+                    insertDeque(sell, NULL, p + 1);
+                }
             }
             else
             {
@@ -156,7 +174,7 @@ int main()
     scanf("%u %u %u", &t, &maxp, &w);
 #endif
 
-    for (size_t i = 1; i <= t; i++)
+    for (int i = 1; i <= t; i++)
     {
         int ap, bp, as, bs;
 #if DEBUG
@@ -172,20 +190,20 @@ int main()
 
     long long ans = 0;
 
-    for (size_t i = 1; i <= t; i++)
+    for (int i = 1; i <= t; i++)
     {
         if (1 == i)
         {
             profit[i][0] = 0;
-            for (size_t j = 1; j <= days[i].as; j++)
+            for (int j = 1; j <= days[i].as; j++)
             {
                 profit[i][j] = 0 - j * days[i].ap;
             }
         }
         else if (i < 1 + w + 1)
         {
-            profit[i][0] = profit[i - 1][0];
-            for (size_t j = 1; j <= days[i].as; j++)
+            profit[i][0] = 0;
+            for (int j = 1; j <= days[i].as; j++)
             {
                 profit[i][j] = 0 - j * days[i].ap;
                 if (profit[i - 1][j] > profit[i][j])
@@ -193,7 +211,7 @@ int main()
                     profit[i][j] = profit[i - 1][j];
                 }
             }
-            for (size_t j = days[i].as + 1; j <= maxp; j++)
+            for (int j = days[i].as + 1; j <= maxp; j++)
             {
                 profit[i][j] = profit[i - 1][j];
             }
@@ -202,7 +220,7 @@ int main()
         {
             unsigned int pre = i - w - 1;
             deque<Elem> buy, sell;
-            for (size_t j = 0; j <= maxp; j++)
+            for (int j = 0; j <= maxp; j++)
             {
                 profit[i][j] = profit[i - 1][j];
 

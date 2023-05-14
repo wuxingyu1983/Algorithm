@@ -29,7 +29,7 @@ using namespace std;
 unsigned int n, m, x, y, k;
 
 vector< bitset<MAX_M> > flags(MAX_N);
-int dist[MAX_N][MAX_M];
+int dist[2][MAX_N][MAX_M];
 
 class Elem
 {
@@ -49,7 +49,7 @@ bool cmp13(const Elem & elm, int idx)
 {
     bool ret = false;
 
-    if (elm.idx < idx)
+    if (elm.idx > idx)
     {
         ret = true;
     }
@@ -61,7 +61,7 @@ bool cmp24(const Elem & elm, int idx)
 {
     bool ret = false;
 
-    if (elm.idx > idx)
+    if (elm.idx < idx)
     {
         ret = true;
     }
@@ -130,7 +130,7 @@ int main()
     scanf("%u %u %u %u %u\n", &n, &m, &x, &y, &k);
 #endif
 
-    dist[x][y] = 1;
+    dist[0][x][y] = 1;
 
     char c;
     for (int row = 1; row <= n; row++)
@@ -154,15 +154,17 @@ int main()
 #endif
     }
 
-    unsigned ans = 1;
+    int now = 0;
+    int ans = 1;
 
     for (int i = 0; i < k; i++)
     {
+        now = 1 - now;
         int s, t, d;
 #if DEBUG
-        fscanf(fp, "%d %d %d\n", &s, &t, &d);
+        fscanf(fp, "%d %d %d", &s, &t, &d);
 #else
-        scanf("%d %d %d\n", &s, &t, &d);
+        scanf("%d %d %d", &s, &t, &d);
 #endif
 
         if (1 == d)
@@ -170,49 +172,39 @@ int main()
             for (int col = 1; col <= m; col++)
             {
                 deque<Elem> dq;
-
-                // init dq
-                for (int row = 1; row <= n && row <= 1 + (t + 1 - s); row++)
+                
+                for (int row = n; row >= 1; row--)
                 {
-                    
-                    if (0 == flags[row][col] && dist[row][col])
+                    if (1 == flags[row][col])
                     {
-                        Elem elm;
-                        elm.d = row + dist[row][col];
-                        elm.idx = row;
-
-                        insertDeque(dq, &elm, 1, cmp13);
+                        dq.clear();
                     }
-                }
-
-                for (int row = 1; row <= n; row++)
-                {
-                    insertDeque(dq, NULL, row, cmp13);
-                    
-                    if (0 == flags[row][col] && false == dq.empty())
+                    else
                     {
-                        Elem elm = dq.front();
-                        int tmp = elm.d - row;
-                        if (tmp > dist[row][col])
+                        insertDeque(dq, NULL, row + (t - s + 1), cmp13);
+                        
+                        dist[now][row][col] = dist[1 - now][row][col];
+                        if (false == dq.empty())
                         {
-                            dist[row][col] = tmp;
-                            if (tmp > ans)
+                            Elem elm = dq.front();
+                            int tmp = elm.d - row;
+                            if (tmp > dist[now][row][col])
                             {
-                                ans = tmp;
+                                dist[now][row][col] = tmp;
+                                if (tmp > ans)
+                                {
+                                    ans = tmp;
+                                }
                             }
                         }
-                    }
 
-                    if (row + 1 + (t + 1 - s) <= n)
-                    {
-                        int bnd = row + 1 + (t + 1 - s);
-                        if (0 == flags[bnd][col] && dist[bnd][col])
+                        if (dist[1 - now][row][col])
                         {
                             Elem elm;
-                            elm.d = bnd + dist[bnd][col];
-                            elm.idx = bnd;
+                            elm.d = row + dist[1 - now][row][col];
+                            elm.idx = row;
 
-                            insertDeque(dq, &elm, row + 1, cmp13);
+                            insertDeque(dq, &elm, row + (t - s + 1), cmp13);
                         }
                     }
                 }
@@ -223,48 +215,40 @@ int main()
             for (int col = 1; col <= m; col++)
             {
                 deque<Elem> dq;
-
-                // init dq
-                for (int row = n; row >= 1 && row >= n - (t + 1 - s); row--)
+                
+                for (int row = 1; row <= n; row++)
                 {
-                    if (0 == flags[row][col] && dist[row][col])
+                    if (1 == flags[row][col])
                     {
-                        Elem elm;
-                        elm.d = dist[row][col] - row;
-                        elm.idx = row;
-
-                        insertDeque(dq, &elm, n, cmp24);
+                        dq.clear();
                     }
-                }
-
-                for (int row = n; row >= 1; row--)
-                {
-                    insertDeque(dq, NULL, row - 1, cmp24);
-                    
-                    if (0 == flags[row][col] && false == dq.empty())
+                    else
                     {
-                        Elem elm = dq.front();
-                        int tmp = elm.d + row;
-                        if (tmp > dist[row][col])
+                        dist[now][row][col] = dist[1 - now][row][col];
+                        
+                        insertDeque(dq, NULL, row - (t - s + 1), cmp24);
+                        
+                        if (false == dq.empty())
                         {
-                            dist[row][col] = tmp;
-                            if (tmp > ans)
+                            Elem elm = dq.front();
+                            int tmp = elm.d + row;
+                            if (tmp > dist[now][row][col])
                             {
-                                ans = tmp;
+                                dist[now][row][col] = tmp;
+                                if (tmp > ans)
+                                {
+                                    ans = tmp;
+                                }
                             }
                         }
-                    }
 
-                    if (row - 1 - (t + 1 - s) >= 1)
-                    {
-                        int bnd = row - 1 - (t + 1 - s);
-                        if (0 == flags[bnd][col] && dist[bnd][col])
+                        if (dist[1 - now][row][col])
                         {
                             Elem elm;
-                            elm.d = dist[bnd][col] - bnd;
-                            elm.idx = bnd;
+                            elm.d = dist[1 - now][row][col] - row;
+                            elm.idx = row;
 
-                            insertDeque(dq, &elm, row - 1, cmp24);
+                            insertDeque(dq, &elm, row - (t - s + 1), cmp24);
                         }
                     }
                 }
@@ -275,52 +259,43 @@ int main()
             for (int row = 1; row <= n; row++)
             {
                 deque<Elem> dq;
-
-                // init dq
-                for (int col = 1; col <= m && col <= 1 + (t + 1 - s); col++)
+                
+                for (int col = m; col >= 1; col--)
                 {
-                    if (0 == flags[row][col] && dist[row][col])
+                    if (1 == flags[row][col])
                     {
-                        Elem elm;
-                        elm.d = col + dist[row][col];
-                        elm.idx = col;
-
-                        insertDeque(dq, &elm, 1, cmp13);
+                        dq.clear();
                     }
-                }
-
-                for (int col = 1; col <= m; col++)
-                {
-                    insertDeque(dq, NULL, col + 1, cmp13);
-                    
-                    if (0 == flags[row][col] && false == dq.empty())
+                    else
                     {
-                        Elem elm = dq.front();
-                        int tmp = elm.d - col;
-                        if (tmp > dist[row][col])
+                        dist[now][row][col] = dist[1 - now][row][col];
+                        
+                        insertDeque(dq, NULL, col + (t - s + 1), cmp13);
+                        
+                        if (false == dq.empty())
                         {
-                            dist[row][col] = tmp;
-                            if (tmp > ans)
+                            Elem elm = dq.front();
+                            int tmp = elm.d - col;
+                            if (tmp > dist[now][row][col])
                             {
-                                ans = tmp;
+                                dist[now][row][col] = tmp;
+                                if (tmp > ans)
+                                {
+                                    ans = tmp;
+                                }
                             }
                         }
-                    }
 
-                    if (col + 1 + (t + 1 - s) <= m)
-                    {
-                        int bnd = col + 1 + (t + 1 - s);
-                        if (0 == flags[row][bnd] && dist[row][bnd])
+                        if (dist[1 - now][row][col])
                         {
                             Elem elm;
-                            elm.d = bnd + dist[row][bnd];
-                            elm.idx = bnd;
+                            elm.d = col + dist[1 - now][row][col];
+                            elm.idx = col;
 
-                            insertDeque(dq, &elm, col + 1, cmp13);
+                            insertDeque(dq, &elm, col + (t - s + 1), cmp13);
                         }
                     }
                 }
-                
             }
         }
         else
@@ -330,59 +305,44 @@ int main()
             {
                 deque<Elem> dq;
             
-                // init dq
-                for (int col = m; col >= 1 && col >= m - (t + 1 - s); col--)
+                for (int col = 1; col <= m; col++)
                 {
-                    if (0 == flags[row][col] && dist[row][col])
+                    if (1 == flags[row][col])
                     {
-                        Elem elm;
-                        elm.d = dist[row][col] - col;
-                        elm.idx = col;
-
-                        insertDeque(dq, &elm, m, cmp24);
+                        dq.clear();
                     }
-                }
-
-                for (int col = m; col >= 1; col--)
-                {
-                    insertDeque(dq, NULL, col - 1, cmp24);
-                    
-                    if (0 == flags[row][col] && false == dq.empty())
+                    else
                     {
-                        Elem elm = dq.front();
-                        int tmp = elm.d + col;
-                        if (tmp > dist[row][col])
+                        dist[now][row][col] = dist[1 - now][row][col];
+                        
+                        insertDeque(dq, NULL, col - (t - s + 1), cmp24);
+                        
+                        if (false == dq.empty())
                         {
-                            dist[row][col] = tmp;
-                            if (tmp > ans)
+                            Elem elm = dq.front();
+                            int tmp = elm.d + col;
+                            if (tmp > dist[now][row][col])
                             {
-                                ans = tmp;
+                                dist[now][row][col] = tmp;
+                                if (tmp > ans)
+                                {
+                                    ans = tmp;
+                                }
                             }
                         }
-                    }
 
-                    if (col - 1 - (t + 1 - s) >= 1)
-                    {
-                        int bnd = col - 1 - (t + 1 - s);
-                        if (0 == flags[row][bnd] && dist[row][bnd])
+                        if (dist[1 - now][row][col])
                         {
                             Elem elm;
-                            elm.d = dist[row][bnd] - bnd;
-                            elm.idx = bnd;
+                            elm.d = dist[1 - now][row][col] - col;
+                            elm.idx = col;
 
-                            insertDeque(dq, &elm, col - 1, cmp24);
+                            insertDeque(dq, &elm, col - (t - s + 1), cmp24);
                         }
                     }
                 }
             }
         }
-/*
-#if DEBUG
-        fscanf(fp, "%c", &c);
-#else
-        scanf("%c", &c);
-#endif
-*/
     }
 
     printf("%u\n", ans - 1);

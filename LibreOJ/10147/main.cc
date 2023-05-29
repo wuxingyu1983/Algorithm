@@ -1,4 +1,4 @@
-// https://loj.ac/p/10147
+// https://loj.ac/p/10147 类似的 https://vijos.org/p/1312
 
 #include <cmath>
 #include <cstdio>

@@ -1,4 +1,5 @@
 // https://www.luogu.com.cn/problem/P4767
+// 四边形不等式优化 https://oi-wiki.org/dp/opt/quadrangle/
 
 #include <cmath>
 #include <cstdio>
@@ -29,6 +30,7 @@ using namespace std;
 int w[MAX_V][MAX_V];
 int dp[MAX_V][MAX_P];
 int ltr[MAX_V][MAX_V], rtl[MAX_V][MAX_V];
+int opt[MAX_V][MAX_P];
 
 int main()
 {
@@ -100,12 +102,23 @@ int main()
         for (size_t i = j; i <= v; i++)
         {
             int tmp = 0;
-            for (size_t k = j - 1; k < i; k++)
+            int l = j - 1;
+            int r = i - 1;
+            if (opt[i][j - 1])
+            {
+                l = opt[i][j - 1];
+            }
+            if (opt[i + 1][j])
+            {
+                r = opt[i + 1][j];
+            }
+            for (size_t k = l; k <= r; k++)
             {
                 tmp = dp[k][j - 1] + w[k + 1][i];
                 if (0 == dp[i][j] || dp[i][j] > tmp)
                 {
                     dp[i][j] = tmp;
+                    opt[i][j] = k;
                 }
             }
         }

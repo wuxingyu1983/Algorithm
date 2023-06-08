@@ -125,7 +125,78 @@ int main()
             }
         }
     }
+
+    int ans = 0;
+    int row = 0;
+
+    // row = 0;
+    for (vector<int>::iterator it = enables.begin(); it != enables.end(); it++)
+    {
+        if (0 == (*it & position[row]))
+        {
+            dp[row][*it][0] = oneCnt[*it];
+            if (dp[row][*it][0] > ans)
+            {
+                ans = dp[row][*it][0];
+            }
+        }
+    }
     
+    if (1 < n)
+    {
+        for (vector<int>::iterator it = enables.begin(); it != enables.end(); it++)
+        {
+            for (vector<int>::iterator jt = enables.begin(); jt != enables.end(); jt++)
+            {
+                if (0 == (*it & position[row]) && 0 == (*jt & position[row + 1]) && 0 == (*it & *jt))
+                {
+                    dp[row][*it][*jt] = oneCnt[*it] + oneCnt[*jt];
+                    if (dp[row][*it][*jt] > ans)
+                    {
+                        ans = dp[row][*it][*jt];
+                    }
+                }
+            }
+        }
+    }
+
+    if (2 < n)
+    {
+        for (row = 1; row < n - 1; row++)
+        {
+            for (vector<int>::iterator it = enables.begin(); it != enables.end(); it++)
+            {
+                if (0 == (*it & position[row]))
+                {
+                    for (vector<int>::iterator jt = enVecs[*it].begin(); jt != enVecs[*it].end(); jt++)
+                    {
+                        if (0 == (*jt & position[row + 1]))
+                        {
+                            for (vector<int>::iterator kt = enVecs[*it].begin(); kt != enVecs[*it].end(); kt++)
+                            {
+                                if (0 == (*jt & *kt) && (0 < dp[row - 1][*kt][*it] || (0 == *kt && 0 == *it)))
+                                {
+                                    int tmp = dp[row - 1][*kt][*it] + oneCnt[*jt];
+                                    if (tmp > dp[row][*it][*jt])
+                                    {
+                                        dp[row][*it][*jt] = tmp;
+                                    }
+                                    if (tmp > ans)
+                                    {
+                                        ans = tmp;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }
+            
+        }
+    }
+
+    cout << ans << endl;
 
 #if DEBUG
     fclose(fp);

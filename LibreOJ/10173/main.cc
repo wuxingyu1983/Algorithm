@@ -23,6 +23,7 @@
 using namespace std;
 
 #define DEBUG   0
+
 #define MAX_N   101                 // row
 #define MAX_M   11                  // colum
 #define MAX_2M  1025
@@ -45,21 +46,17 @@ int main()
 #if DEBUG
     fscanf(fp, "%d %d", &n, &m);
 #else
-    scanf("%d %d", &n, &m);
+    cin >> n >> m;
 #endif
 
     for (size_t row = 0; row < n; row++)
     {
-        for (size_t col = 0; col < m; col++)
+        string str;
+        cin >> str;
+        
+        for (size_t col = 0; col < str.length(); col++)
         {
-            char c;
-#if DEBUG
-            fscanf(fp, "%c", &c);
-#else
-            scanf("%c", &c);
-#endif
-
-            if ('H' == c)
+            if ('H' == str[col])
             {
                 position[row] |= 1 << col;
             }

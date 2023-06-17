@@ -27,6 +27,26 @@ using namespace std;
 #define MAX_2HW     2048
 long long dp[MAX_HW + 1][MAX_HW + 1][MAX_2HW];      // dp[row][col][MAX_2HW]
 
+long long func(int row, int i, int start, int col)
+{
+    long long ret = 0;
+    
+    int last_idx = (~i) & ((1 << col) - 1);
+
+    ret = dp[row - 1][col][last_idx];
+ 
+    int mask = 3;
+    for (int pos = start; pos < col; pos++)
+    {
+        if ((mask << pos) == (i & (mask << pos)))
+        {
+            ret += func(row, i - (mask << pos), pos + 2, col);
+        }
+    }
+    
+    return ret;
+}
+
 int main()
 {
 #if DEBUG
@@ -41,10 +61,13 @@ int main()
         if (2 <= col)
         {
             int mask = 3;
-
-            for (size_t i = 0; i < (1 << col) - (mask << (col - 2)); i++)
+            
+            for (int i = 0; i < col - 1; i++)
             {
-                dp[1][col][i + (mask << (col - 2))] = dp[1][col][i];
+                for (int j = 0; j < (1 << i); j++)
+                {
+                    dp[1][col][j + (mask << i)] = dp[1][col][j];
+                }
             }
         }
     }
@@ -55,23 +78,7 @@ int main()
         {
             for (size_t i = 0; i < (1 << col); i++)
             {
-                int last_idx = (~i) & ((1 << col) - 1);
-
-                dp[row][col][i] = dp[row][col][last_idx];
-
-                if (2 <= col)
-                {
-                    int mask = 3;
-                    while (mask > i)
-                    {
-                        if (mask == (mask & i))
-                        {
-                            dp[row][col][i] += dp[row][col][i - mask];
-                        }
-
-                        mask <<= 1;
-                    }
-                }
+                dp[row][col][i] = func(row, i, 0, col);
             }
         }
     }

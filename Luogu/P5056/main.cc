@@ -25,6 +25,26 @@ using namespace std;
 #define DEBUG       0
 #define MAX_MN      12
 
+class Line
+{
+public:
+    /*
+        已经处理过（x, y）格子后，状态为state的个数cnt 
+    */
+    int x, y;
+    int state;
+    int cnt;
+
+    Line()
+    {
+        x = y = 0;
+        state = 0;
+        cnt = 0;
+    }
+};
+
+queue<Line> lines;
+
 unsigned char cells[MAX_MN + 1][MAX_MN + 1];        // 1 - obstacle
 
 int main()

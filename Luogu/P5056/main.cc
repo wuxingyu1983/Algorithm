@@ -152,7 +152,7 @@ int main()
 
             if (0 == i && 0 == j)
             {
-                if (m > now_y && end_x > now_x)
+                if (m > now_y && end_x > now_x && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                 {
                     state = setState(state, (now_y - 1) * 2, 1);
                     state = setState(state, now_y * 2, 2);
@@ -163,13 +163,13 @@ int main()
             }
             else if (0 == i && 0 < j)
             {
-                if (m > now_y)
+                if (m > now_y && 0 == cells[now_x][now_y + 1])
                 {
                     now.state = state;
                     lines.push(now);
                 }
 
-                if (end_x > now_x)
+                if (end_x > now_x && 0 == cells[now_x + 1][now_y])
                 {
                     state = setState(state, (now_y - 1) * 2, j);
                     state = setState(state, now_y * 2, 0);
@@ -180,13 +180,13 @@ int main()
             }
             else if (0 < i && 0 == j)
             {
-                if (end_x > now_x)
+                if (end_x > now_x && 0 == cells[now_x + 1][now_y])
                 {
                     now.state = state;
                     lines.push(now);
                 }
 
-                if (m > now_y)
+                if (m > now_y && 0 == cells[now_x][now_y + 1])
                 {
                     state = setState(state, (now_y - 1) * 2, 0);
                     state = setState(state, now_y * 2, i);

@@ -129,9 +129,6 @@ int main()
         if (1 == cells[now_x][now_y])
         {
             // 障碍物
-            state &= ~(3 << ((now_y - 1) * 2));
-            state &= ~(3 << (now_y * 2));
-
             Line now;
             now.x = now_x;
             now.y = now_y;
@@ -201,7 +198,7 @@ int main()
                 state = setState(state, now_y * 2, 0);
 
                 int pos = (now_y + 1) * 2;
-                while (pos < m * 2)
+                while (pos <= m * 2)
                 {
                     if (2 == ((state >> pos) & 3))
                     {

@@ -29,7 +29,7 @@ class Line
 {
 public:
     /*
-        已经处理过（x, y）格子后，状态为state的个数cnt 
+        已经处理过（x, y）格子后，状态为state的个数cnt
     */
     int x, y;
     int state;
@@ -69,7 +69,7 @@ int main()
 #if DEBUG
         fscanf(fp, "%d %d", &n, &m);
 #else
-        scanf("%d %d", &n, &m);
+        cin >> n >> m;
 #endif
 
     int end_x = 0, end_y = 0;
@@ -82,7 +82,7 @@ int main()
 #if DEBUG
             fscanf(fp, "%c", &c);
 #else
-            scanf("%c", &c);
+            cin >> c;
 #endif
             if ('*' == c)
             {
@@ -107,7 +107,7 @@ int main()
 
     int ans = 0;
 
-    while (!lines.empty())
+    while (false == lines.empty())
     {
         Line pre = lines.front();
         lines.pop();
@@ -120,6 +120,11 @@ int main()
             now_x ++;
             now_y = 1;
             state <<= 2;
+            
+            if (end_x < now_x)
+            {
+                continue;;
+            }
         }
         else
         {
@@ -236,7 +241,7 @@ int main()
             }
             else if (1 == i && 2 == j)
             {
-                if (n == now_x && m == now_y)
+                if (end_x == now_x && end_y == now_y)
                 {
                     state = setState(state, (now_y - 1) * 2, 0);
                     state = setState(state, now_y * 2, 0);
@@ -250,7 +255,7 @@ int main()
         }
     }
 
-    cout << ans << endl;    
+    cout << ans << endl;
 
 #if DEBUG
     fclose(fp);

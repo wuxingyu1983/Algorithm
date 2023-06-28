@@ -120,11 +120,6 @@ int main()
             now_x ++;
             now_y = 1;
             state <<= 2;
-            
-            if (end_x < now_x)
-            {
-                continue;;
-            }
         }
         else
         {
@@ -157,7 +152,7 @@ int main()
 
             if (0 == i && 0 == j)
             {
-                if (m > now_y)
+                if (m > now_y && end_x > now_x)
                 {
                     state = setState(state, (now_y - 1) * 2, 1);
                     state = setState(state, now_y * 2, 2);
@@ -174,16 +169,22 @@ int main()
                     lines.push(now);
                 }
 
-                state = setState(state, (now_y - 1) * 2, j);
-                state = setState(state, now_y * 2, 0);
+                if (end_x > now_x)
+                {
+                    state = setState(state, (now_y - 1) * 2, j);
+                    state = setState(state, now_y * 2, 0);
 
-                now.state = state;
-                lines.push(now);
+                    now.state = state;
+                    lines.push(now);
+                }
             }
             else if (0 < i && 0 == j)
             {
-                now.state = state;
-                lines.push(now);
+                if (end_x > now_x)
+                {
+                    now.state = state;
+                    lines.push(now);
+                }
 
                 if (m > now_y)
                 {

@@ -1,4 +1,5 @@
 // https://www.luogu.com.cn/problem/P5056
+// https://blog.csdn.net/weixin_46215084/article/details/114167766
 
 #include <cmath>
 #include <cstdio>
@@ -33,13 +34,11 @@ public:
     */
     int x, y;
     int state;
-    int cnt;
 
     Line()
     {
         x = y = 0;
         state = 0;
-        cnt = 0;
     }
 };
 
@@ -57,6 +56,25 @@ inline int setState(int state, int pos, int val)
     ret |= val << pos;
 
     return ret;
+}
+
+map<int, long long> cnts[2];
+int act = 0;        // 当前生效的 map
+unsigned char flags[MAX_MN + 1][MAX_MN + 1];
+
+void insertLine(Line &line, long long cnt)
+{
+    // 判断是否已经存在了
+    map<int, long long>::iterator it = cnts[1 - act].find(line.state);
+    if (it == cnts[1 - act].end())
+    {
+        cnts[1 - act][line.state] = cnt;
+        lines.push(line);
+    }
+    else
+    {
+        cnts[1 - act][line.state] = cnt + it->second;
+    }
 }
 
 int main()
@@ -101,20 +119,32 @@ int main()
     start.x = 0;
     start.y = m;
     start.state = 0;
-    start.cnt = 1;
 
     lines.push(start);
 
-    int ans = 0;
+    flags[0][m] = 1;
+    cnts[act][0] = 1;
+
+    long long ans = 0;
 
     while (false == lines.empty())
     {
         Line pre = lines.front();
         lines.pop();
 
-            int now_x = pre.x,
-                now_y = pre.y;
+        int now_x = pre.x,
+            now_y = pre.y;
         int state = pre.state;
+
+        if (0 == flags[now_x][now_y])
+        {
+            // 第一次访问 (now_x, now_y)
+            flags[now_x][now_y] = 1;
+            cnts[act].clear();
+            act = 1 - act;
+        }
+
+        long long pre_cnt = cnts[act][state];
 
         if (m == pre.y)
         {
@@ -134,9 +164,8 @@ int main()
             now.x = now_x;
             now.y = now_y;
             now.state = state;
-            now.cnt = pre.cnt;
 
-            lines.push(now);
+            insertLine(now, pre_cnt);
         }
         else
         {
@@ -146,7 +175,6 @@ int main()
             Line now;
             now.x = now_x;
             now.y = now_y;
-            now.cnt = pre.cnt;
 
             if (0 == i && 0 == j)
             {
@@ -157,7 +185,7 @@ int main()
 
                     now.state = state;
 
-                    lines.push(now);
+                    insertLine(now, pre_cnt);
                 }
             }
             else if (0 == i && 0 < j)
@@ -165,7 +193,7 @@ int main()
                 if (m > now_y && 0 == cells[now_x][now_y + 1])
                 {
                     now.state = state;
-                    lines.push(now);
+                    insertLine(now, pre_cnt);
                 }
 
                 if (end_x > now_x && 0 == cells[now_x + 1][now_y])
@@ -174,7 +202,7 @@ int main()
                     state = setState(state, now_y * 2, 0);
 
                     now.state = state;
-                    lines.push(now);
+                    insertLine(now, pre_cnt);
                 }
             }
             else if (0 < i && 0 == j)
@@ -182,7 +210,7 @@ int main()
                 if (end_x > now_x && 0 == cells[now_x + 1][now_y])
                 {
                     now.state = state;
-                    lines.push(now);
+                    insertLine(now, pre_cnt);
                 }
 
                 if (m > now_y && 0 == cells[now_x][now_y + 1])
@@ -191,7 +219,7 @@ int main()
                     state = setState(state, now_y * 2, i);
 
                     now.state = state;
-                    lines.push(now);
+                    insertLine(now, pre_cnt);
                 }
             }
             else if (1 == i && 1 == j)
@@ -214,7 +242,7 @@ int main()
                         {
                             state = setState(state, pos, 1);
                             now.state = state;
-                            lines.push(now);
+                            insertLine(now, pre_cnt);
                             break;
                         }
                     }
@@ -242,7 +270,7 @@ int main()
                         {
                             state = setState(state, pos, 2);
                             now.state = state;
-                            lines.push(now);
+                            insertLine(now, pre_cnt);
                             break;
                         }
                     }
@@ -255,7 +283,7 @@ int main()
                 state = setState(state, (now_y - 1) * 2, 0);
                 state = setState(state, now_y * 2, 0);
                 now.state = state;
-                lines.push(now);
+                insertLine(now, pre_cnt);
             }
             else if (1 == i && 2 == j)
             {
@@ -266,8 +294,7 @@ int main()
 
                     if (0 == state)
                     {
-                        now.state = state;
-                        ans += pre.cnt;
+                        ans = pre_cnt;
                     }
                 }
             }

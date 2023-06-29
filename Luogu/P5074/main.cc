@@ -126,6 +126,13 @@ int main()
             }
         }
 
+        if (0 == end_x && 0 == end_y)
+        {
+            // 全为 0 的情况，输出为 1
+            cout << 1 << endl;
+            continue;
+        }
+
         // start
         act = 0;
         cnts[0].clear();

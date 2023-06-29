@@ -112,7 +112,8 @@ int main()
         Line pre = lines.front();
         lines.pop();
 
-        int now_x = pre.x, now_y = pre.y;
+            int now_x = pre.x,
+                now_y = pre.y;
         int state = pre.state;
 
         if (m == pre.y)
@@ -155,6 +156,7 @@ int main()
                     state = setState(state, now_y * 2, 2);
 
                     now.state = state;
+
                     lines.push(now);
                 }
             }
@@ -198,14 +200,23 @@ int main()
                 state = setState(state, now_y * 2, 0);
 
                 int pos = (now_y + 1) * 2;
+                int s = 1;
                 while (pos <= m * 2)
                 {
-                    if (2 == ((state >> pos) & 3))
+                    if (1 == ((state >> pos) & 3))
                     {
-                        state = setState(state, pos, 1);
-                        now.state = state;
-                        lines.push(now);
-                        break;
+                        s ++;
+                    }
+                    else if (2 == ((state >> pos) & 3))
+                    {
+                        s--;
+                        if (0 == s)
+                        {
+                            state = setState(state, pos, 1);
+                            now.state = state;
+                            lines.push(now);
+                            break;
+                        }
                     }
 
                     pos += 2;
@@ -216,15 +227,24 @@ int main()
                 state = setState(state, (now_y - 1) * 2, 0);
                 state = setState(state, now_y * 2, 0);
 
-                int pos = (now_y - 1) * 2;
+                int pos = (now_y - 2) * 2;
+                int s = 1;
                 while (0 <= pos)
                 {
-                    if (1 == ((state >> pos) & 3))
+                    if (2 == ((state >> pos) & 3))
                     {
-                        state = setState(state, pos, 2);
-                        now.state = state;
-                        lines.push(now);
-                        break;
+                        s ++;
+                    }
+                    else if (1 == ((state >> pos) & 3))
+                    {
+                        s--;
+                        if (0 == s)
+                        {
+                            state = setState(state, pos, 2);
+                            now.state = state;
+                            lines.push(now);
+                            break;
+                        }
                     }
 
                     pos -= 2;
@@ -246,6 +266,7 @@ int main()
 
                     if (0 == state)
                     {
+                        now.state = state;
                         ans += pre.cnt;
                     }
                 }

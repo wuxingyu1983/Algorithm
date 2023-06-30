@@ -23,7 +23,7 @@
 using namespace std;
 
 #define DEBUG       0
-#define MAX_N       100    
+#define MAX_N       100
 #define MAX_M       6
 
 class Line
@@ -154,6 +154,7 @@ int main()
         {
             now_y++;
         }
+        
 
         int i = (state >> ((now_y - 1) * 2)) & 3;
         int j = (state >> (now_y * 2)) & 3;
@@ -164,6 +165,13 @@ int main()
 
         if (0 == i && 0 == j)
         {
+            // 忽略该cell
+            if (end_x > now_x || end_y > now_y)
+            {
+                now.state = state;
+                insertLine(now, pre_cnt);
+            }
+            
             if (m > now_y && end_x > now_x)
             {
                 state = setState(state, (now_y - 1) * 2, 1);
@@ -172,13 +180,6 @@ int main()
                 now.state = state;
 
                 insertLine(now, pre_cnt + cells[now_x][now_y]);
-            }
-
-            // 忽略该cell
-            {
-                now.state = state;
-
-                insertLine(now, pre_cnt);
             }
         }
         else if (0 == i && 0 < j)

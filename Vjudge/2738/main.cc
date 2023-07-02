@@ -55,14 +55,75 @@ inline int setState(int state, int pos, int val)
     return ret;
 }
 
-map<int, long long> cnts[2];
+map<int, vector<short> > cnts[2];
 int act = 0; // 当前生效的 map
 unsigned char flags[MAX_N][5];
 
-void insertLine(Line &line, long long cnt)
+void vecPlus(vector<short> &x, vector<short> &y, vector<short> &sum)
+{
+    int carry = 0;
+    vector<short>::iterator itx = x.begin();
+    vector<short>::iterator ity = y.begin();
+
+    while (itx != x.end() && ity != y.end())
+    {
+        short tmp = *itx + *ity + carry;
+        sum.push_back(tmp % 1000);
+        carry = tmp / 1000;
+
+        itx ++;
+        ity ++;
+    }
+
+    while (itx != x.end())
+    {
+        short tmp = *itx + carry;
+        sum.push_back(tmp % 1000);
+        carry = tmp / 1000;
+
+        itx ++;
+    }
+    
+    while (ity != y.end())
+    {
+        short tmp = *ity + carry;
+        sum.push_back(tmp % 1000);
+        carry = tmp / 1000;
+
+        ity ++;
+    }
+
+    if (0 < carry)
+    {
+        sum.push_back(carry);
+    }
+}
+
+void vecPrint(int n, vector<short> &vec)
+{
+    cout << n << ": ";
+
+    reverse(vec.begin(), vec.end());
+
+    for (size_t i = 0; i < vec.size(); i++)
+    {
+        if (0 == i)
+        {
+            cout << vec[i];
+        }
+        else
+        {
+            cout << "," << setfill('0') << setw(3) << vec[i];
+        }
+    }
+
+    cout << endl;
+}
+
+void insertLine(Line &line, vector<short> &cnt)
 {
     // 判断是否已经存在了
-    map<int, long long>::iterator it = cnts[1 - act].find(line.state);
+    map<int, vector<short> >::iterator it = cnts[1 - act].find(line.state);
     if (it == cnts[1 - act].end())
     {
         cnts[1 - act][line.state] = cnt;
@@ -70,7 +131,10 @@ void insertLine(Line &line, long long cnt)
     }
     else
     {
-        cnts[1 - act][line.state] = cnt + it->second;
+        // TBD
+        vector<short> sum;
+        vecPlus(cnt, it->second, sum);
+        cnts[1 - act][line.state] = sum;
     }
 }
 
@@ -82,6 +146,8 @@ int main()
 
     while (true)
     {
+        bool f = false;
+
         string str_n;
 
         cin >> str_n;
@@ -111,9 +177,12 @@ int main()
         lines.push(start);
 
         flags[0][m] = 1;
-        cnts[act][0] = 1;
 
-        long long ans = 0;
+        vector<short> tmp;
+        tmp.push_back(1);
+        cnts[act][0] = tmp;
+
+        vector<short> ans;
 
         while (false == lines.empty())
         {
@@ -132,7 +201,7 @@ int main()
                 act = 1 - act;
             }
 
-            long long pre_cnt = cnts[act][state];
+            vector<short> pre_cnt = cnts[act][state];
 
             if (m == pre.y)
             {
@@ -270,13 +339,18 @@ int main()
 
                     if (0 == state)
                     {
-                        ans = pre_cnt;
+                        vecPlus(pre_cnt, pre_cnt, ans);
+                        vecPrint(n, ans);
+                        f = true;
                     }
                 }
             }
         }
 
-        cout << ans << endl;
+        if (false == f)
+        {
+            cout << n << ": " << 0 << endl;
+        }
     }
 
 #if DEBUG

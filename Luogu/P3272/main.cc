@@ -25,6 +25,7 @@ using namespace std;
 #define DEBUG       0
 #define MAX_MN      100
 #define MOD         20110520
+#define ST_SIZE     4194304
 
 class Line
 {
@@ -58,22 +59,22 @@ inline int setState(int state, int pos, int val)
     return ret;
 }
 
-map<int, long long> cnts[2];
+int cnts[2][ST_SIZE];
 int act = 0;        // 当前生效的 map
 unsigned char flags[MAX_MN + 1][MAX_MN + 1];
 
-void insertLine(Line &line, long long cnt)
+void insertLine(Line &line, int cnt)
 {
     // 判断是否已经存在了
-    map<int, long long>::iterator it = cnts[1 - act].find(line.state);
-    if (it == cnts[1 - act].end())
+    if (0 == cnts[1 - act][line.state])
     {
         cnts[1 - act][line.state] = cnt;
         lines.push(line);
     }
     else
     {
-        cnts[1 - act][line.state] = (cnt + it->second) % MOD;
+        cnts[1 - act][line.state] += cnt;
+        cnts[1 - act][line.state] %= MOD;
     }
 }
 
@@ -171,7 +172,7 @@ int main()
         {
             // 第一次访问 (now_x, now_y)
             flags[now_x][now_y] = 1;
-            cnts[act].clear();
+            memset(cnts[act], 0, sizeof(int) * ST_SIZE);
             act = 1 - act;
         }
 

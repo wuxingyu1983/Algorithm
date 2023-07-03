@@ -283,7 +283,7 @@ int main()
                             if (0 == state)
                             {
                                 ans += pre_cnt;
-                                ans &= MOD;
+                                ans %= MOD;
                             }
                         }
                         else
@@ -338,7 +338,7 @@ int main()
                             if (0 == state)
                             {
                                 ans += pre_cnt;
-                                ans &= MOD;
+                                ans %= MOD;
                             }
                         }
                         else
@@ -359,7 +359,7 @@ int main()
                     if (0 == state)
                     {
                         ans += pre_cnt;
-                        ans &= MOD;
+                        ans %= MOD;
                     }
                 }
                 else

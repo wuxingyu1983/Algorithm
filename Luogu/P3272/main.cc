@@ -179,13 +179,13 @@ int main()
 
         if (m == pre.y)
         {
-            now_x ++;
+            now_x++;
             now_y = 1;
             state <<= 2;
         }
         else
         {
-            now_y ++;
+            now_y++;
         }
 
         if (1 == cells[now_x][now_y])
@@ -207,7 +207,7 @@ int main()
             now.x = now_x;
             now.y = now_y;
 
-            if ((0 == i && 0 == j) || (0 == i && 3 == j) || (3 == i && 0 == j))
+            if (0 == i && 0 == j)
             {
                 if (m > now_y && end_x > now_x && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                 {
@@ -272,6 +272,26 @@ int main()
                         now.state = state;
                         insertLine(now, pre_cnt);
                     }
+
+                    {
+                        // 就此打住了
+                        state = setState(state, (now_y - 1) * 2, 0);
+                        state = setState(state, now_y * 2, 0);
+
+                        if (end_x == now_x && end_y == now_y)
+                        {
+                            if (0 == state)
+                            {
+                                ans += pre_cnt;
+                                ans &= MOD;
+                            }
+                        }
+                        else
+                        {
+                            now.state = state;
+                            insertLine(now, pre_cnt);
+                        }
+                    }
                 }
             }
             else if (0 < i && 0 == j)
@@ -307,6 +327,26 @@ int main()
                         now.state = state;
                         insertLine(now, pre_cnt);
                     }
+
+                    {
+                        // 就此打住了
+                        state = setState(state, (now_y - 1) * 2, 0);
+                        state = setState(state, now_y * 2, 0);
+
+                        if (end_x == now_x && end_y == now_y)
+                        {
+                            if (0 == state)
+                            {
+                                ans += pre_cnt;
+                                ans &= MOD;
+                            }
+                        }
+                        else
+                        {
+                            now.state = state;
+                            insertLine(now, pre_cnt);
+                        }
+                    }
                 }
             }
             else if (1 == i && 1 == j)
@@ -314,10 +354,20 @@ int main()
                 state = setState(state, (now_y - 1) * 2, 0);
                 state = setState(state, now_y * 2, 0);
 
-                now.state = state;
-                insertLine(now, pre_cnt);
+                if (end_x == now_x && end_y == now_y)
+                {
+                    if (0 == state)
+                    {
+                        ans += pre_cnt;
+                        ans &= MOD;
+                    }
+                }
+                else
+                {
+                    now.state = state;
+                    insertLine(now, pre_cnt);
+                }
             }
-            
         }
     }
 

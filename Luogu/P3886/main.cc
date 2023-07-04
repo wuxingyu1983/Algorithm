@@ -252,7 +252,6 @@ int main()
 
         // now_x, now_y 将要处理的cell
         // state 还未处理 (now_x, now_y) 的状态
-
         {
             // 忽略该 cell 
             Line now;
@@ -294,7 +293,6 @@ int main()
             {
                 if ((8 < nxtIdx && 8 < j) || (8 > nxtIdx && 8 > j))
                 {
-                    state = setState(state, now_y, j);
                     now.state = state;
                     now.nextIdx = nxtIdx;
 
@@ -314,7 +312,6 @@ int main()
                 // 0 < i && 0 < j
                 if (i == j)
                 {
-                    state = setState(state, now_y, i);
                     now.state = state;
                     now.nextIdx = nxtIdx;
 

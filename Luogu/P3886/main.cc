@@ -82,9 +82,9 @@ inline long long setAllState(const long long state, const int startPos, const in
 
     for (size_t i = startPos; i <= m; i++)
     {
-        if (oldVal == (state >> (4 * i)))
+        if (oldVal == ((ret >> (4 * i)) & 15))
         {
-            ret = setState(state, i, newVal);
+            ret = setState(ret, i, newVal);
         }
     }
 

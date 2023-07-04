@@ -126,6 +126,18 @@ inline bool stateRightful(long long state)
 
 void insertLine(Line &line, int cnt)
 {
+    if (m == line.y)
+    {
+        if (1 & line.x)
+        {
+            line.nextIdx = 9; // 1001
+        }
+        else
+        {
+            line.nextIdx = 1; // 0001
+        }
+    }
+
     // 判断是否已经存在了
     map<long long, int>::iterator it = cnts[1 - act].find(line.state);
     if (it == cnts[1 - act].end())
@@ -249,22 +261,7 @@ int main()
 
             state = setState(state, now_y, 0);
             now.state = state;
-
-            if (m == now_y)
-            {
-                if (1 & now_x)
-                {
-                    now.nextIdx = 9;    // 1001
-                }
-                else
-                {
-                    now.nextIdx = 1;    // 0001
-                }
-            }
-            else
-            {
-                now.nextIdx = nxtIdx;
-            }
+            now.nextIdx = nxtIdx;
 
             insertLine(now, pre_cnt);
         }

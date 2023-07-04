@@ -45,8 +45,9 @@ public:
 };
 
 queue<Line> lines;
-
-int cells[MAX_MN + 1][MAX_MN + 1];        // 1 - obstacle
+int ans = INT32_MIN;
+int cells[MAX_MN + 1][MAX_MN + 1];
+int n, m;
 
 inline long long setState(long long state, int pos, int val)
 {
@@ -94,6 +95,35 @@ map<long long, int> cnts[2];
 int act = 0;        // 当前生效的 map
 unsigned char flags[MAX_MN + 1][MAX_MN + 1];
 
+inline bool stateRightful(long long state)
+{
+    bool ret = true;
+    int pre = 0;
+
+    for (size_t i = 1; i <= m; i++)
+    {
+        if (0 != (state & 15))
+        {
+            if (0 == pre)
+            {
+                pre = state & 15;
+            }
+            else
+            {
+                if (pre != (state & 15))
+                {
+                    ret = false;
+                    break;
+                }
+            }
+        }
+
+        state >>= 4;
+    }
+
+    return ret;
+}
+
 void insertLine(Line &line, int cnt)
 {
     // 判断是否已经存在了
@@ -102,12 +132,28 @@ void insertLine(Line &line, int cnt)
     {
         cnts[1 - act][line.state] = cnt;
         lines.push(line);
+
+        if (stateRightful(line.state))
+        {
+            if (cnt > ans)
+            {
+                ans = cnt;
+            }
+        }
     }
     else
     {
         if (cnt > it->second)
         {
             cnts[1 - act][line.state] = cnt;
+
+            if (stateRightful(line.state))
+            {
+                if (cnt > ans)
+                {
+                    ans = cnt;
+                }
+            }
         }
     }
 }
@@ -117,8 +163,7 @@ int main()
 #if DEBUG
     FILE *fp = fopen("input.txt", "r");
 #endif
-
-    int n, m;
+    
 #if DEBUG
         fscanf(fp, "%d", &n);
 #else
@@ -158,8 +203,6 @@ int main()
     flags[0][m] = 1;
     cnts[act][0] = 0;
 
-    int ans = INT32_MIN;
-
     while (false == lines.empty())
     {
         Line pre = lines.front();
@@ -184,6 +227,11 @@ int main()
         {
             now_x ++;
             now_y = 1;
+
+            if (n < now_x)
+            {
+                continue;
+            }
         }
         else
         {
@@ -285,7 +333,11 @@ int main()
                 }
                 else
                 {
+                    state = setAllState(state, now_y, m, j, i);
+                    now.state = state;
+                    now.nextIdx = nxtIdx;
 
+                    insertLine(now, pre_cnt + cells[now_x][now_y]);
                 }
             }
         }

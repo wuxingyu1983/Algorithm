@@ -165,7 +165,7 @@ inline long long preProc(long long state, int from, int m, int lastIdx)
     return state;
 }
 
-inline long long postProc(long long state, int pos, int m)
+inline long long postProc(long long state)
 {
     int idx = 1;
     
@@ -191,36 +191,28 @@ inline long long postProc(long long state, int pos, int m)
 
 void insertLine(Line &line, int cnt)
 {
-    line.state = postProc(line.state, line.y, m);
-    
+    line.state = postProc(line.state);
+
+    if (stateRightful(line.state))
+    {
+        if (cnt > ans)
+        {
+            ans = cnt;
+        }
+    }
+
     // 判断是否已经存在了
     map<long long, int>::iterator it = cnts[1 - act].find(line.state);
     if (it == cnts[1 - act].end())
     {
         cnts[1 - act][line.state] = cnt;
         lines.push(line);
-
-        if (stateRightful(line.state))
-        {
-            if (cnt > ans)
-            {
-                ans = cnt;
-            }
-        }
     }
     else
     {
         if (cnt > it->second)
         {
             cnts[1 - act][line.state] = cnt;
-
-            if (stateRightful(line.state))
-            {
-                if (cnt > ans)
-                {
-                    ans = cnt;
-                }
-            }
         }
     }
 }

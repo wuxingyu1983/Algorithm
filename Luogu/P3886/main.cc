@@ -1,5 +1,6 @@
 // https://www.luogu.com.cn/problem/P3886
 
+
 #include <cmath>
 #include <cstdio>
 #include <vector>
@@ -263,7 +264,18 @@ int main()
             cells[row][col] = c;
             end_x = row;
             end_y = col;
+            
+            if (c > ans)
+            {
+                ans = c;
+            }
         }
+    }
+    
+    if (ans <= 0)
+    {
+        cout << ans << endl;
+        return 0;
     }
 
     // start

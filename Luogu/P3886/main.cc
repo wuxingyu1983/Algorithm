@@ -23,7 +23,9 @@
 using namespace std;
 
 #define DEBUG       0
-#define MAX_MN      9
+#define MAX_MN      10
+#define MASK        7
+#define BITS        3
 
 class Line
 {
@@ -32,7 +34,7 @@ public:
         已经处理过（x, y）格子后，状态为state的个数cnt
     */
     int x, y;
-    long long state;
+    int state;
 
     Line()
     {
@@ -46,155 +48,83 @@ int ans = INT32_MIN;
 int cells[MAX_MN + 1][MAX_MN + 1];
 int n, m;
 
-inline long long setState(long long state, int pos, int val)
+int setState(int state, int pos, int val)
 {
-    long long ret = state;
-
-    // 4 bits
-    pos *= 4;
-
     // clear
-    ret &= ~(15 << pos);
+    state &= ~(MASK << (pos * BITS));
+    state |= val << (pos * BITS);
 
-    ret |= val << pos;
-
-    return ret;
+    return state;
 }
 
-inline int getState(const long long state, const int pos)
+int getState(int state, int pos)
 {
     int ret = 0;
 
     if (0 <= pos)
     {
-        ret = (state >> (4 * pos)) & 15;
+        ret = (state >> (BITS * pos)) & MASK;
     }
 
     return ret;
 }
 
-inline long long setAllState(const long long state, const int startPos, const int m, const int oldVal, const int newVal)
+int setAllState(int state, const int startPos, const int endPos, const int oldVal, const int newVal)
 {
-    long long ret = state;
-
-    for (int i = startPos; i <= m; i++)
+    for (int i = startPos; i <= endPos; i++)
     {
-        if (oldVal == getState(ret, i))
+        if (oldVal == getState(state, i))
         {
-            ret = setState(ret, i, newVal);
+            state = setState(state, i, newVal);
         }
     }
 
-    return ret;
-}
-
-inline bool haveState(const long long state, const int startPos, const int m, const int val)
-{
-    bool ret = false;
-    
-    for (int i = startPos; i <= m; i++)
-    {
-        if (val == getState(state, i))
-        {
-            ret = true;
-            break;
-        }
-    }
-    
-    return ret;
-}
-
-map<long long, int> cnts[2];
-int act = 0;        // 当前生效的 map
-unsigned char flags[MAX_MN + 1][MAX_MN + 1];
-
-inline bool stateRightful(long long state)
-{
-    bool ret = true;
-    int pre = 0;
-
-    for (int i = 1; i <= m; i++)
-    {
-        int st = getState(state, i);
-        if (0 != st)
-        {
-            if (0 == pre)
-            {
-                pre = st;
-            }
-            else
-            {
-                if (pre != st)
-                {
-                    ret = false;
-                    break;
-                }
-            }
-        }
-    }
-
-    return ret;
-}
-
-inline int getLastIdx(long long state, int toPos)
-{
-    int ret = 0;
-   
-    for (size_t i = 1; i <= toPos; i++)
-    {
-        int idx = getState(state, i);
-        if (idx > ret)
-        {
-            ret = idx;
-        }
-    }
-    
-    return ret;
-}
-
-inline long long preProc(long long state, int from, int m, int lastIdx)
-{
-    for (int i = from; i <= m; i++)
-    {
-        int st = getState(state, i);
-        if (st > lastIdx)
-        {
-            state = setState(state, i, 8 + st);
-        }
-    }
     return state;
 }
 
-inline long long postProc(long long state)
-{
-    state = preProc(state, 1, m, 0);
+map<int, int> cnts[MAX_MN + 1][MAX_MN + 1];
 
-    int idx = 1;
-    
-    for (int i = 1; i <= m; i++)
+bool can_use(int state)
+{
+    int tot0 = 0, tot1 = 0;
+    for (int i = 1; i <= m; ++i)
     {
-        int st = getState(state, i);
-        if (0 < st)
+        tot0 += getState(state, i) == 0;
+        tot1 += getState(state, i) == 1;
+        if (getState(state, i) > 1)
         {
-            if (idx < st)
-            {
-                state = setAllState(state, i, m, st, idx);
-                idx ++;
-            }
+            return false;
         }
     }
-    
-    return state;
+    if (!tot1)
+        return false;
+    return true;
+}
+
+void min_express(int &zt)
+{
+    int tot = 0, id[MAX_MN] = {0};
+    for (int i = 1; i <= m; ++i)
+    {
+        int now = getState(zt, i);
+        if (!now)
+            continue;
+        if (id[now] != 0)
+        {
+            zt = setState(zt, i, id[now]);
+        }
+        else
+        {
+            zt = setState(zt, i, id[now] = ++tot);
+        }
+    }
 }
 
 void insertLine(Line &line, int cnt)
 {
-    if (m == line.y)
-    {
-        line.state = postProc(line.state);
-    }
+    min_express(line.state);
 
-    if (stateRightful(line.state))
+    if (can_use(line.state))
     {
         if (cnt > ans)
         {
@@ -203,19 +133,29 @@ void insertLine(Line &line, int cnt)
     }
     
     // 判断是否已经存在了
-    map<long long, int>::iterator it = cnts[1 - act].find(line.state);
-    if (it == cnts[1 - act].end())
+    map<int, int>::iterator it = cnts[line.x][line.y].find(line.state);
+    if (it == cnts[line.x][line.y].end())
     {
-        cnts[1 - act][line.state] = cnt;
+        cnts[line.x][line.y][line.state] = cnt;
         lines.push(line);
     }
     else
     {
         if (cnt > it->second)
         {
-            cnts[1 - act][line.state] = cnt;
+            cnts[line.x][line.y][line.state] = cnt;
         }
     }
+}
+
+int count(int zt, int val)
+{
+    int ret = -1;
+    for (int i = 1; i <= m; ++i)
+    {
+        ret += (getState(zt, i) == val);
+    }
+    return ret;
 }
 
 int main()
@@ -232,8 +172,6 @@ int main()
 
     m = n;
 
-    int end_x = 0, end_y = 0;
-
     for (size_t row = 1; row <= n; row++)
     {
         for (size_t col = 1; col <= m; col++)
@@ -246,8 +184,6 @@ int main()
 #endif
 
             cells[row][col] = c;
-            end_x = row;
-            end_y = col;
             
             if (c > ans)
             {
@@ -270,8 +206,7 @@ int main()
 
     lines.push(start);
 
-    flags[0][m] = 1;
-    cnts[act][0] = 0;
+    cnts[0][m][0] = 0;
 
     while (false == lines.empty())
     {
@@ -280,17 +215,9 @@ int main()
 
         int now_x = pre.x,
             now_y = pre.y;
-        long long state = pre.state;
+        int state = pre.state;
 
-        if (0 == flags[now_x][now_y])
-        {
-            // 第一次访问 (now_x, now_y)
-            flags[now_x][now_y] = 1;
-            cnts[act].clear();
-            act = 1 - act;
-        }
-
-        int pre_cnt = cnts[act][state];
+        int pre_cnt = cnts[now_x][now_y][state];
 
         if (m == pre.y)
         {
@@ -301,16 +228,11 @@ int main()
             {
                 continue;
             }
-
-            // pre process
-            state = preProc(state, 1, m, 0);
         }
         else
         {
             now_y ++;
         }
-        
-        int lastIdx = getLastIdx(state, now_y - 1);
 
         int i = getState(state, now_y - 1);
         int j = getState(state, now_y);
@@ -319,7 +241,7 @@ int main()
         // state 还未处理 (now_x, now_y) 的状态
         {
             // 忽略该 cell
-            if (8 > j || haveState(state, now_y + 1, m, j))
+            if (0 == j || count(state, j))
             {
                 Line now;
                 now.x = now_x;
@@ -338,7 +260,7 @@ int main()
 
             if (0 == i && 0 == j)
             {
-                now.state = setState(state, now_y, lastIdx + 1);
+                now.state = setState(state, now_y, 7);
 
                 insertLine(now, pre_cnt + cells[now_x][now_y]);
             }
@@ -350,19 +272,9 @@ int main()
             }
             else if (0 == i && 0 < j)
             {
-                if (8 > j)
-                {
-                    now.state = state;
+                now.state = state;
 
-                    insertLine(now, pre_cnt + cells[now_x][now_y]);
-                }
-                else
-                {
-                    //  j >= 8
-                    now.state = setAllState(state, now_y, m, j, lastIdx + 1);
-
-                    insertLine(now, pre_cnt + cells[now_x][now_y]);
-                }
+                insertLine(now, pre_cnt + cells[now_x][now_y]);
             }
             else
             {
@@ -373,21 +285,9 @@ int main()
 
                     insertLine(now, pre_cnt + cells[now_x][now_y]);
                 }
-                else if (8 > j)
-                {
-                    if (i > j)
-                    {
-                        swap(i, j);
-                    }
-                    // i < j
-                    now.state = setAllState(state, 1, m, j, i);
-
-                    insertLine(now, pre_cnt + cells[now_x][now_y]);
-                }
                 else
                 {
-                    // j >= 8
-                    now.state = setAllState(state, now_y, m, j, i);
+                    now.state = setAllState(state, 1, m, j, i);
 
                     insertLine(now, pre_cnt + cells[now_x][now_y]);
                 }

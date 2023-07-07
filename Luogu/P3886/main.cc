@@ -22,8 +22,8 @@
 
 using namespace std;
 
-#define DEBUG 0
-#define MAX_MN 10
+#define DEBUG       0
+#define MAX_MN      10
 
 class Line
 {
@@ -88,7 +88,7 @@ long long setAllState(const long long state, const int startPos, const int endPo
 bool haveState(const long long state, const int startPos, const int endPos, const int val)
 {
     bool ret = false;
-
+    
     for (int i = startPos; i <= endPos; i++)
     {
         if (val == getState(state, i))
@@ -97,12 +97,12 @@ bool haveState(const long long state, const int startPos, const int endPos, cons
             break;
         }
     }
-
+    
     return ret;
 }
 
-map<long long, int> cnts[MAX_MN + 1][MAX_MN + 1];
-// int act = 0;        // 当前生效的 map
+map<long long, int> cnts[2];
+int act = 0;        // 当前生效的 map
 unsigned char flags[MAX_MN + 1][MAX_MN + 1];
 
 bool stateRightful(long long state)
@@ -136,7 +136,7 @@ bool stateRightful(long long state)
 int getLastIdx(long long state, int toPos)
 {
     int ret = 0;
-
+   
     for (size_t i = 1; i <= toPos; i++)
     {
         int idx = getState(state, i);
@@ -145,7 +145,7 @@ int getLastIdx(long long state, int toPos)
             ret = idx;
         }
     }
-
+    
     return ret;
 }
 
@@ -167,17 +167,20 @@ long long postProc(long long state)
     state = preProc(state, 1, m, 0);
 
     int idx = 1;
-
+    
     for (int i = 1; i <= m; i++)
     {
         int st = getState(state, i);
-        if (idx < st)
+        if (0 < st)
         {
-            state = setAllState(state, i, m, st, idx);
-            idx++;
+            if (idx < st)
+            {
+                state = setAllState(state, i, m, st, idx);
+                idx ++;
+            }
         }
     }
-
+    
     return state;
 }
 
@@ -195,19 +198,19 @@ void insertLine(Line &line, int cnt)
             ans = cnt;
         }
     }
-
+    
     // 判断是否已经存在了
-    map<long long, int>::iterator it = cnts[line.x][line.y].find(line.state);
-    if (it == cnts[line.x][line.y].end())
+    map<long long, int>::iterator it = cnts[1 - act].find(line.state);
+    if (it == cnts[1 - act].end())
     {
-        cnts[line.x][line.y][line.state] = cnt;
+        cnts[1 - act][line.state] = cnt;
         lines.push(line);
     }
     else
     {
         if (cnt > it->second)
         {
-            cnts[line.x][line.y][line.state] = cnt;
+            cnts[1 - act][line.state] = cnt;
         }
     }
 }
@@ -217,14 +220,16 @@ int main()
 #if DEBUG
     FILE *fp = fopen("input.txt", "r");
 #endif
-
+    
 #if DEBUG
-    fscanf(fp, "%d", &n);
+        fscanf(fp, "%d", &n);
 #else
-    cin >> n;
+        cin >> n;
 #endif
 
     m = n;
+
+    int end_x = 0, end_y = 0;
 
     for (size_t row = 1; row <= n; row++)
     {
@@ -238,14 +243,16 @@ int main()
 #endif
 
             cells[row][col] = c;
-
+            end_x = row;
+            end_y = col;
+            
             if (c > ans)
             {
                 ans = c;
             }
         }
     }
-
+    
     if (ans <= 0)
     {
         cout << ans << endl;
@@ -261,7 +268,7 @@ int main()
     lines.push(start);
 
     flags[0][m] = 1;
-    cnts[0][m][0] = 0;
+    cnts[act][0] = 0;
 
     while (false == lines.empty())
     {
@@ -276,15 +283,15 @@ int main()
         {
             // 第一次访问 (now_x, now_y)
             flags[now_x][now_y] = 1;
-            //            cnts[act].clear();
-            //            act = 1 - act;
+            cnts[act].clear();
+            act = 1 - act;
         }
 
-        int pre_cnt = cnts[now_x][now_y][state];
+        int pre_cnt = cnts[act][state];
 
         if (m == pre.y)
         {
-            now_x++;
+            now_x ++;
             now_y = 1;
 
             if (n < now_x)
@@ -297,26 +304,26 @@ int main()
         }
         else
         {
-            now_y++;
+            now_y ++;
         }
-
+        
         int lastIdx = getLastIdx(state, now_y - 1);
 
         int i = getState(state, now_y - 1);
         int j = getState(state, now_y);
-
+        
         // now_x, now_y 将要处理的cell
         // state 还未处理 (now_x, now_y) 的状态
         {
             // 忽略该 cell
-            if (8 > j || haveState(state, now_y + 1, m, j) || haveState(state, 1, now_y - 1, j))
+            if (8 > j || haveState(state, now_y + 1, m, j))
             {
                 Line now;
                 now.x = now_x;
                 now.y = now_y;
-
+                
                 now.state = setState(state, now_y, 0);
-
+                
                 insertLine(now, pre_cnt);
             }
         }
@@ -365,11 +372,6 @@ int main()
                 }
                 else if (8 > j)
                 {
-                    if (i > j)
-                    {
-                        swap(i, j);
-                    }
-                    // i < j
                     now.state = setAllState(state, 1, m, j, i);
 
                     insertLine(now, pre_cnt + cells[now_x][now_y]);

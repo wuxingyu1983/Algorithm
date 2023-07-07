@@ -1,6 +1,5 @@
 // https://www.luogu.com.cn/problem/P3886
 
-
 #include <cmath>
 #include <cstdio>
 #include <vector>
@@ -93,7 +92,7 @@ inline bool haveState(const long long state, const int startPos, const int m, co
 {
     bool ret = false;
     
-    for (int i = startPos + 1; i <= m; i++)
+    for (int i = startPos; i <= m; i++)
     {
         if (val == getState(state, i))
         {
@@ -137,13 +136,13 @@ inline bool stateRightful(long long state)
     return ret;
 }
 
-inline int getLastIdx(long long state, int pos)
+inline int getLastIdx(long long state, int toPos)
 {
     int ret = 0;
    
-    for (size_t i = 1; i < pos; i++)
+    for (size_t i = 1; i <= toPos; i++)
     {
-        int idx = (state >> (4 * i)) & 15;
+        int idx = getState(state, i);
         if (idx > ret)
         {
             ret = idx;
@@ -208,28 +207,12 @@ void insertLine(Line &line, int cnt)
     {
         cnts[1 - act][line.state] = cnt;
         lines.push(line);
-
-        if (stateRightful(line.state))
-        {
-            if (cnt > ans)
-            {
-                ans = cnt;
-            }
-        }
     }
     else
     {
         if (cnt > it->second)
         {
             cnts[1 - act][line.state] = cnt;
-
-            if (stateRightful(line.state))
-            {
-                if (cnt > ans)
-                {
-                    ans = cnt;
-                }
-            }
         }
     }
 }
@@ -323,7 +306,7 @@ int main()
             now_y ++;
         }
         
-        int lastIdx = getLastIdx(state, now_y);
+        int lastIdx = getLastIdx(state, now_y - 1);
         
         // 预处理
         state = preProc(state, now_y, m, lastIdx);
@@ -336,7 +319,7 @@ int main()
         {
             // TBD
             // 忽略该 cell
-            if (0 == j || (8 > j) || haveState(state, now_y, m, j))
+            if (0 == j || (8 > j) || haveState(state, now_y + 1, m, j))
             {
                 Line now;
                 now.x = now_x;

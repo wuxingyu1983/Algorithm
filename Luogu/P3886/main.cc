@@ -92,7 +92,7 @@ inline bool haveState(const long long state, const int startPos, const int m, co
 {
     bool ret = false;
     
-    for (int i = startPos; i <= m; i++)
+    for (int i = startPos + 1; i <= m; i++)
     {
         if (val == getState(state, i))
         {
@@ -167,6 +167,8 @@ inline long long preProc(long long state, int from, int m, int lastIdx)
 
 inline long long postProc(long long state, int pos, int m)
 {
+    state = preProc(state, 1, m, 0);
+
     int idx = 1;
     
     for (int i = 1; i <= m; i++)
@@ -174,11 +176,7 @@ inline long long postProc(long long state, int pos, int m)
         int st = getState(state, i);
         if (0 < st)
         {
-            if (idx == st)
-            {
-                idx ++;
-            }
-            else if (idx < st)
+            if (idx < st)
             {
                 state = setAllState(state, i, m, st, idx);
                 idx ++;
@@ -191,8 +189,11 @@ inline long long postProc(long long state, int pos, int m)
 
 void insertLine(Line &line, int cnt)
 {
-    line.state = postProc(line.state, line.y, m);
-    
+    if (m == line.y)
+    {
+        line.state = postProc(line.state, line.y, m);
+    }
+
     if (stateRightful(line.state))
     {
         if (cnt > ans)
@@ -300,6 +301,9 @@ int main()
             {
                 continue;
             }
+
+            // pre process
+            state = preProc(state, 1, m, 0);
         }
         else
         {
@@ -307,9 +311,6 @@ int main()
         }
         
         int lastIdx = getLastIdx(state, now_y - 1);
-        
-        // 预处理
-        state = preProc(state, now_y, m, lastIdx);
 
         int i = getState(state, now_y - 1);
         int j = getState(state, now_y);
@@ -317,9 +318,8 @@ int main()
         // now_x, now_y 将要处理的cell
         // state 还未处理 (now_x, now_y) 的状态
         {
-            // TBD
             // 忽略该 cell
-            if (0 == j || (8 > j) || haveState(state, now_y + 1, m, j))
+            if (8 > j || haveState(state, now_y, m, j))
             {
                 Line now;
                 now.x = now_x;
@@ -338,15 +338,13 @@ int main()
 
             if (0 == i && 0 == j)
             {
-                state = setState(state, now_y, lastIdx + 1);
-                now.state = state;
+                now.state = setState(state, now_y, lastIdx + 1);
 
                 insertLine(now, pre_cnt + cells[now_x][now_y]);
             }
             else if (0 < i && 0 == j)
             {
-                state = setState(state, now_y, i);
-                now.state = state;
+                now.state = setState(state, now_y, i);
 
                 insertLine(now, pre_cnt + cells[now_x][now_y]);
             }
@@ -361,8 +359,7 @@ int main()
                 else
                 {
                     //  j >= 8
-                    state = setAllState(state, now_y, m, j, lastIdx + 1);
-                    now.state = state;
+                    now.state = setAllState(state, now_y, m, j, lastIdx + 1);
 
                     insertLine(now, pre_cnt + cells[now_x][now_y]);
                 }
@@ -383,16 +380,14 @@ int main()
                         swap(i, j);
                     }
                     // i < j
-                    state = setAllState(state, 1, m, j, i);
-                    now.state = state;
+                    now.state = setAllState(state, 1, m, j, i);
 
                     insertLine(now, pre_cnt + cells[now_x][now_y]);
                 }
                 else
                 {
                     // j >= 8
-                    state = setAllState(state, now_y, m, j, i);
-                    now.state = state;
+                    now.state = setAllState(state, now_y, m, j, i);
 
                     insertLine(now, pre_cnt + cells[now_x][now_y]);
                 }

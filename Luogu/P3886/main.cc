@@ -92,7 +92,7 @@ inline bool haveState(const long long state, const int startPos, const int m, co
 {
     bool ret = false;
     
-    for (int i = startPos + 1; i <= m; i++)
+    for (int i = startPos; i <= m; i++)
     {
         if (val == getState(state, i))
         {
@@ -165,7 +165,7 @@ inline long long preProc(long long state, int from, int m, int lastIdx)
     return state;
 }
 
-inline long long postProc(long long state, int pos, int m)
+inline long long postProc(long long state)
 {
     state = preProc(state, 1, m, 0);
 
@@ -191,7 +191,7 @@ void insertLine(Line &line, int cnt)
 {
     if (m == line.y)
     {
-        line.state = postProc(line.state, line.y, m);
+        line.state = postProc(line.state);
     }
 
     if (stateRightful(line.state))
@@ -319,7 +319,7 @@ int main()
         // state 还未处理 (now_x, now_y) 的状态
         {
             // 忽略该 cell
-            if (8 > j || haveState(state, now_y, m, j))
+            if (8 > j || haveState(state, now_y + 1, m, j))
             {
                 Line now;
                 now.x = now_x;

@@ -37,12 +37,12 @@ public:
         已经处理过（x, y）格子后，状态为state的个数cnt
     */
     int x, y;
-    unsigned char sts[MAX_M + 1];   // 每个cell 在一条轮廓线上最多有4条边参与，用一个 char 来表示，每个边用2bits表示状态，0-1 表示同层的边，2-3，4-5，6-7 表示上层中的左上，上，右上 对应的边
+    long long state;
 
     Line()
     {
         x = y = 0;
-        memset(sts, 0, sizeof(sts));
+        state = 0;
     }
 };
 
@@ -59,84 +59,44 @@ inline void setState(unsigned char sts[], int cell, int pos, int val)
     sts[cell] |= val << (pos * BITS);
 }
 
-inline unsigned char setOneState(unsigned char st, int pos, int val)
+inline long long setState(long long state, int pos, int val)
 {
-    // clear
-    st &= ~(MASK << (pos * BITS));
-    st |= val << (pos * BITS);
+    long long ret = state;
 
-    return st;
+    // clear
+    ret &= ~(((long long)MASK) << (pos * BITS));
+
+    ret |= ((long long)val) << (pos * BITS);
+
+    return ret;
 }
 
-inline int getState(unsigned char sts[], int cell, int pos)
+inline int getState(long long st, int pos)
 {
     int ret = 0;
 
-    ret = (sts[cell] >> (pos * BITS)) & MASK;
+    ret = (st >> (pos * BITS)) & MASK;
 
     return ret;
 }
 
-inline long long getMainKey(unsigned char sts[])
-{
-    long long ret = 0;
 
-    for (size_t i = 1; i <= m / 2; i++)
-    {
-        ret |= sts[i];
-        ret <<= 8;
-    }
-
-    return ret;
-}
-
-inline long long getSubKey(unsigned char sts[])
-{
-    long long ret = 0;
-
-    int i = m / 2;
-    if (m & 1)
-    {
-        i ++;
-    }
-
-    for (; i <= m; i++)
-    {
-        ret |= sts[i];
-        ret <<= 8;
-    }
-
-    return ret;
-}
-
-map<long long, map<long long, long long> > cnts[2];
-int act = 1; // 当前生效的 map
+map<long long, long long> cnts[2];
+int act = 0; // 当前生效的 map
 unsigned char flags[MAX_N + 1][MAX_M + 1];
 
 void insertLine(Line &line, long long cnt)
 {
     // 判断是否已经存在了
-    long long mKey = getMainKey(line.sts);
-
-    map<long long, map<long long, long long> >::iterator mIt = cnts[1 - act].find(mKey);
-
-    if (mIt == cnts[1 - act].end())
+    map<long long, long long>::iterator it = cnts[1 - act].find(line.state);
+    if (it == cnts[1 - act].end())
     {
-        cnts[1 - act].insert(pair<long long, map<long long, long long> >(mKey, map<long long, long long>()));
-    }
-
-    mIt = cnts[1 - act].find(mKey);
-
-    long long sKey = getSubKey(line.sts);
-    map<long long, long long>::iterator it = mIt->second.find(sKey);
-    if (it == mIt->second.end())
-    {
-        mIt->second[sKey] = cnt;
+        cnts[1 - act][line.state] = cnt;
         lines.push(line);
     }
     else
     {
-        mIt->second[sKey] = cnt + it->second;
+        cnts[1 - act][line.state] = cnt + it->second;
     }
 }
 
@@ -183,12 +143,14 @@ int main()
     Line start;
     start.x = 0;
     start.y = m;
+    start.state = 0;
+
+    lines.push(start);
 
     flags[0][m] = 1;
-    insertLine(start, 1);
+    cnts[act][0] = 1;
 
     long long ans = 0;
-    act = 0;
 
     while (false == lines.empty())
     {
@@ -197,8 +159,7 @@ int main()
 
         int now_x = pre.x,
             now_y = pre.y;
-        unsigned char state[MAX_M + 1] = {0};
-        memcpy(state, pre.sts, sizeof(state));
+        long long state = pre.state;
 
         if (0 == flags[now_x][now_y])
         {
@@ -208,7 +169,7 @@ int main()
             act = 1 - act;
         }
 
-        long long pre_cnt = cnts[act][getMainKey(state)][getSubKey(state)];
+        long long pre_cnt = cnts[act][state];
 
         if (m == pre.y)
         {
@@ -218,6 +179,11 @@ int main()
             if (n < now_x)
             {
                 continue;
+            }
+
+            if (0 == (now_x & 1))
+            {
+                state <<= 2 * BITS;
             }
         }
         else
@@ -233,419 +199,13 @@ int main()
         if (1 == cells[now_x][now_y])
         {
             // 障碍物
-            memcpy(now.sts, state, sizeof(now.sts));
+            now.state = state;
 
             insertLine(now, pre_cnt);
         }
         else
         {
-            if (now_y & 1)
-            {
-                // 2 个可以 in 的边
-                // 上一个cell 同层的插头 - 0
-                int st0 = getState(state, now_y - 1, 0);
-                // 该列上一层cell 的向下插头 - 2
-                int st2 = getState(state, now_y, 2);
-                // 该列上一层cell 的右下插头 - 3, 作用在同层下一个cell
-                int st3 = getState(state, now_y, 3);
-                if (st3 && m > now_y)
-                {
-                    // 由于处理完该 cell 会覆盖掉st3, 将st3转递给下一个 cell 的 是st1
-                    setState(state, now_y + 1, 1, st3);
-                }
-
-                if (0 == st0 && 0 == st2)
-                {
-                    if (n > now_x && 1 < now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x + 1][now_y])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 1, 1);
-                        oneSt = setOneState(oneSt, 2, 2);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-
-                    if (n > now_x && 1 < now_y && m > now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x + 1][now_y + 1])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 1, 1);
-                        oneSt = setOneState(oneSt, 3, 2);
-                        state[now_y] = oneSt;
-                        
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-                   
-                    if (n > now_x && 1 < now_y && m > now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x][now_y + 1])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 1, 1);
-                        oneSt = setOneState(oneSt, 0, 2);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-                   
-                    if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x + 1][now_y + 1])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 2, 1);
-                        oneSt = setOneState(oneSt, 3, 2);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-                    
-                    if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 2, 1);
-                        oneSt = setOneState(oneSt, 0, 2);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-                    
-                    if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1] && 0 == cells[now_x][now_y + 1])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 3, 1);
-                        oneSt = setOneState(oneSt, 0, 2);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-                }
-                else if ((0 == st0 && 0 < st2) || (0 < st0 && 0 == st2))
-                {
-                    unsigned char st = st0 + st2;
-                    if (n > now_x)
-                    {
-                        if (0 == cells[now_x + 1][now_y])
-                        {
-                            unsigned char oneSt = 0;
-                            oneSt = setOneState(oneSt, 2, st);
-                            state[now_y] = oneSt;
-
-                            memcpy(now.sts, state, sizeof(state));
-                            insertLine(now, pre_cnt);
-                        }
-
-                        if (1 < now_y && 0 == cells[now_x + 1][now_y - 1])
-                        {
-                            unsigned char oneSt = 0;
-                            oneSt = setOneState(oneSt, 1, st);
-                            state[now_y] = oneSt;
-
-                            memcpy(now.sts, state, sizeof(state));
-                            insertLine(now, pre_cnt);
-                        }
-
-                        if (m > now_y && 0 == cells[now_x + 1][now_y + 1])
-                        {
-                            unsigned char oneSt = 0;
-                            oneSt = setOneState(oneSt, 3, st);
-                            state[now_y] = oneSt;
-
-                            memcpy(now.sts, state, sizeof(state));
-                            insertLine(now, pre_cnt);
-                        }
-                    }
-
-                    if (m > now_y)
-                    {
-                        if (0 == cells[now_x][now_y + 1])
-                        {
-                            unsigned char oneSt = 0;
-                            oneSt = setOneState(oneSt, 0, st);
-                            state[now_y] = oneSt;
-
-                            memcpy(now.sts, state, sizeof(state));
-                            insertLine(now, pre_cnt);
-                        }
-                    }
-                }
-                else if (1 == st0 && 1 == st2)
-                {
-                    state[now_y] = 0;
-
-                    int cell = now_y + 1;
-                    int s = 1;
-                    while (0 < s && cell <= m)
-                    {
-                        for (size_t i = 0; i < 4; i++)
-                        {
-                            if (1 == getState(state, cell, i))
-                            {
-                                s++;
-                            }
-                            else if (2 == getState(state, cell, i))
-                            {
-                                s--;
-                                if (0 == s)
-                                {
-                                    // 2 -> 1
-                                    setState(state, cell, i, 1);
-
-                                    memcpy(now.sts, state, sizeof(state));
-                                    insertLine(now, pre_cnt);
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (2 == st0 && 2 == st2)
-                {
-                    state[now_y] = 0;
-
-                    int cell = now_y - 1;
-                    int s = 1;
-                    while (0 < s && 1 <= cell)
-                    {
-                        for (size_t i = 0; i < 4; i++)
-                        {
-                            if (2 == getState(state, cell, i))
-                            {
-                                s++;
-                            }
-                            else if (1 == getState(state, cell, i))
-                            {
-                                s--;
-                                if (0 == s)
-                                {
-                                    // 1 -> 2
-                                    setState(state, cell, i, 2);
-
-                                    memcpy(now.sts, state, sizeof(state));
-                                    insertLine(now, pre_cnt);
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (2 == st0 && 1 == st2)
-                {
-                    state[now_y] = 0;
-
-                    memcpy(now.sts, state, sizeof(state));
-                    insertLine(now, pre_cnt);
-                }
-                else if (1 == st0 && 2 == st2)
-                {
-                    state[now_y] = 0;
-
-                    memcpy(now.sts, state, sizeof(state));
-                    insertLine(now, pre_cnt);
-
-                    for (size_t i = 1; i <= m; i++)
-                    {
-                        if (0 != state[i])
-                        continue;
-                    }
-
-                    if (pre_cnt > ans)
-                    {
-                        ans = pre_cnt;
-                    }
-                }
-            }
-            else
-            {
-                // 4 个可以 in 的边
-                // 上一个cell 同层的插头 - 0
-                int st0 = 0, st1 = 0, st2 = 0, st3 = 0;
-                int cnt = 0;
-                int pos1 = 0, pos2 = 0;
-                // 上一个cell 同层的插头 - 0
-                if (st0 = getState(state, now_y - 1, 0))
-                {
-                    cnt ++;
-                    if (1 == st0)
-                    {
-                        pos1 = 0;
-                    }
-                    else
-                    {
-                        pos2 = 0;
-                    }
-                }
-                if (st1 = getState(state, now_y, 1))
-                {
-                    cnt ++;
-                    if (1 == st1)
-                    {
-                        pos1 = 1;
-                    }
-                    else
-                    {
-                        pos2 = 1;
-                    }
-                }
-                if (st2 = getState(state, now_y, 2))
-                {
-                    cnt ++;
-                    if (1 == st2)
-                    {
-                        pos1 = 2;
-                    }
-                    else
-                    {
-                        pos2 = 2;
-                    }
-                }
-                if (m > now_y && (st3 = getState(state, now_y + 1, 1)))
-                {
-                    cnt ++;
-                    if (1 == st3)
-                    {
-                        pos1 = 3;
-                    }
-                    else
-                    {
-                        pos2 = 3;
-                    }
-                }
-
-                int st = st0 + st1 + st2 + st3;
-                if (0 == cnt)
-                {
-                    if (n > now_x && 0 == cells[now_x + 1][now_y] && m > now_y && 0 == cells[now_x][now_y + 1])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 2, 1);
-                        oneSt = setOneState(oneSt, 0, 2);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-                }
-                else if (1 == cnt)
-                {
-                    if (n > now_x && 0 == cells[now_x + 1][now_y])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 2, st);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-
-                    if (m > now_y && 0 == cells[now_x][now_y + 1])
-                    {
-                        unsigned char oneSt = 0;
-                        oneSt = setOneState(oneSt, 0, st);
-                        state[now_y] = oneSt;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-                    }
-                }
-                else if (2 == cnt)
-                {
-                    if (3 == st)
-                    {
-                        // 1, 2 or 2, 1
-                        state[now_y] = 0;
-
-                        memcpy(now.sts, state, sizeof(state));
-                        insertLine(now, pre_cnt);
-
-                        if (pos1 < pos2)
-                        {
-                            for (size_t i = 1; i <= m; i++)
-                            {
-                                if (0 != state[i])
-                                    continue;
-                            }
-
-                            if (pre_cnt > ans)
-                            {
-                                ans = pre_cnt;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // 1,1 or 2, 2
-                        if (2 == st)
-                        {
-                            // 1, 1
-                            state[now_y] = 0;
-
-                            int cell = now_y + 1;
-                            int s = 1;
-                            while (0 < s && cell <= m)
-                            {
-                                for (size_t i = 0; i < 4; i++)
-                                {
-                                    if (1 == getState(state, cell, i))
-                                    {
-                                        s++;
-                                    }
-                                    else if (2 == getState(state, cell, i))
-                                    {
-                                        s--;
-                                        if (0 == s)
-                                        {
-                                            // 2 -> 1
-                                            setState(state, cell, i, 1);
-
-                                            memcpy(now.sts, state, sizeof(state));
-                                            insertLine(now, pre_cnt);
-
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // 2, 2
-                            state[now_y] = 0;
-
-                            int cell = now_y - 1;
-                            int s = 1;
-                            while (0 < s && 1 <= cell)
-                            {
-                                for (size_t i = 0; i < 4; i++)
-                                {
-                                    if (2 == getState(state, cell, i))
-                                    {
-                                        s++;
-                                    }
-                                    else if (1 == getState(state, cell, i))
-                                    {
-                                        s--;
-                                        if (0 == s)
-                                        {
-                                            // 1 -> 2
-                                            setState(state, cell, i, 2);
-
-                                            memcpy(now.sts, state, sizeof(state));
-                                            insertLine(now, pre_cnt);
-
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            
         }
     }
 

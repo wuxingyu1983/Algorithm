@@ -269,6 +269,7 @@ int main()
                         oneSt = setOneState(oneSt, 2, 2);
                         state[now_y] = oneSt;
 
+                        memcpy(now.sts, state, sizeof(state));
                         insertLine(now, pre_cnt);
                     }
 
@@ -280,6 +281,8 @@ int main()
                             oneSt = setOneState(oneSt, 1, 1);
                             oneSt = setOneState(oneSt, 3, 2);
                             state[now_y] = oneSt;
+
+                            memcpy(now.sts, state, sizeof(state));
                             insertLine(now, pre_cnt);
                         }
 
@@ -289,6 +292,8 @@ int main()
                             oneSt = setOneState(oneSt, 1, 1);
                             oneSt = setOneState(oneSt, 0, 2);
                             state[now_y] = oneSt;
+
+                            memcpy(now.sts, state, sizeof(state));
                             insertLine(now, pre_cnt);
                         }
                     }
@@ -303,6 +308,8 @@ int main()
                                 oneSt = setOneState(oneSt, 2, 1);
                                 oneSt = setOneState(oneSt, 3, 2);
                                 state[now_y] = oneSt;
+
+                                memcpy(now.sts, state, sizeof(state));
                                 insertLine(now, pre_cnt);
 
                                 if (0 == cells[now_x][now_y + 1])
@@ -311,6 +318,8 @@ int main()
                                     oneSt = setOneState(oneSt, 3, 1);
                                     oneSt = setOneState(oneSt, 0, 2);
                                     state[now_y] = oneSt;
+
+                                    memcpy(now.sts, state, sizeof(state));
                                     insertLine(now, pre_cnt);
                                 }
                             }
@@ -321,6 +330,8 @@ int main()
                                 oneSt = setOneState(oneSt, 1, 1);
                                 oneSt = setOneState(oneSt, 0, 2);
                                 state[now_y] = oneSt;
+
+                                memcpy(now.sts, state, sizeof(state));
                                 insertLine(now, pre_cnt);
                             }
                         }
@@ -337,6 +348,8 @@ int main()
                             unsigned char oneSt = 0;
                             oneSt = setOneState(oneSt, 2, st);
                             state[now_y] = oneSt;
+
+                            memcpy(now.sts, state, sizeof(state));
                             insertLine(now, pre_cnt);
                         }
 
@@ -345,6 +358,8 @@ int main()
                             unsigned char oneSt = 0;
                             oneSt = setOneState(oneSt, 1, st);
                             state[now_y] = oneSt;
+
+                            memcpy(now.sts, state, sizeof(state));
                             insertLine(now, pre_cnt);
                         }
 
@@ -353,6 +368,8 @@ int main()
                             unsigned char oneSt = 0;
                             oneSt = setOneState(oneSt, 3, st);
                             state[now_y] = oneSt;
+
+                            memcpy(now.sts, state, sizeof(state));
                             insertLine(now, pre_cnt);
                         }
                     }
@@ -364,26 +381,98 @@ int main()
                             unsigned char oneSt = 0;
                             oneSt = setOneState(oneSt, 0, st);
                             state[now_y] = oneSt;
+
+                            memcpy(now.sts, state, sizeof(state));
                             insertLine(now, pre_cnt);
                         }
                     }
-                    
                 }
                 else if (1 == st0 && 1 == st2)
                 {
+                    state[now_y] = 0;
 
+                    int cell = now_y + 1;
+                    int s = 1;
+                    while (0 < s && cell <= m)
+                    {
+                        for (size_t i = 0; i < 4; i++)
+                        {
+                            if (1 == getState(state, cell, i))
+                            {
+                                s++;
+                            }
+                            else if (2 == getState(state, cell, i))
+                            {
+                                s--;
+                                if (0 == s)
+                                {
+                                    // 2 -> 1
+                                    setState(state, cell, i, 1);
+
+                                    memcpy(now.sts, state, sizeof(state));
+                                    insertLine(now, pre_cnt);
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
                 else if (2 == st0 && 2 == st2)
                 {
+                    state[now_y] = 0;
 
+                    int cell = now_y - 1;
+                    int s = 1;
+                    while (0 < s && 1 <= cell)
+                    {
+                        for (size_t i = 0; i < 4; i++)
+                        {
+                            if (2 == getState(state, cell, i))
+                            {
+                                s++;
+                            }
+                            else if (1 == getState(state, cell, i))
+                            {
+                                s--;
+                                if (0 == s)
+                                {
+                                    // 1 -> 2
+                                    setState(state, cell, i, 2);
+
+                                    memcpy(now.sts, state, sizeof(state));
+                                    insertLine(now, pre_cnt);
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 } 
                 else if (2 == st0 && 1 == st2)
                 {
+                    state[now_y] = 0;
 
-                } 
+                    memcpy(now.sts, state, sizeof(state));
+                    insertLine(now, pre_cnt);
+                }
                 else if (1 == st0 && 2 == st2)
                 {
+                    state[now_y] = 0;
 
+                    memcpy(now.sts, state, sizeof(state));
+                    insertLine(now, pre_cnt);
+
+                    for (size_t i = 1; i <= m; i++)
+                    {
+                        if (0 != state[i])
+                        continue;
+                    }
+
+                    if (pre_cnt > ans) 
+                    {
+                        ans = pre_cnt;
+                    }
                 }
             }
             else

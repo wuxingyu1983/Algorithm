@@ -209,45 +209,21 @@ int main()
             int j = getState(state, 2 * (now_y - 1) + 1);
             int k = getState(state, 2 * now_y);
 
-            int cnt = 0, pos1 = 0, pos2 = 0;
+            int cnt = 0;
             int st = i + j + k;
             if (i)
             {
                 cnt ++;
-                if (1 == i)
-                {
-                    pos1 = 0;
-                }
-                else
-                {
-                    pos2 = 0;
-                }
             }
 
             if (j)
             {
                 cnt++;
-                if (1 == j)
-                {
-                    pos1 = 1;
-                }
-                else
-                {
-                    pos2 = 1;
-                }
             }
 
             if (k)
             {
                 cnt++;
-                if (1 == k)
-                {
-                    pos1 = 2;
-                }
-                else
-                {
-                    pos2 = 2;
-                }
             }
 
             if (0 == cnt)
@@ -325,7 +301,82 @@ int main()
             }
             else if (2 == cnt)
             {
-                
+                if (2 == st)
+                {
+                    // 1, 1
+                    state = setState(state, 2 * (now_y - 1), 0);
+                    state = setState(state, 2 * (now_y - 1) + 1, 0);
+                    state = setState(state, 2 * now_y, 0);
+
+                    int pos = 2 * now_y + 1;
+                    int s = 1;
+                    while (pos <= m * 2)
+                    {
+                        if (1 == getState(state, pos))
+                        {
+                            s++;
+                        }
+                        else if (2 == getState(state, pos))
+                        {
+                            s--;
+                            if (0 == s)
+                            {
+                                state = setState(state, pos, 1);
+                                now.state = state;
+                                insertLine(now, pre_cnt);
+                                break;
+                            }
+                        }
+
+                        pos ++;
+                    }
+                }
+                else if (4 == st)
+                {
+                    // 2, 2
+                    state = setState(state, 2 * (now_y - 1), 0);
+                    state = setState(state, 2 * (now_y - 1) + 1, 0);
+                    state = setState(state, 2 * now_y, 0);
+
+                    int pos = 2 * (now_y - 1) - 1;
+                    int s = 1;
+                    while (0 <= pos)
+                    {
+                        if (2 == getState(state, pos))
+                        {
+                            s++;
+                        }
+                        else if (1 == getState(state, pos))
+                        {
+                            s--;
+                            if (0 == s)
+                            {
+                                state = setState(state, pos, 2);
+                                now.state = state;
+                                insertLine(now, pre_cnt);
+                                break;
+                            }
+                        }
+
+                        pos --;
+                    }
+                }
+                else if (3 == st)
+                {
+                    // 1, 2 or 2, 1
+                    state = setState(state, 2 * (now_y - 1), 0);
+                    state = setState(state, 2 * (now_y - 1) + 1, 0);
+                    state = setState(state, 2 * now_y, 0);
+
+                    now.state = state;
+
+                    insertLine(now, pre_cnt);
+
+                    if (0 == state)
+                    {
+                        ans = pre_cnt;
+                    }
+                }
             }
         }
     }

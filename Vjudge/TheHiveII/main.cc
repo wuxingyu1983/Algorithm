@@ -252,7 +252,41 @@ int main()
 
             if (0 == cnt)
             {
+                if (n > now_x && m > now_y)
+                {
+                    if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x + 1][now_y + 1])
+                    {
+                        state = setState(state, 2 * (now_y - 1), 1);
+                        state = setState(state, 2 * (now_y - 1) + 1, 2);
+                        state = setState(state, 2 * now_y, 0);
 
+                        now.state = state;
+
+                        insertLine(now, pre_cnt);
+                    }
+
+                    if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
+                    {
+                        state = setState(state, 2 * (now_y - 1), 1);
+                        state = setState(state, 2 * (now_y - 1) + 1, 0);
+                        state = setState(state, 2 * now_y, 2);
+
+                        now.state = state;
+
+                        insertLine(now, pre_cnt);
+                    }
+
+                    if (0 == cells[now_x + 1][now_y + 1] && 0 == cells[now_x][now_y + 1])
+                    {
+                        state = setState(state, 2 * (now_y - 1), 0);
+                        state = setState(state, 2 * (now_y - 1) + 1, 1);
+                        state = setState(state, 2 * now_y, 2);
+
+                        now.state = state;
+
+                        insertLine(now, pre_cnt);
+                    }
+                }
             }
             else if (1 == cnt)
             {

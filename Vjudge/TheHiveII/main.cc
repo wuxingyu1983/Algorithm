@@ -205,7 +205,94 @@ int main()
         }
         else
         {
-            
+            int i = getState(state, 2 * (now_y - 1));
+            int j = getState(state, 2 * (now_y - 1) + 1);
+            int k = getState(state, 2 * now_y);
+
+            int cnt = 0, pos1 = 0, pos2 = 0;
+            int st = i + j + k;
+            if (i)
+            {
+                cnt ++;
+                if (1 == i)
+                {
+                    pos1 = 0;
+                }
+                else
+                {
+                    pos2 = 0;
+                }
+            }
+
+            if (j)
+            {
+                cnt++;
+                if (1 == j)
+                {
+                    pos1 = 1;
+                }
+                else
+                {
+                    pos2 = 1;
+                }
+            }
+
+            if (k)
+            {
+                cnt++;
+                if (1 == k)
+                {
+                    pos1 = 2;
+                }
+                else
+                {
+                    pos2 = 2;
+                }
+            }
+
+            if (0 == cnt)
+            {
+
+            }
+            else if (1 == cnt)
+            {
+                if (n > now_x && 0 == cells[now_x + 1][now_y])
+                {
+                    state = setState(state, 2 * (now_y - 1), st);
+                    state = setState(state, 2 * (now_y - 1) + 1, 0);
+                    state = setState(state, 2 * now_y, 0);
+
+                    now.state = state;
+
+                    insertLine(now, pre_cnt);
+                }
+
+                if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1])
+                {
+                    state = setState(state, 2 * (now_y - 1), 0);
+                    state = setState(state, 2 * (now_y - 1) + 1, st);
+                    state = setState(state, 2 * now_y, 0);
+
+                    now.state = state;
+
+                    insertLine(now, pre_cnt);
+                }
+
+                if (m > now_y && 0 == cells[now_x][now_y + 1])
+                {
+                    state = setState(state, 2 * (now_y - 1), 0);
+                    state = setState(state, 2 * (now_y - 1) + 1, 0);
+                    state = setState(state, 2 * now_y, st);
+
+                    now.state = state;
+
+                    insertLine(now, pre_cnt);
+                }
+            }
+            else if (2 == cnt)
+            {
+                
+            }
         }
     }
 

@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <iostream>
 #include <algorithm>
@@ -71,14 +72,14 @@ inline int getState(long long st, int pos)
     return ret;
 }
 
-map<long long, long long> cnts[2];
+unordered_map<long long, long long> cnts[2];
 int act = 0; // 当前生效的 map
 unsigned char flags[MAX_N + 1][MAX_M + 1];
 
 void insertLine(Line &line, long long cnt)
 {
     // 判断是否已经存在了
-    map<long long, long long>::iterator it = cnts[1 - act].find(line.state);
+    unordered_map<long long, long long>::iterator it = cnts[1 - act].find(line.state);
     if (it == cnts[1 - act].end())
     {
         cnts[1 - act][line.state] = cnt;

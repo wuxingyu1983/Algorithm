@@ -24,10 +24,11 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_N 8     // row
-#define MAX_M 10    // col
+#define MAX_N 8  // row
+#define MAX_M 10 // col
 #define BITS 2
 #define MASK 3
+#define MASK3 63
 
 int n, m;
 
@@ -57,6 +58,18 @@ inline long long setState(long long state, int pos, int val)
 
     // clear
     ret &= ~(((long long)MASK) << (pos * BITS));
+
+    ret |= ((long long)val) << (pos * BITS);
+
+    return ret;
+}
+
+inline long long setState3(long long state, int pos, int val)
+{
+    long long ret = state;
+
+    // clear
+    ret &= ~(((long long)MASK3) << (pos * BITS));
 
     ret |= ((long long)val) << (pos * BITS);
 
@@ -224,10 +237,12 @@ int main()
                         {
                             if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x + 1][now_y + 1])
                             {
+                                state = setState3(state, 2 * (now_y - 1), 9);
+                                /*
                                 state = setState(state, 2 * (now_y - 1), 1);
                                 state = setState(state, 2 * (now_y - 1) + 1, 2);
                                 state = setState(state, 2 * now_y, 0);
-
+                                */
                                 now.state = state;
 
                                 insertLine(now, pre_cnt);
@@ -235,10 +250,12 @@ int main()
 
                             if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                             {
+                                state = setState3(state, 2 * (now_y - 1), 33);
+                                /*
                                 state = setState(state, 2 * (now_y - 1), 1);
                                 state = setState(state, 2 * (now_y - 1) + 1, 0);
                                 state = setState(state, 2 * now_y, 2);
-
+                                */
                                 now.state = state;
 
                                 insertLine(now, pre_cnt);
@@ -246,10 +263,12 @@ int main()
 
                             if (0 == cells[now_x + 1][now_y + 1] && 0 == cells[now_x][now_y + 1])
                             {
+                                state = setState3(state, 2 * (now_y - 1), 36);
+                                /*
                                 state = setState(state, 2 * (now_y - 1), 0);
                                 state = setState(state, 2 * (now_y - 1) + 1, 1);
                                 state = setState(state, 2 * now_y, 2);
-
+                                */
                                 now.state = state;
 
                                 insertLine(now, pre_cnt);
@@ -262,10 +281,12 @@ int main()
                         {
                             if (1 < now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x + 1][now_y])
                             {
+                                state = setState3(state, 2 * (now_y - 1), 9);
+                                /*
                                 state = setState(state, 2 * (now_y - 1), 1);
                                 state = setState(state, 2 * (now_y - 1) + 1, 2);
                                 state = setState(state, 2 * now_y, 0);
-
+                                */
                                 now.state = state;
 
                                 insertLine(now, pre_cnt);
@@ -273,10 +294,12 @@ int main()
 
                             if (1 < now_y && m > now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x][now_y + 1])
                             {
+                                state = setState3(state, 2 * (now_y - 1), 33);
+                                /*
                                 state = setState(state, 2 * (now_y - 1), 1);
                                 state = setState(state, 2 * (now_y - 1) + 1, 0);
                                 state = setState(state, 2 * now_y, 2);
-
+                                */
                                 now.state = state;
 
                                 insertLine(now, pre_cnt);
@@ -284,10 +307,12 @@ int main()
 
                             if (m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                             {
+                                state = setState3(state, 2 * (now_y - 1), 36);
+                                /*
                                 state = setState(state, 2 * (now_y - 1), 0);
                                 state = setState(state, 2 * (now_y - 1) + 1, 1);
                                 state = setState(state, 2 * now_y, 2);
-
+                                */
                                 now.state = state;
 
                                 insertLine(now, pre_cnt);
@@ -301,10 +326,12 @@ int main()
                     {
                         if (n > now_x && 0 == cells[now_x + 1][now_y])
                         {
+                            state = setState3(state, 2 * (now_y - 1), st);
+                            /*
                             state = setState(state, 2 * (now_y - 1), st);
                             state = setState(state, 2 * (now_y - 1) + 1, 0);
                             state = setState(state, 2 * now_y, 0);
-
+                            */
                             now.state = state;
 
                             insertLine(now, pre_cnt);
@@ -312,10 +339,12 @@ int main()
 
                         if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1])
                         {
+                            state = setState(state, 2 * (now_y - 1), st * 4);
+                            /*
                             state = setState(state, 2 * (now_y - 1), 0);
                             state = setState(state, 2 * (now_y - 1) + 1, st);
                             state = setState(state, 2 * now_y, 0);
-
+                            */
                             now.state = state;
 
                             insertLine(now, pre_cnt);
@@ -325,10 +354,12 @@ int main()
                     {
                         if (n > now_x && 1 < now_y && 0 == cells[now_x + 1][now_y - 1])
                         {
+                            state = setState3(state, 2 * (now_y - 1), st);
+                            /*
                             state = setState(state, 2 * (now_y - 1), st);
                             state = setState(state, 2 * (now_y - 1) + 1, 0);
                             state = setState(state, 2 * now_y, 0);
-
+                            */
                             now.state = state;
 
                             insertLine(now, pre_cnt);
@@ -336,10 +367,12 @@ int main()
 
                         if (n > now_x && 0 == cells[now_x + 1][now_y])
                         {
+                            state = setState3(state, 2 * (now_y - 1), st * 4);
+                            /*
                             state = setState(state, 2 * (now_y - 1), 0);
                             state = setState(state, 2 * (now_y - 1) + 1, st);
                             state = setState(state, 2 * now_y, 0);
-
+                            */
                             now.state = state;
 
                             insertLine(now, pre_cnt);
@@ -348,10 +381,12 @@ int main()
 
                     if (m > now_y && 0 == cells[now_x][now_y + 1])
                     {
+                        state = setState3(state, 2 * (now_y - 1), st * 16);
+                        /*
                         state = setState(state, 2 * (now_y - 1), 0);
                         state = setState(state, 2 * (now_y - 1) + 1, 0);
                         state = setState(state, 2 * now_y, st);
-
+                        */
                         now.state = state;
 
                         insertLine(now, pre_cnt);
@@ -362,10 +397,12 @@ int main()
                     if (2 == st)
                     {
                         // 1, 1
+                        state = setState3(state, 2 * (now_y - 1), 0);
+                        /*
                         state = setState(state, 2 * (now_y - 1), 0);
                         state = setState(state, 2 * (now_y - 1) + 1, 0);
                         state = setState(state, 2 * now_y, 0);
-
+                        */
                         int pos = 2 * now_y + 1;
                         int s = 1;
                         while (pos <= m * 2)
@@ -393,10 +430,12 @@ int main()
                     else if (4 == st)
                     {
                         // 2, 2
+                        state = setState3(state, 2 * (now_y - 1), 0);
+                        /*
                         state = setState(state, 2 * (now_y - 1), 0);
                         state = setState(state, 2 * (now_y - 1) + 1, 0);
                         state = setState(state, 2 * now_y, 0);
-
+                        */
                         int pos = 2 * (now_y - 1) - 1;
                         int s = 1;
                         while (0 <= pos)
@@ -424,10 +463,12 @@ int main()
                     else if (3 == st)
                     {
                         // 1, 2 or 2, 1
+                        state = setState3(state, 2 * (now_y - 1), 0);
+                        /*
                         state = setState(state, 2 * (now_y - 1), 0);
                         state = setState(state, 2 * (now_y - 1) + 1, 0);
                         state = setState(state, 2 * now_y, 0);
-
+                        */
                         now.state = state;
 
                         insertLine(now, pre_cnt);

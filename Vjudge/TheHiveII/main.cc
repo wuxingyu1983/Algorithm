@@ -102,7 +102,7 @@ int main()
     cin >> n >> m;
 #endif
 
-    int end_x = 0, end_y = 0;
+    int end_x = 0;
 
     for (int i = 0; i < m; i++)
     {
@@ -118,11 +118,6 @@ int main()
         if (r > end_x)
         {
             end_x = r;
-        }
-
-        if (c > end_y)
-        {
-            end_y = c;
         }
     }
 
@@ -193,7 +188,7 @@ int main()
 
             insertLine(now, pre_cnt);
 
-            if (end_x == now_x && end_y == now_y)
+            if (n == now_x && m == now_y)
             {
                 if (0 == state)
                 {
@@ -438,7 +433,7 @@ int main()
 
                     insertLine(now, pre_cnt);
 
-                    if (end_x == now_x && end_y == now_y)
+                    if (n == now_x && m == now_y)
                     {
                         if (0 == state)
                         {

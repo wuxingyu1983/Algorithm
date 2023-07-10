@@ -163,7 +163,7 @@ int main()
 
             if (n < now_x)
             {
-                continue;
+                break;
             }
 
             if (0 == (now_x & 1))

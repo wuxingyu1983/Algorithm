@@ -24,8 +24,8 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_N 26 // row
-#define MAX_M 10 // col
+#define MAX_N 8     // row
+#define MAX_M 10    // col
 #define BITS 2
 #define MASK 3
 
@@ -76,7 +76,7 @@ unordered_map<long long, long long> cnts[2];
 int act = 0; // 当前生效的 map
 unsigned char flags[MAX_N + 1][MAX_M + 1];
 
-void insertLine(Line &line, long long cnt)
+inline void insertLine(Line &line, long long cnt)
 {
     // 判断是否已经存在了
     unordered_map<long long, long long>::iterator it = cnts[1 - act].find(line.state);
@@ -93,9 +93,12 @@ void insertLine(Line &line, long long cnt)
 
 int main()
 {
-    while (scanf("%d", &n) == 1 && n)
+    while (scanf("%d %d", &n, &m))
     {
-        scanf("%d", &m);
+        if (0 >= n)
+        {
+            break;
+        }
 
         // init
         cnts[0].clear();
@@ -105,7 +108,6 @@ int main()
         memset(cells, 0, sizeof(cells));
         memset(flags, 0, sizeof(flags));
 
-        int max_x = 0;
         char str[20];
 
         for (int i = 0; i < m; i++)
@@ -116,15 +118,10 @@ int main()
             int r = str[1] - 'A' + 1;
 
             cells[r][c] = 1;
-
-            if (r > max_x)
-            {
-                max_x = r;
-            }
         }
 
         m = n;
-        n = max_x;
+        n = MAX_N;
 
         // start
         Line start;
@@ -192,7 +189,7 @@ int main()
                 {
                     if (0 == state)
                     {
-                        ans = pre_cnt;
+                        ans += pre_cnt;
                     }
                 }
             }
@@ -439,7 +436,7 @@ int main()
                         {
                             if (0 == state)
                             {
-                                ans = pre_cnt;
+                                ans += pre_cnt;
                             }
                         }
                     }

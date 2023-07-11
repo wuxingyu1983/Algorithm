@@ -29,6 +29,7 @@ using namespace std;
 #define BITS 2
 #define MASK 3
 #define MASK3 63
+#define Q_SIZE  2314000     // line queue size
 
 int n, m;
 
@@ -38,7 +39,7 @@ public:
     /*
         已经处理过（x, y）格子后，状态为state的个数cnt
     */
-    int x, y;
+    char x, y;
     long long state;
 
     Line()
@@ -48,7 +49,8 @@ public:
     }
 };
 
-queue<Line> lines;
+Line lines[Q_SIZE];
+int qHead = 0, qTail = 0;
 
 unsigned char cells[MAX_N + 1][MAX_M + 1]; // 1 - obstacle
 
@@ -96,7 +98,13 @@ inline void insertLine(Line &line, long long cnt)
     if (it == cnts[1 - act].end())
     {
         cnts[1 - act][line.state] = cnt;
-        lines.push(line);
+
+        lines[qTail].x = line.x;
+        lines[qTail].y = line.y;
+        lines[qTail].state = line.state;
+
+        qTail ++;
+        qTail %= Q_SIZE;
     }
     else
     {
@@ -121,7 +129,9 @@ int main()
         memset(cells, 0, sizeof(cells));
         memset(flags, 0, sizeof(flags));
 
-        char str[20];
+        qHead = qTail = 0;
+
+        char str[5];
 
         for (int i = 0; i < m; i++)
         {
@@ -142,19 +152,24 @@ int main()
         start.y = m;
         start.state = 0;
 
-        lines.push(start);
+        lines[qTail].x = start.x;
+        lines[qTail].y = start.y;
+        lines[qTail].state = start.state;
+
+        qTail ++;
+        qTail %= Q_SIZE;
 
         flags[0][m] = 1;
         cnts[act][0] = 1;
 
-        while (false == lines.empty())
+        while (qHead != qTail)
         {
-            Line pre = lines.front();
-            lines.pop();
+            int now_x = lines[qHead].x,
+                now_y = lines[qHead].y;
+            long long state = lines[qHead].state;
 
-            int now_x = pre.x,
-                now_y = pre.y;
-            long long state = pre.state;
+            qHead ++;
+            qHead %= Q_SIZE;
 
             if (0 == flags[now_x][now_y])
             {
@@ -166,7 +181,7 @@ int main()
 
             long long pre_cnt = cnts[act][state];
 
-            if (m == pre.y)
+            if (m == now_y)
             {
                 now_x++;
                 now_y = 1;

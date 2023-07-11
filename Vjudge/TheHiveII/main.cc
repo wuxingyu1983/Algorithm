@@ -159,9 +159,9 @@ int main()
                 now_y++;
             }
 
-            unordered_map<long long, long long>::iterator it = cnts[act].begin();
-            for (unordered_map<long long, long long>::iterator it = cnts[act].begin(); it != cnts[act].end(); it++)
-            {
+            while (!cnts[act].empty())
+            { 
+                unordered_map<long long, long long>::iterator it = cnts[act].begin();
                 long long state = it->first;
                 if (1 == now_y && 0 == (now_x & 1))
                 {
@@ -466,6 +466,8 @@ int main()
                         }
                     }
                 }
+
+                cnts[act].erase(it);
             }
 
             cnts[act].clear();

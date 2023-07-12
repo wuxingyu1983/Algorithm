@@ -29,7 +29,7 @@ using namespace std;
 #define ST_BITS 2
 #define CELL_BITS 8
 #define MASK 3
-#define MASK4   255 
+#define MASK4   255
 
 int n, m;
 
@@ -213,7 +213,7 @@ int main()
                                 if (0 == cells[now_x + 1][now_y])
                                 {
                                     // 1, 2插头
-                                    state = setCellState(state, now_y, 1 << 2 + 2 << 4);
+                                    state = setCellState(state, now_y, (1 << 2) + (2 << 4));
 
                                     if (tmp = cnts[1 - act][state])
                                     {
@@ -228,7 +228,7 @@ int main()
                                 if (m > now_y && 0 == cells[now_x + 1][now_y + 1])
                                 {
                                     // 1, 3
-                                    state = setCellState(state, now_y, 1 << 2 + 2 << 6);
+                                    state = setCellState(state, now_y, (1 << 2) + (2 << 6));
 
                                     if (tmp = cnts[1 - act][state])
                                     {
@@ -238,12 +238,12 @@ int main()
                                     {
                                         cnts[1 - act][state] = pre_cnt;
                                     }
-                                } 
+                                }
 
                                 if (m > now_y && 0 == cells[now_x][now_y + 1])
                                 {
                                     // 1, 0
-                                    state = setCellState(state, now_y, 1 << 2 + 2 << 0);
+                                    state = setCellState(state, now_y, (1 << 2) + (2 << 0));
 
                                     if (tmp = cnts[1 - act][state])
                                     {
@@ -261,7 +261,7 @@ int main()
                                 if (0 == cells[now_x + 1][now_y + 1])
                                 {
                                     // 2, 3
-                                    state = setCellState(state, now_y, 1 << 4 + 2 << 6);
+                                    state = setCellState(state, now_y, (1 << 4) + (2 << 6));
 
                                     if (tmp = cnts[1 - act][state])
                                     {
@@ -276,7 +276,7 @@ int main()
                                 if (0 == cells[now_x][now_y + 1])
                                 {
                                     // 2, 0
-                                    state = setCellState(state, now_y, 1 << 4 + 2 << 0);
+                                    state = setCellState(state, now_y, (1 << 4) + (2 << 0));
 
                                     if (tmp = cnts[1 - act][state])
                                     {
@@ -292,7 +292,7 @@ int main()
                             if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1] && 0 == cells[now_x][now_y + 1])
                             {
                                 // 3, 0
-                                state = setCellState(state, now_y, 1 << 6 + 2 << 0);
+                                state = setCellState(state, now_y, (1 << 6) + (2 << 0));
 
                                 if (tmp = cnts[1 - act][state])
                                 {
@@ -480,7 +480,7 @@ int main()
                         }
 
                         // 上层 左下，正下 插头
-                        if (j = getState(state, now_y, 1)) 
+                        if (j = getState(state, now_y, 1))
                         {
                             cnt ++;
                             st += j;
@@ -510,7 +510,7 @@ int main()
                             if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                             {
                                 // 2, 0
-                                state = setCellState(state, now_y, 1 << 4 + 2 << 0);
+                                state = setCellState(state, now_y, (1 << 4) + (2 << 0));
 
                                 if (tmp = cnts[1 - act][state])
                                 {

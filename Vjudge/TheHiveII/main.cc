@@ -450,11 +450,14 @@ int main()
                                 cnts[1 - act][state] = pre_cnt;
                             }
 
-                            if (n == now_x && m == now_y)
+                            if (1 == i && 2 == j)
                             {
-                                if (0 == state)
+                                if (n == now_x && m == now_y)
                                 {
-                                    ans += pre_cnt;
+                                    if (0 == state)
+                                    {
+                                        ans += pre_cnt;
+                                    }
                                 }
                             }
                         }
@@ -465,6 +468,7 @@ int main()
                         int i = 0, j = 0, k = 0, l = 0;
                         int cnt = 0;
                         int st = 0;
+                        int pos1 = 0, pos2 = 0;
 
                         // 同层上一个cell的插头
                         if (1 < now_y)
@@ -476,20 +480,47 @@ int main()
 
                                 // clear
                                 state = setState(state, now_y - 1, 0, 0);
+
+                                if (1 == i)
+                                {
+                                    pos1 = 0;
+                                }
+                                else
+                                {
+                                    pos2 = 0;
+                                }
                             }
                         }
 
                         // 上层 左下，正下 插头
                         if (j = getState(state, now_y, 1))
                         {
-                            cnt ++;
+                            cnt++;
                             st += j;
+
+                            if (1 == j)
+                            {
+                                pos1 = 1;
+                            }
+                            else if (2 == j)
+                            {
+                                pos2 = 1;
+                            }
                         }
 
                         if (k = getState(state, now_y, 2))
                         {
                             cnt ++;
                             st += k;
+
+                            if (1 == k)
+                            {
+                                pos1 = 2;
+                            }
+                            else if (2 == k)
+                            {
+                                pos2 = 2;
+                            }
                         }
 
                         // 上层下一列的左下插头
@@ -497,11 +528,20 @@ int main()
                         {
                             if (l = getState(state, now_y + 1, 1))
                             {
-                                cnt ++;
+                                cnt++;
                                 st += l;
 
                                 // clean
                                 state = setState(state, now_y + 1, 1, 0);
+
+                                if (1 == l)
+                                {
+                                    pos1 = 3;
+                                }
+                                else
+                                {
+                                    pos2 = 3;
+                                }
                             }
                         }
 
@@ -640,11 +680,14 @@ int main()
                                     cnts[1 - act][state] = pre_cnt;
                                 }
 
-                                if (n == now_x && m == now_y)
+                                if (pos1 < pos2)
                                 {
-                                    if (0 == state)
+                                    if (n == now_x && m == now_y)
                                     {
-                                        ans += pre_cnt;
+                                        if (0 == state)
+                                        {
+                                            ans += pre_cnt;
+                                        }
                                     }
                                 }
                             }

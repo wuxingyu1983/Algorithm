@@ -30,6 +30,7 @@ using namespace std;
 #define CELL_BITS 8
 #define MASK 3
 #define MASK4   255
+#define Q_SIZE  800000
 
 int n, m;
 
@@ -93,6 +94,8 @@ inline long long setState(long long state, int pos, int val)
 
 unordered_map<long long, long long> cnts[2];
 int act = 0; // 当前生效的 map
+long long qs[2][Q_SIZE];
+int qTail[2];
 
 inline long long proc11(long long state, int pos)
 {
@@ -164,6 +167,8 @@ int main()
         act = 0;
         long long ans = 0;
         memset(cells, 0, sizeof(cells));
+        qTail[0] = 0;
+        qTail[1] = 0;
 
         char str[5];
 
@@ -181,11 +186,13 @@ int main()
 
         // start
         cnts[act][0] = 1;
+        qs[act][0] = 0;
+        qTail[act] ++;
 
         int now_x = 0;
         int now_y = m;
 
-        while (!cnts[act].empty())
+        while (qTail[act])
         {
             if (m == now_y)
             {
@@ -202,12 +209,10 @@ int main()
                 now_y++;
             }
 
-            unordered_map<long long, long long>::iterator it;
-            for (it = cnts[act].begin(); it != cnts[act].end(); it++)
+            for (size_t iQs = 0; iQs < qTail[act]; iQs++)
             {
-                
-                long long state = it->first;
-                long long pre_cnt = it->second;
+                long long state = qs[act][iQs];
+                long long pre_cnt = cnts[act][state];
 
                 // (now_x, now_y) 将要处理的 cell
                 if (1 == cells[now_x][now_y])
@@ -220,6 +225,7 @@ int main()
                     else
                     {
                         cnts[1 - act][state] = pre_cnt;
+                        qs[1 - act][qTail[1 - act] ++] = state;
                     }
 
                     if (n == now_x && m == now_y)
@@ -277,6 +283,7 @@ int main()
                                     else
                                     {
                                         cnts[1 - act][state] = pre_cnt;
+                                        qs[1 - act][qTail[1 - act] ++] = state;
                                     }
                                 }
 
@@ -292,6 +299,7 @@ int main()
                                     else
                                     {
                                         cnts[1 - act][state] = pre_cnt;
+                                        qs[1 - act][qTail[1 - act] ++] = state;
                                     }
                                 }
 
@@ -307,6 +315,7 @@ int main()
                                     else
                                     {
                                         cnts[1 - act][state] = pre_cnt;
+                                        qs[1 - act][qTail[1 - act] ++] = state;
                                     }
                                 }
                             }
@@ -325,6 +334,7 @@ int main()
                                     else
                                     {
                                         cnts[1 - act][state] = pre_cnt;
+                                        qs[1 - act][qTail[1 - act] ++] = state;
                                     }
                                 }
 
@@ -340,6 +350,7 @@ int main()
                                     else
                                     {
                                         cnts[1 - act][state] = pre_cnt;
+                                        qs[1 - act][qTail[1 - act] ++] = state;
                                     }
                                 }
                             }
@@ -356,6 +367,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
                         }
@@ -375,6 +387,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
 
@@ -390,6 +403,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
 
@@ -405,6 +419,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
 
@@ -420,6 +435,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
                         }
@@ -435,6 +451,7 @@ int main()
                             else
                             {
                                 cnts[1 - act][state] = pre_cnt;
+                                qs[1 - act][qTail[1 - act] ++] = state;
                             }
                         }
                         else if (2 == i && 2 == j)
@@ -449,6 +466,7 @@ int main()
                             else
                             {
                                 cnts[1 - act][state] = pre_cnt;
+                                qs[1 - act][qTail[1 - act] ++] = state;
                             }
                         }
                         else
@@ -463,6 +481,7 @@ int main()
                             else
                             {
                                 cnts[1 - act][state] = pre_cnt;
+                                qs[1 - act][qTail[1 - act] ++] = state;
                             }
 
                             if (1 == i && 2 == j)
@@ -574,6 +593,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
                         }
@@ -591,6 +611,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
 
@@ -606,6 +627,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
                         }
@@ -624,6 +646,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
                             else if (4 == st)
@@ -639,6 +662,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
                             }
                             else
@@ -653,6 +677,7 @@ int main()
                                 else
                                 {
                                     cnts[1 - act][state] = pre_cnt;
+                                    qs[1 - act][qTail[1 - act] ++] = state;
                                 }
 
                                 if (pos1 < pos2)
@@ -672,6 +697,7 @@ int main()
             }
 
             cnts[act].clear();
+            qTail[act] = 0;
             act = 1 - act;
         }
 

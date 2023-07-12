@@ -462,6 +462,193 @@ int main()
                     else
                     {
                         // 4 in, 2 out
+                        int i = 0, j = 0, k = 0, l = 0;
+                        int cnt = 0;
+                        int st = 0;
+
+                        // 同层上一个cell的插头
+                        if (1 < now_y)
+                        {
+                            if (i = getState(state, now_y - 1, 0))
+                            {
+                                cnt ++;
+                                st += i;
+
+                                // clear
+                                state = setState(state, now_y - 1, 0, 0);
+                            }
+                        }
+
+                        // 上层 左下，正下 插头
+                        if (j = getState(state, now_y, 1)) 
+                        {
+                            cnt ++;
+                            st += j;
+                        }
+
+                        if (k = getState(state, now_y, 2))
+                        {
+                            cnt ++;
+                            st += k;
+                        }
+
+                        // 上层下一列的左下插头
+                        if (m > now_y)
+                        {
+                            if (l = getState(state, now_y + 1, 1))
+                            {
+                                cnt ++;
+                                st += l;
+
+                                // clean
+                                state = setState(state, now_y + 1, 1, 0);
+                            }
+                        }
+
+                        if (0 == cnt)
+                        {
+                            if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
+                            {
+                                // 2, 0
+                                state = setCellState(state, now_y, 1 << 4 + 2 << 0);
+
+                                if (tmp = cnts[1 - act][state])
+                                {
+                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                }
+                                else
+                                {
+                                    cnts[1 - act][state] = pre_cnt;
+                                }
+                            }
+                        }
+                        else if (1 == cnt)
+                        {
+                            if (n > now_x && 0 == cells[now_x + 1][now_y])
+                            {
+                                // 2
+                                state = setCellState(state, now_y, st << 4);
+
+                                if (tmp = cnts[1 - act][state])
+                                {
+                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                }
+                                else
+                                {
+                                    cnts[1 - act][state] = pre_cnt;
+                                }
+                            }
+
+                            if (m > now_y && 0 == cells[now_x][now_y + 1])
+                            {
+                                // 0
+                                state = setCellState(state, now_y, st << 0);
+
+                                if (tmp = cnts[1 - act][state])
+                                {
+                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                }
+                                else
+                                {
+                                    cnts[1 - act][state] = pre_cnt;
+                                }
+                            }
+                        }
+                        else if (2 == cnt)
+                        {
+                            if (2 == st)
+                            {
+                                // 1, 1
+                                state = setCellState(state, now_y, 0);
+
+                                int pos = 4 * now_y;
+                                int s = 1;
+                                while (pos < m * 4)
+                                {
+                                    int st = getState(state, pos);
+                                    if (1 == st)
+                                    {
+                                        s++;
+                                    }
+                                    else if (2 == st)
+                                    {
+                                        s--;
+                                        if (0 == s)
+                                        {
+                                            state = setState(state, pos, 1);
+                                            if (tmp = cnts[1 - act][state])
+                                            {
+                                                cnts[1 - act][state] = tmp + pre_cnt;
+                                            }
+                                            else
+                                            {
+                                                cnts[1 - act][state] = pre_cnt;
+                                            }
+                                            break;
+                                        }
+                                    }
+
+                                    pos++;
+                                }
+                            }
+                            else if (4 == st)
+                            {
+                                // 2, 2
+                                state = setCellState(state, now_y, 0);
+
+                                int pos = 4 * (now_y - 1) - 1;
+                                int s = 1;
+                                while (0 <= pos)
+                                {
+                                    int st = getState(state, pos);
+                                    if (2 == st)
+                                    {
+                                        s++;
+                                    }
+                                    else if (1 == st)
+                                    {
+                                        s--;
+                                        if (0 == s)
+                                        {
+                                            state = setState(state, pos, 2);
+                                            if (tmp = cnts[1 - act][state])
+                                            {
+                                                cnts[1 - act][state] = tmp + pre_cnt;
+                                            }
+                                            else
+                                            {
+                                                cnts[1 - act][state] = pre_cnt;
+                                            }
+                                            break;
+                                        }
+                                    }
+
+                                    pos--;
+                                }
+                            }
+                            else
+                            {
+                                // 1, 2 or 2, 1
+                                state = setCellState(state, now_y, 0);
+
+                                if (tmp = cnts[1 - act][state])
+                                {
+                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                }
+                                else
+                                {
+                                    cnts[1 - act][state] = pre_cnt;
+                                }
+
+                                if (n == now_x && m == now_y)
+                                {
+                                    if (0 == state)
+                                    {
+                                        ans += pre_cnt;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 

@@ -94,6 +94,62 @@ inline long long setState(long long state, int pos, int val)
 unordered_map<long long, long long> cnts[2];
 int act = 0; // 当前生效的 map
 
+inline long long proc11(long long state, int pos)
+{
+    pos *= 4;
+    int s = 1;
+    while (pos < m * 4)
+    {
+        int st = (state >> (pos * 2)) & MASK;
+        if (1 == st)
+        {
+            s++;
+        }
+        else if (2 == st)
+        {
+            s--;
+            if (0 == s)
+            {
+                state &= ~(((long long)MASK) << (pos * 2));
+                state |= ((long long)1) << (pos * 2);
+                break;
+            }
+        }
+
+        pos++;
+    }
+
+    return state;
+}
+
+inline long long proc22(long long state, int pos)
+{
+    pos = 4 * (pos - 1) - 1;
+    int s = 1;
+    while (0 <= pos)
+    {
+        int st = (state >> (pos * 2)) & MASK;
+        if (2 == st)
+        {
+            s++;
+        }
+        else if (1 == st)
+        {
+            s--;
+            if (0 == s)
+            {
+                state &= ~(((long long)MASK) << (pos * 2));
+                state |= ((long long)2) << (pos * 2);
+                break;
+            }
+        }
+
+        pos--;
+    }
+
+    return state;
+}
+
 int main()
 {
     long long tmp;
@@ -105,8 +161,6 @@ int main()
         }
 
         // init
-        cnts[0].clear();
-        cnts[1].clear();
         act = 0;
         long long ans = 0;
         memset(cells, 0, sizeof(cells));
@@ -371,69 +425,29 @@ int main()
                         else if (1 == i && 1 == j)
                         {
                             state = setCellState(state, now_y, 0);
-                            
-                            int pos = 4 * now_y;
-                            int s = 1;
-                            while (pos < m * 4)
-                            {
-                                int st = getState(state, pos);
-                                if (1 == st)
-                                {
-                                    s++;
-                                }
-                                else if (2 == st)
-                                {
-                                    s--;
-                                    if (0 == s)
-                                    {
-                                        state = setState(state, pos, 1);
-                                        if (tmp = cnts[1 - act][state])
-                                        {
-                                            cnts[1 - act][state] = tmp + pre_cnt;
-                                        }
-                                        else
-                                        {
-                                            cnts[1 - act][state] = pre_cnt;
-                                        }
-                                        break;
-                                    }
-                                }
+                            state = proc11(state, now_y);
 
-                                pos++;
+                            if (tmp = cnts[1 - act][state])
+                            {
+                                cnts[1 - act][state] = tmp + pre_cnt;
+                            }
+                            else
+                            {
+                                cnts[1 - act][state] = pre_cnt;
                             }
                         }
                         else if (2 == i && 2 == j)
                         {
                             state = setCellState(state, now_y, 0);
-                            
-                            int pos = 4 * (now_y - 1) - 1;
-                            int s = 1;
-                            while (0 <= pos)
-                            {
-                                int st = getState(state, pos);
-                                if (2 == st)
-                                {
-                                    s++;
-                                }
-                                else if (1 == st)
-                                {
-                                    s--;
-                                    if (0 == s)
-                                    {
-                                        state = setState(state, pos, 2);
-                                        if (tmp = cnts[1 - act][state])
-                                        {
-                                            cnts[1 - act][state] = tmp + pre_cnt;
-                                        }
-                                        else
-                                        {
-                                            cnts[1 - act][state] = pre_cnt;
-                                        }
-                                        break;
-                                    }
-                                }
+                            state = proc22(state, now_y);
 
-                                pos--;
+                            if (tmp = cnts[1 - act][state])
+                            {
+                                cnts[1 - act][state] = tmp + pre_cnt;
+                            }
+                            else
+                            {
+                                cnts[1 - act][state] = pre_cnt;
                             }
                         }
                         else
@@ -600,70 +614,30 @@ int main()
                             {
                                 // 1, 1
                                 state = setCellState(state, now_y, 0);
+                                state = proc11(state, now_y);
 
-                                int pos = 4 * now_y;
-                                int s = 1;
-                                while (pos < m * 4)
+                                if (tmp = cnts[1 - act][state])
                                 {
-                                    int st = getState(state, pos);
-                                    if (1 == st)
-                                    {
-                                        s++;
-                                    }
-                                    else if (2 == st)
-                                    {
-                                        s--;
-                                        if (0 == s)
-                                        {
-                                            state = setState(state, pos, 1);
-                                            if (tmp = cnts[1 - act][state])
-                                            {
-                                                cnts[1 - act][state] = tmp + pre_cnt;
-                                            }
-                                            else
-                                            {
-                                                cnts[1 - act][state] = pre_cnt;
-                                            }
-                                            break;
-                                        }
-                                    }
-
-                                    pos++;
+                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                }
+                                else
+                                {
+                                    cnts[1 - act][state] = pre_cnt;
                                 }
                             }
                             else if (4 == st)
                             {
                                 // 2, 2
                                 state = setCellState(state, now_y, 0);
+                                state = proc22(state, now_y);
 
-                                int pos = 4 * (now_y - 1) - 1;
-                                int s = 1;
-                                while (0 <= pos)
+                                if (tmp = cnts[1 - act][state])
                                 {
-                                    int st = getState(state, pos);
-                                    if (2 == st)
-                                    {
-                                        s++;
-                                    }
-                                    else if (1 == st)
-                                    {
-                                        s--;
-                                        if (0 == s)
-                                        {
-                                            state = setState(state, pos, 2);
-                                            if (tmp = cnts[1 - act][state])
-                                            {
-                                                cnts[1 - act][state] = tmp + pre_cnt;
-                                            }
-                                            else
-                                            {
-                                                cnts[1 - act][state] = pre_cnt;
-                                            }
-                                            break;
-                                        }
-                                    }
-
-                                    pos--;
+                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                }
+                                else
+                                {
+                                    cnts[1 - act][state] = pre_cnt;
                                 }
                             }
                             else

@@ -185,9 +185,9 @@ int main()
         m = MAX_M;
 
         int end_x = 0, end_y = 0;
-        for (size_t i = 1; i <= n; i++)
+        for (int i = 1; i <= n; i++)
         {
-            for (size_t j = 1; j <= m; j++)
+            for (int j = 1; j <= m; j++)
             {
                 if (0 == cells[i][j])
                 {
@@ -222,6 +222,39 @@ int main()
                 now_y++;
             }
 
+            if (1 == cells[now_x][now_y])
+            {
+                if (now_y & 1 && m > now_y)
+                {
+                    for (size_t iQs = 0; iQs < qTail[act]; iQs++)
+                    {
+                        long long state = qs[act][iQs];
+                        long long pre_cnt = cnts[act][state];
+                        // 同 col 上一个 cell 的 右下插头，由于接下来的处理过程会清除掉该状态，将其移到后一列cell中
+                        int k = getState(state, now_y, 3);
+                        if (k)
+                        {
+                            state = setState(state, now_y + 1, 1, k);
+                        }
+                        state = setCellState(state, now_y, 0);
+                        if (tmp = cnts[1 - act][state])
+                        {
+                            cnts[1 - act][state] = tmp + pre_cnt;
+                        }
+                        else
+                        {
+                            cnts[1 - act][state] = pre_cnt;
+                            qs[1 - act][qTail[1 - act]++] = state;
+                        }
+                    }
+
+                    cnts[act].clear();
+                    qTail[act] = 0;
+                    act = 1 - act;
+                }
+                continue;
+            }
+
             for (size_t iQs = 0; iQs < qTail[act]; iQs++)
             {
                 long long state = qs[act][iQs];
@@ -254,25 +287,6 @@ int main()
 
                             state = setState(state, now_y + 1, 1, k);
                         }
-                    }
-
-                    if (1 == cells[now_x][now_y])
-                    {
-                        if (0 == (i + j))
-                        {
-                            state = setCellState(state, now_y, 0);
-                            if (tmp = cnts[1 - act][state])
-                            {
-                                cnts[1 - act][state] = tmp + pre_cnt;
-                            }
-                            else
-                            {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
-                            }
-                        }
-
-                        continue;
                     }
 
                     if (0 == i && 0 == j)
@@ -586,22 +600,6 @@ int main()
                                 pos2 = 3;
                             }
                         }
-                    }
-
-                    if (1 == cells[now_x][now_y])
-                    {
-                        state = setCellState(state, now_y, 0);
-                        if (tmp = cnts[1 - act][state])
-                        {
-                            cnts[1 - act][state] = tmp + pre_cnt;
-                        }
-                        else
-                        {
-                            cnts[1 - act][state] = pre_cnt;
-                            qs[1 - act][qTail[1 - act]++] = state;
-                        }
-
-                        continue;
                     }
 
                     if (0 == cnt)

@@ -235,17 +235,11 @@ int main()
                         if (k)
                         {
                             state = setState(state, now_y + 1, 1, k);
+                            state = setCellState(state, now_y, 0);
                         }
-                        state = setCellState(state, now_y, 0);
-                        if (tmp = cnts[1 - act][state])
-                        {
-                            cnts[1 - act][state] = tmp + pre_cnt;
-                        }
-                        else
-                        {
-                            cnts[1 - act][state] = pre_cnt;
-                            qs[1 - act][qTail[1 - act]++] = state;
-                        }
+
+                        cnts[1 - act][state] = pre_cnt;
+                        qs[1 - act][qTail[1 - act]++] = state;
                     }
 
                     cnts[act].clear();

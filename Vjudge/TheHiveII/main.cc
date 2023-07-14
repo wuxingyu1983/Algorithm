@@ -92,8 +92,8 @@ inline long long setState(long long state, int pos, int val)
     return ret;
 }
 
-unordered_map<long long, int> cnts[2];      // key - state, value - state 在 qs 中的位置 index
-int act = 0; // 当前生效的 map
+unordered_map<long long, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
+int act = 0;                           // 当前生效的 map
 
 class StAndCnt
 {
@@ -106,7 +106,6 @@ public:
         st = cnt = 0;
     }
 };
-
 
 StAndCnt qs[2][Q_SIZE];
 int qTail[2];
@@ -256,7 +255,7 @@ int main()
                         cnts[1 - act][state] = iQs;
                         qs[1 - act][qTail[1 - act]].st = state;
                         qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
-                        qTail[1 - act] ++;
+                        qTail[1 - act]++;
                     }
 
                     cnts[act].clear();
@@ -266,14 +265,14 @@ int main()
                 continue;
             }
 
-            for (size_t iQs = 0; iQs < qTail[act]; iQs++)
+            // (now_x, now_y) 将要处理的 cell
+            if (now_y & 1)
             {
-                long long state = qs[act][iQs].st;
-                long long pre_cnt = qs[act][iQs].cnt;
-
-                // (now_x, now_y) 将要处理的 cell
-                if (now_y & 1)
+                for (size_t iQs = 0; iQs < qTail[act]; iQs++)
                 {
+                    long long state = qs[act][iQs].st;
+                    long long pre_cnt = qs[act][iQs].cnt;
+
                     // 2 in, 4 out
                     int i = 0, j = 0;
                     if (1 < now_y)
@@ -320,7 +319,7 @@ int main()
                                     qs[1 - act][qTail[1 - act]].st = state;
                                     qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
                                     cnts[1 - act][state] = qTail[1 - act];
-                                    qTail[1 - act] ++;
+                                    qTail[1 - act]++;
                                 }
                             }
 
@@ -339,7 +338,7 @@ int main()
                                     qs[1 - act][qTail[1 - act]].st = state;
                                     qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
                                     cnts[1 - act][state] = qTail[1 - act];
-                                    qTail[1 - act] ++;
+                                    qTail[1 - act]++;
                                 }
                             }
 
@@ -358,7 +357,7 @@ int main()
                                     qs[1 - act][qTail[1 - act]].st = state;
                                     qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
                                     cnts[1 - act][state] = qTail[1 - act];
-                                    qTail[1 - act] ++;
+                                    qTail[1 - act]++;
                                 }
                             }
                         }
@@ -380,7 +379,7 @@ int main()
                                     qs[1 - act][qTail[1 - act]].st = state;
                                     qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
                                     cnts[1 - act][state] = qTail[1 - act];
-                                    qTail[1 - act] ++;
+                                    qTail[1 - act]++;
                                 }
                             }
 
@@ -399,7 +398,7 @@ int main()
                                     qs[1 - act][qTail[1 - act]].st = state;
                                     qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
                                     cnts[1 - act][state] = qTail[1 - act];
-                                    qTail[1 - act] ++;
+                                    qTail[1 - act]++;
                                 }
                             }
                         }
@@ -569,8 +568,14 @@ int main()
                         }
                     }
                 }
-                else
+            }
+            else
+            {
+                for (size_t iQs = 0; iQs < qTail[act]; iQs++)
                 {
+                    long long state = qs[act][iQs].st;
+                    long long pre_cnt = qs[act][iQs].cnt;
+
                     // 4 in, 2 out
                     int i = 0, j = 0, k = 0, l = 0;
                     int cnt = 0;

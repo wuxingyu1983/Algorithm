@@ -32,25 +32,6 @@ using namespace std;
 
 int n, m;
 
-class Line
-{
-public:
-    /*
-        已经处理过（x, y）格子后，状态为state的个数cnt
-    */
-    char x, y;
-    long long state;
-
-    Line()
-    {
-        x = y = 0;
-        state = 0;
-    }
-};
-
-Line lines[Q_SIZE];
-int qHead = 0, qTail = 0;
-
 unsigned char cells[MAX_N + 1][MAX_M + 1]; // 1 - obstacle
 
 inline long long setState(long long state, int pos, int val)
@@ -86,47 +67,36 @@ inline int getState(long long st, int pos)
     return ret;
 }
 
-unordered_map<long long, long long> cnts[2];
-int act = 0; // 当前生效的 map
-unsigned char flags[MAX_N + 1][MAX_M + 1];
+unordered_map<long long, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
+int act = 0;                           // 当前生效的 map
 
-inline void insertLine(Line &line, long long cnt)
+class StAndCnt
 {
-    // 判断是否已经存在了
-    unordered_map<long long, long long>::iterator it = cnts[1 - act].find(line.state);
-    if (it == cnts[1 - act].end())
-    {
-        cnts[1 - act][line.state] = cnt;
+public:
+    long long st;
+    long long cnt;
 
-        lines[qTail].x = line.x;
-        lines[qTail].y = line.y;
-        lines[qTail].state = line.state;
-
-        qTail ++;
-        qTail %= Q_SIZE;
-    }
-    else
+    StAndCnt()
     {
-        cnts[1 - act][line.state] = cnt + it->second;
+        st = cnt = 0;
     }
-}
+};
+
+StAndCnt qs[2][Q_SIZE];
+int qTail[2];
 
 int main()
 {
     while (scanf("%d %d", &n, &m))
     {
-        if (0 >= n)
-        {
-            break;
-        }
-
         // init
         cnts[0].clear();
         cnts[1].clear();
         act = 0;
         long long ans = 0;
         memset(cells, 0, sizeof(cells));
-        memset(flags, 0, sizeof(flags));
+        qTail[0] = 0;
+        qTail[1] = 0;
 
         char str[20];
 
@@ -143,41 +113,30 @@ int main()
         m = n;
         n = MAX_N;
 
-        // start
-        Line start;
-        start.x = 0;
-        start.y = m;
-        start.state = 0;
-
-        lines[qTail].x = start.x;
-        lines[qTail].y = start.y;
-        lines[qTail].state = start.state;
-
-        qTail ++;
-        qTail %= Q_SIZE;
-
-        flags[0][m] = 1;
-        cnts[act][0] = 1;
-
-        while (qHead != qTail)
+        int end_x = 0, end_y = 0;
+        for (int i = 1; i <= n; i++)
         {
-            int now_x = lines[qHead].x,
-                now_y = lines[qHead].y;
-            long long state = lines[qHead].state;
-
-            qHead ++;
-            qHead %= Q_SIZE;
-
-            if (0 == flags[now_x][now_y])
+            for (int j = 1; j <= m; j++)
             {
-                // 第一次访问 (now_x, now_y)
-                flags[now_x][now_y] = 1;
-                cnts[act].clear();
-                act = 1 - act;
+                if (0 == cells[i][j])
+                {
+                    end_x = i;
+                    end_y = j;
+                }
             }
+        }
 
-            long long pre_cnt = cnts[act][state];
+        // start
+        cnts[act][0] = 0;
+        qs[act][0].st = 0;
+        qs[act][0].cnt = 1;
+        qTail[act]++;
 
+        int now_x = 0;
+        int now_y = m;
+
+        while (qTail[act])
+        {
             if (m == now_y)
             {
                 now_x++;
@@ -185,12 +144,7 @@ int main()
 
                 if (n < now_x)
                 {
-                    continue;
-                }
-
-                if (0 == (now_x & 1))
-                {
-                    state <<= 2 * BITS;
+                    break;
                 }
             }
             else
@@ -198,28 +152,41 @@ int main()
                 now_y++;
             }
 
-            Line now;
-            now.x = now_x;
-            now.y = now_y;
-
-            // (now_x, now_y) 将要处理的 cell
             if (1 == cells[now_x][now_y])
             {
-                // 障碍物
-                now.state = state;
-
-                insertLine(now, pre_cnt);
-
-                if (n == now_x && m == now_y)
+                if (0 == (now_x & 1) && 1 == now_y)
                 {
-                    if (0 == state)
+                    for (size_t iQs = 0; iQs < qTail[act]; iQs++)
                     {
-                        ans += pre_cnt;
+                        long long state = qs[act][iQs].st;
+                        long long pre_cnt = qs[act][iQs].cnt;
+
+                        state <<= 2 * BITS;
+
+                        cnts[1 - act][state] = iQs;
+                        qs[1 - act][qTail[1 - act]].st = state;
+                        qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                        qTail[1 - act]++;
                     }
+
+                    cnts[act].clear();
+                    qTail[act] = 0;
+                    act = 1 - act;
                 }
+                continue;
             }
-            else
+
+            // (now_x, now_y) 将要处理的 cell
+            for (size_t iQs = 0; iQs < qTail[act]; iQs++)
             {
+                long long state = qs[act][iQs].st;
+                long long pre_cnt = qs[act][iQs].cnt;
+                
+                if (0 == (now_x & 1) && 1 == now_y)
+                {
+                    state <<= 2 * BITS;
+                }
+
                 int i = getState(state, 2 * (now_y - 1));
                 int j = getState(state, 2 * (now_y - 1) + 1);
                 int k = getState(state, 2 * now_y);
@@ -250,25 +217,54 @@ int main()
                             if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x + 1][now_y + 1])
                             {
                                 state = setState3(state, 2 * (now_y - 1), 9);
-                                now.state = state;
 
-                                insertLine(now, pre_cnt);
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
+                                {
+                                    qs[1 - act][it->second].cnt += pre_cnt;
+                                }
+                                else
+                                {
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act]++;
+                                }
                             }
 
                             if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                             {
                                 state = setState3(state, 2 * (now_y - 1), 33);
-                                now.state = state;
 
-                                insertLine(now, pre_cnt);
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
+                                {
+                                    qs[1 - act][it->second].cnt += pre_cnt;
+                                }
+                                else
+                                {
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act]++;
+                                }
                             }
 
                             if (0 == cells[now_x + 1][now_y + 1] && 0 == cells[now_x][now_y + 1])
                             {
                                 state = setState3(state, 2 * (now_y - 1), 36);
-                                now.state = state;
-
-                                insertLine(now, pre_cnt);
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
+                                {
+                                    qs[1 - act][it->second].cnt += pre_cnt;
+                                }
+                                else
+                                {
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act]++;
+                                }
                             }
                         }
                     }
@@ -279,25 +275,52 @@ int main()
                             if (1 < now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x + 1][now_y])
                             {
                                 state = setState3(state, 2 * (now_y - 1), 9);
-                                now.state = state;
-
-                                insertLine(now, pre_cnt);
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
+                                {
+                                    qs[1 - act][it->second].cnt += pre_cnt;
+                                }
+                                else
+                                {
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act]++;
+                                }
                             }
 
                             if (1 < now_y && m > now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x][now_y + 1])
                             {
                                 state = setState3(state, 2 * (now_y - 1), 33);
-                                now.state = state;
-
-                                insertLine(now, pre_cnt);
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
+                                {
+                                    qs[1 - act][it->second].cnt += pre_cnt;
+                                }
+                                else
+                                {
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act]++;
+                                }
                             }
 
                             if (m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                             {
                                 state = setState3(state, 2 * (now_y - 1), 36);
-                                now.state = state;
-
-                                insertLine(now, pre_cnt);
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
+                                {
+                                    qs[1 - act][it->second].cnt += pre_cnt;
+                                }
+                                else
+                                {
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act]++;
+                                }
                             }
                         }
                     }
@@ -309,17 +332,35 @@ int main()
                         if (n > now_x && 0 == cells[now_x + 1][now_y])
                         {
                             state = setState3(state, 2 * (now_y - 1), st);
-                            now.state = state;
-
-                            insertLine(now, pre_cnt);
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
+                            {
+                                qs[1 - act][it->second].cnt += pre_cnt;
+                            }
+                            else
+                            {
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
+                            }
                         }
 
                         if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1])
                         {
                             state = setState(state, 2 * (now_y - 1), st * 4);
-                            now.state = state;
-
-                            insertLine(now, pre_cnt);
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
+                            {
+                                qs[1 - act][it->second].cnt += pre_cnt;
+                            }
+                            else
+                            {
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
+                            }
                         }
                     }
                     else
@@ -327,26 +368,53 @@ int main()
                         if (n > now_x && 1 < now_y && 0 == cells[now_x + 1][now_y - 1])
                         {
                             state = setState3(state, 2 * (now_y - 1), st);
-                            now.state = state;
-
-                            insertLine(now, pre_cnt);
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
+                            {
+                                qs[1 - act][it->second].cnt += pre_cnt;
+                            }
+                            else
+                            {
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
+                            }
                         }
 
                         if (n > now_x && 0 == cells[now_x + 1][now_y])
                         {
                             state = setState3(state, 2 * (now_y - 1), st * 4);
-                            now.state = state;
-
-                            insertLine(now, pre_cnt);
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
+                            {
+                                qs[1 - act][it->second].cnt += pre_cnt;
+                            }
+                            else
+                            {
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
+                            }
                         }
                     }
 
                     if (m > now_y && 0 == cells[now_x][now_y + 1])
                     {
                         state = setState3(state, 2 * (now_y - 1), st * 16);
-                        now.state = state;
-
-                        insertLine(now, pre_cnt);
+                        unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                        if (it != cnts[1 - act].end())
+                        {
+                            qs[1 - act][it->second].cnt += pre_cnt;
+                        }
+                        else
+                        {
+                            qs[1 - act][qTail[1 - act]].st = state;
+                            qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                            cnts[1 - act][state] = qTail[1 - act];
+                            qTail[1 - act]++;
+                        }
                     }
                 }
                 else if (2 == cnt)
@@ -355,7 +423,7 @@ int main()
                     {
                         // 1, 1
                         state = setState3(state, 2 * (now_y - 1), 0);
-                        
+
                         int pos = 2 * now_y + 1;
                         int s = 1;
                         while (pos <= m * 2)
@@ -371,8 +439,18 @@ int main()
                                 if (0 == s)
                                 {
                                     state = setState(state, pos, 1);
-                                    now.state = state;
-                                    insertLine(now, pre_cnt);
+                                    unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                    if (it != cnts[1 - act].end())
+                                    {
+                                        qs[1 - act][it->second].cnt += pre_cnt;
+                                    }
+                                    else
+                                    {
+                                        qs[1 - act][qTail[1 - act]].st = state;
+                                        qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                        cnts[1 - act][state] = qTail[1 - act];
+                                        qTail[1 - act]++;
+                                    }
                                     break;
                                 }
                             }
@@ -384,7 +462,7 @@ int main()
                     {
                         // 2, 2
                         state = setState3(state, 2 * (now_y - 1), 0);
-                        
+
                         int pos = 2 * (now_y - 1) - 1;
                         int s = 1;
                         while (0 <= pos)
@@ -400,8 +478,18 @@ int main()
                                 if (0 == s)
                                 {
                                     state = setState(state, pos, 2);
-                                    now.state = state;
-                                    insertLine(now, pre_cnt);
+                                    unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                    if (it != cnts[1 - act].end())
+                                    {
+                                        qs[1 - act][it->second].cnt += pre_cnt;
+                                    }
+                                    else
+                                    {
+                                        qs[1 - act][qTail[1 - act]].st = state;
+                                        qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                        cnts[1 - act][state] = qTail[1 - act];
+                                        qTail[1 - act]++;
+                                    }
                                     break;
                                 }
                             }
@@ -413,11 +501,20 @@ int main()
                     {
                         // 1, 2 or 2, 1
                         state = setState3(state, 2 * (now_y - 1), 0);
-                        now.state = state;
+                        unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                        if (it != cnts[1 - act].end())
+                        {
+                            qs[1 - act][it->second].cnt += pre_cnt;
+                        }
+                        else
+                        {
+                            qs[1 - act][qTail[1 - act]].st = state;
+                            qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                            cnts[1 - act][state] = qTail[1 - act];
+                            qTail[1 - act]++;
+                        }
 
-                        insertLine(now, pre_cnt);
-
-                        if (n == now_x && m == now_y)
+                        if (end_x == now_x && end_y == now_y)
                         {
                             if (0 == state)
                             {
@@ -427,6 +524,10 @@ int main()
                     }
                 }
             }
+
+            cnts[act].clear();
+            qTail[act] = 0;
+            act = 1 - act;
         }
 
         printf("%lld\n", ans);

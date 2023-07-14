@@ -92,9 +92,23 @@ inline long long setState(long long state, int pos, int val)
     return ret;
 }
 
-unordered_map<long long, long long> cnts[2];
+unordered_map<long long, int> cnts[2];      // key - state, value - state 在 qs 中的位置 index
 int act = 0; // 当前生效的 map
-long long qs[2][Q_SIZE];
+
+class StAndCnt
+{
+public:
+    long long st;
+    long long cnt;
+
+    StAndCnt()
+    {
+        st = cnt = 0;
+    }
+};
+
+
+StAndCnt qs[2][Q_SIZE];
 int qTail[2];
 
 inline long long proc11(long long state, int pos)
@@ -198,8 +212,9 @@ int main()
         }
 
         // start
-        cnts[act][0] = 1;
-        qs[act][0] = 0;
+        cnts[act][0] = 0;
+        qs[act][0].st = 0;
+        qs[act][0].cnt = 1;
         qTail[act]++;
 
         int now_x = 0;
@@ -228,8 +243,8 @@ int main()
                 {
                     for (size_t iQs = 0; iQs < qTail[act]; iQs++)
                     {
-                        long long state = qs[act][iQs];
-                        long long pre_cnt = cnts[act][state];
+                        long long state = qs[act][iQs].st;
+                        long long pre_cnt = qs[act][iQs].cnt;
                         // 同 col 上一个 cell 的 右下插头，由于接下来的处理过程会清除掉该状态，将其移到后一列cell中
                         int k = getState(state, now_y, 3);
                         if (k)
@@ -238,8 +253,10 @@ int main()
                             state = setCellState(state, now_y, 0);
                         }
 
-                        cnts[1 - act][state] = pre_cnt;
-                        qs[1 - act][qTail[1 - act]++] = state;
+                        cnts[1 - act][state] = iQs;
+                        qs[1 - act][qTail[1 - act]].st = state;
+                        qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                        qTail[1 - act] ++;
                     }
 
                     cnts[act].clear();
@@ -251,8 +268,8 @@ int main()
 
             for (size_t iQs = 0; iQs < qTail[act]; iQs++)
             {
-                long long state = qs[act][iQs];
-                long long pre_cnt = cnts[act][state];
+                long long state = qs[act][iQs].st;
+                long long pre_cnt = qs[act][iQs].cnt;
 
                 // (now_x, now_y) 将要处理的 cell
                 if (now_y & 1)
@@ -293,14 +310,17 @@ int main()
                                 // 1, 2插头
                                 state = setCellState(state, now_y, (1 << 2) + (2 << 4));
 
-                                if (tmp = cnts[1 - act][state])
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
                                 {
-                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                    qs[1 - act][it->second].cnt += pre_cnt;
                                 }
                                 else
                                 {
-                                    cnts[1 - act][state] = pre_cnt;
-                                    qs[1 - act][qTail[1 - act]++] = state;
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act] ++;
                                 }
                             }
 
@@ -309,14 +329,17 @@ int main()
                                 // 1, 3
                                 state = setCellState(state, now_y, (1 << 2) + (2 << 6));
 
-                                if (tmp = cnts[1 - act][state])
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
                                 {
-                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                    qs[1 - act][it->second].cnt += pre_cnt;
                                 }
                                 else
                                 {
-                                    cnts[1 - act][state] = pre_cnt;
-                                    qs[1 - act][qTail[1 - act]++] = state;
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act] ++;
                                 }
                             }
 
@@ -325,14 +348,17 @@ int main()
                                 // 1, 0
                                 state = setCellState(state, now_y, (1 << 2) + (2 << 0));
 
-                                if (tmp = cnts[1 - act][state])
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
                                 {
-                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                    qs[1 - act][it->second].cnt += pre_cnt;
                                 }
                                 else
                                 {
-                                    cnts[1 - act][state] = pre_cnt;
-                                    qs[1 - act][qTail[1 - act]++] = state;
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act] ++;
                                 }
                             }
                         }
@@ -344,14 +370,17 @@ int main()
                                 // 2, 3
                                 state = setCellState(state, now_y, (1 << 4) + (2 << 6));
 
-                                if (tmp = cnts[1 - act][state])
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
                                 {
-                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                    qs[1 - act][it->second].cnt += pre_cnt;
                                 }
                                 else
                                 {
-                                    cnts[1 - act][state] = pre_cnt;
-                                    qs[1 - act][qTail[1 - act]++] = state;
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act] ++;
                                 }
                             }
 
@@ -360,14 +389,17 @@ int main()
                                 // 2, 0
                                 state = setCellState(state, now_y, (1 << 4) + (2 << 0));
 
-                                if (tmp = cnts[1 - act][state])
+                                unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                                if (it != cnts[1 - act].end())
                                 {
-                                    cnts[1 - act][state] = tmp + pre_cnt;
+                                    qs[1 - act][it->second].cnt += pre_cnt;
                                 }
                                 else
                                 {
-                                    cnts[1 - act][state] = pre_cnt;
-                                    qs[1 - act][qTail[1 - act]++] = state;
+                                    qs[1 - act][qTail[1 - act]].st = state;
+                                    qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                    cnts[1 - act][state] = qTail[1 - act];
+                                    qTail[1 - act] ++;
                                 }
                             }
                         }
@@ -377,14 +409,17 @@ int main()
                             // 3, 0
                             state = setCellState(state, now_y, (1 << 6) + (2 << 0));
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
                     }
@@ -397,14 +432,17 @@ int main()
                             // 1
                             state = setCellState(state, now_y, st << 2);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
 
@@ -413,14 +451,17 @@ int main()
                             // 2
                             state = setCellState(state, now_y, st << 4);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
 
@@ -429,14 +470,17 @@ int main()
                             // 3
                             state = setCellState(state, now_y, st << 6);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
 
@@ -445,14 +489,17 @@ int main()
                             // 0
                             state = setCellState(state, now_y, st << 0);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
                     }
@@ -461,14 +508,17 @@ int main()
                         state = setCellState(state, now_y, 0);
                         state = proc11(state, now_y);
 
-                        if (tmp = cnts[1 - act][state])
+                        unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                        if (it != cnts[1 - act].end())
                         {
-                            cnts[1 - act][state] = tmp + pre_cnt;
+                            qs[1 - act][it->second].cnt += pre_cnt;
                         }
                         else
                         {
-                            cnts[1 - act][state] = pre_cnt;
-                            qs[1 - act][qTail[1 - act]++] = state;
+                            qs[1 - act][qTail[1 - act]].st = state;
+                            qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                            cnts[1 - act][state] = qTail[1 - act];
+                            qTail[1 - act]++;
                         }
                     }
                     else if (2 == i && 2 == j)
@@ -476,14 +526,17 @@ int main()
                         state = setCellState(state, now_y, 0);
                         state = proc22(state, now_y);
 
-                        if (tmp = cnts[1 - act][state])
+                        unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                        if (it != cnts[1 - act].end())
                         {
-                            cnts[1 - act][state] = tmp + pre_cnt;
+                            qs[1 - act][it->second].cnt += pre_cnt;
                         }
                         else
                         {
-                            cnts[1 - act][state] = pre_cnt;
-                            qs[1 - act][qTail[1 - act]++] = state;
+                            qs[1 - act][qTail[1 - act]].st = state;
+                            qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                            cnts[1 - act][state] = qTail[1 - act];
+                            qTail[1 - act]++;
                         }
                     }
                     else
@@ -491,14 +544,17 @@ int main()
                         // 1, 2 or 2, 1
                         state = setCellState(state, now_y, 0);
 
-                        if (tmp = cnts[1 - act][state])
+                        unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                        if (it != cnts[1 - act].end())
                         {
-                            cnts[1 - act][state] = tmp + pre_cnt;
+                            qs[1 - act][it->second].cnt += pre_cnt;
                         }
                         else
                         {
-                            cnts[1 - act][state] = pre_cnt;
-                            qs[1 - act][qTail[1 - act]++] = state;
+                            qs[1 - act][qTail[1 - act]].st = state;
+                            qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                            cnts[1 - act][state] = qTail[1 - act];
+                            qTail[1 - act]++;
                         }
 
                         if (1 == i && 2 == j)
@@ -603,14 +659,17 @@ int main()
                             // 2, 0
                             state = setCellState(state, now_y, (1 << 4) + (2 << 0));
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
                     }
@@ -621,14 +680,17 @@ int main()
                             // 2
                             state = setCellState(state, now_y, st << 4);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
 
@@ -637,14 +699,17 @@ int main()
                             // 0
                             state = setCellState(state, now_y, st << 0);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
                     }
@@ -656,14 +721,17 @@ int main()
                             state = setCellState(state, now_y, 0);
                             state = proc11(state, now_y);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
                         else if (4 == st)
@@ -672,14 +740,17 @@ int main()
                             state = setCellState(state, now_y, 0);
                             state = proc22(state, now_y);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
                         }
                         else
@@ -687,14 +758,17 @@ int main()
                             // 1, 2 or 2, 1
                             state = setCellState(state, now_y, 0);
 
-                            if (tmp = cnts[1 - act][state])
+                            unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
+                            if (it != cnts[1 - act].end())
                             {
-                                cnts[1 - act][state] = tmp + pre_cnt;
+                                qs[1 - act][it->second].cnt += pre_cnt;
                             }
                             else
                             {
-                                cnts[1 - act][state] = pre_cnt;
-                                qs[1 - act][qTail[1 - act]++] = state;
+                                qs[1 - act][qTail[1 - act]].st = state;
+                                qs[1 - act][qTail[1 - act]].cnt = pre_cnt;
+                                cnts[1 - act][state] = qTail[1 - act];
+                                qTail[1 - act]++;
                             }
 
                             if (pos1 < pos2)

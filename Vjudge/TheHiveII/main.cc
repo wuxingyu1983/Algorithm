@@ -39,41 +39,17 @@ int n, m;
 unsigned char cells[MAX_N + 1][MAX_M + 1]; // 1 - obstacle
 
 // pos : 0 - 同层插头 1，2，3 分别对应左下，正下，右下插头
-inline long long setState(long long state, int cell, int pos, int val)
-{
-    long long ret = state;
-    cell--;
-    // clear
-    ret &= ~(((long long)MASK) << (cell * CELL_BITS + pos * ST_BITS));
+#define setState4(ST, CELL, POS, VAL) \
+    ST &= ~(((long long)MASK) << (((CELL) - 1) * CELL_BITS + (POS) * ST_BITS)); \
+    ST |= ((long long)(VAL)) << (((CELL) - 1) * CELL_BITS + (POS) * ST_BITS);
 
-    ret |= ((long long)val) << (cell * CELL_BITS + pos * ST_BITS);
+#define setCellState(ST, CELL, VAL) \
+    ST &= ~(((long long)MASK4) << (((CELL) - 1) * CELL_BITS)); \
+    ST |= ((long long)(VAL)) << (((CELL - 1)) * CELL_BITS);
 
-    return ret;
-}
-inline long long setCellState(long long state, int cell, int val)
-{
-    long long ret = state;
-    cell--;
-
-    // clear
-    ret &= ~(((long long)MASK4) << (cell * CELL_BITS));
-
-    ret |= ((long long)val) << (cell * CELL_BITS);
-
-    return ret;
-}
-
-inline long long setState3(long long state, int pos, int val)
-{
-    long long ret = state;
-
-    // clear
-    ret &= ~(((long long)MASK3) << (pos * BITS));
-
-    ret |= ((long long)val) << (pos * BITS);
-
-    return ret;
-}
+#define setState3(ST, POS, VAL) \
+    ST &= ~(((long long)MASK3) << ((POS) * BITS)); \
+    ST |= ((long long)(VAL)) << ((POS) * BITS);
 
 inline long long setState(long long state, int pos, int val)
 {
@@ -260,8 +236,8 @@ int main()
                             int k = getState(state, now_y, 3);
                             if (k)
                             {
-                                state = setState(state, now_y + 1, 1, k);
-                                state = setCellState(state, now_y, 0);
+                                setState4(state, now_y + 1, 1, k);
+                                setCellState(state, now_y, 0);
                             }
 
                             cnts[1 - act][state] = iQs;
@@ -294,7 +270,7 @@ int main()
                             // 清空
                             if (i)
                             {
-                                state = setState(state, now_y - 1, 0, 0);
+                                setState4(state, now_y - 1, 0, 0);
                             }
                         }
                         if (1 < now_x)
@@ -307,7 +283,7 @@ int main()
                                 // 同 col 上一个 cell 的 右下插头，由于接下来的处理过程会清除掉该状态，将其移到后一列cell中
                                 int k = getState(state, now_y, 3);
 
-                                state = setState(state, now_y + 1, 1, k);
+                                setState4(state, now_y + 1, 1, k);
                             }
                         }
 
@@ -319,21 +295,21 @@ int main()
                                 if (0 == cells[now_x + 1][now_y])
                                 {
                                     // 1, 2插头
-                                    state = setCellState(state, now_y, (1 << 2) + (2 << 4));
+                                    setCellState(state, now_y, (1 << 2) + (2 << 4));
                                     insertState(state, pre_cnt);
                                 }
 
                                 if (m > now_y && 0 == cells[now_x + 1][now_y + 1])
                                 {
                                     // 1, 3
-                                    state = setCellState(state, now_y, (1 << 2) + (2 << 6));
+                                    setCellState(state, now_y, (1 << 2) + (2 << 6));
                                     insertState(state, pre_cnt);
                                 }
 
                                 if (m > now_y && 0 == cells[now_x][now_y + 1])
                                 {
                                     // 1, 0
-                                    state = setCellState(state, now_y, (1 << 2) + (2 << 0));
+                                    setCellState(state, now_y, (1 << 2) + (2 << 0));
                                     insertState(state, pre_cnt);
                                 }
                             }
@@ -343,14 +319,14 @@ int main()
                                 if (0 == cells[now_x + 1][now_y + 1])
                                 {
                                     // 2, 3
-                                    state = setCellState(state, now_y, (1 << 4) + (2 << 6));
+                                    setCellState(state, now_y, (1 << 4) + (2 << 6));
                                     insertState(state, pre_cnt);
                                 }
 
                                 if (0 == cells[now_x][now_y + 1])
                                 {
                                     // 2, 0
-                                    state = setCellState(state, now_y, (1 << 4) + (2 << 0));
+                                    setCellState(state, now_y, (1 << 4) + (2 << 0));
                                     insertState(state, pre_cnt);
                                 }
                             }
@@ -358,7 +334,7 @@ int main()
                             if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1] && 0 == cells[now_x][now_y + 1])
                             {
                                 // 3, 0
-                                state = setCellState(state, now_y, (1 << 6) + (2 << 0));
+                                setCellState(state, now_y, (1 << 6) + (2 << 0));
                                 insertState(state, pre_cnt);
                             }
                         }
@@ -369,41 +345,41 @@ int main()
                             if (1 < now_y && n > now_x && 0 == cells[now_x + 1][now_y - 1])
                             {
                                 // 1
-                                state = setCellState(state, now_y, st << 2);
+                                setCellState(state, now_y, st << 2);
                                 insertState(state, pre_cnt);
                             }
 
                             if (n > now_x && 0 == cells[now_x + 1][now_y])
                             {
                                 // 2
-                                state = setCellState(state, now_y, st << 4);
+                                setCellState(state, now_y, st << 4);
                                 insertState(state, pre_cnt);
                             }
 
                             if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1])
                             {
                                 // 3
-                                state = setCellState(state, now_y, st << 6);
+                                setCellState(state, now_y, st << 6);
                                 insertState(state, pre_cnt);
                             }
 
                             if (m > now_y && 0 == cells[now_x][now_y + 1])
                             {
                                 // 0
-                                state = setCellState(state, now_y, st << 0);
+                                setCellState(state, now_y, st << 0);
                                 insertState(state, pre_cnt);
                             }
                         }
                         else if (1 == i && 1 == j)
                         {
-                            state = setCellState(state, now_y, 0);
+                            setCellState(state, now_y, 0);
                             state = proc11(state, now_y);
 
                             insertState(state, pre_cnt);
                         }
                         else if (2 == i && 2 == j)
                         {
-                            state = setCellState(state, now_y, 0);
+                            setCellState(state, now_y, 0);
                             state = proc22(state, now_y);
 
                             insertState(state, pre_cnt);
@@ -411,7 +387,7 @@ int main()
                         else
                         {
                             // 1, 2 or 2, 1
-                            state = setCellState(state, now_y, 0);
+                            setCellState(state, now_y, 0);
 
                             insertState(state, pre_cnt);
 
@@ -450,7 +426,7 @@ int main()
                                 st += i;
 
                                 // clear
-                                state = setState(state, now_y - 1, 0, 0);
+                                setState4(state, now_y - 1, 0, 0);
 
                                 if (1 == i)
                                 {
@@ -503,7 +479,7 @@ int main()
                                 st += l;
 
                                 // clean
-                                state = setState(state, now_y + 1, 1, 0);
+                                setState4(state, now_y + 1, 1, 0);
 
                                 if (1 == l)
                                 {
@@ -521,7 +497,7 @@ int main()
                             if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                             {
                                 // 2, 0
-                                state = setCellState(state, now_y, (1 << 4) + (2 << 0));
+                                setCellState(state, now_y, (1 << 4) + (2 << 0));
                                 insertState(state, pre_cnt);
                             }
                         }
@@ -530,14 +506,14 @@ int main()
                             if (n > now_x && 0 == cells[now_x + 1][now_y])
                             {
                                 // 2
-                                state = setCellState(state, now_y, st << 4);
+                                setCellState(state, now_y, st << 4);
                                 insertState(state, pre_cnt);
                             }
 
                             if (m > now_y && 0 == cells[now_x][now_y + 1])
                             {
                                 // 0
-                                state = setCellState(state, now_y, st << 0);
+                                setCellState(state, now_y, st << 0);
                                 insertState(state, pre_cnt);
                             }
                         }
@@ -546,21 +522,21 @@ int main()
                             if (2 == st)
                             {
                                 // 1, 1
-                                state = setCellState(state, now_y, 0);
+                                setCellState(state, now_y, 0);
                                 state = proc11(state, now_y);
                                 insertState(state, pre_cnt);
                             }
                             else if (4 == st)
                             {
                                 // 2, 2
-                                state = setCellState(state, now_y, 0);
+                                setCellState(state, now_y, 0);
                                 state = proc22(state, now_y);
                                 insertState(state, pre_cnt);
                             }
                             else
                             {
                                 // 1, 2 or 2, 1
-                                state = setCellState(state, now_y, 0);
+                                setCellState(state, now_y, 0);
                                 insertState(state, pre_cnt);
 
                                 if (pos1 < pos2)
@@ -714,19 +690,19 @@ int main()
                             {
                                 if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x + 1][now_y + 1])
                                 {
-                                    state = setState3(state, 2 * (now_y - 1), 9);
+                                    setState3(state, 2 * (now_y - 1), 9);
                                     insertState(state, pre_cnt);
                                 }
 
                                 if (0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                                 {
-                                    state = setState3(state, 2 * (now_y - 1), 33);
+                                    setState3(state, 2 * (now_y - 1), 33);
                                     insertState(state, pre_cnt);
                                 }
 
                                 if (0 == cells[now_x + 1][now_y + 1] && 0 == cells[now_x][now_y + 1])
                                 {
-                                    state = setState3(state, 2 * (now_y - 1), 36);
+                                    setState3(state, 2 * (now_y - 1), 36);
                                     insertState(state, pre_cnt);
                                 }
                             }
@@ -737,19 +713,19 @@ int main()
                             {
                                 if (1 < now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x + 1][now_y])
                                 {
-                                    state = setState3(state, 2 * (now_y - 1), 9);
+                                    setState3(state, 2 * (now_y - 1), 9);
                                     insertState(state, pre_cnt);
                                 }
 
                                 if (1 < now_y && m > now_y && 0 == cells[now_x + 1][now_y - 1] && 0 == cells[now_x][now_y + 1])
                                 {
-                                    state = setState3(state, 2 * (now_y - 1), 33);
+                                    setState3(state, 2 * (now_y - 1), 33);
                                     insertState(state, pre_cnt);
                                 }
 
                                 if (m > now_y && 0 == cells[now_x + 1][now_y] && 0 == cells[now_x][now_y + 1])
                                 {
-                                    state = setState3(state, 2 * (now_y - 1), 36);
+                                    setState3(state, 2 * (now_y - 1), 36);
                                     insertState(state, pre_cnt);
                                 }
                             }
@@ -761,13 +737,13 @@ int main()
                         {
                             if (n > now_x && 0 == cells[now_x + 1][now_y])
                             {
-                                state = setState3(state, 2 * (now_y - 1), st);
+                                setState3(state, 2 * (now_y - 1), st);
                                 insertState(state, pre_cnt);
                             }
 
                             if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1])
                             {
-                                state = setState3(state, 2 * (now_y - 1), st * 4);
+                                setState3(state, 2 * (now_y - 1), st * 4);
                                 insertState(state, pre_cnt);
                             }
                         }
@@ -775,20 +751,20 @@ int main()
                         {
                             if (n > now_x && 1 < now_y && 0 == cells[now_x + 1][now_y - 1])
                             {
-                                state = setState3(state, 2 * (now_y - 1), st);
+                                setState3(state, 2 * (now_y - 1), st);
                                 insertState(state, pre_cnt);
                             }
 
                             if (n > now_x && 0 == cells[now_x + 1][now_y])
                             {
-                                state = setState3(state, 2 * (now_y - 1), st * 4);
+                                setState3(state, 2 * (now_y - 1), st * 4);
                                 insertState(state, pre_cnt);
                             }
                         }
 
                         if (m > now_y && 0 == cells[now_x][now_y + 1])
                         {
-                            state = setState3(state, 2 * (now_y - 1), st * 16);
+                            setState3(state, 2 * (now_y - 1), st * 16);
                             insertState(state, pre_cnt);
                         }
                     }
@@ -797,7 +773,7 @@ int main()
                         if (2 == st)
                         {
                             // 1, 1
-                            state = setState3(state, 2 * (now_y - 1), 0);
+                            setState3(state, 2 * (now_y - 1), 0);
 
                             int pos = 2 * now_y + 1;
                             int s = 1;
@@ -825,7 +801,7 @@ int main()
                         else if (4 == st)
                         {
                             // 2, 2
-                            state = setState3(state, 2 * (now_y - 1), 0);
+                            setState3(state, 2 * (now_y - 1), 0);
 
                             int pos = 2 * (now_y - 1) - 1;
                             int s = 1;
@@ -853,7 +829,7 @@ int main()
                         else if (3 == st)
                         {
                             // 1, 2 or 2, 1
-                            state = setState3(state, 2 * (now_y - 1), 0);
+                            setState3(state, 2 * (now_y - 1), 0);
                             insertState(state, pre_cnt);
 
                             if (end_x == now_x && end_y == now_y)

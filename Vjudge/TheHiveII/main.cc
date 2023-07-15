@@ -51,17 +51,9 @@ unsigned char cells[MAX_N + 1][MAX_M + 1]; // 1 - obstacle
     ST &= ~(((long long)MASK3) << ((POS) * BITS)); \
     ST |= ((long long)(VAL)) << ((POS) * BITS);
 
-inline long long setState(long long state, int pos, int val)
-{
-    long long ret = state;
-
-    // clear
-    ret &= ~(((long long)MASK) << (pos * 2));
-
-    ret |= ((long long)val) << (pos * 2);
-
-    return ret;
-}
+#define setState(ST, POS, VAL) \
+    ST &= ~(((long long)MASK) << ((POS) * 2));\
+    ST |= ((long long)(VAL)) << ((POS) * 2);
 
 #define getState2(ST, POS)  ((ST) >> ((POS) * 2)) & MASK
 

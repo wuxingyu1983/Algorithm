@@ -348,7 +348,7 @@ int main()
 
                         if (n > now_x && m > now_y && 0 == cells[now_x + 1][now_y + 1])
                         {
-                            state = setState(state, 2 * (now_y - 1), st * 4);
+                            state = setState3(state, 2 * (now_y - 1), st * 4);
                             unordered_map<long long, int>::iterator it = cnts[1 - act].find(state);
                             if (it != cnts[1 - act].end())
                             {

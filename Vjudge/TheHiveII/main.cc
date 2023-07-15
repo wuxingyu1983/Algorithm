@@ -75,25 +75,6 @@ inline long long setState3(long long state, int pos, int val)
     return ret;
 }
 
-inline int getState(long long st, int cell, int pos)
-{
-    int ret = 0;
-    cell--;
-
-    ret = (st >> (cell * CELL_BITS + pos * ST_BITS)) & MASK;
-
-    return ret;
-}
-
-inline int getState(long long st, int pos)
-{
-    int ret = 0;
-
-    ret = (st >> (pos * 2)) & MASK;
-
-    return ret;
-}
-
 inline long long setState(long long state, int pos, int val)
 {
     long long ret = state;
@@ -105,6 +86,10 @@ inline long long setState(long long state, int pos, int val)
 
     return ret;
 }
+
+#define getState2(ST, POS)  ((ST) >> ((POS) * 2)) & MASK
+
+#define getState(ST, CELL, POS) ((ST) >> (((CELL) - 1) * CELL_BITS + (POS) * ST_BITS)) & MASK
 
 unordered_map<long long, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
 int act = 0;                           // 当前生效的 map
@@ -179,8 +164,6 @@ inline long long proc22(long long state, int pos)
 
     return state;
 }
-
-// inline void insertState(long long state, long long pre_cnt)
 
 #define insertState(ST, CNT)   \
 {\
@@ -702,9 +685,9 @@ int main()
                         state <<= 2 * BITS;
                     }
 
-                    int i = getState(state, 2 * (now_y - 1));
-                    int j = getState(state, 2 * (now_y - 1) + 1);
-                    int k = getState(state, 2 * now_y);
+                    int i = getState2(state, 2 * (now_y - 1));
+                    int j = getState2(state, 2 * (now_y - 1) + 1);
+                    int k = getState2(state, 2 * now_y);
 
                     int cnt = 0;
                     int st = i + j + k;
@@ -820,7 +803,7 @@ int main()
                             int s = 1;
                             while (pos <= m * 2)
                             {
-                                int st = getState(state, pos);
+                                int st = getState2(state, pos);
                                 if (1 == st)
                                 {
                                     s++;
@@ -848,7 +831,7 @@ int main()
                             int s = 1;
                             while (0 <= pos)
                             {
-                                int st = getState(state, pos);
+                                int st = getState2(state, pos);
                                 if (2 == st)
                                 {
                                     s++;

@@ -23,12 +23,9 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_H 13    // row
-#define MAX_W 30    // col
-#define BITS 2
-#define MASK 3
-#define MASK3 63
-#define Q_SIZE  2320000     // line queue size
+#define BITS 1
+#define MASK 1
+#define Q_SIZE 12320000 // line queue size
 
 class StAndCnt
 {
@@ -44,31 +41,63 @@ public:
 
 StAndCnt qs[2][Q_SIZE];
 int qTail[2];
-int n, m;
+int n, m, mod;
 unordered_map<int, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
-int act = 0;                           // 当前生效的 map
+int act = 0;                     // 当前生效的 map
 
-#define getState(ST, POS)  ((ST) >> ((POS) * 2)) & MASK
+#define getState(ST, POS) ((ST) >> (POS)) & MASK
 
 #define setState(ST, POS, VAL)    \
-    ST &= ~((MASK) << ((POS)*2)); \
-    ST |= ((VAL)) << ((POS)*2);
+    ST &= ~((MASK) << (POS)); \
+    ST |= ((VAL)) << (POS);
 
-#define insertState(ST, CNT)                                                 \
-    {                                                                        \
+#define insertState(ST, CNT)                                           \
+    {                                                                  \
         unordered_map<int, int>::iterator it = cnts[1 - act].find(ST); \
-        if (it != cnts[1 - act].end())                                       \
-        {                                                                    \
-            qs[1 - act][it->second].cnt = CNT;                              \
-        }                                                                    \
-        else                                                                 \
-        {                                                                    \
-            qs[1 - act][qTail[1 - act]].st = ST;                             \
-            qs[1 - act][qTail[1 - act]].cnt = CNT;                           \
-            cnts[1 - act][state] = qTail[1 - act];                           \
-            qTail[1 - act]++;                                                \
-        }                                                                    \
+        if (it != cnts[1 - act].end())                                 \
+        {                                                              \
+            qs[1 - act][it->second].cnt += CNT;                        \
+            qs[1 - act][it->second].cnt %= mod;                        \
+        }                                                              \
+        else                                                           \
+        {                                                              \
+            qs[1 - act][qTail[1 - act]].st = ST;                       \
+            qs[1 - act][qTail[1 - act]].cnt = CNT;                     \
+            cnts[1 - act][state] = qTail[1 - act];                     \
+            qTail[1 - act]++;                                          \
+        }                                                              \
     }
+
+int getAns()
+{
+    int ret = 0;
+
+    for (size_t iQs = 0; iQs < qTail[act]; iQs++)
+    {
+        long long state = qs[act][iQs].st;
+        long long pre_cnt = qs[act][iQs].cnt;
+
+        int cnt = 0;
+        for (size_t i = 0; i < m; i++)
+        {
+            int st = getState(state, i);
+            if (st)
+            {
+                cnt++;
+            }
+        }
+
+        pre_cnt *= (n * m - cnt);
+        pre_cnt %= mod;
+
+        ret += pre_cnt;
+        ret %= mod;
+    }
+
+    ret >>= 1;
+
+    return ret;
+}
 
 class BearDestroys
 {
@@ -79,6 +108,7 @@ public:
 
         n = H;
         m = W;
+        mod = MOD;
 
         cnts[act][0] = 0;
         qs[act][0].st = 0;
@@ -97,6 +127,7 @@ public:
 
                 if (n < now_x)
                 {
+                    ret = getAns();
                     break;
                 }
             }
@@ -124,7 +155,7 @@ public:
                     if (m == now_y)
                     {
                         // 只能 “|”
-                        setState(state, now_y - 1, 1); 
+                        setState(state, now_y - 1, 1);
 
                         // x 2
                         pre_cnt *= 2;
@@ -150,7 +181,7 @@ public:
                         {
                             if (n == now_x)
                             {
-                                // 处理 "--"
+                                // 只能 "--"
                                 setState(state, now_y, 1);
 
                                 // x 2
@@ -168,9 +199,9 @@ public:
                                 insertState(state, pre_cnt);
 
                                 // 处理 "|"
-                                setState(state, now_y - 1, 0);
-                                setState(state, now_y, 1);
-                                
+                                setState(state, now_y - 1, 1);
+                                setState(state, now_y, 0);
+
                                 // x 1
                                 insertState(state, pre_cnt);
                             }
@@ -195,14 +226,23 @@ public:
                     insertState(state, pre_cnt);
                 }
             }
+
+            cnts[act].clear();
+            qTail[act] = 0;
+            act = 1 - act;
         }
 
         return ret;
     }
 };
 
-
 int main()
 {
+    BearDestroys solver;
+
+    int ans = solver.sumUp(20, 2, 584794877);
+
+    cout << ans << endl;
+
     return 0;
 }

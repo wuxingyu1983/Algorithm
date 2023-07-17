@@ -25,7 +25,7 @@ using namespace std;
 #define DEBUG 0
 #define BITS 1
 #define MASK 1
-#define Q_SIZE 12320000 // line queue size
+#define Q_SIZE 2320000 // line queue size
 
 class StAndCnt
 {
@@ -39,10 +39,10 @@ public:
     }
 };
 
-StAndCnt qs[2][Q_SIZE];
-int qTail[2];
+StAndCnt qs[3][Q_SIZE];
+int qTail[3];
 int n, m, mod;
-unordered_map<int, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
+unordered_map<int, int> cnts[3]; // key - state, value - state 在 qs 中的位置 index
 int act = 0;                     // 当前生效的 map
 
 #define getState(ST, POS) ((ST) >> (POS)) & MASK
@@ -120,7 +120,8 @@ public:
 
         while (qTail[act])
         {
-            int nIdx = (act + 1) % 2;
+            int nIdx = (act + 1) % 3;
+            int nnIdx = (act + 2) % 3;
             if (m == now_y)
             {
                 now_x++;
@@ -183,28 +184,29 @@ public:
                             if (n == now_x)
                             {
                                 // 只能 "--"
-                                setState(state, now_y, 1);
-
-                                // x 2
-                                pre_cnt *= 2;
+                                // x 4
+                                pre_cnt *= 4;
                                 pre_cnt %= MOD;
 
-                                insertState(nIdx, state, pre_cnt);
+                                insertState(nnIdx, state, pre_cnt);
                             }
                             else
                             {
-                                // 处理 "--"
-                                setState(state, now_y, 1);
-
-                                // x 1
-                                insertState(nIdx, state, pre_cnt);
-
                                 // 处理 "|"
                                 setState(state, now_y - 1, 1);
                                 setState(state, now_y, 0);
 
                                 // x 1
                                 insertState(nIdx, state, pre_cnt);
+
+                                // 处理 "--"
+                                setState(state, now_y - 1, 0);
+
+                                // x 2
+                                pre_cnt *= 2;
+                                pre_cnt %= MOD;
+
+                                insertState(nnIdx, state, pre_cnt);
                             }
                         }
                     }
@@ -241,7 +243,9 @@ int main()
 {
     BearDestroys solver;
 
-    int ans = solver.sumUp(13, 13, 584794877);
+    scanf("%d %d %d", &m, &n, &mod);
+
+    int ans = solver.sumUp(m, n, mod);
 
     cout << ans << endl;
 

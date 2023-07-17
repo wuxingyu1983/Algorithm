@@ -121,7 +121,61 @@ public:
 
                 if (0 == i && 0 == j)
                 {
+                    if (m == now_y)
+                    {
+                        // 只能 “|”
+                        setState(state, now_y - 1, 1); 
 
+                        // x 2
+                        pre_cnt *= 2;
+                        pre_cnt %= MOD;
+
+                        insertState(state, pre_cnt);
+                    }
+                    else
+                    {
+                        int k = getState(state, now_y + 1);
+                        if (k)
+                        {
+                            // 只能 "|"
+                            setState(state, now_y - 1, 1);
+
+                            // x 2
+                            pre_cnt *= 2;
+                            pre_cnt %= MOD;
+
+                            insertState(state, pre_cnt);
+                        }
+                        else
+                        {
+                            if (n == now_x)
+                            {
+                                // 处理 "--"
+                                setState(state, now_y, 1);
+
+                                // x 2
+                                pre_cnt *= 2;
+                                pre_cnt %= MOD;
+
+                                insertState(state, pre_cnt);
+                            }
+                            else
+                            {
+                                // 处理 "--"
+                                setState(state, now_y, 1);
+
+                                // x 1
+                                insertState(state, pre_cnt);
+
+                                // 处理 "|"
+                                setState(state, now_y - 1, 0);
+                                setState(state, now_y, 1);
+                                
+                                // x 1
+                                insertState(state, pre_cnt);
+                            }
+                        }
+                    }
                 }
                 else
                 {

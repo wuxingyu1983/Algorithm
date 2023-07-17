@@ -51,21 +51,21 @@ int act = 0;                     // 当前生效的 map
     ST &= ~((MASK) << (POS)); \
     ST |= ((VAL)) << (POS);
 
-#define insertState(ST, CNT)                                           \
-    {                                                                  \
-        unordered_map<int, int>::iterator it = cnts[1 - act].find(ST); \
-        if (it != cnts[1 - act].end())                                 \
-        {                                                              \
-            qs[1 - act][it->second].cnt += CNT;                        \
-            qs[1 - act][it->second].cnt %= mod;                        \
-        }                                                              \
-        else                                                           \
-        {                                                              \
-            qs[1 - act][qTail[1 - act]].st = ST;                       \
-            qs[1 - act][qTail[1 - act]].cnt = CNT;                     \
-            cnts[1 - act][state] = qTail[1 - act];                     \
-            qTail[1 - act]++;                                          \
-        }                                                              \
+#define insertState(IDX, ST, CNT)                                  \
+    {                                                              \
+        unordered_map<int, int>::iterator it = cnts[IDX].find(ST); \
+        if (it != cnts[IDX].end())                                 \
+        {                                                          \
+            qs[IDX][it->second].cnt += CNT;                        \
+            qs[IDX][it->second].cnt %= mod;                        \
+        }                                                          \
+        else                                                       \
+        {                                                          \
+            qs[IDX][qTail[IDX]].st = ST;                           \
+            qs[IDX][qTail[IDX]].cnt = CNT;                         \
+            cnts[IDX][state] = qTail[IDX];                         \
+            qTail[IDX]++;                                          \
+        }                                                          \
     }
 
 int getAns()
@@ -120,6 +120,7 @@ public:
 
         while (qTail[act])
         {
+            int nIdx = (act + 1) % 2;
             if (m == now_y)
             {
                 now_x++;
@@ -161,7 +162,7 @@ public:
                         pre_cnt *= 2;
                         pre_cnt %= MOD;
 
-                        insertState(state, pre_cnt);
+                        insertState(nIdx, state, pre_cnt);
                     }
                     else
                     {
@@ -175,7 +176,7 @@ public:
                             pre_cnt *= 2;
                             pre_cnt %= MOD;
 
-                            insertState(state, pre_cnt);
+                            insertState(nIdx, state, pre_cnt);
                         }
                         else
                         {
@@ -188,7 +189,7 @@ public:
                                 pre_cnt *= 2;
                                 pre_cnt %= MOD;
 
-                                insertState(state, pre_cnt);
+                                insertState(nIdx, state, pre_cnt);
                             }
                             else
                             {
@@ -196,14 +197,14 @@ public:
                                 setState(state, now_y, 1);
 
                                 // x 1
-                                insertState(state, pre_cnt);
+                                insertState(nIdx, state, pre_cnt);
 
                                 // 处理 "|"
                                 setState(state, now_y - 1, 1);
                                 setState(state, now_y, 0);
 
                                 // x 1
-                                insertState(state, pre_cnt);
+                                insertState(nIdx, state, pre_cnt);
                             }
                         }
                     }
@@ -223,13 +224,13 @@ public:
                         setState(state, now_y, 0);
                     }
 
-                    insertState(state, pre_cnt);
+                    insertState(nIdx, state, pre_cnt);
                 }
             }
 
             cnts[act].clear();
             qTail[act] = 0;
-            act = 1 - act;
+            act = nIdx;
         }
 
         return ret;
@@ -240,7 +241,7 @@ int main()
 {
     BearDestroys solver;
 
-    int ans = solver.sumUp(20, 2, 584794877);
+    int ans = solver.sumUp(13, 13, 584794877);
 
     cout << ans << endl;
 

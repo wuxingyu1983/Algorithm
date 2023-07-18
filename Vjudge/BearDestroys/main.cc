@@ -25,7 +25,7 @@ using namespace std;
 #define DEBUG 0
 #define BITS 1
 #define MASK 1
-#define Q_SIZE 12320000 // line queue size
+#define Q_SIZE 2320000 // line queue size
 
 class StAndCnt
 {
@@ -65,8 +65,8 @@ int act = 0;                           // 当前生效的 map
         else                                                             \
         {                                                                \
             qs[IDX][qTail[IDX]].st = ST;                                 \
-            qs[IDX][qTail[IDX]].p = P;                                   \
-            qs[IDX][qTail[IDX]].cnt = CNT;                               \
+            qs[IDX][qTail[IDX]].p = P % mod;                             \
+            qs[IDX][qTail[IDX]].cnt = CNT % mod;                         \
             cnts[IDX][state] = qTail[IDX];                               \
             qTail[IDX]++;                                                \
         }                                                                \
@@ -155,11 +155,8 @@ private:
                         if (n == now_x)
                         {
                             // x 2
-                            p *= 2;
-                            p %= mod;
-
-                            pre_cnt *= 2;
-                            pre_cnt %= mod;
+                            p <<= 1;
+                            pre_cnt <<= 1;
 
                             insertState4(nIdx, state, p, pre_cnt);
                         }
@@ -168,12 +165,9 @@ private:
                             setState(state, now_y - 1, 1);
 
                             // x 4
-                            p *= 4;
-                            p %= mod;
-
-                            pre_cnt *= 4;
+                            p <<= 2;
+                            pre_cnt <<= 2;
                             pre_cnt += p;
-                            pre_cnt %= mod;
 
                             insertState4(nIdx, state, p, pre_cnt);
                         }
@@ -187,11 +181,8 @@ private:
                             if (n == now_x)
                             {
                                 // x 2
-                                p *= 2;
-                                p %= mod;
-
-                                pre_cnt *= 2;
-                                pre_cnt %= mod;
+                                p <<= 1;
+                                pre_cnt <<= 1;
 
                                 insertState4(nIdx, state, p, pre_cnt);
                             }
@@ -200,12 +191,9 @@ private:
                                 setState(state, now_y - 1, 1);
 
                                 // x 4
-                                p *= 4;
-                                p %= mod;
-
-                                pre_cnt *= 4;
+                                p <<= 2;
+                                pre_cnt <<= 2;
                                 pre_cnt += p;
-                                pre_cnt %= mod;
 
                                 insertState4(nIdx, state, p, pre_cnt);
                             }
@@ -218,12 +206,9 @@ private:
                                 setState(state, now_y, 1);
 
                                 // x 4
-                                p *= 4;
-                                p %= mod;
-
-                                pre_cnt *= 4;
+                                p <<= 2;
+                                pre_cnt <<= 2;
                                 pre_cnt += p;
-                                pre_cnt %= mod;
 
                                 insertState4(nIdx, state, p, pre_cnt);
                             }
@@ -233,12 +218,9 @@ private:
                                 setState(state, now_y - 1, 1);
 
                                 // x 2
-                                p *= 2;
-                                p %= mod;
-
-                                pre_cnt *= 2;
+                                p <<= 1;
+                                pre_cnt <<= 1;
                                 pre_cnt += p;
-                                pre_cnt %= mod;
 
                                 insertState4(nIdx, state, p, pre_cnt);
 
@@ -312,11 +294,8 @@ private:
                         if (n == now_x)
                         {
                             // x 2
-                            p *= 2;
-                            p %= mod;
-
-                            pre_cnt *= 2;
-                            pre_cnt %= mod;
+                            p <<= 1;
+                            pre_cnt <<= 1;
 
                             insertState4(nIdx, state, p, pre_cnt);
                         }
@@ -325,12 +304,9 @@ private:
                             setState(state, pos, 1);
 
                             // x 4
-                            p *= 4;
-                            p %= mod;
-
-                            pre_cnt *= 4;
+                            p <<= 2;
+                            pre_cnt <<= 2;
                             pre_cnt += p;
-                            pre_cnt %= mod;
 
                             insertState4(nIdx, state, p, pre_cnt);
                         }
@@ -344,11 +320,8 @@ private:
                             if (n == now_x)
                             {
                                 // x 2
-                                p *= 2;
-                                p %= mod;
-
-                                pre_cnt *= 2;
-                                pre_cnt %= mod;
+                                p <<= 1;
+                                pre_cnt <<= 1;
 
                                 insertState4(nIdx, state, p, pre_cnt);
                             }
@@ -357,12 +330,9 @@ private:
                                 setState(state, pos, 1);
 
                                 // x 4
-                                p *= 4;
-                                p %= mod;
-
-                                pre_cnt *= 4;
+                                p <<= 2;
+                                pre_cnt <<= 2;
                                 pre_cnt += p;
-                                pre_cnt %= mod;
 
                                 insertState4(nIdx, state, p, pre_cnt);
                             }
@@ -375,12 +345,9 @@ private:
                                 setState(state, pos + 1, 1);
 
                                 // x 4
-                                p *= 4;
-                                p %= mod;
-
-                                pre_cnt *= 4;
+                                p <<= 2;
+                                pre_cnt <<= 2;
                                 pre_cnt += p;
-                                pre_cnt %= mod;
 
                                 insertState4(nIdx, state, p, pre_cnt);
                             }
@@ -390,12 +357,9 @@ private:
                                 setState(state, pos + 1, 1);
 
                                 // x 2
-                                p *= 2;
-                                p %= mod;
-
-                                pre_cnt *= 2;
+                                p <<= 1;
+                                pre_cnt <<= 1;
                                 pre_cnt += p;
-                                pre_cnt %= mod;
 
                                 insertState4(nIdx, state, p, pre_cnt);
 

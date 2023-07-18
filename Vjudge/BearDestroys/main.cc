@@ -40,10 +40,10 @@ public:
     }
 };
 
-StAndCnt qs[3][Q_SIZE];
-int qTail[3];
+StAndCnt qs[2][Q_SIZE];
+int qTail[2];
 int n, m, mod;
-unordered_map<long long, int> cnts[3]; // key - state, value - state 在 qs 中的位置 index
+unordered_map<long long, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
 int act = 0;                           // 当前生效的 map
 
 #define getState(ST, POS) ((ST) >> (POS)) & MASK
@@ -51,23 +51,6 @@ int act = 0;                           // 当前生效的 map
 #define setState(ST, POS, VAL)             \
     ST &= ~(((long long)(MASK)) << (POS)); \
     ST |= ((long long)(VAL)) << (POS);
-
-#define insertState(IDX, ST, CNT)                                        \
-    {                                                                    \
-        unordered_map<long long, int>::iterator it = cnts[IDX].find(ST); \
-        if (it != cnts[IDX].end())                                       \
-        {                                                                \
-            qs[IDX][it->second].cnt += CNT;                              \
-            qs[IDX][it->second].cnt %= mod;                              \
-        }                                                                \
-        else                                                             \
-        {                                                                \
-            qs[IDX][qTail[IDX]].st = ST;                                 \
-            qs[IDX][qTail[IDX]].cnt = CNT;                               \
-            cnts[IDX][state] = qTail[IDX];                               \
-            qTail[IDX]++;                                                \
-        }                                                                \
-    }
 
 #define insertState4(IDX, ST, P, CNT)                                    \
     {                                                                    \
@@ -89,35 +72,6 @@ int act = 0;                           // 当前生效的 map
         }                                                                \
     }
 
-int getAns()
-{
-    int ret = 0;
-
-    for (size_t iQs = 0; iQs < qTail[act]; iQs++)
-    {
-        long long state = qs[act][iQs].st;
-        long long pre_cnt = qs[act][iQs].cnt;
-
-        int cnt = 0;
-        for (size_t i = 0; i < m; i++)
-        {
-            int st = getState(state, i);
-            if (st)
-            {
-                cnt++;
-            }
-        }
-
-        pre_cnt *= (n * m - cnt) >> 1;
-        pre_cnt %= mod;
-
-        ret += pre_cnt;
-        ret %= mod;
-    }
-
-    return ret;
-}
-
 class BearDestroys
 {
 public:
@@ -129,8 +83,7 @@ public:
 
         if (m > n)
         {
-            //            return sumUpW();
-            return sumUpH();
+            return sumUpW();
         }
         else
         {
@@ -294,7 +247,6 @@ private:
                                 setState(state, now_y, 1);
 
                                 // x 2
-
                                 insertState4(nIdx, state, p, pre_cnt);
                             }
                         }
@@ -330,7 +282,8 @@ private:
 
         cnts[act][0] = 0;
         qs[act][0].st = 0;
-        qs[act][0].cnt = 1;
+        qs[act][0].p = 1;
+        qs[act][0].cnt = 0;
         qTail[act]++;
 
         int now_x = 1;
@@ -338,13 +291,14 @@ private:
 
         while (qTail[act])
         {
-            int nIdx = (act + 1) % 3;
+            int nIdx = (act + 1) % 2;
             int pos = n - now_x + now_y - 1;
 
             // (now_x, now_y) 将要处理的 cell
             for (size_t iQs = 0; iQs < qTail[act]; iQs++)
             {
                 long long state = qs[act][iQs].st;
+                long long p = qs[act][iQs].p;
                 long long pre_cnt = qs[act][iQs].cnt;
 
                 int i = getState(state, pos);
@@ -355,13 +309,31 @@ private:
                     if (m == now_y)
                     {
                         // 只能 “|”
-                        setState(state, pos, 1);
+                        if (n == now_x)
+                        {
+                            // x 2
+                            p *= 2;
+                            p %= mod;
 
-                        // x 2
-                        pre_cnt *= 2;
-                        pre_cnt %= mod;
+                            pre_cnt *= 2;
+                            pre_cnt %= mod;
 
-                        insertState(nIdx, state, pre_cnt);
+                            insertState4(nIdx, state, p, pre_cnt);
+                        }
+                        else
+                        {
+                            setState(state, pos, 1);
+
+                            // x 4
+                            p *= 4;
+                            p %= mod;
+
+                            pre_cnt *= 4;
+                            pre_cnt += p;
+                            pre_cnt %= mod;
+
+                            insertState4(nIdx, state, p, pre_cnt);
+                        }
                     }
                     else
                     {
@@ -369,13 +341,31 @@ private:
                         if (k)
                         {
                             // 只能 "|"
-                            setState(state, pos, 1);
+                            if (n == now_x)
+                            {
+                                // x 2
+                                p *= 2;
+                                p %= mod;
 
-                            // x 2
-                            pre_cnt *= 2;
-                            pre_cnt %= mod;
+                                pre_cnt *= 2;
+                                pre_cnt %= mod;
 
-                            insertState(nIdx, state, pre_cnt);
+                                insertState4(nIdx, state, p, pre_cnt);
+                            }
+                            else
+                            {
+                                setState(state, pos, 1);
+
+                                // x 4
+                                p *= 4;
+                                p %= mod;
+
+                                pre_cnt *= 4;
+                                pre_cnt += p;
+                                pre_cnt %= mod;
+
+                                insertState4(nIdx, state, p, pre_cnt);
+                            }
                         }
                         else
                         {
@@ -384,36 +374,44 @@ private:
                                 // 只能 "--"
                                 setState(state, pos + 1, 1);
 
-                                // x 2
-                                pre_cnt *= 2;
+                                // x 4
+                                p *= 4;
+                                p %= mod;
+
+                                pre_cnt *= 4;
+                                pre_cnt += p;
                                 pre_cnt %= mod;
 
-                                insertState(nIdx, state, pre_cnt);
+                                insertState4(nIdx, state, p, pre_cnt);
                             }
                             else
                             {
                                 // 处理 "--"
                                 setState(state, pos + 1, 1);
 
-                                // x 1
-                                insertState(nIdx, state, pre_cnt);
+                                // x 2
+                                p *= 2;
+                                p %= mod;
+
+                                pre_cnt *= 2;
+                                pre_cnt += p;
+                                pre_cnt %= mod;
+
+                                insertState4(nIdx, state, p, pre_cnt);
 
                                 // 处理 "|"
                                 setState(state, pos, 1);
                                 setState(state, pos + 1, 0);
 
-                                // x 1
-                                insertState(nIdx, state, pre_cnt);
+                                // x 2
+                                insertState4(nIdx, state, p, pre_cnt);
                             }
                         }
                     }
                 }
                 else
                 {
-                    // x 2
-                    pre_cnt *= 2;
-                    pre_cnt %= mod;
-
+                    // do nothing
                     if (i)
                     {
                         setState(state, pos, 0);
@@ -423,7 +421,7 @@ private:
                         setState(state, pos + 1, 0);
                     }
 
-                    insertState(nIdx, state, pre_cnt);
+                    insertState4(nIdx, state, p, pre_cnt);
                 }
             }
 
@@ -434,7 +432,14 @@ private:
 
             if (n == now_x && m == now_y)
             {
-                ret = getAns();
+                for (size_t iQs = 0; iQs < qTail[act]; iQs++)
+                {
+                    long long state = qs[act][iQs].st;
+                    long long pre_cnt = qs[act][iQs].cnt;
+
+                    ret += pre_cnt;
+                    ret %= mod;
+                }
                 break;
             }
             else

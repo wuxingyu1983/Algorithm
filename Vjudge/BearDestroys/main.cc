@@ -253,6 +253,139 @@ private:
     {
         int ret = 0;
 
+        cnts[act][0] = 0;
+        qs[act][0].st = 0;
+        qs[act][0].cnt = 1;
+        qTail[act]++;
+
+        int now_x = 1;
+        int now_y = 1;
+
+        while (qTail[act])
+        {
+            int nIdx = (act + 1) % 3;
+            int pos = n - now_x + now_y - 1;
+
+            // (now_x, now_y) 将要处理的 cell
+            for (size_t iQs = 0; iQs < qTail[act]; iQs++)
+            {
+                long long state = qs[act][iQs].st;
+                long long pre_cnt = qs[act][iQs].cnt;
+
+                int i = getState(state, pos);
+                int j = getState(state, pos + 1);
+
+                if (0 == i && 0 == j)
+                {
+                    if (m == now_y)
+                    {
+                        // 只能 “|”
+                        setState(state, pos, 1);
+
+                        // x 2
+                        pre_cnt *= 2;
+                        pre_cnt %= mod;
+
+                        insertState(nIdx, state, pre_cnt);
+                    }
+                    else
+                    {
+                        int k = getState(state, pos + 2);
+                        if (k)
+                        {
+                            // 只能 "|"
+                            setState(state, pos, 1);
+
+                            // x 2
+                            pre_cnt *= 2;
+                            pre_cnt %= mod;
+
+                            insertState(nIdx, state, pre_cnt);
+                        }
+                        else
+                        {
+                            if (n == now_x)
+                            {
+                                // 只能 "--"
+                                setState(state, pos + 1, 1);
+
+                                // x 2
+                                pre_cnt *= 2;
+                                pre_cnt %= mod;
+
+                                insertState(nIdx, state, pre_cnt);
+                            }
+                            else
+                            {
+                                // 处理 "--"
+                                setState(state, pos + 1, 1);
+
+                                // x 1
+                                insertState(nIdx, state, pre_cnt);
+
+                                // 处理 "|"
+                                setState(state, pos, 1);
+                                setState(state, pos + 1, 0);
+
+                                // x 1
+                                insertState(nIdx, state, pre_cnt);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // x 2
+                    pre_cnt *= 2;
+                    pre_cnt %= mod;
+
+                    if (i)
+                    {
+                        setState(state, pos, 0);
+                    }
+                    else
+                    {
+                        setState(state, pos + 1, 0);
+                    }
+
+                    insertState(nIdx, state, pre_cnt);
+                }
+            }
+
+            // 处理 now_x, now_y, act
+            cnts[act].clear();
+            qTail[act] = 0;
+            act = nIdx;
+
+            if (n == now_x && m == now_y)
+            {
+                ret = getAns();
+                break;
+            }
+            else
+            {
+                if (1 == now_y || n == now_x)
+                {
+                    int sum = now_x + now_y + 1;
+                    if (m >= (sum - 1))
+                    {
+                        now_x = 1;
+                        now_y = sum - now_x;
+                    }
+                    else
+                    {
+                        now_y = m;
+                        now_x = sum - now_y;
+                    }
+                }
+                else
+                {
+                    now_x++;
+                    now_y--;
+                }
+            }
+        }
+
         return ret;
     }
 };

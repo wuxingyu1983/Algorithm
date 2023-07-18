@@ -47,25 +47,25 @@ int act = 0;                     // 当前生效的 map
 
 #define getState(ST, POS) ((ST) >> (POS)) & MASK
 
-#define setState(ST, POS, VAL)    \
+#define setState(ST, POS, VAL)             \
     ST &= ~(((long long)(MASK)) << (POS)); \
     ST |= ((long long)(VAL)) << (POS);
 
-#define insertState(IDX, ST, CNT)                                  \
-    {                                                              \
+#define insertState(IDX, ST, CNT)                                        \
+    {                                                                    \
         unordered_map<long long, int>::iterator it = cnts[IDX].find(ST); \
-        if (it != cnts[IDX].end())                                 \
-        {                                                          \
-            qs[IDX][it->second].cnt += CNT;                        \
-            qs[IDX][it->second].cnt %= mod;                        \
-        }                                                          \
-        else                                                       \
-        {                                                          \
-            qs[IDX][qTail[IDX]].st = ST;                           \
-            qs[IDX][qTail[IDX]].cnt = CNT;                         \
-            cnts[IDX][state] = qTail[IDX];                         \
-            qTail[IDX]++;                                          \
-        }                                                          \
+        if (it != cnts[IDX].end())                                       \
+        {                                                                \
+            qs[IDX][it->second].cnt += CNT;                              \
+            qs[IDX][it->second].cnt %= mod;                              \
+        }                                                                \
+        else                                                             \
+        {                                                                \
+            qs[IDX][qTail[IDX]].st = ST;                                 \
+            qs[IDX][qTail[IDX]].cnt = CNT;                               \
+            cnts[IDX][state] = qTail[IDX];                               \
+            qTail[IDX]++;                                                \
+        }                                                                \
     }
 
 int getAns()
@@ -102,11 +102,24 @@ class BearDestroys
 public:
     int sumUp(int W, int H, int MOD)
     {
-        int ret = 0;
-
         n = H;
         m = W;
         mod = MOD;
+
+        if (W > H)
+        {
+            return sumUpW();
+        }
+        else
+        {
+            return sumUpH();
+        }
+    }
+
+private:
+    int sumUpH()
+    {
+        int ret = 0;
 
         cnts[act][0] = 0;
         qs[act][0].st = 0;
@@ -159,7 +172,7 @@ public:
 
                         // x 2
                         pre_cnt *= 2;
-                        pre_cnt %= MOD;
+                        pre_cnt %= mod;
 
                         insertState(nIdx, state, pre_cnt);
                     }
@@ -173,7 +186,7 @@ public:
 
                             // x 2
                             pre_cnt *= 2;
-                            pre_cnt %= MOD;
+                            pre_cnt %= mod;
 
                             insertState(nIdx, state, pre_cnt);
                         }
@@ -184,7 +197,7 @@ public:
                                 // 只能 "--"
                                 // x 4
                                 pre_cnt *= 4;
-                                pre_cnt %= MOD;
+                                pre_cnt %= mod;
 
                                 insertState(nnIdx, state, pre_cnt);
                             }
@@ -202,7 +215,7 @@ public:
 
                                 // x 2
                                 pre_cnt *= 2;
-                                pre_cnt %= MOD;
+                                pre_cnt %= mod;
 
                                 insertState(nnIdx, state, pre_cnt);
                             }
@@ -213,7 +226,7 @@ public:
                 {
                     // x 2
                     pre_cnt *= 2;
-                    pre_cnt %= MOD;
+                    pre_cnt %= mod;
 
                     if (i)
                     {
@@ -232,6 +245,13 @@ public:
             qTail[act] = 0;
             act = nIdx;
         }
+
+        return ret;
+    }
+
+    int sumUpW()
+    {
+        int ret = 0;
 
         return ret;
     }

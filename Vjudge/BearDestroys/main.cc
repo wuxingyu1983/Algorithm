@@ -87,14 +87,12 @@ int getAns()
             }
         }
 
-        pre_cnt *= (n * m - cnt);
+        pre_cnt *= (n * m - cnt) >> 1;
         pre_cnt %= mod;
 
         ret += pre_cnt;
         ret %= mod;
     }
-
-    ret >>= 1;
 
     return ret;
 }

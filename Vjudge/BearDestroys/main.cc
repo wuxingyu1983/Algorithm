@@ -30,7 +30,7 @@ using namespace std;
 class StAndCnt
 {
 public:
-    int st;
+    long long st;
     int cnt;
 
     StAndCnt()
@@ -42,18 +42,18 @@ public:
 StAndCnt qs[3][Q_SIZE];
 int qTail[3];
 int n, m, mod;
-unordered_map<int, int> cnts[3]; // key - state, value - state 在 qs 中的位置 index
+unordered_map<long long, int> cnts[3]; // key - state, value - state 在 qs 中的位置 index
 int act = 0;                     // 当前生效的 map
 
 #define getState(ST, POS) ((ST) >> (POS)) & MASK
 
 #define setState(ST, POS, VAL)    \
-    ST &= ~((MASK) << (POS)); \
-    ST |= ((VAL)) << (POS);
+    ST &= ~(((long long)(MASK)) << (POS)); \
+    ST |= ((long long)(VAL)) << (POS);
 
 #define insertState(IDX, ST, CNT)                                  \
     {                                                              \
-        unordered_map<int, int>::iterator it = cnts[IDX].find(ST); \
+        unordered_map<long long, int>::iterator it = cnts[IDX].find(ST); \
         if (it != cnts[IDX].end())                                 \
         {                                                          \
             qs[IDX][it->second].cnt += CNT;                        \

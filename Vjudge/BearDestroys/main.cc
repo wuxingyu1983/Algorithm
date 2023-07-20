@@ -25,7 +25,7 @@ using namespace std;
 #define DEBUG 0
 #define BITS 1
 #define MASK 1
-#define Q_SIZE 50000 // line queue size
+#define Q_SIZE 40000 // line queue size
 
 class StAndCnt
 {
@@ -541,11 +541,13 @@ private:
     }
 };
 
-int main()
+int main(int argc, char** argv)
 {
     BearDestroys solver;
 
-    scanf("%d %d %d", &m, &n, &mod);
+    m = atoi(argv[1]);
+    n = atoi(argv[2]);
+    mod = atoi(argv[3]);
 
     int ans = solver.sumUp(m, n, mod);
 

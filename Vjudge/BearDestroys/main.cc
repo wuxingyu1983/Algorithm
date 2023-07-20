@@ -101,24 +101,27 @@ class BearDestroys
 public:
     int sumUp(int W, int H, int MOD)
     {
+        int ret = 0;
         n = H;
         m = W;
         mod = MOD;
 
         if (m > n)
         {
-            return sumUpW();
+            ret = sumUpW();
         }
         else
         {
-            return sumUpH();
+            ret = sumUpH();
         }
+
+        return ret;
     }
 
 private:
     int sumUpH()
     {
-        int ret = 0;
+        long long ret = 0;
 
         cnts[act][0] = 0;
         qs[act][0].st = 0;

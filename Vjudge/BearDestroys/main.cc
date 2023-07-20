@@ -25,14 +25,14 @@ using namespace std;
 #define DEBUG 0
 #define BITS 1
 #define MASK 1
-#define Q_SIZE 20000 // line queue size
+#define Q_SIZE 50000 // line queue size
 
 class StAndCnt
 {
 public:
     long long st;
-    int cnt;
-    int p;
+    long long cnt;
+    long long p;
 
     StAndCnt()
     {
@@ -71,7 +71,7 @@ int wQTail[16][33];
             qs[IDX][qTail[IDX]].st = ST;                                 \
             qs[IDX][qTail[IDX]].p = P % mod;                             \
             qs[IDX][qTail[IDX]].cnt = CNT % mod;                         \
-            cnts[IDX][ST] = qTail[IDX];                               \
+            cnts[IDX][ST] = qTail[IDX];                                  \
             qTail[IDX]++;                                                \
         }                                                                \
     }
@@ -88,11 +88,11 @@ int wQTail[16][33];
         }                                                                  \
         else                                                               \
         {                                                                  \
-            wQs[X][Y][wQTail[X][Y]].st = ST;                                 \
-            wQs[X][Y][wQTail[X][Y]].p = P % mod;                             \
-            wQs[X][Y][wQTail[X][Y]].cnt = CNT % mod;                         \
-            wCnts[X][Y][ST] = wQTail[X][Y];                              \
-            wQTail[X][Y]++;                                                 \
+            wQs[X][Y][wQTail[X][Y]].st = ST;                               \
+            wQs[X][Y][wQTail[X][Y]].p = P % mod;                           \
+            wQs[X][Y][wQTail[X][Y]].cnt = CNT % mod;                       \
+            wCnts[X][Y][ST] = wQTail[X][Y];                                \
+            wQTail[X][Y]++;                                                \
         }                                                                  \
     }
 
@@ -283,7 +283,7 @@ private:
 
     int sumUpW()
     {
-        int ret = 0;
+        long long ret = 0;
 
         int mask = (1 << n) - 1;
 
@@ -294,7 +294,7 @@ private:
         wQs[now_x][now_y][0].st = 0;
         wQs[now_x][now_y][0].p = 1;
         wQs[now_x][now_y][0].cnt = 0;
-        wQTail[now_x][now_y] ++;
+        wQTail[now_x][now_y]++;
 
         while (wQTail[now_x][now_y])
         {
@@ -402,7 +402,7 @@ private:
                                 pre_cnt <<= 2;
                                 pre_cnt += p;
                             }
-                            
+
                             if (m == now_y)
                             {
                                 ret += pre_cnt;
@@ -437,7 +437,7 @@ private:
                                 pre_cnt <<= 1;
                                 pre_cnt += p;
                             }
-                            
+
                             if (m == now_y)
                             {
                                 ret += pre_cnt;
@@ -462,7 +462,7 @@ private:
                         // 左边、上边的 cell 都占用了，该 cell 暂时 do nothing
                         setState(state, upPos, 0);
                         insertState2D(nxt_x, nxt_y, state, p, pre_cnt);
-                        
+
                         if (n == now_x && m == now_y)
                         {
                             ret += pre_cnt * 2;
@@ -482,7 +482,7 @@ private:
                             pre_cnt <<= 2;
                             pre_cnt += p;
                             insertState2D(nxt_x, nxt_y, state, p, pre_cnt);
-                            
+
                             if (m == now_y)
                             {
                                 ret += pre_cnt;
@@ -504,7 +504,7 @@ private:
                             // left 的 cell 和下面的 cell 组成 “|”
                             setState(state, upPos, 0);
                             setState(state, leftPos, 1);
-                            
+
                             // 默认 x 2
                             if (n - 1 == now_x && 1 <= now_y - 2)
                             {
@@ -516,7 +516,7 @@ private:
                                     pre_cnt <<= 1;
                                 }
                             }
-                            
+
                             insertState2D(nnxt_x, nnxt_y, state, p, pre_cnt);
                         }
                     }

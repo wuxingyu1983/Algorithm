@@ -1,4 +1,5 @@
 // https://vjudge.net/problem/TopCoder-14069
+// https://blog.csdn.net/qq_34454069/article/details/83420222
 
 #include <cmath>
 #include <cstdio>

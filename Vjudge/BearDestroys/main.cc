@@ -25,12 +25,12 @@ using namespace std;
 #define DEBUG 0
 #define BITS 1
 #define MASK 1
-#define Q_SIZE 40000 // line queue size
+#define Q_SIZE 20000 // line queue size
 
 class StAndCnt
 {
 public:
-    long long st;
+    int st;
     long long cnt;
     long long p;
 
@@ -43,22 +43,22 @@ public:
 StAndCnt qs[2][Q_SIZE];
 int qTail[2];
 int n, m, mod;
-unordered_map<long long, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
+unordered_map<int, int> cnts[2]; // key - state, value - state 在 qs 中的位置 index
 int act = 0;                           // 当前生效的 map
 
 StAndCnt wQs[16][33][Q_SIZE];
-unordered_map<long long, int> wCnts[16][33]; // key - state, value - state 在 qs 中的位置 index
+int wCnts[16][33][Q_SIZE];       // state 在 qs 中的位置 index
 int wQTail[16][33];
 
 #define getState(ST, POS) ((ST) >> (POS)) & MASK
 
 #define setState(ST, POS, VAL)             \
-    ST &= ~(((long long)(MASK)) << (POS)); \
-    ST |= ((long long)(VAL)) << (POS);
+    ST &= ~(((MASK)) << (POS)); \
+    ST |= ((VAL)) << (POS);
 
 #define insertState4(IDX, ST, P, CNT)                                    \
     {                                                                    \
-        unordered_map<long long, int>::iterator it = cnts[IDX].find(ST); \
+        unordered_map<int, int>::iterator it = cnts[IDX].find(ST); \
         if (it != cnts[IDX].end())                                       \
         {                                                                \
             qs[IDX][it->second].cnt += CNT;                              \
@@ -76,24 +76,30 @@ int wQTail[16][33];
         }                                                                \
     }
 
-#define insertState2D(X, Y, ST, P, CNT)                                    \
-    {                                                                      \
-        unordered_map<long long, int>::iterator it = wCnts[X][Y].find(ST); \
-        if (it != wCnts[X][Y].end())                                       \
-        {                                                                  \
-            wQs[X][Y][it->second].cnt += CNT;                              \
-            wQs[X][Y][it->second].cnt %= mod;                              \
-            wQs[X][Y][it->second].p += P;                                  \
-            wQs[X][Y][it->second].p %= mod;                                \
-        }                                                                  \
-        else                                                               \
-        {                                                                  \
-            wQs[X][Y][wQTail[X][Y]].st = ST;                               \
-            wQs[X][Y][wQTail[X][Y]].p = P % mod;                           \
-            wQs[X][Y][wQTail[X][Y]].cnt = CNT % mod;                       \
-            wCnts[X][Y][ST] = wQTail[X][Y];                                \
-            wQTail[X][Y]++;                                                \
-        }                                                                  \
+#define insertState2D(X, Y, ST, P, CNT)              \
+    {                                                \
+        int it = wCnts[X][Y][ST];                    \
+        if (0 <= it)                                 \
+        {                                            \
+            wQs[X][Y][it].cnt += CNT;                \
+            if (mod * 199 < wQs[X][Y][it].cnt)       \
+            {                                        \
+                wQs[X][Y][it].cnt %= mod;            \
+            }                                        \
+            wQs[X][Y][it].p += P;                    \
+            if (mod * 199 < wQs[X][Y][it].p)         \
+            {                                        \
+                wQs[X][Y][it].p %= mod;              \
+            }                                        \
+        }                                            \
+        else                                         \
+        {                                            \
+            wQs[X][Y][wQTail[X][Y]].st = ST;         \
+            wQs[X][Y][wQTail[X][Y]].p = P % mod;     \
+            wQs[X][Y][wQTail[X][Y]].cnt = CNT % mod; \
+            wCnts[X][Y][ST] = wQTail[X][Y];          \
+            wQTail[X][Y]++;                          \
+        }                                            \
     }
 
 class BearDestroys
@@ -161,7 +167,7 @@ private:
             // (now_x, now_y) 将要处理的 cell
             for (size_t iQs = 0; iQs < qTail[act]; iQs++)
             {
-                long long state = qs[act][iQs].st;
+                int state = qs[act][iQs].st;
                 long long p = qs[act][iQs].p;
                 long long pre_cnt = qs[act][iQs].cnt;
 
@@ -293,6 +299,8 @@ private:
         int now_x = 1;
         int now_y = 2;
 
+        memset(wCnts, -1, sizeof(wCnts));
+
         wCnts[now_x][now_y][0] = 0;
         wQs[now_x][now_y][0].st = 0;
         wQs[now_x][now_y][0].p = 1;
@@ -348,7 +356,7 @@ private:
             // (now_x, now_y) 将要处理的 cell
             for (size_t iQs = 0; iQs < wQTail[now_x][now_y]; iQs++)
             {
-                long long state = wQs[now_x][now_y][iQs].st;
+                int state = wQs[now_x][now_y][iQs].st;
                 long long p = wQs[now_x][now_y][iQs].p;
                 long long pre_cnt = wQs[now_x][now_y][iQs].cnt;
 

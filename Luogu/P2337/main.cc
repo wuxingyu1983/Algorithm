@@ -66,6 +66,18 @@ using namespace std;
             cannons++;      \
     }
 
+#define getPaths()         \
+    {                      \
+        if (4 > leftSt)    \
+            paths++;       \
+        if (4 > leftUpSt)  \
+            paths++;       \
+        if (4 > upSt)      \
+            paths++;       \
+        if (4 > rightUpSt) \
+            paths++;       \
+    }
+
 int n, m, k;
 char cells[MAX_N][MAX_M];
 map<int, int> cnts[2][MAX_K];           // key - state, value - state 的最大打击数
@@ -321,7 +333,99 @@ int main()
                 }
                 else
                 {
+                    if (0 == leftSt || 0 == upSt)
+                    {
+                        // 只能是 障碍物 或 炮台
+                        {
+                            // 障碍物
+                            int st = state;
+                            setState(st, leftPos, BLOCK);
+                            setState(st, leftUpPos, BLOCK);
 
+                            procUpST();
+
+                            insertState(nAct, iK, st, cnt);
+                        }
+
+                        if (iK < k)
+                        {
+                            // 炮台
+                            int st = state;
+                            setState(st, leftPos, 5);
+                            setState(st, leftUpPos, 5);
+
+                            procUpST();
+
+                            int paths = 0;
+
+                            getPaths();
+
+                            insertState(nAct, (iK + 1), st, (cnt + paths));
+                        }
+                    }
+                    else if (4 < leftSt && 4 < upSt)
+                    {
+                        // 路径拐角
+                        {
+                            if (n > now_x && m > now_y)
+                            {
+                                int st = state;
+                                setState(st, leftPos, 1);
+                                setState(st, leftUpPos, 2);
+
+                                procUpST();
+
+                                // 周边炮台的个数
+                                int cannons = 0;
+                                getCannons();
+
+                                insertState(nAct, iK, st, (cnt + cannons));
+                            }
+                        }
+
+                        // 障碍物 或 炮台
+                        {
+                            // 障碍物
+                            int st = state;
+                            setState(st, leftPos, BLOCK);
+                            setState(st, leftUpPos, BLOCK);
+
+                            procUpST();
+
+                            insertState(nAct, iK, st, cnt);
+
+                            if (iK < k)
+                            {
+                                // 炮台
+                                st = state;
+                                setState(st, leftPos, 5);
+                                setState(st, leftUpPos, 5);
+
+                                procUpST();
+
+                                int paths = 0;
+
+                                getPaths();
+
+                                insertState(nAct, (iK + 1), st, (cnt + paths));
+                            }
+                        }
+                    }
+                    else if (4 > leftSt && 4 > upSt)
+                    {
+                        // left 和 up 中两个都是插头
+                    }
+                    else
+                    {
+                        // left 和 up 中只有一个插头
+                        int st = leftSt;
+                        if (4 > upSt)
+                        {
+                            st = upSt;
+                        }
+
+
+                    }
                 }
             }
 

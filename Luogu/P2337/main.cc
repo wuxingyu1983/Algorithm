@@ -46,6 +46,26 @@ using namespace std;
         }                                                   \
     }
 
+#define procUpST()                               \
+    {                                            \
+        if (1 == upSt || 2 == upSt || 3 == upSt) \
+        {                                        \
+            setState(st, upPos, 0);              \
+        }                                        \
+    }
+
+#define getCannons()        \
+    {                       \
+        if (5 == leftSt)    \
+            cannons++;      \
+        if (5 == leftUpSt)  \
+            cannons++;      \
+        if (5 == upSt)      \
+            cannons++;      \
+        if (5 == rightUpSt) \
+            cannons++;      \
+    }
+
 int n, m, k;
 char cells[MAX_N][MAX_M];
 map<int, int> cnts[2][MAX_K];           // key - state, value - state 的最大打击数
@@ -150,15 +170,65 @@ int main()
                     setState(st, leftPos, BLOCK);
                     setState(st, leftUpPos, BLOCK);
 
+                    procUpST(); 
+
                     insertState(nAct, iK, st, cnt);
                 }
-                else if ('S' == cells[now_x][now_y])
+                else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
                 {
-                    // 起点
-                }
-                else if ('T' == cells[now_x][now_y])
-                {
-                    // 终点
+                    // 起点、终点
+                    if (0 == leftSt || 0 == upSt)
+                    {
+                        // 左边、上边有一条路径
+                        // 这种情况非法
+                    }
+                    else if (leftSt < 4 && upSt < 4)
+                    {
+                        // 左边、上边 都有插头
+                        // 这种情况非法
+                    }
+                    else if (leftSt > 4 && upSt > 4)
+                    {
+                        // 左边、上边 为 障碍物 或 炮台
+                        // 合法
+                        // 路径在此开始
+                        if (n > now_x && '#' != cells[now_x + 1][now_y])
+                        {
+                            // 向下
+                            int st = state;
+                            setState(st, leftPos, 3);
+                            setState(st, leftUpPos, 0);
+
+                            procUpST();
+
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
+
+                            insertState(nAct, iK, st, (cnt + cannons));
+                        }
+
+                        if (m > now_y && '#' != cells[now_x][now_y + 1])
+                        {
+                            // 向右
+                            int st = state;
+                            setState(st, leftPos, 0);
+                            setState(st, leftUpPos, 3);
+
+                            procUpST();
+
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
+
+                            insertState(nAct, iK, st, (cnt + cannons));
+                        }
+                    }
+                    else
+                    {
+                        // 一边 是 插头，一边 是 障碍物 或 炮台
+                        // 路径在此 cell 封住
+                    }
                 }
                 else
                 {

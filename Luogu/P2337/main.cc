@@ -228,6 +228,95 @@ int main()
                     {
                         // 一边 是 插头，一边 是 障碍物 或 炮台
                         // 路径在此 cell 封住
+                        if (3 == leftSt || 3 == upSt)
+                        {
+                            int st = state;
+                            setState(st, leftPos, 0);
+                            setState(st, leftUpPos, 0);
+
+                            procUpST();
+
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
+
+                            insertState(nAct, iK, st, (cnt + cannons));
+                        }
+                        else if (1 == leftSt || 1 == upSt)
+                        {
+                            // 从现在到最后，找到匹配的插头（2），改为 3
+                            int st = state;
+                            setState(st, leftPos, 0);
+                            setState(st, leftUpPos, 0);
+
+                            procUpST();
+
+                            int pos = rightUpPos;
+                            int s = 1;
+                            while (pos <= m + 1)
+                            {
+                                int oneSt = getState(st, pos);
+                                if (1 == oneSt)
+                                {
+                                    s++;
+                                }
+                                else if (2 == oneSt)
+                                {
+                                    s--;
+                                    if (0 == s)
+                                    {
+                                        setState(st, pos, 3);
+                                        break;
+                                    }
+                                }
+
+                                pos ++;
+                            }
+
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
+
+                            insertState(nAct, iK, st, (cnt + cannons));
+                        }
+                        else
+                        {
+                            // 2 == leftSt || 2 == upSt
+                            // 从现在到最开始，找到匹配的插头（1），改为 3
+                            int st = state;
+                            setState(st, leftPos, 0);
+                            setState(st, leftUpPos, 0);
+
+                            procUpST();
+
+                            int pos = leftPos - 1;
+                            int s = 1;
+                            while (pos >= 0)
+                            {
+                                int oneSt = getState(st, pos);
+                                if (2 == oneSt)
+                                {
+                                    s++;
+                                }
+                                else if (1 == oneSt)
+                                {
+                                    s--;
+                                    if (0 == s)
+                                    {
+                                        setState(st, pos, 3);
+                                        break;
+                                    }
+                                }
+
+                                pos --;
+                            }
+
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
+
+                            insertState(nAct, iK, st, (cnt + cannons));
+                        }
                     }
                 }
                 else

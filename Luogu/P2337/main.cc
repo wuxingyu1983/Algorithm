@@ -40,6 +40,10 @@ using namespace std;
 
 #define insertState(IDX, K, ST, CNT)                        \
     {                                                       \
+        if (m == now_y)                                     \
+        {                                                   \
+            ST &= mask;                                     \
+        }                                                   \
         map<int, int>::iterator it = cnts[IDX][K].find(ST); \
         if (it == cnts[IDX][K].end() || CNT > it->second)   \
         {                                                   \
@@ -147,7 +151,7 @@ using namespace std;
         }                                 \
     }
 
-int n, m, k;
+int n, m, k, mask;
 char cells[MAX_N][MAX_M];
 map<int, int> cnts[2][MAX_K]; // key - state, value - state 的最大打击数
 int act = 0;                  // 当前生效的 map
@@ -186,6 +190,12 @@ int main()
     cnts[act][0][0] = 0;
     int now_x = 0;
     int now_y = m;
+
+    for (int i = 1; i <= m; i++)
+    {
+        mask <<= BITS;
+        mask |= MASK;
+    }
 
     while (true)
     {

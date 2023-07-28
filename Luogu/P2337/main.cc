@@ -23,14 +23,14 @@
 
 using namespace std;
 
-#define DEBUG   0
-#define MAX_N   21
-#define MAX_M   7 
-#define MAX_K   15
-#define BITS    3
-#define MASK    7
-#define BLOCK   7
-#define CANNON  5
+#define DEBUG 0
+#define MAX_N 21
+#define MAX_M 7
+#define MAX_K 15
+#define BITS 3
+#define MASK 7
+#define BLOCK 7
+#define CANNON 5
 
 #define getState(ST, POS) ((ST) >> (POS * BITS)) & MASK
 
@@ -55,16 +55,16 @@ using namespace std;
         }                                        \
     }
 
-#define getCannons()        \
-    {                       \
+#define getCannons()             \
+    {                            \
         if (CANNON == leftSt)    \
-            cannons++;      \
+            cannons++;           \
         if (CANNON == leftUpSt)  \
-            cannons++;      \
+            cannons++;           \
         if (CANNON == upSt)      \
-            cannons++;      \
+            cannons++;           \
         if (CANNON == rightUpSt) \
-            cannons++;      \
+            cannons++;           \
     }
 
 #define getPaths()         \
@@ -87,7 +87,9 @@ using namespace std;
         {                                   \
             int oneSt = getState(ST, pos);  \
             if (1 == oneSt)                 \
+            {                               \
                 s++;                        \
+            }                               \
             else if (2 == oneSt)            \
             {                               \
                 s--;                        \
@@ -109,7 +111,9 @@ using namespace std;
         {                                   \
             int oneSt = getState(ST, pos);  \
             if (2 == oneSt)                 \
+            {                               \
                 s++;                        \
+            }                               \
             else if (1 == oneSt)            \
             {                               \
                 s--;                        \
@@ -123,13 +127,35 @@ using namespace std;
         }                                   \
     }
 
+#define blockCannonProc(ST, VAL)          \
+    {                                     \
+        if (n > now_x)                    \
+        {                                 \
+            setState(ST, leftPos, VAL);   \
+        }                                 \
+        else                              \
+        {                                 \
+            setState(ST, leftPos, 0);     \
+        }                                 \
+        if (m > now_y)                    \
+        {                                 \
+            setState(ST, leftUpPos, VAL); \
+        }                                 \
+        else                              \
+        {                                 \
+            setState(ST, leftUpPos, 0);   \
+        }                                 \
+    }
+
 int n, m, k;
 char cells[MAX_N][MAX_M];
-map<int, int> cnts[2][MAX_K];           // key - state, value - state 的最大打击数
-int act = 0;                           // 当前生效的 map
+map<int, int> cnts[2][MAX_K]; // key - state, value - state 的最大打击数
+int act = 0;                  // 当前生效的 map
 
 int main()
 {
+    int ret = 0;
+
     cin >> n >> m >> k;
 
     if (n >= m)
@@ -171,7 +197,8 @@ int main()
 
             if (n < now_x)
             {
-                // finished 
+                // finished
+                ret = cnts[act][k][0];
                 break;
             }
         }
@@ -204,7 +231,7 @@ int main()
                 {
                     leftSt = getState(state, leftPos);
                 }
-                
+
                 if (1 < now_y && 1 < now_x)
                 {
                     leftUpSt = getState(state, leftUpPos);
@@ -224,10 +251,9 @@ int main()
                 {
                     // 障碍物
                     int st = state;
-                    setState(st, leftPos, BLOCK);
-                    setState(st, leftUpPos, BLOCK);
 
-                    procUpST(); 
+                    blockCannonProc(st, BLOCK);
+                    procUpST();
 
                     insertState(nAct, iK, st, cnt);
                 }
@@ -345,9 +371,8 @@ int main()
                         {
                             // 障碍物
                             int st = state;
-                            setState(st, leftPos, BLOCK);
-                            setState(st, leftUpPos, BLOCK);
 
+                            blockCannonProc(st, BLOCK);
                             procUpST();
 
                             insertState(nAct, iK, st, cnt);
@@ -357,9 +382,8 @@ int main()
                         {
                             // 炮台
                             int st = state;
-                            setState(st, leftPos, CANNON);
-                            setState(st, leftUpPos, CANNON);
 
+                            blockCannonProc(st, CANNON);
                             procUpST();
 
                             int paths = 0;
@@ -393,9 +417,8 @@ int main()
                         {
                             // 障碍物
                             int st = state;
-                            setState(st, leftPos, BLOCK);
-                            setState(st, leftUpPos, BLOCK);
 
+                            blockCannonProc(st, BLOCK);
                             procUpST();
 
                             insertState(nAct, iK, st, cnt);
@@ -404,9 +427,8 @@ int main()
                             {
                                 // 炮台
                                 st = state;
-                                setState(st, leftPos, CANNON);
-                                setState(st, leftUpPos, CANNON);
 
+                                blockCannonProc(st, CANNON);
                                 procUpST();
 
                                 int paths = 0;
@@ -457,17 +479,17 @@ int main()
                     else
                     {
                         // left 和 up 中只有一个插头
-                        int st = leftSt;
+                        int oneSt = leftSt;
                         if (4 > upSt)
                         {
-                            st = upSt;
+                            oneSt = upSt;
                         }
 
                         if (n > now_x && '#' != cells[now_x][now_y])
                         {
                             // 向下
                             int st = state;
-                            setState(st, leftPos, st);
+                            setState(st, leftPos, oneSt);
                             setState(st, leftUpPos, 0);
 
                             procUpST();
@@ -484,7 +506,7 @@ int main()
                             // 向右
                             int st = state;
                             setState(st, leftPos, 0);
-                            setState(st, leftUpPos, st);
+                            setState(st, leftUpPos, oneSt);
 
                             procUpST();
 
@@ -504,6 +526,8 @@ int main()
         // 准备下一轮
         act = nAct;
     }
+
+    cout << ret << endl;
 
     return 0;
 }

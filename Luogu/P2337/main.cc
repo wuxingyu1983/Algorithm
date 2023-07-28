@@ -30,6 +30,7 @@ using namespace std;
 #define BITS    3
 #define MASK    7
 #define BLOCK   7
+#define CANNON  5
 
 #define getState(ST, POS) ((ST) >> (POS * BITS)) & MASK
 
@@ -56,13 +57,13 @@ using namespace std;
 
 #define getCannons()        \
     {                       \
-        if (5 == leftSt)    \
+        if (CANNON == leftSt)    \
             cannons++;      \
-        if (5 == leftUpSt)  \
+        if (CANNON == leftUpSt)  \
             cannons++;      \
-        if (5 == upSt)      \
+        if (CANNON == upSt)      \
             cannons++;      \
-        if (5 == rightUpSt) \
+        if (CANNON == rightUpSt) \
             cannons++;      \
     }
 
@@ -76,6 +77,50 @@ using namespace std;
             paths++;       \
         if (4 > rightUpSt) \
             paths++;       \
+    }
+
+#define frontWardProc(ST, START, VAL)       \
+    {                                       \
+        int pos = START;                    \
+        int s = 1;                          \
+        while (pos <= m + 1)                \
+        {                                   \
+            int oneSt = getState(ST, pos);  \
+            if (1 == oneSt)                 \
+                s++;                        \
+            else if (2 == oneSt)            \
+            {                               \
+                s--;                        \
+                if (0 == s)                 \
+                {                           \
+                    setState(ST, pos, VAL); \
+                    break;                  \
+                }                           \
+            }                               \
+            pos++;                          \
+        }                                   \
+    }
+
+#define backWardProc(ST, START, VAL)        \
+    {                                       \
+        int pos = START;                    \
+        int s = 1;                          \
+        while (pos >= 0)                    \
+        {                                   \
+            int oneSt = getState(ST, pos);  \
+            if (2 == oneSt)                 \
+                s++;                        \
+            else if (1 == oneSt)            \
+            {                               \
+                s--;                        \
+                if (0 == s)                 \
+                {                           \
+                    setState(ST, pos, VAL); \
+                    break;                  \
+                }                           \
+            }                               \
+            pos--;                          \
+        }                                   \
     }
 
 int n, m, k;
@@ -263,27 +308,7 @@ int main()
 
                             procUpST();
 
-                            int pos = rightUpPos;
-                            int s = 1;
-                            while (pos <= m + 1)
-                            {
-                                int oneSt = getState(st, pos);
-                                if (1 == oneSt)
-                                {
-                                    s++;
-                                }
-                                else if (2 == oneSt)
-                                {
-                                    s--;
-                                    if (0 == s)
-                                    {
-                                        setState(st, pos, 3);
-                                        break;
-                                    }
-                                }
-
-                                pos ++;
-                            }
+                            frontWardProc(st, rightUpPos, 3);
 
                             // 周边炮台的个数
                             int cannons = 0;
@@ -301,27 +326,7 @@ int main()
 
                             procUpST();
 
-                            int pos = leftPos - 1;
-                            int s = 1;
-                            while (pos >= 0)
-                            {
-                                int oneSt = getState(st, pos);
-                                if (2 == oneSt)
-                                {
-                                    s++;
-                                }
-                                else if (1 == oneSt)
-                                {
-                                    s--;
-                                    if (0 == s)
-                                    {
-                                        setState(st, pos, 3);
-                                        break;
-                                    }
-                                }
-
-                                pos --;
-                            }
+                            backWardProc(st, leftPos - 1, 3);
 
                             // 周边炮台的个数
                             int cannons = 0;
@@ -333,6 +338,7 @@ int main()
                 }
                 else
                 {
+                    // 正常的 cell，非 障碍物、起点、终点
                     if (0 == leftSt || 0 == upSt)
                     {
                         // 只能是 障碍物 或 炮台
@@ -351,8 +357,8 @@ int main()
                         {
                             // 炮台
                             int st = state;
-                            setState(st, leftPos, 5);
-                            setState(st, leftUpPos, 5);
+                            setState(st, leftPos, CANNON);
+                            setState(st, leftUpPos, CANNON);
 
                             procUpST();
 
@@ -367,7 +373,7 @@ int main()
                     {
                         // 路径拐角
                         {
-                            if (n > now_x && m > now_y)
+                            if (n > now_x && m > now_y && '#' != cells[now_x + 1][now_y] && '#' != cells[now_x][now_y + 1])
                             {
                                 int st = state;
                                 setState(st, leftPos, 1);
@@ -398,8 +404,8 @@ int main()
                             {
                                 // 炮台
                                 st = state;
-                                setState(st, leftPos, 5);
-                                setState(st, leftUpPos, 5);
+                                setState(st, leftPos, CANNON);
+                                setState(st, leftUpPos, CANNON);
 
                                 procUpST();
 
@@ -414,6 +420,23 @@ int main()
                     else if (4 > leftSt && 4 > upSt)
                     {
                         // left 和 up 中两个都是插头
+                        int st = state;
+                        setState(st, leftPos, 0);
+                        setState(st, leftUpPos, 0);
+
+                        procUpST();
+
+                        if ((3 == leftSt && 3 == upSt) || (2 == leftSt && 1 == upSt) || (1 == leftSt && 2 == upSt))
+                        {
+                            // do nothing
+                        }
+
+
+                        // 周边炮台的个数
+                        int cannons = 0;
+                        getCannons();
+
+                        insertState(nAct, iK, st, (cnt + cannons));
                     }
                     else
                     {

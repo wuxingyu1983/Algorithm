@@ -430,7 +430,23 @@ int main()
                         {
                             // do nothing
                         }
-
+                        else if ((3 == leftSt && 1 == upSt) || (1 == leftSt && 3 == upSt))
+                        {
+                            frontWardProc(st, rightUpPos, 3);
+                        }
+                        else if ((3 == leftSt && 2 == upSt) || (2 == leftSt && 3 == upSt))
+                        {
+                            backWardProc(st, leftPos - 1, 3);
+                        }
+                        else if (2 == leftSt && 2 == upSt)
+                        {
+                            backWardProc(st, leftPos - 1, 2);
+                        }
+                        else
+                        {
+                            // 1 == leftSt && 1 == upSt
+                            frontWardProc(st, rightUpPos, 1);
+                        }
 
                         // 周边炮台的个数
                         int cannons = 0;
@@ -447,7 +463,37 @@ int main()
                             st = upSt;
                         }
 
+                        if (n > now_x && '#' != cells[now_x][now_y])
+                        {
+                            // 向下
+                            int st = state;
+                            setState(st, leftPos, st);
+                            setState(st, leftUpPos, 0);
 
+                            procUpST();
+
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
+
+                            insertState(nAct, iK, st, (cnt + cannons));
+                        }
+
+                        if (m > now_y && '#' != cells[now_x][now_y + 1])
+                        {
+                            // 向右
+                            int st = state;
+                            setState(st, leftPos, 0);
+                            setState(st, leftUpPos, st);
+
+                            procUpST();
+
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
+
+                            insertState(nAct, iK, st, (cnt + cannons));
+                        }
                     }
                 }
             }

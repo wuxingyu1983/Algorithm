@@ -131,24 +131,10 @@ using namespace std;
         }                                   \
     }
 
-#define blockCannonProc(ST, VAL)          \
-    {                                     \
-        if (n > now_x)                    \
-        {                                 \
-            setState(ST, leftPos, VAL);   \
-        }                                 \
-        else                              \
-        {                                 \
-            setState(ST, leftPos, 0);     \
-        }                                 \
-        if (m > now_y)                    \
-        {                                 \
-            setState(ST, leftUpPos, VAL); \
-        }                                 \
-        else                              \
-        {                                 \
-            setState(ST, leftUpPos, 0);   \
-        }                                 \
+#define blockCannonProc(ST, VAL)      \
+    {                                 \
+        setState(ST, leftPos, VAL);   \
+        setState(ST, leftUpPos, VAL); \
     }
 
 int n, m, k, mask;
@@ -208,7 +194,17 @@ int main()
             if (n < now_x)
             {
                 // finished
-                ret = cnts[act][k][0];
+                for (size_t iK = 1; iK <= k; iK++)
+                {
+                    for (map<int, int>::iterator it = cnts[act][iK].begin(); it != cnts[act][iK].end(); it++)
+                    {
+                        if (ret < it->second)
+                        {
+                            ret = it->second;
+                        }
+                    }
+                }
+
                 break;
             }
         }
@@ -458,7 +454,12 @@ int main()
 
                         procUpST();
 
-                        if ((3 == leftSt && 3 == upSt) || (2 == leftSt && 1 == upSt) || (1 == leftSt && 2 == upSt))
+                        if (1 == leftSt && 2 == upSt)
+                        {
+                            // 非法
+                            continue;
+                        }
+                        else if ((3 == leftSt && 3 == upSt) || (2 == leftSt && 1 == upSt))
                         {
                             // do nothing
                         }

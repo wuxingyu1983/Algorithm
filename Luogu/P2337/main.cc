@@ -80,23 +80,23 @@ using namespace std;
             cannons++;             \
     }
 
-#define getPaths()         \
-    {                      \
+#define getPaths()            \
+    {                         \
         if (0 == leftCell)    \
-            paths++;       \
+            paths++;          \
         if (0 == leftUpCell)  \
-            paths++;       \
+            paths++;          \
         if (0 == upCell)      \
-            paths++;       \
+            paths++;          \
         if (0 == rightUpCell) \
-            paths++;       \
+            paths++;          \
     }
 
 #define frontWardProc(ST, START, VAL)       \
     {                                       \
         int pos = START;                    \
         int s = 1;                          \
-        while (pos <= m)                \
+        while (pos <= m)                    \
         {                                   \
             int oneSt = getState(ST, pos);  \
             if (1 == oneSt)                 \
@@ -256,37 +256,38 @@ int main()
 
             int leftSt = getState(state1, now_y - 1);
             int upSt = getState(state1, now_y);
-
-            int leftCellPos = now_y - 2;
-            int leftUpCellPos = now_y - 1;
-            int upCellPos = now_y;
-            int rightUpCellPos = now_y + 1;
-
+            
             int leftCell = BLOCK, leftUpCell = BLOCK, upCell = BLOCK, rightUpCell = BLOCK;
 
             if (1 < now_y)
             {
-                leftCell = getState(state2, leftCellPos);
+                leftCell = getState(state2, now_y - 2);
             }
 
             if (1 < now_y && 1 < now_x)
             {
-                leftUpCell = getState(state2, leftUpCellPos);
+                leftUpCell = getState(state2, now_y - 1);
             }
 
             if (1 < now_x)
             {
-                upCell = getState(state2, upCellPos);
+                upCell = getState(state2, now_y);
             }
 
             if (1 < now_x && m > now_y)
             {
-                rightUpCell = getState(state2, rightUpCellPos);
+                rightUpCell = getState(state2, now_y + 1);
             }
 
             if ('#' == cells[now_x][now_y])
             {
                 // 障碍物
+                if (0 < leftSt || 0 < upSt)
+                {
+                    // 非法
+                    continue;
+                }
+
                 int st1 = state1;
 
                 setState(st1, now_y - 1, 0);
@@ -323,8 +324,7 @@ int main()
                         setState(st1, now_y, 0);
 
                         int st2 = state2;
-                        setState(st2, now_y - 1, 0);
-
+                        setState(st2, now_y - 1, PATH);
 
                         // 周边炮台的个数
                         int cannons = 0;
@@ -341,7 +341,7 @@ int main()
                         setState(st1, now_y, 3);
 
                         int st2 = state2;
-                        setState(st2, now_y - 1, 0);
+                        setState(st2, now_y - 1, PATH);
 
                         // 周边炮台的个数
                         int cannons = 0;
@@ -359,7 +359,7 @@ int main()
                     setState(st1, now_y, 0);
 
                     int st2 = state2;
-                    setState(st2, now_y - 1, 0);
+                    setState(st2, now_y - 1, PATH);
 
                     // 周边炮台的个数
                     int cannons = 0;
@@ -430,7 +430,7 @@ int main()
                         setState(st1, now_y, 2);
 
                         int st2 = state2;
-                        setState(st2, now_y - 1, 0);
+                        setState(st2, now_y - 1, PATH);
 
                         // 周边炮台的个数
                         int cannons = 0;
@@ -519,16 +519,16 @@ int main()
                     // left 和 up 中只有一个插头
                     int oneSt = leftSt + upSt;
 
-                    if (n > now_x && '#' != cells[now_x][now_y])
+                    if (n > now_x && '#' != cells[now_x + 1][now_y])
                     {
                         // 向下
                         int st1 = state1;
 
-                    setState(st1, now_y - 1, oneSt);
-                    setState(st1, now_y, 0);
+                        setState(st1, now_y - 1, oneSt);
+                        setState(st1, now_y, 0);
 
-                    int st2 = state2;
-                    setState(st2, now_y - 1, PATH);
+                        int st2 = state2;
+                        setState(st2, now_y - 1, PATH);
 
                         // 周边炮台的个数
                         int cannons = 0;

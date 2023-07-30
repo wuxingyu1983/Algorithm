@@ -288,12 +288,12 @@ int main()
                     continue;
                 }
 
-                int st1 = state1;
+                short st1 = state1;
 
                 setState(st1, now_y - 1, 0);
                 setState(st1, now_y, 0);
 
-                int st2 = state2;
+                short st2 = state2;
                 setState(st2, now_y - 1, BLOCK);
 
                 insertState(nAct, iK, st1, st2, sum);
@@ -305,30 +305,32 @@ int main()
                 {
                     // 左边、上边有一条路径
                     // 这种情况非法
+                    continue;
                 }
                 else if (0 < leftSt && 0 < upSt)
                 {
                     // 左边、上边 都有插头
                     // 这种情况非法
+                    continue;
                 }
                 else if (0 < leftCell && 0 < upCell)
                 {
                     // 左边、上边 为 障碍物 或 炮台
                     // 合法
                     // 路径在此开始
+                    short st2 = state2;
+                    setState(st2, now_y - 1, PATH);
+
+                    // 周边炮台的个数
+                    int cannons = 0;
+                    getCannons();
+
                     if (n > now_x && '#' != cells[now_x + 1][now_y])
                     {
                         // 向下
-                        int st1 = state1;
+                        short st1 = state1;
                         setState(st1, now_y - 1, 3);
                         setState(st1, now_y, 0);
-
-                        int st2 = state2;
-                        setState(st2, now_y - 1, PATH);
-
-                        // 周边炮台的个数
-                        int cannons = 0;
-                        getCannons();
 
                         insertState(nAct, iK, st1, st2, (sum + cannons));
                     }
@@ -336,16 +338,9 @@ int main()
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
                     {
                         // 向右
-                        int st1 = state1;
+                        short st1 = state1;
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, 3);
-
-                        int st2 = state2;
-                        setState(st2, now_y - 1, PATH);
-
-                        // 周边炮台的个数
-                        int cannons = 0;
-                        getCannons();
 
                         insertState(nAct, iK, st1, st2, (sum + cannons));
                     }
@@ -354,11 +349,11 @@ int main()
                 {
                     // 一边 是 插头，一边 是 障碍物 或 炮台
                     // 路径在此 cell 封住
-                    int st1 = state1;
+                    short st1 = state1;
                     setState(st1, now_y - 1, 0);
                     setState(st1, now_y, 0);
 
-                    int st2 = state2;
+                    short st2 = state2;
                     setState(st2, now_y - 1, PATH);
 
                     // 周边炮台的个数
@@ -391,12 +386,12 @@ int main()
                     // 只能是 障碍物 或 炮台
                     {
                         // 障碍物
-                        int st1 = state1;
+                        short st1 = state1;
 
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, 0);
 
-                        int st2 = state2;
+                        short st2 = state2;
                         setState(st2, now_y - 1, BLOCK);
 
                         insertState(nAct, iK, st1, st2, sum);
@@ -405,12 +400,12 @@ int main()
                     if (iK < k)
                     {
                         // 炮台
-                        int st1 = state1;
+                        short st1 = state1;
 
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, 0);
 
-                        int st2 = state2;
+                        short st2 = state2;
                         setState(st2, now_y - 1, CANNON);
 
                         int paths = 0;
@@ -424,12 +419,12 @@ int main()
                     // 路径拐角
                     if (n > now_x && m > now_y && '#' != cells[now_x + 1][now_y] && '#' != cells[now_x][now_y + 1])
                     {
-                        int st1 = state1;
+                        short st1 = state1;
 
                         setState(st1, now_y - 1, 1);
                         setState(st1, now_y, 2);
 
-                        int st2 = state2;
+                        short st2 = state2;
                         setState(st2, now_y - 1, PATH);
 
                         // 周边炮台的个数
@@ -442,12 +437,12 @@ int main()
                     // 障碍物 或 炮台
                     {
                         // 障碍物
-                        int st1 = state1;
+                        short st1 = state1;
 
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, 0);
 
-                        int st2 = state2;
+                        short st2 = state2;
                         setState(st2, now_y - 1, BLOCK);
 
                         insertState(nAct, iK, st1, st2, sum);
@@ -456,12 +451,12 @@ int main()
                     if (iK < k)
                     {
                         // 炮台
-                        int st1 = state1;
+                        short st1 = state1;
 
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, 0);
 
-                        int st2 = state2;
+                        short st2 = state2;
                         setState(st2, now_y - 1, CANNON);
 
                         int paths = 0;
@@ -473,12 +468,12 @@ int main()
                 else if (0 < leftSt && 0 < upSt)
                 {
                     // left 和 up 中两个都是插头
-                    int st1 = state1;
+                    short st1 = state1;
 
                     setState(st1, now_y - 1, 0);
                     setState(st1, now_y, 0);
 
-                    int st2 = state2;
+                    short st2 = state2;
                     setState(st2, now_y - 1, PATH);
 
                     if (1 == leftSt && 2 == upSt)
@@ -519,20 +514,20 @@ int main()
                     // left 和 up 中只有一个插头
                     int oneSt = leftSt + upSt;
 
+                    short st2 = state2;
+                    setState(st2, now_y - 1, PATH);
+
+                    // 周边炮台的个数
+                    int cannons = 0;
+                    getCannons();
+
                     if (n > now_x && '#' != cells[now_x + 1][now_y])
                     {
                         // 向下
-                        int st1 = state1;
+                        short st1 = state1;
 
                         setState(st1, now_y - 1, oneSt);
                         setState(st1, now_y, 0);
-
-                        int st2 = state2;
-                        setState(st2, now_y - 1, PATH);
-
-                        // 周边炮台的个数
-                        int cannons = 0;
-                        getCannons();
 
                         insertState(nAct, iK, st1, st2, (sum + cannons));
                     }
@@ -540,17 +535,10 @@ int main()
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
                     {
                         // 向右
-                        int st1 = state1;
+                        short st1 = state1;
 
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, oneSt);
-
-                        int st2 = state2;
-                        setState(st2, now_y - 1, PATH);
-
-                        // 周边炮台的个数
-                        int cannons = 0;
-                        getCannons();
 
                         insertState(nAct, iK, st1, st2, (sum + cannons));
                     }

@@ -37,35 +37,38 @@ using namespace std;
 #define getState(ST, POS) ((ST) >> ((POS) * BITS)) & MASK
 
 #define setState(ST, POS, VAL)         \
-    ST &= ~(((MASK)) << ((POS) * BITS)); \
-    ST |= ((VAL)) << ((POS) * BITS);
+    ST &= ~(((MASK)) << ((POS)*BITS)); \
+    ST |= ((VAL)) << ((POS)*BITS);
 
-#define insertState(IDX, K, ST1, ST2, SUM)                                                                     \
-    {                                                                                                          \
-        unordered_map<short, unordered_map<short, int> >::iterator it1 = cnts[IDX][K].find(ST1);                \
-        if (it1 == cnts[IDX][K].end())                                                                         \
-        {                                                                                                      \
-            cnts[IDX][K].insert(pair<short, unordered_map<short, int> >(ST1, unordered_map<short, int>())); \
-        }                                                                                                      \
-        unordered_map<short, int>::iterator it2 = cnts[IDX][K][ST1].find(ST2);                                 \
-        if (it2 == cnts[IDX][K][ST1].end())                                                                    \
-        {                                                                                                      \
-            int idx = qTail[IDX];                                                                              \
-            qs[IDX][idx].state1 = ST1;                                                                         \
-            qs[IDX][idx].state2 = ST2;                                                                         \
-            qs[IDX][idx].cnCnt = K;                                                                            \
-            qs[IDX][idx].sum = SUM;                                                                            \
-            qTail[IDX]++;                                                                                      \
-            cnts[IDX][K][ST1][ST2] = idx;                                                                       \
-        }                                                                                                      \
-        else                                                                                                   \
-        {                                                                                                      \
-            int idx = it2->second;                                                                             \
-            if (qs[IDX][idx].sum < SUM)                                                                        \
-            {                                                                                                  \
-                qs[IDX][idx].sum = SUM;                                                                        \
-            }                                                                                                  \
-        }                                                                                                      \
+#define insertState(IDX, K, ST1, ST2, SUM)                                                              \
+    {                                                                                                   \
+        unordered_map<short, unordered_map<short, int> >::iterator it1 = cnts[IDX].find(ST1);            \
+        if (it1 == cnts[IDX].end())                                                                     \
+        {                                                                                               \
+            cnts[IDX].insert(pair<short, unordered_map<short, int> >(ST1, unordered_map<short, int>())); \
+        }                                                                                               \
+        unordered_map<short, int>::iterator it2 = cnts[IDX][ST1].find(ST2);                             \
+        if (it2 == cnts[IDX][ST1].end())                                                                \
+        {                                                                                               \
+            int idx = qTail[IDX];                                                                       \
+            qs[IDX][idx].state1 = ST1;                                                                  \
+            qs[IDX][idx].state2 = ST2;                                                                  \
+            for (size_t iKD = 0; iKD <= k; iKD++)                                                       \
+            {                                                                                           \
+                qs[IDX][idx].sum[iKD] = INT_MIN;                                                        \
+            }                                                                                           \
+            qs[IDX][idx].sum[K] = SUM;                                                                  \
+            qTail[IDX]++;                                                                               \
+            cnts[IDX][ST1][ST2] = idx;                                                                  \
+        }                                                                                               \
+        else                                                                                            \
+        {                                                                                               \
+            int idx = it2->second;                                                                      \
+            if (qs[IDX][idx].sum[K] < SUM)                                                              \
+            {                                                                                           \
+                qs[IDX][idx].sum[K] = SUM;                                                              \
+            }                                                                                           \
+        }                                                                                               \
     }
 
 #define getCannons()               \
@@ -145,12 +148,11 @@ class Record
 public:
     short state1;   // 轮廓线状态，0 - 无插头，1 - 左插头，2 - 右插头，3 - 独立插头
     short state2;   // 周边cells的状态，0 - 路径，1 - 炮台，3 - 障碍物 或 边界外部
-    unsigned char cnCnt;    // 炮台数量
-    unsigned char sum;
+    int sum[MAX_K];
 
     Record()
     {
-        state1 = state2 = cnCnt = sum = 0;
+        state1 = state2 = 0;
     }
 };
 
@@ -159,7 +161,7 @@ int qTail[2];
 
 int n, m, k, mask;
 char cells[MAX_N][MAX_M];
-unordered_map< short, unordered_map<short, int> > cnts[2][MAX_K]; // 第一级 key 是轮廓线状态，第二级 key 是 cells 的状态，value 是在 qs 的下标
+unordered_map< short, unordered_map<short, int> > cnts[2]; // 第一级 key 是轮廓线状态，第二级 key 是 cells 的状态，value 是在 qs 的下标
 int act = 0;                  // 当前生效的 map
 
 int main()
@@ -201,10 +203,8 @@ int main()
 
     qs[act][qTail[act]].state1 = 0;
     qs[act][qTail[act]].state2 = 0;
-    qs[act][qTail[act]].cnCnt = 0;
-    qs[act][qTail[act]].sum = 0;
 
-    cnts[act][0][0][mask] = qTail[act];
+    cnts[act][0][mask] = qTail[act];
     qTail[act] ++;
     int now_x = 0;
     int now_y = m;
@@ -224,9 +224,12 @@ int main()
                 {
                     if (0 == qs[act][iQ].state1)
                     {
-                        if (ret < qs[act][iQ].sum)
+                        for (size_t iK = 1; iK <= k; iK++)
                         {
-                            ret = qs[act][iQ].sum;
+                            if (ret < qs[act][iQ].sum[iK])
+                            {
+                                ret = qs[act][iQ].sum[iK];
+                            }
                         }
                     }
                 }
@@ -243,8 +246,6 @@ int main()
         {
             short state1 = qs[act][iQ].state1;
             short state2 = qs[act][iQ].state2;
-            unsigned char iK = qs[act][iQ].cnCnt;
-            unsigned char sum = qs[act][iQ].sum;
 
             if (1 == now_y)
             {
@@ -296,7 +297,10 @@ int main()
                 short st2 = state2;
                 setState(st2, now_y - 1, BLOCK);
 
-                insertState(nAct, iK, st1, st2, sum);
+                for (size_t iK = 0; iK <= k; iK++)
+                {
+                    insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK]);
+                }
             }
             else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
             {
@@ -332,7 +336,10 @@ int main()
                         setState(st1, now_y - 1, 3);
                         setState(st1, now_y, 0);
 
-                        insertState(nAct, iK, st1, st2, (sum + cannons));
+                        for (size_t iK = 0; iK <= k; iK++)
+                        {
+                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
+                        }
                     }
 
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
@@ -342,7 +349,10 @@ int main()
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, 3);
 
-                        insertState(nAct, iK, st1, st2, (sum + cannons));
+                        for (size_t iK = 0; iK <= k; iK++)
+                        {
+                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
+                        }
                     }
                 }
                 else
@@ -375,7 +385,10 @@ int main()
                         backWardProc(st1, now_y - 2, 3);
                     }
 
-                    insertState(nAct, iK, st1, st2, (sum + cannons));
+                    for (size_t iK = 0; iK <= k; iK++)
+                    {
+                        insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
+                    }
                 }
             }
             else
@@ -394,12 +407,14 @@ int main()
                         short st2 = state2;
                         setState(st2, now_y - 1, BLOCK);
 
-                        insertState(nAct, iK, st1, st2, sum);
+                        for (size_t iK = 0; iK <= k; iK++)
+                        {
+                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK]);
+                        }
                     }
 
-                    if (iK < k)
+                    // 炮台
                     {
-                        // 炮台
                         short st1 = state1;
 
                         setState(st1, now_y - 1, 0);
@@ -411,7 +426,10 @@ int main()
                         int paths = 0;
                         getPaths();
 
-                        insertState(nAct, (iK + 1), st1, st2, (sum + paths));
+                        for (size_t iK = 0; iK < k; iK++)
+                        {
+                            insertState(nAct, iK + 1, st1, st2, qs[act][iQ].sum[iK] + paths);
+                        }
                     }
                 }
                 else if (0 == leftSt && 0 == upSt)
@@ -431,7 +449,10 @@ int main()
                         int cannons = 0;
                         getCannons();
 
-                        insertState(nAct, iK, st1, st2, (sum + cannons));
+                        for (size_t iK = 0; iK <= k; iK++)
+                        {
+                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
+                        }
                     }
 
                     // 障碍物 或 炮台
@@ -445,10 +466,12 @@ int main()
                         short st2 = state2;
                         setState(st2, now_y - 1, BLOCK);
 
-                        insertState(nAct, iK, st1, st2, sum);
+                        for (size_t iK = 0; iK <= k; iK++)
+                        {
+                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK]);
+                        }
                     }
 
-                    if (iK < k)
                     {
                         // 炮台
                         short st1 = state1;
@@ -462,7 +485,10 @@ int main()
                         int paths = 0;
                         getPaths();
 
-                        insertState(nAct, (iK + 1), st1, st2, (sum + paths));
+                        for (size_t iK = 0; iK < k; iK++)
+                        {
+                            insertState(nAct, iK + 1, st1, st2, qs[act][iQ].sum[iK] + paths);
+                        }
                     }
                 }
                 else if (0 < leftSt && 0 < upSt)
@@ -507,7 +533,10 @@ int main()
                     int cannons = 0;
                     getCannons();
 
-                    insertState(nAct, iK, st1, st2, (sum + cannons));
+                    for (size_t iK = 0; iK <= k; iK++)
+                    {
+                        insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
+                    }
                 }
                 else
                 {
@@ -529,7 +558,10 @@ int main()
                         setState(st1, now_y - 1, oneSt);
                         setState(st1, now_y, 0);
 
-                        insertState(nAct, iK, st1, st2, (sum + cannons));
+                        for (size_t iK = 0; iK <= k; iK++)
+                        {
+                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
+                        }
                     }
 
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
@@ -540,7 +572,10 @@ int main()
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, oneSt);
 
-                        insertState(nAct, iK, st1, st2, (sum + cannons));
+                        for (size_t iK = 0; iK <= k; iK++)
+                        {
+                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
+                        }
                     }
                 }
             }
@@ -548,10 +583,7 @@ int main()
 
         // 准备下一轮
         qTail[act] = 0;
-        for (size_t iK = 0; iK <= k; iK ++)
-        {
-            cnts[act][iK].clear();
-        }
+        cnts[act].clear();
         
         act = nAct;
     }

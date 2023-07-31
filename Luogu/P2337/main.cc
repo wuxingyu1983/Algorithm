@@ -40,7 +40,7 @@ using namespace std;
     ST &= ~(((MASK)) << ((POS)*BITS)); \
     ST |= ((VAL)) << ((POS)*BITS);
 
-#define insertState(IDX, K, ST1, ST2, SUM)                                                              \
+#define insertState(IDX, ST1, ST2, START, END, SUMS, ADD)                                               \
     {                                                                                                   \
         unordered_map<short, unordered_map<short, int> >::iterator it1 = cnts[IDX].find(ST1);            \
         if (it1 == cnts[IDX].end())                                                                     \
@@ -48,25 +48,28 @@ using namespace std;
             cnts[IDX].insert(pair<short, unordered_map<short, int> >(ST1, unordered_map<short, int>())); \
         }                                                                                               \
         unordered_map<short, int>::iterator it2 = cnts[IDX][ST1].find(ST2);                             \
+        int idx = 0;                                                                                    \
         if (it2 == cnts[IDX][ST1].end())                                                                \
         {                                                                                               \
-            int idx = qTail[IDX];                                                                       \
+            idx = qTail[IDX];                                                                           \
             qs[IDX][idx].state1 = ST1;                                                                  \
             qs[IDX][idx].state2 = ST2;                                                                  \
             for (size_t iKD = 0; iKD <= k; iKD++)                                                       \
             {                                                                                           \
                 qs[IDX][idx].sum[iKD] = INT_MIN;                                                        \
             }                                                                                           \
-            qs[IDX][idx].sum[K] = SUM;                                                                  \
             qTail[IDX]++;                                                                               \
             cnts[IDX][ST1][ST2] = idx;                                                                  \
         }                                                                                               \
         else                                                                                            \
         {                                                                                               \
-            int idx = it2->second;                                                                      \
-            if (qs[IDX][idx].sum[K] < SUM)                                                              \
+            idx = it2->second;                                                                          \
+        }                                                                                               \
+        for (size_t i = START, j = 0; i <= END; i++, j++)                                               \
+        {                                                                                               \
+            if (qs[IDX][idx].sum[i] < ADD + SUMS[j])                                              \
             {                                                                                           \
-                qs[IDX][idx].sum[K] = SUM;                                                              \
+                qs[IDX][idx].sum[i] = ADD + SUMS[j];                                              \
             }                                                                                           \
         }                                                                                               \
     }
@@ -201,11 +204,9 @@ int main()
         mask |= MASK;
     }
 
-    qs[act][qTail[act]].state1 = 0;
-    qs[act][qTail[act]].state2 = 0;
+    insertState(act, 0, mask, 0, k, qs[act][0].sum, 0);
+    qs[act][0].sum[0] = 0;
 
-    cnts[act][0][mask] = qTail[act];
-    qTail[act] ++;
     int now_x = 0;
     int now_y = m;
 
@@ -297,10 +298,7 @@ int main()
                 short st2 = state2;
                 setState(st2, now_y - 1, BLOCK);
 
-                for (size_t iK = 0; iK <= k; iK++)
-                {
-                    insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK]);
-                }
+                insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, 0);
             }
             else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
             {
@@ -336,10 +334,7 @@ int main()
                         setState(st1, now_y - 1, 3);
                         setState(st1, now_y, 0);
 
-                        for (size_t iK = 0; iK <= k; iK++)
-                        {
-                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
-                        }
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
                     }
 
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
@@ -349,10 +344,7 @@ int main()
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, 3);
 
-                        for (size_t iK = 0; iK <= k; iK++)
-                        {
-                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
-                        }
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
                     }
                 }
                 else
@@ -385,10 +377,7 @@ int main()
                         backWardProc(st1, now_y - 2, 3);
                     }
 
-                    for (size_t iK = 0; iK <= k; iK++)
-                    {
-                        insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
-                    }
+                    insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
                 }
             }
             else
@@ -407,10 +396,7 @@ int main()
                         short st2 = state2;
                         setState(st2, now_y - 1, BLOCK);
 
-                        for (size_t iK = 0; iK <= k; iK++)
-                        {
-                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK]);
-                        }
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, 0);
                     }
 
                     // 炮台
@@ -426,10 +412,7 @@ int main()
                         int paths = 0;
                         getPaths();
 
-                        for (size_t iK = 0; iK < k; iK++)
-                        {
-                            insertState(nAct, iK + 1, st1, st2, qs[act][iQ].sum[iK] + paths);
-                        }
+                        insertState(nAct, st1, st2, 1, k, qs[act][iQ].sum, paths);
                     }
                 }
                 else if (0 == leftSt && 0 == upSt)
@@ -449,10 +432,7 @@ int main()
                         int cannons = 0;
                         getCannons();
 
-                        for (size_t iK = 0; iK <= k; iK++)
-                        {
-                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
-                        }
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
                     }
 
                     // 障碍物 或 炮台
@@ -466,10 +446,7 @@ int main()
                         short st2 = state2;
                         setState(st2, now_y - 1, BLOCK);
 
-                        for (size_t iK = 0; iK <= k; iK++)
-                        {
-                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK]);
-                        }
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, 0);
                     }
 
                     {
@@ -485,10 +462,7 @@ int main()
                         int paths = 0;
                         getPaths();
 
-                        for (size_t iK = 0; iK < k; iK++)
-                        {
-                            insertState(nAct, iK + 1, st1, st2, qs[act][iQ].sum[iK] + paths);
-                        }
+                        insertState(nAct, st1, st2, 1, k, qs[act][iQ].sum, paths);
                     }
                 }
                 else if (0 < leftSt && 0 < upSt)
@@ -533,10 +507,7 @@ int main()
                     int cannons = 0;
                     getCannons();
 
-                    for (size_t iK = 0; iK <= k; iK++)
-                    {
-                        insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
-                    }
+                    insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
                 }
                 else
                 {
@@ -558,10 +529,7 @@ int main()
                         setState(st1, now_y - 1, oneSt);
                         setState(st1, now_y, 0);
 
-                        for (size_t iK = 0; iK <= k; iK++)
-                        {
-                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
-                        }
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
                     }
 
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
@@ -572,10 +540,7 @@ int main()
                         setState(st1, now_y - 1, 0);
                         setState(st1, now_y, oneSt);
 
-                        for (size_t iK = 0; iK <= k; iK++)
-                        {
-                            insertState(nAct, iK, st1, st2, qs[act][iQ].sum[iK] + cannons);
-                        }
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
                     }
                 }
             }

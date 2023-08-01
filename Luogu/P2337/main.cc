@@ -77,25 +77,41 @@ using namespace std;
 #define getCannons()               \
     {                              \
         if (CANNON == leftCell)    \
+        {                          \
             cannons++;             \
+        }                          \
         if (CANNON == leftUpCell)  \
+        {                          \
             cannons++;             \
+        }                          \
         if (CANNON == upCell)      \
+        {                          \
             cannons++;             \
+        }                          \
         if (CANNON == rightUpCell) \
+        {                          \
             cannons++;             \
+        }                          \
     }
 
-#define getPaths()            \
-    {                         \
-        if (0 == leftCell)    \
-            paths++;          \
-        if (0 == leftUpCell)  \
-            paths++;          \
-        if (0 == upCell)      \
-            paths++;          \
-        if (0 == rightUpCell) \
-            paths++;          \
+#define getPaths()               \
+    {                            \
+        if (PATH == leftCell)    \
+        {                        \
+            paths++;             \
+        }                        \
+        if (PATH == leftUpCell)  \
+        {                        \
+            paths++;             \
+        }                        \
+        if (PATH == upCell)      \
+        {                        \
+            paths++;             \
+        }                        \
+        if (PATH == rightUpCell) \
+        {                        \
+            paths++;             \
+        }                        \
     }
 
 #define frontWardProc(ST, START, VAL)       \
@@ -315,7 +331,7 @@ int main()
                     // 这种情况非法
                     continue;
                 }
-                else if (0 < leftCell && 0 < upCell)
+                else if (0 == leftSt && 0 == upSt)
                 {
                     // 左边、上边 为 障碍物 或 炮台
                     // 合法
@@ -383,56 +399,27 @@ int main()
             else
             {
                 // 正常的 cell，非 障碍物、起点、终点
-                if ((0 == leftSt && 0 == leftCell) || (0 == upSt && 0 == upCell))
+                if (0 == leftSt && 0 == upSt)
                 {
-                    // 只能是 障碍物 或 炮台
+                    if (PATH != leftCell && PATH != upCell)
                     {
-                        // 障碍物
-                        short st1 = state1;
+                        // 路径拐角
+                        if (n > now_x && m > now_y && '#' != cells[now_x + 1][now_y] && '#' != cells[now_x][now_y + 1])
+                        {
+                            short st1 = state1;
 
-                        setState(st1, now_y - 1, 0);
-                        setState(st1, now_y, 0);
+                            setState(st1, now_y - 1, 1);
+                            setState(st1, now_y, 2);
 
-                        short st2 = state2;
-                        setState(st2, now_y - 1, BLOCK);
+                            short st2 = state2;
+                            setState(st2, now_y - 1, PATH);
 
-                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, 0);
-                    }
+                            // 周边炮台的个数
+                            int cannons = 0;
+                            getCannons();
 
-                    // 炮台
-                    {
-                        short st1 = state1;
-
-                        setState(st1, now_y - 1, 0);
-                        setState(st1, now_y, 0);
-
-                        short st2 = state2;
-                        setState(st2, now_y - 1, CANNON);
-
-                        int paths = 0;
-                        getPaths();
-
-                        insertState(nAct, st1, st2, 1, k, qs[act][iQ].sum, paths);
-                    }
-                }
-                else if (0 == leftSt && 0 == upSt)
-                {
-                    // 路径拐角
-                    if (n > now_x && m > now_y && '#' != cells[now_x + 1][now_y] && '#' != cells[now_x][now_y + 1])
-                    {
-                        short st1 = state1;
-
-                        setState(st1, now_y - 1, 1);
-                        setState(st1, now_y, 2);
-
-                        short st2 = state2;
-                        setState(st2, now_y - 1, PATH);
-
-                        // 周边炮台的个数
-                        int cannons = 0;
-                        getCannons();
-
-                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+                            insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+                        }
                     }
 
                     // 障碍物 或 炮台

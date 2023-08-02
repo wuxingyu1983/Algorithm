@@ -258,6 +258,10 @@ int main()
             now_y++;
         }
 
+#if DEBUG
+        printf("now process cell[%d, %d]\n", now_x, now_y);
+#endif
+
         // 处理主体
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
@@ -297,6 +301,10 @@ int main()
                 rightUpCell = getState(state2, now_y + 1);
             }
 
+#if DEBUG
+            printf("state1 = %X, state2 = %X, leftSt = %d, upSt = %d, leftCell = %d, leftUpCell = %d, upCell = %d, rightUpCell = %d\n", state1, state2, leftSt, upSt, leftCell, leftUpCell, upCell, rightUpCell);
+#endif
+
             if ('#' == cells[now_x][now_y])
             {
                 // 障碍物
@@ -315,6 +323,10 @@ int main()
                 setState(st2, now_y - 1, BLOCK);
 
                 insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, 0);
+
+#if DEBUG
+                printf("BLOCK : st1 = %X, st2 = %X\n", st1, st2);
+#endif
             }
             else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
             {
@@ -351,6 +363,9 @@ int main()
                         setState(st1, now_y, 0);
 
                         insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                        printf("S/T Down : st1 = %X, st2 = %X, cannons = %d\n", st1, st2, cannons);
+#endif
                     }
 
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
@@ -361,6 +376,9 @@ int main()
                         setState(st1, now_y, 3);
 
                         insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                        printf("S/T Right : st1 = %X, st2 = %X, cannons = %d\n", st1, st2, cannons);
+#endif
                     }
                 }
                 else
@@ -394,32 +412,77 @@ int main()
                     }
 
                     insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                    printf("S/T : st1 = %X, st2 = %X, cannons = %d\n", st1, st2, cannons);
+#endif
                 }
             }
             else
             {
                 // 正常的 cell，非 障碍物、起点、终点
-                if (0 == leftSt && 0 == upSt)
+                if ((0 == leftSt && PATH == leftCell) || (0 == upSt && PATH == upCell))
                 {
-                    if (PATH != leftCell && PATH != upCell)
+                    if (0 == leftSt && 0 == upSt)
                     {
-                        // 路径拐角
-                        if (n > now_x && m > now_y && '#' != cells[now_x + 1][now_y] && '#' != cells[now_x][now_y + 1])
+                        // 障碍物 或 炮台
                         {
+                            // 障碍物
                             short st1 = state1;
 
-                            setState(st1, now_y - 1, 1);
-                            setState(st1, now_y, 2);
+                            setState(st1, now_y - 1, 0);
+                            setState(st1, now_y, 0);
 
                             short st2 = state2;
-                            setState(st2, now_y - 1, PATH);
+                            setState(st2, now_y - 1, BLOCK);
 
-                            // 周边炮台的个数
-                            int cannons = 0;
-                            getCannons();
+                            insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, 0);
 
-                            insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                            printf("Normal Block : st1 = %X, st2 = %X\n", st1, st2);
+#endif
                         }
+
+                        {
+                            // 炮台
+                            short st1 = state1;
+
+                            setState(st1, now_y - 1, 0);
+                            setState(st1, now_y, 0);
+
+                            short st2 = state2;
+                            setState(st2, now_y - 1, CANNON);
+
+                            int paths = 0;
+                            getPaths();
+
+                            insertState(nAct, st1, st2, 1, k, qs[act][iQ].sum, paths);
+#if DEBUG
+                            printf("Normal Cannons : st1 = %X, st2 = %X, paths = %d\n", st1, st2, paths);
+#endif
+                        }
+                    }
+                }
+                else if (0 == leftSt && 0 == upSt)
+                {
+                    // 路径拐角
+                    if (n > now_x && m > now_y && '#' != cells[now_x + 1][now_y] && '#' != cells[now_x][now_y + 1])
+                    {
+                        short st1 = state1;
+
+                        setState(st1, now_y - 1, 1);
+                        setState(st1, now_y, 2);
+
+                        short st2 = state2;
+                        setState(st2, now_y - 1, PATH);
+
+                        // 周边炮台的个数
+                        int cannons = 0;
+                        getCannons();
+
+                        insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                        printf("Normal 1,2 : st1 = %X, st2 = %X, cannons = %d\n", st1, st2, cannons);
+#endif
                     }
 
                     // 障碍物 或 炮台
@@ -434,6 +497,10 @@ int main()
                         setState(st2, now_y - 1, BLOCK);
 
                         insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, 0);
+
+#if DEBUG
+                        printf("Normal Block : st1 = %X, st2 = %X\n", st1, st2);
+#endif
                     }
 
                     {
@@ -450,6 +517,9 @@ int main()
                         getPaths();
 
                         insertState(nAct, st1, st2, 1, k, qs[act][iQ].sum, paths);
+#if DEBUG
+                        printf("Normal Cannons : st1 = %X, st2 = %X, paths = %d\n", st1, st2, paths);
+#endif
                     }
                 }
                 else if (0 < leftSt && 0 < upSt)
@@ -495,6 +565,9 @@ int main()
                     getCannons();
 
                     insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                    printf("Normal 2 plugs : st1 = %X, st2 = %X, cannons = %d\n", st1, st2, cannons);
+#endif
                 }
                 else
                 {
@@ -517,6 +590,9 @@ int main()
                         setState(st1, now_y, 0);
 
                         insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                        printf("Normal 1 plugs Donw : st1 = %X, st2 = %X, cannons = %d\n", st1, st2, cannons);
+#endif
                     }
 
                     if (m > now_y && '#' != cells[now_x][now_y + 1])
@@ -528,6 +604,9 @@ int main()
                         setState(st1, now_y, oneSt);
 
                         insertState(nAct, st1, st2, 0, k, qs[act][iQ].sum, cannons);
+#if DEBUG
+                        printf("Normal 1 plugs Right : st1 = %X, st2 = %X, cannons = %d\n", st1, st2, cannons);
+#endif
                     }
                 }
             }

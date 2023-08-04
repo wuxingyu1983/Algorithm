@@ -22,23 +22,24 @@
 
 using namespace std;
 
-#define DEBUG       0
-#define MAX_MN      18
-#define BITS        1
-#define MASK        1
-#define QS_SIZE     132000
+#define DEBUG 0
+#define MAX_MN 18
+#define BITS 1
+#define MASK 1
+#define QS_SIZE 132000
+#define MOD 1000000007
 
 class Record
 {
 public:
-    int state;   // 轮廓线状态
-    int total;
-    int sums[MAX_MN][MAX_MN];
+    int state; // 轮廓线状态
+    long long total;
+    long long sums[MAX_MN][MAX_MN];
 
     Record() {}
 };
 
-#define getState(ST, POS) ((ST) >> ((POS) * BITS)) & MASK
+#define getState(ST, POS) ((ST) >> ((POS)*BITS)) & MASK
 
 #define setState(ST, POS, VAL)       \
     ST &= ~((MASK) << ((POS)*BITS)); \
@@ -54,7 +55,12 @@ public:
             qs[IDX][NOWID].total = OLD.total;                      \
             for (size_t i = 1; i <= X; i++)                        \
             {                                                      \
-                for (size_t j = 1; j <= Y; j++)                    \
+                int end = m;                                       \
+                if (i == X)                                        \
+                {                                                  \
+                    end = Y;                                       \
+                }                                                  \
+                for (size_t j = 1; j <= end; j++)                  \
                 {                                                  \
                     qs[IDX][NOWID].sums[i][j] = OLD.sums[i][j];    \
                 }                                                  \
@@ -66,11 +72,18 @@ public:
         {                                                          \
             NOWID = it->second;                                    \
             qs[IDX][NOWID].total += OLD.total;                     \
+            qs[IDX][NOWID].total %= MOD;                           \
             for (size_t i = 1; i <= X; i++)                        \
             {                                                      \
-                for (size_t j = 1; j <= Y; j++)                    \
+                int end = m;                                       \
+                if (i == X)                                        \
+                {                                                  \
+                    end = Y;                                       \
+                }                                                  \
+                for (size_t j = 1; j <= end; j++)                  \
                 {                                                  \
                     qs[IDX][NOWID].sums[i][j] += OLD.sums[i][j];   \
+                    qs[IDX][NOWID].sums[i][j] %= MOD;              \
                 }                                                  \
             }                                                      \
         }                                                          \
@@ -78,13 +91,13 @@ public:
 
 int n, m;
 unsigned char cells[MAX_MN][MAX_MN];
-int outs[MAX_MN][MAX_MN];
+long long outs[MAX_MN][MAX_MN];
 
 Record qs[2][QS_SIZE];
 int qTail[2];
 
 unordered_map<int, int> cnts[2];
-int act = 0;                  // 当前生效的 map
+int act = 0; // 当前生效的 map
 
 int main()
 {
@@ -103,7 +116,7 @@ int main()
     int now_y = m;
 
     qs[act][0].total = 1;
-    qTail[act] ++;
+    qTail[act]++;
 
     while (0 < qTail[act])
     {
@@ -115,7 +128,7 @@ int main()
 
             if (n < now_x)
             {
-                int total = 0;
+                long long total = 0;
 
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
@@ -130,25 +143,27 @@ int main()
                     }
                 }
 
+                total %= MOD;
+
                 for (size_t i = 1; i <= n; i++)
                 {
-                    if (1 == cells[i][1])
+                    if ('1' == cells[i][1])
                     {
                         printf("0");
                     }
                     else
                     {
-                        printf("%d", total - outs[i][1]);
+                        printf("%lld", (MOD + total - (outs[i][1] % MOD)) % MOD);
                     }
                     for (size_t j = 2; j <= m; j++)
                     {
-                        if (1 == cells[i][j])
+                        if ('1' == cells[i][j])
                         {
                             printf(" 0");
                         }
                         else
                         {
-                            printf(" %d", total - outs[i][j]);
+                            printf(" %lld", (MOD + total - (outs[i][j] % MOD)) % MOD);
                         }
                     }
                     printf("\n");
@@ -165,9 +180,9 @@ int main()
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
             int state = qs[act][iQ].state;
-            int total = qs[act][iQ].total;
+            long long total = qs[act][iQ].total;
 
-            if (1 == cells[now_x][now_y])
+            if ('1' == cells[now_x][now_y])
             {
                 // 障碍物
                 int st = state;
@@ -206,8 +221,10 @@ int main()
                     int id = 0;
                     insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
 
-                    qs[nAct][id].sums[now_x][now_y - 1] = total;
-                    qs[nAct][id].sums[now_x][now_y] = total;
+                    qs[nAct][id].sums[now_x][now_y - 1] += total;
+                    qs[nAct][id].sums[now_x][now_y - 1] %= MOD;
+                    qs[nAct][id].sums[now_x][now_y] += total;
+                    qs[nAct][id].sums[now_x][now_y] %= MOD;
                 }
 
                 if (0 == up)
@@ -218,8 +235,10 @@ int main()
                     int id = 0;
                     insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
 
-                    qs[nAct][id].sums[now_x - 1][now_y] = total;
-                    qs[nAct][id].sums[now_x][now_y] = total;
+                    qs[nAct][id].sums[now_x - 1][now_y] += total;
+                    qs[nAct][id].sums[now_x - 1][now_y] %= MOD;
+                    qs[nAct][id].sums[now_x][now_y] += total;
+                    qs[nAct][id].sums[now_x][now_y] %= MOD;
                 }
             }
         }

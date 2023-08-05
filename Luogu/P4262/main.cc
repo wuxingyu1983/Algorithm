@@ -188,8 +188,7 @@ int main()
                 int st = state;
                 setState(st, now_y - 1, 1);
 
-                int id = 0;
-                insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
+                qs[act][iQ].state = st;
             }
             else
             {
@@ -243,10 +242,13 @@ int main()
             }
         }
 
-        // 准备下一轮
-        qTail[act] = 0;
-        cnts[act].clear();
-        act = nAct;
+        if ('1' != cells[now_x][now_y])
+        {
+            // 准备下一轮
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
     }
 
     return 0;

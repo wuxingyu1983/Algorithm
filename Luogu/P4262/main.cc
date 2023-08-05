@@ -3,7 +3,6 @@
 #include <cmath>
 #include <cstdio>
 #include <vector>
-#include <unordered_map>
 #include <set>
 #include <iostream>
 #include <algorithm>
@@ -45,48 +44,47 @@ public:
     ST &= ~((MASK) << ((POS)*BITS)); \
     ST |= (VAL) << ((POS)*BITS);
 
-#define insertState(IDX, X, Y, ST, OLD, NOWID)                     \
-    {                                                              \
-        unordered_map<int, int>::iterator it = cnts[IDX].find(ST); \
-        if (it == cnts[IDX].end())                                 \
-        {                                                          \
-            NOWID = qTail[IDX];                                    \
-            qs[IDX][NOWID].state = ST;                             \
-            qs[IDX][NOWID].total = OLD.total;                      \
-            for (size_t i = 1; i <= X; i++)                        \
-            {                                                      \
-                int end = m;                                       \
-                if (i == X)                                        \
-                {                                                  \
-                    end = Y;                                       \
-                }                                                  \
-                for (size_t j = 1; j <= end; j++)                  \
-                {                                                  \
-                    qs[IDX][NOWID].sums[i][j] = OLD.sums[i][j];    \
-                }                                                  \
-            }                                                      \
-            qTail[IDX]++;                                          \
-            cnts[IDX][ST] = NOWID;                                 \
-        }                                                          \
-        else                                                       \
-        {                                                          \
-            NOWID = it->second;                                    \
-            qs[IDX][NOWID].total += OLD.total;                     \
-            qs[IDX][NOWID].total %= MOD;                           \
-            for (size_t i = 1; i <= X; i++)                        \
-            {                                                      \
-                int end = m;                                       \
-                if (i == X)                                        \
-                {                                                  \
-                    end = Y;                                       \
-                }                                                  \
-                for (size_t j = 1; j <= end; j++)                  \
-                {                                                  \
-                    qs[IDX][NOWID].sums[i][j] += OLD.sums[i][j];   \
-                    qs[IDX][NOWID].sums[i][j] %= MOD;              \
-                }                                                  \
-            }                                                      \
-        }                                                          \
+#define insertState(IDX, X, Y, ST, OLD, NOWID)                   \
+    {                                                            \
+        NOWID = cnts[IDX][ST];                                   \
+        if (0 > NOWID)                                           \
+        {                                                        \
+            NOWID = qTail[IDX];                                  \
+            qs[IDX][NOWID].state = ST;                           \
+            qs[IDX][NOWID].total = OLD.total;                    \
+            for (size_t i = 1; i <= X; i++)                      \
+            {                                                    \
+                int end = m;                                     \
+                if (i == X)                                      \
+                {                                                \
+                    end = Y;                                     \
+                }                                                \
+                for (size_t j = 1; j <= end; j++)                \
+                {                                                \
+                    qs[IDX][NOWID].sums[i][j] = OLD.sums[i][j];  \
+                }                                                \
+            }                                                    \
+            qTail[IDX]++;                                        \
+            cnts[IDX][ST] = NOWID;                               \
+        }                                                        \
+        else                                                     \
+        {                                                        \
+            qs[IDX][NOWID].total += OLD.total;                   \
+            qs[IDX][NOWID].total %= MOD;                         \
+            for (size_t i = 1; i <= X; i++)                      \
+            {                                                    \
+                int end = m;                                     \
+                if (i == X)                                      \
+                {                                                \
+                    end = Y;                                     \
+                }                                                \
+                for (size_t j = 1; j <= end; j++)                \
+                {                                                \
+                    qs[IDX][NOWID].sums[i][j] += OLD.sums[i][j]; \
+                    qs[IDX][NOWID].sums[i][j] %= MOD;            \
+                }                                                \
+            }                                                    \
+        }                                                        \
     }
 
 int n, m;
@@ -96,7 +94,7 @@ long long outs[MAX_MN][MAX_MN];
 Record qs[2][QS_SIZE];
 int qTail[2];
 
-unordered_map<int, int> cnts[2];
+int cnts[2][QS_SIZE];
 int act = 0; // 当前生效的 map
 
 int main()
@@ -114,6 +112,9 @@ int main()
     // init
     int now_x = 0;
     int now_y = m;
+
+    memset(cnts[0], -1, QS_SIZE * 4);
+    memset(cnts[1], -1, QS_SIZE * 4);
 
     qs[act][0].total = 1;
     qTail[act]++;
@@ -246,7 +247,7 @@ int main()
         {
             // 准备下一轮
             qTail[act] = 0;
-            cnts[act].clear();
+            memset(cnts[act], -1, QS_SIZE * 4);
             act = nAct;
         }
     }

@@ -52,24 +52,6 @@ public:
             NOWID = qTail[IDX];                                  \
             qs[IDX][NOWID].state = ST;                           \
             qs[IDX][NOWID].total = OLD.total;                    \
-            for (size_t i = 1; i <= X; i++)                      \
-            {                                                    \
-                int end = m;                                     \
-                if (i == X)                                      \
-                {                                                \
-                    end = Y;                                     \
-                }                                                \
-                for (size_t j = 1; j <= end; j++)                \
-                {                                                \
-                    qs[IDX][NOWID].sums[i][j] = OLD.sums[i][j];  \
-                }                                                \
-            }                                                    \
-            qTail[IDX]++;                                        \
-            cnts[IDX][ST] = NOWID;                               \
-        }                                                        \
-        else                                                     \
-        {                                                        \
-            qs[IDX][NOWID].total += OLD.total;                   \
             qs[IDX][NOWID].total %= MOD;                         \
             for (size_t i = 1; i <= X; i++)                      \
             {                                                    \
@@ -80,8 +62,26 @@ public:
                 }                                                \
                 for (size_t j = 1; j <= end; j++)                \
                 {                                                \
-                    qs[IDX][NOWID].sums[i][j] += OLD.sums[i][j]; \
+                    qs[IDX][NOWID].sums[i][j] = OLD.sums[i][j];  \
                     qs[IDX][NOWID].sums[i][j] %= MOD;            \
+                }                                                \
+            }                                                    \
+            qTail[IDX]++;                                        \
+            cnts[IDX][ST] = NOWID;                               \
+        }                                                        \
+        else                                                     \
+        {                                                        \
+            qs[IDX][NOWID].total += OLD.total;                   \
+            for (size_t i = 1; i <= X; i++)                      \
+            {                                                    \
+                int end = m;                                     \
+                if (i == X)                                      \
+                {                                                \
+                    end = Y;                                     \
+                }                                                \
+                for (size_t j = 1; j <= end; j++)                \
+                {                                                \
+                    qs[IDX][NOWID].sums[i][j] += OLD.sums[i][j]; \
                 }                                                \
             }                                                    \
         }                                                        \
@@ -222,9 +222,7 @@ int main()
                     insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
 
                     qs[nAct][id].sums[now_x][now_y - 1] += total;
-                    qs[nAct][id].sums[now_x][now_y - 1] %= MOD;
                     qs[nAct][id].sums[now_x][now_y] += total;
-                    qs[nAct][id].sums[now_x][now_y] %= MOD;
                 }
 
                 if (0 == up)
@@ -236,9 +234,7 @@ int main()
                     insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
 
                     qs[nAct][id].sums[now_x - 1][now_y] += total;
-                    qs[nAct][id].sums[now_x - 1][now_y] %= MOD;
                     qs[nAct][id].sums[now_x][now_y] += total;
-                    qs[nAct][id].sums[now_x][now_y] %= MOD;
                 }
             }
         }

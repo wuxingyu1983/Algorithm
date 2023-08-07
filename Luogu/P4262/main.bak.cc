@@ -58,37 +58,36 @@ Record *freeRecs = NULL;
 Record *cnts[2][QS_SIZE];
 int act = 0; // 当前生效的 map
 
-inline void insertFunc(int idx, int x, int y, int state, Record *old)
-{
-    Record * rec = cnts[idx][state];
-    if (NULL == rec)
-    {
-        rec = old;
-        qs[idx][qTail[idx]++] = rec;
-        cnts[idx][state] = rec;
+#define insertFunc(IDX, X, Y, ST, OLD)                 \
+    {                                                  \
+        Record *rd = cnts[IDX][ST];                    \
+        if (NULL == rd)                                \
+        {                                              \
+            rd = OLD;                                  \
+            qs[IDX][qTail[IDX]++] = rd;                \
+            cnts[IDX][ST] = rd;                        \
+        }                                              \
+        else                                           \
+        {                                              \
+            rd->total += OLD->total;                   \
+            rd->total %= MOD;                          \
+            for (size_t i = 1; i <= X; i++)            \
+            {                                          \
+                int end = m;                           \
+                if (i == X)                            \
+                {                                      \
+                    end = Y;                           \
+                }                                      \
+                for (size_t j = 1; j <= end; j++)      \
+                {                                      \
+                    rd->sums[i][j] += OLD->sums[i][j]; \
+                    rd->sums[i][j] %= MOD;             \
+                }                                      \
+            }                                          \
+            OLD->next = freeRecs;                      \
+            freeRecs = OLD;                            \
+        }                                              \
     }
-    else
-    {
-        rec->total += old->total;
-        rec->total %= MOD;
-        for (size_t i = 1; i <= x; i++)
-        {
-            int end = m;
-            if (i == x)
-            {
-                end = y;
-            }
-            for (size_t j = 1; j <= end; j++)
-            {
-                rec->sums[i][j] += old->sums[i][j];
-                rec->sums[i][j] %= MOD;
-            }
-        }
-        // free record
-        old->next = freeRecs;
-        freeRecs = old;
-    }
-}
 
 int main()
 {
@@ -118,7 +117,7 @@ int main()
 
     rec->total = 1;
     qs[act][qTail[act]++] = rec;
-    
+
     while (0 < qTail[act])
     {
         int nAct = 1 - act;
@@ -242,7 +241,7 @@ int main()
 
                     insertFunc(nAct, now_x, now_y, st, tmp);
                 }
-                
+
                 {
                     // do nothing , 跳过
                     int st = state;
@@ -256,7 +255,7 @@ int main()
 
         // 准备下一轮
         qTail[act] = 0;
-        memset(cnts[act], 0, QS_SIZE * 4);
+        memset(cnts[act], 0, QS_SIZE * sizeof(Record *));
         act = nAct;
     }
 

@@ -55,20 +55,21 @@ int qTail[2];
 
 Record *freeRecs = NULL;
 
-Record *cnts[2][QS_SIZE];
+int cnts[2][QS_SIZE];       // state 在队列 qs 中的 位置 
 int act = 0; // 当前生效的 map
 
 #define insertFunc(IDX, X, Y, ST, OLD)                 \
     {                                                  \
-        Record *rd = cnts[IDX][ST];                    \
-        if (NULL == rd)                                \
+        int index = cnts[IDX][ST];                     \
+        if (0 > index)                                 \
         {                                              \
-            rd = OLD;                                  \
+            Record *rd = OLD;                          \
+            cnts[IDX][ST] = qTail[IDX];                \
             qs[IDX][qTail[IDX]++] = rd;                \
-            cnts[IDX][ST] = rd;                        \
         }                                              \
         else                                           \
         {                                              \
+            Record *rd = qs[IDX][index];               \
             rd->total += OLD->total;                   \
             rd->total %= MOD;                          \
             for (size_t i = 1; i <= X; i++)            \
@@ -102,6 +103,9 @@ int main()
     }
 
     // init
+    memset(cnts[0], -1, QS_SIZE * sizeof(int));
+    memset(cnts[1], -1, QS_SIZE * sizeof(int));
+
     int now_x = 0;
     int now_y = m;
 
@@ -115,6 +119,7 @@ int main()
     Record *rec = freeRecs;
     freeRecs = rec->next;
 
+    rec->state = (1 << m) - 1;
     rec->total = 1;
     qs[act][qTail[act]++] = rec;
 
@@ -184,12 +189,46 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 rec = qs[act][iQ];
+                if (NULL == rec)
+                {
+                    continue;
+                }
+
                 int state = rec->state;
-                long long total = rec->total;
+                int up = getState(state, now_y - 1);
 
                 int st = state;
                 setState(st, now_y - 1, 1);
                 rec->state = st;
+
+                int twinSt = state;
+                setState(twinSt, now_y - 1, (1 - up));
+                int twinIdx = cnts[act][twinSt];
+                if (0 <= twinIdx)
+                {
+                    Record *twinRec = qs[act][twinIdx];
+                    if (twinRec)
+                    {
+                        rec->total += twinRec->total;
+                        for (size_t i = 1; i <= now_x; i++)
+                        {
+                            int end = m;
+                            if (i == now_x)
+                            {
+                                end = now_y;
+                            }
+                            for (size_t j = 1; j <= end; j++)
+                            {
+                                rec->sums[i][j] += twinRec->sums[i][j];
+                            }
+                        }
+
+                        // free twinRec
+                        qs[act][twinIdx] = NULL;
+                        twinRec->next = freeRecs;
+                        freeRecs = twinRec;
+                    }
+                }
 
                 insertFunc(nAct, now_x, now_y, st, rec);
             }
@@ -199,18 +238,16 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 rec = qs[act][iQ];
+                
                 int state = rec->state;
                 long long total = rec->total;
 
-                int left = 1, up = 1;
+                int left = 1;
                 if (1 < now_y)
                 {
                     left = getState(state, now_y - 2);
                 }
-                if (1 < now_x)
-                {
-                    up = getState(state, now_y - 1);
-                }
+                int up = getState(state, now_y - 1);
 
                 if (0 == left)
                 {
@@ -252,6 +289,7 @@ int main()
                 {
                     // do nothing , 跳过
                     int st = state;
+
                     setState(st, now_y - 1, 0);
                     rec->state = st;
 
@@ -262,7 +300,7 @@ int main()
 
         // 准备下一轮
         qTail[act] = 0;
-        memset(cnts[act], 0, QS_SIZE * sizeof(Record *));
+        memset(cnts[act], -1, QS_SIZE * sizeof(int));
         act = nAct;
     }
 

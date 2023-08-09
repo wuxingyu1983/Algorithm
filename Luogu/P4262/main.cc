@@ -188,10 +188,55 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 rec = qs[act][iQ];
+                if (NULL == rec)
+                {
+                    continue;
+                }
+
                 int state = rec->state;
-                long long total = rec->total;
+                int up = 1;
+                if (1 < now_x)
+                {
+                    up = getState(state, now_y - 1);
+                }
 
                 int st = state;
+                int twinSt = state;
+
+                setState(twinSt, now_y - 1, (1 - up));
+
+                if (st != twinSt)
+                {
+                    int twinIdx = cnts[act][twinSt];
+                    if (0 <= twinIdx)
+                    {
+                        Record *twinRec = qs[act][twinIdx];
+                        if (twinRec)
+                        {
+                            rec->total += twinRec->total;
+                            rec->total %= MOD;
+                            for (size_t i = 1; i <= now_x; i++)
+                            {
+                                int end = m;
+                                if (i == now_x)
+                                {
+                                    end = now_y;
+                                }
+                                for (size_t j = 1; j <= end; j++)
+                                {
+                                    rec->sums[i][j] += twinRec->sums[i][j];
+                                    rec->sums[i][j] %= MOD;
+                                }
+                            }
+
+                            // free twinRec
+                            qs[act][twinIdx] = NULL;
+                            twinRec->next = freeRecs;
+                            freeRecs = twinRec;
+                        }
+                    }
+                }
+
                 setState(st, now_y - 1, 1);
                 rec->state = st;
 
@@ -203,6 +248,11 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 rec = qs[act][iQ];
+                if (NULL == rec)
+                {
+                    continue;
+                }
+
                 int state = rec->state;
                 long long total = rec->total;
 
@@ -256,6 +306,7 @@ int main()
                 {
                     // do nothing , 跳过
                     int st = state;
+
                     setState(st, now_y - 1, 0);
                     rec->state = st;
 

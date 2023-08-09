@@ -178,23 +178,30 @@ int main()
             now_y++;
         }
 
-        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        if ('1' == cells[now_x][now_y])
         {
-            rec = qs[act][iQ];
-            int state = rec->state;
-            long long total = rec->total;
-
-            if ('1' == cells[now_x][now_y])
+            // 障碍物
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                // 障碍物
+                rec = qs[act][iQ];
+                int state = rec->state;
+                long long total = rec->total;
+
                 int st = state;
                 setState(st, now_y - 1, 1);
                 rec->state = st;
 
                 insertFunc(nAct, now_x, now_y, st, rec);
             }
-            else
+        }
+        else
+        {
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
+                rec = qs[act][iQ];
+                int state = rec->state;
+                long long total = rec->total;
+
                 int left = 1, up = 1;
                 if (1 < now_y)
                 {

@@ -25,7 +25,7 @@ using namespace std;
 #define MAX_MN 18
 #define BITS 1
 #define MASK 1
-#define QS_SIZE 132000
+#define QS_SIZE 135000
 #define MOD 1000000007
 
 class Record
@@ -34,6 +34,7 @@ public:
     int state; // 轮廓线状态
     long long total;
     long long sums[MAX_MN][MAX_MN];
+    Record *next;
 
     Record() {}
 };
@@ -44,58 +45,50 @@ public:
     ST &= ~((MASK) << ((POS)*BITS)); \
     ST |= (VAL) << ((POS)*BITS);
 
-#define insertState(IDX, X, Y, ST, OLD, NOWID)                   \
-    {                                                            \
-        NOWID = cnts[IDX][ST];                                   \
-        if (0 > NOWID)                                           \
-        {                                                        \
-            NOWID = qTail[IDX];                                  \
-            qs[IDX][NOWID].state = ST;                           \
-            qs[IDX][NOWID].total = OLD.total;                    \
-            qs[IDX][NOWID].total %= MOD;                         \
-            for (size_t i = 1; i <= X; i++)                      \
-            {                                                    \
-                int end = m;                                     \
-                if (i == X)                                      \
-                {                                                \
-                    end = Y;                                     \
-                }                                                \
-                for (size_t j = 1; j <= end; j++)                \
-                {                                                \
-                    qs[IDX][NOWID].sums[i][j] = OLD.sums[i][j];  \
-                    qs[IDX][NOWID].sums[i][j] %= MOD;            \
-                }                                                \
-            }                                                    \
-            qTail[IDX]++;                                        \
-            cnts[IDX][ST] = NOWID;                               \
-        }                                                        \
-        else                                                     \
-        {                                                        \
-            qs[IDX][NOWID].total += OLD.total;                   \
-            for (size_t i = 1; i <= X; i++)                      \
-            {                                                    \
-                int end = m;                                     \
-                if (i == X)                                      \
-                {                                                \
-                    end = Y;                                     \
-                }                                                \
-                for (size_t j = 1; j <= end; j++)                \
-                {                                                \
-                    qs[IDX][NOWID].sums[i][j] += OLD.sums[i][j]; \
-                }                                                \
-            }                                                    \
-        }                                                        \
-    }
-
 int n, m;
 unsigned char cells[MAX_MN][MAX_MN];
 long long outs[MAX_MN][MAX_MN];
 
-Record qs[2][QS_SIZE];
+Record records[2 * QS_SIZE];
+Record *qs[2][QS_SIZE];
 int qTail[2];
 
-int cnts[2][QS_SIZE];
-int act = 0; // 当前生效的 map
+Record *freeRecs = NULL;
+
+int cnts[2][QS_SIZE]; // state 在队列 qs 中的 位置
+int act = 0;          // 当前生效的 map
+
+#define insertFunc(IDX, X, Y, ST, OLD)                 \
+    {                                                  \
+        int index = cnts[IDX][ST];                     \
+        if (0 > index)                                 \
+        {                                              \
+            Record *rd = OLD;                          \
+            cnts[IDX][ST] = qTail[IDX];                \
+            qs[IDX][qTail[IDX]++] = rd;                \
+        }                                              \
+        else                                           \
+        {                                              \
+            Record *rd = qs[IDX][index];               \
+            rd->total += OLD->total;                   \
+            rd->total %= MOD;                          \
+            for (size_t i = 1; i <= X; i++)            \
+            {                                          \
+                int end = m;                           \
+                if (i == X)                            \
+                {                                      \
+                    end = Y;                           \
+                }                                      \
+                for (size_t j = 1; j <= end; j++)      \
+                {                                      \
+                    rd->sums[i][j] += OLD->sums[i][j]; \
+                    rd->sums[i][j] %= MOD;             \
+                }                                      \
+            }                                          \
+            OLD->next = freeRecs;                      \
+            freeRecs = OLD;                            \
+        }                                              \
+    }
 
 int main()
 {
@@ -110,14 +103,24 @@ int main()
     }
 
     // init
+    memset(cnts[0], -1, QS_SIZE * sizeof(int));
+    memset(cnts[1], -1, QS_SIZE * sizeof(int));
+
     int now_x = 0;
     int now_y = m;
 
-    memset(cnts[0], -1, QS_SIZE * 4);
-    memset(cnts[1], -1, QS_SIZE * 4);
+    for (size_t i = 0; i < 2 * QS_SIZE; i++)
+    {
+        records[i].next = freeRecs;
+        freeRecs = &(records[i]);
+    }
 
-    qs[act][0].total = 1;
-    qTail[act]++;
+    // get free record
+    Record *rec = freeRecs;
+    freeRecs = rec->next;
+
+    rec->total = 1;
+    qs[act][qTail[act]++] = rec;
 
     while (0 < qTail[act])
     {
@@ -133,13 +136,14 @@ int main()
 
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-                    total += qs[act][iQ].total;
+                    rec = qs[act][iQ];
+                    total += rec->total;
 
                     for (size_t i = 1; i <= n; i++)
                     {
                         for (size_t j = 1; j <= m; j++)
                         {
-                            outs[i][j] += qs[act][iQ].sums[i][j];
+                            outs[i][j] += rec->sums[i][j];
                         }
                     }
                 }
@@ -178,29 +182,29 @@ int main()
             now_y++;
         }
 
-        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        if ('1' == cells[now_x][now_y])
         {
-            int state = qs[act][iQ].state;
-            long long total = qs[act][iQ].total;
-
-            if ('1' == cells[now_x][now_y])
+            // 障碍物
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                // 障碍物
+                rec = qs[act][iQ];
+                int state = rec->state;
+                long long total = rec->total;
+
                 int st = state;
                 setState(st, now_y - 1, 1);
+                rec->state = st;
 
-                qs[act][iQ].state = st;
+                insertFunc(nAct, now_x, now_y, st, rec);
             }
-            else
+        }
+        else
+        {
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                {
-                    // do nothing , 跳过
-                    int st = state;
-                    setState(st, now_y - 1, 0);
-
-                    int id = 0;
-                    insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
-                }
+                rec = qs[act][iQ];
+                int state = rec->state;
+                long long total = rec->total;
 
                 int left = 1, up = 1;
                 if (1 < now_y)
@@ -218,11 +222,17 @@ int main()
                     setState(st, now_y - 2, 1);
                     setState(st, now_y - 1, 1);
 
-                    int id = 0;
-                    insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
+                    // get free record
+                    Record *tmp = NULL;
+                    tmp = freeRecs;
+                    freeRecs = tmp->next;
 
-                    qs[nAct][id].sums[now_x][now_y - 1] += total;
-                    qs[nAct][id].sums[now_x][now_y] += total;
+                    memcpy(tmp, rec, sizeof(Record));
+                    tmp->state = st;
+                    tmp->sums[now_x][now_y - 1] += total;
+                    tmp->sums[now_x][now_y] += total;
+
+                    insertFunc(nAct, now_x, now_y, st, tmp);
                 }
 
                 if (0 == up)
@@ -230,22 +240,34 @@ int main()
                     int st = state;
                     setState(st, now_y - 1, 1);
 
-                    int id = 0;
-                    insertState(nAct, now_x, now_y, st, qs[act][iQ], id);
+                    // get free record
+                    Record *tmp = NULL;
+                    tmp = freeRecs;
+                    freeRecs = tmp->next;
 
-                    qs[nAct][id].sums[now_x - 1][now_y] += total;
-                    qs[nAct][id].sums[now_x][now_y] += total;
+                    memcpy(tmp, rec, sizeof(Record));
+                    tmp->state = st;
+                    tmp->sums[now_x - 1][now_y] += total;
+                    tmp->sums[now_x][now_y] += total;
+
+                    insertFunc(nAct, now_x, now_y, st, tmp);
+                }
+
+                {
+                    // do nothing , 跳过
+                    int st = state;
+                    setState(st, now_y - 1, 0);
+                    rec->state = st;
+
+                    insertFunc(nAct, now_x, now_y, st, rec);
                 }
             }
         }
 
-        if ('1' != cells[now_x][now_y])
-        {
-            // 准备下一轮
-            qTail[act] = 0;
-            memset(cnts[act], -1, QS_SIZE * 4);
-            act = nAct;
-        }
+        // 准备下一轮
+        qTail[act] = 0;
+        memset(cnts[act], -1, QS_SIZE * sizeof(int));
+        act = nAct;
     }
 
     return 0;

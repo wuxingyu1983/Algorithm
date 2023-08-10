@@ -58,24 +58,27 @@ int qTail[2];
 int cnts[2][QS_SIZE]; // state 在队列 qs 中的 位置
 int act = 0;          // 当前生效的 map
 
-#define insertFunc(IDX, X, Y, ST, SUM, DP) \
-    {                                      \
-        int index = cnts[IDX][ST];         \
-        if (0 > index)                     \
-        {                                  \
-            index = qTail[IDX];            \
-            qs[IDX][index].state = ST;     \
-            qs[IDX][index].sum = SUM;      \
-            cnts[IDX][ST] = index;         \
-            qTail[IDX]++;                  \
-        }                                  \
-        else                               \
-        {                                  \
-            qs[IDX][index].sum += SUM;     \
-            qs[IDX][index].sum %= MOD;     \
-        }                                  \
-        DP[X][Y][ST] += SUM;               \
-        DP[X][Y][ST] %= MOD;               \
+#define insertFunc(IDX, X, Y, ST, SUM, FLAG, DP) \
+    {                                            \
+        int index = cnts[IDX][ST];               \
+        if (0 > index)                           \
+        {                                        \
+            index = qTail[IDX];                  \
+            qs[IDX][index].state = ST;           \
+            qs[IDX][index].sum = SUM;            \
+            cnts[IDX][ST] = index;               \
+            qTail[IDX]++;                        \
+        }                                        \
+        else                                     \
+        {                                        \
+            qs[IDX][index].sum += SUM;           \
+            qs[IDX][index].sum %= MOD;           \
+        }                                        \
+        if (FLAG)                                \
+        {                                        \
+            DP[X][Y][ST] += SUM;                 \
+            DP[X][Y][ST] %= MOD;                 \
+        }                                        \
     }
 
 inline unsigned int reverse(unsigned int x)
@@ -86,6 +89,115 @@ inline unsigned int reverse(unsigned int x)
     x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
 
     return ((x >> 16) | (x << 16));
+}
+
+void func(char carr[][MAX_MN], unsigned int dparr[][MAX_MN][262144])
+{
+    memset(cnts[0], -1, QS_SIZE * sizeof(int));
+    memset(cnts[1], -1, QS_SIZE * sizeof(int));
+
+    int now_x = 0;
+    int now_y = m;
+
+    act = 0;
+    qTail[act] = 0;
+    qs[act][qTail[act]++].sum = 1;
+
+    while (0 < qTail[act])
+    {
+        int nAct = 1 - act;
+        if (m == now_y)
+        {
+            now_x++;
+            now_y = 1;
+
+            if (n < now_x)
+            {
+                break;
+            }
+        }
+        else
+        {
+            now_y++;
+        }
+
+        if ('1' == carr[now_x][now_y])
+        {
+            // 障碍物
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int state = qs[act][iQ].state;
+                unsigned int sum = qs[act][iQ].sum;
+
+                if (1 == now_y)
+                {
+                    state <<= BITS;
+                }
+
+                // do nothing
+                insertFunc(nAct, now_x, now_y, state, sum, false, dparr);
+            }
+        }
+        else
+        {
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int state = qs[act][iQ].state;
+                unsigned int sum = qs[act][iQ].sum;
+
+                if (1 == now_y)
+                {
+                    state <<= BITS;
+                }
+
+                int left = getState(state, (now_y - 1));
+                int up = getState(state, (now_x - 1));
+
+                if (0 == left && 0 == up)
+                {
+                    // 跳过该cell
+                    insertFunc(nAct, now_x, now_y, state, sum, true, dparr);
+
+                    if (n > now_x && '1' != cells[now_x + 1][now_y])
+                    {
+                        // 下插头
+                        unsigned int st = state;
+                        setState(st, (now_y - 1), 1);
+
+                        insertFunc(nAct, now_x, now_y, st, sum, false, dparr);
+                    }
+
+                    if (m > now_y && '1' != cells[now_x][now_y + 1])
+                    {
+                        // 右插头
+                        unsigned int st = state;
+                        setState(st, now_y, 1);
+
+                        insertFunc(nAct, now_x, now_y, st, sum, false, dparr);
+                    }
+                }
+                else if (0 < left && 0 < up)
+                {
+                    // 非法
+                    continue;
+                }
+                else
+                {
+                    // 封住该插头
+                    unsigned int st = state;
+                    setState(st, (now_y - 1), 0);
+                    setState(st, now_y, 0);
+
+                    insertFunc(nAct, now_x, now_y, st, sum, false, dparr);
+                }
+            }
+        }
+
+        // 准备下一轮
+        qTail[act] = 0;
+        memset(cnts[act], -1, QS_SIZE * sizeof(int));
+        act = nAct;
+    }
 }
 
 int main()
@@ -115,57 +227,10 @@ int main()
         }
     }
 
-    memset(cnts[0], -1, QS_SIZE * sizeof(int));
-    memset(cnts[1], -1, QS_SIZE * sizeof(int));
+    func(cells, dp);
+    func(revcells, revdp);
 
-    int now_x = 0;
-    int now_y = m;
     
-    qs[act][qTail[act]++].sum = 1;
-
-    while (0 < qTail[act])
-    {
-        int nAct = 1 - act;
-        if (m == now_y)
-        {
-            now_x++;
-            now_y = 1;
-
-            if (n < now_x)
-            {
-                break;
-            }
-        }
-        else
-        {
-            now_y++;
-        }
-
-        if ('1' == cells[now_x][now_y])
-        {
-            // 障碍物
-            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-            {
-                unsigned int state = qs[act][iQ].state;
-                unsigned int sum = qs[act][iQ].sum;
-
-                // do nothin
-                insertFunc(nAct, now_x, now_y, state, sum, dp);
-            }
-        }
-        else
-        {
-            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-            {
-
-            }
-        }
-
-        // 准备下一轮
-        qTail[act] = 0;
-        memset(cnts[act], -1, QS_SIZE * sizeof(int));
-        act = nAct;
-    }
 
     return 0;
 }

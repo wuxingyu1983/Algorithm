@@ -25,16 +25,14 @@ using namespace std;
 #define MAX_MN 18
 #define BITS 1
 #define MASK 1
-#define QS_SIZE 135000
+#define QS_SIZE 263000
 #define MOD 1000000007
 
 class Record
 {
 public:
-    int state; // 轮廓线状态
-    long long total;
-    long long sums[MAX_MN][MAX_MN];
-    Record *next;
+    unsigned int state; // 轮廓线状态
+    unsigned int sum;
 
     Record() {}
 };
@@ -46,81 +44,84 @@ public:
     ST |= (VAL) << ((POS)*BITS);
 
 int n, m;
-unsigned char cells[MAX_MN][MAX_MN];
-long long outs[MAX_MN][MAX_MN];
+char cells[MAX_MN][MAX_MN];
+char revcells[MAX_MN][MAX_MN];      // 反序的 cell
+//long long outs[MAX_MN][MAX_MN];
 
-Record records[2 * QS_SIZE];
-Record *qs[2][QS_SIZE];
+unsigned int dp[MAX_MN][MAX_MN][262144];
+unsigned int revdp[MAX_MN][MAX_MN][262144];
+
+int revstate[262144];       // state 位反转
+
+Record qs[2][QS_SIZE];
 int qTail[2];
-
-Record *freeRecs = NULL;
-
 int cnts[2][QS_SIZE]; // state 在队列 qs 中的 位置
 int act = 0;          // 当前生效的 map
 
-#define insertFunc(IDX, X, Y, ST, OLD)                 \
-    {                                                  \
-        int index = cnts[IDX][ST];                     \
-        if (0 > index)                                 \
-        {                                              \
-            Record *rd = OLD;                          \
-            cnts[IDX][ST] = qTail[IDX];                \
-            qs[IDX][qTail[IDX]++] = rd;                \
-        }                                              \
-        else                                           \
-        {                                              \
-            Record *rd = qs[IDX][index];               \
-            rd->total += OLD->total;                   \
-            rd->total %= MOD;                          \
-            for (size_t i = 1; i <= X; i++)            \
-            {                                          \
-                int end = m;                           \
-                if (i == X)                            \
-                {                                      \
-                    end = Y;                           \
-                }                                      \
-                for (size_t j = 1; j <= end; j++)      \
-                {                                      \
-                    rd->sums[i][j] += OLD->sums[i][j]; \
-                    rd->sums[i][j] %= MOD;             \
-                }                                      \
-            }                                          \
-            OLD->next = freeRecs;                      \
-            freeRecs = OLD;                            \
-        }                                              \
+#define insertFunc(IDX, X, Y, ST, SUM, DP) \
+    {                                      \
+        int index = cnts[IDX][ST];         \
+        if (0 > index)                     \
+        {                                  \
+            index = qTail[IDX];            \
+            qs[IDX][index].state = ST;     \
+            qs[IDX][index].sum = SUM;      \
+            cnts[IDX][ST] = index;         \
+            qTail[IDX]++;                  \
+        }                                  \
+        else                               \
+        {                                  \
+            qs[IDX][index].sum += SUM;     \
+            qs[IDX][index].sum %= MOD;     \
+        }                                  \
+        DP[X][Y][ST] += SUM;               \
+        DP[X][Y][ST] %= MOD;               \
     }
+
+inline unsigned int reverse(unsigned int x)
+{
+    x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
+    x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
+    x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
+    x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
+
+    return ((x >> 16) | (x << 16));
+}
 
 int main()
 {
     cin >> n >> m;
 
+    char ch;
     for (size_t i = 1; i <= n; i++)
     {
         for (size_t j = 1; j <= m; j++)
         {
-            cin >> cells[i][j];
+            cin >> ch;
+            cells[i][j] = ch;
+            revcells[n + 1 - i][m + 1 - j] = ch;
         }
     }
 
     // init
+    // 初始化 revstate
+    for (unsigned int i = 1; i < 262144; i++)
+    {
+        if (0 == revstate[i])
+        {
+            unsigned int revi = reverse(i);
+            revstate[i] = revi;
+            revstate[revi] = i;
+        }
+    }
+
     memset(cnts[0], -1, QS_SIZE * sizeof(int));
     memset(cnts[1], -1, QS_SIZE * sizeof(int));
 
     int now_x = 0;
     int now_y = m;
-
-    for (size_t i = 0; i < 2 * QS_SIZE; i++)
-    {
-        records[i].next = freeRecs;
-        freeRecs = &(records[i]);
-    }
-
-    // get free record
-    Record *rec = freeRecs;
-    freeRecs = rec->next;
-
-    rec->total = 1;
-    qs[act][qTail[act]++] = rec;
+    
+    qs[act][qTail[act]++].sum = 1;
 
     while (0 < qTail[act])
     {
@@ -132,48 +133,6 @@ int main()
 
             if (n < now_x)
             {
-                long long total = 0;
-
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                {
-                    rec = qs[act][iQ];
-                    total += rec->total;
-
-                    for (size_t i = 1; i <= n; i++)
-                    {
-                        for (size_t j = 1; j <= m; j++)
-                        {
-                            outs[i][j] += rec->sums[i][j];
-                        }
-                    }
-                }
-
-                total %= MOD;
-
-                for (size_t i = 1; i <= n; i++)
-                {
-                    if ('1' == cells[i][1])
-                    {
-                        printf("0");
-                    }
-                    else
-                    {
-                        printf("%lld", (MOD + total - (outs[i][1] % MOD)) % MOD);
-                    }
-                    for (size_t j = 2; j <= m; j++)
-                    {
-                        if ('1' == cells[i][j])
-                        {
-                            printf(" 0");
-                        }
-                        else
-                        {
-                            printf(" %lld", (MOD + total - (outs[i][j] % MOD)) % MOD);
-                        }
-                    }
-                    printf("\n");
-                }
-
                 break;
             }
         }
@@ -187,131 +146,18 @@ int main()
             // 障碍物
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                rec = qs[act][iQ];
-                if (NULL == rec)
-                {
-                    continue;
-                }
+                unsigned int state = qs[act][iQ].state;
+                unsigned int sum = qs[act][iQ].sum;
 
-                int state = rec->state;
-                int up = 1;
-                if (1 < now_x)
-                {
-                    up = getState(state, now_y - 1);
-                }
-
-                int st = state;
-                int twinSt = state;
-
-                setState(twinSt, now_y - 1, (1 - up));
-
-                if (st != twinSt)
-                {
-                    int twinIdx = cnts[act][twinSt];
-                    if (0 <= twinIdx)
-                    {
-                        Record *twinRec = qs[act][twinIdx];
-                        if (twinRec)
-                        {
-                            rec->total += twinRec->total;
-                            rec->total %= MOD;
-                            for (size_t i = 1; i <= now_x; i++)
-                            {
-                                int end = m;
-                                if (i == now_x)
-                                {
-                                    end = now_y;
-                                }
-                                for (size_t j = 1; j <= end; j++)
-                                {
-                                    rec->sums[i][j] += twinRec->sums[i][j];
-                                    rec->sums[i][j] %= MOD;
-                                }
-                            }
-
-                            // free twinRec
-                            qs[act][twinIdx] = NULL;
-                            twinRec->next = freeRecs;
-                            freeRecs = twinRec;
-                        }
-                    }
-                }
-
-                setState(st, now_y - 1, 1);
-                rec->state = st;
-
-                insertFunc(nAct, now_x, now_y, st, rec);
+                // do nothin
+                insertFunc(nAct, now_x, now_y, state, sum, dp);
             }
         }
         else
         {
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                rec = qs[act][iQ];
-                if (NULL == rec)
-                {
-                    continue;
-                }
 
-                int state = rec->state;
-                long long total = rec->total;
-
-                int left = 1, up = 1;
-                if (1 < now_y)
-                {
-                    left = getState(state, now_y - 2);
-                }
-                if (1 < now_x)
-                {
-                    up = getState(state, now_y - 1);
-                }
-
-                if (0 == left)
-                {
-                    int st = state;
-                    setState(st, now_y - 2, 1);
-                    setState(st, now_y - 1, 1);
-
-                    // get free record
-                    Record *tmp = NULL;
-                    tmp = freeRecs;
-                    freeRecs = tmp->next;
-
-                    memcpy(tmp, rec, sizeof(Record));
-                    tmp->state = st;
-                    tmp->sums[now_x][now_y - 1] += total;
-                    tmp->sums[now_x][now_y] += total;
-
-                    insertFunc(nAct, now_x, now_y, st, tmp);
-                }
-
-                if (0 == up)
-                {
-                    int st = state;
-                    setState(st, now_y - 1, 1);
-
-                    // get free record
-                    Record *tmp = NULL;
-                    tmp = freeRecs;
-                    freeRecs = tmp->next;
-
-                    memcpy(tmp, rec, sizeof(Record));
-                    tmp->state = st;
-                    tmp->sums[now_x - 1][now_y] += total;
-                    tmp->sums[now_x][now_y] += total;
-
-                    insertFunc(nAct, now_x, now_y, st, tmp);
-                }
-
-                {
-                    // do nothing , 跳过
-                    int st = state;
-
-                    setState(st, now_y - 1, 0);
-                    rec->state = st;
-
-                    insertFunc(nAct, now_x, now_y, st, rec);
-                }
             }
         }
 

@@ -45,13 +45,13 @@ public:
 
 int n, m;
 char cells[MAX_MN][MAX_MN];
-char revcells[MAX_MN][MAX_MN];      // 反序的 cell
-//long long outs[MAX_MN][MAX_MN];
+char revcells[MAX_MN][MAX_MN]; // 反序的 cell
+// long long outs[MAX_MN][MAX_MN];
 
 unsigned int dp[MAX_MN][MAX_MN][262144];
 unsigned int revdp[MAX_MN][MAX_MN][262144];
 
-int revstate[262144];       // state 位反转
+int revstate[262144]; // state 位反转
 
 Record qs[2][QS_SIZE];
 int qTail[2];
@@ -81,14 +81,21 @@ int act = 0;          // 当前生效的 map
         }                                        \
     }
 
-inline unsigned int reverse(unsigned int x)
+inline unsigned int reverse(unsigned int x, int m)
 {
-    x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
-    x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
-    x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
-    x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
+    unsigned int ret = 0;
+    unsigned int flag = 1;
+    unsigned int revflag = 1 << m;
 
-    return ((x >> 16) | (x << 16));
+    for (int i = 0; i <= m; i++, flag <<= 1, revflag >>= 1)
+    {
+        if (x & flag)
+        {
+            ret |= revflag;
+        }
+    }
+
+    return ret;
 }
 
 void func(char carr[][MAX_MN], unsigned int dparr[][MAX_MN][262144])
@@ -100,8 +107,10 @@ void func(char carr[][MAX_MN], unsigned int dparr[][MAX_MN][262144])
     int now_y = m;
 
     act = 0;
-    qTail[act] = 0;
-    qs[act][qTail[act]++].sum = 1;
+    qs[act][0].state = 0;
+    qs[act][0].sum = 1;
+    qTail[act] = 1;
+    qTail[1] = 0;
 
     while (0 < qTail[act])
     {
@@ -151,14 +160,14 @@ void func(char carr[][MAX_MN], unsigned int dparr[][MAX_MN][262144])
                 }
 
                 int left = getState(state, (now_y - 1));
-                int up = getState(state, (now_x - 1));
+                int up = getState(state, now_y);
 
                 if (0 == left && 0 == up)
                 {
                     // 跳过该cell
                     insertFunc(nAct, now_x, now_y, state, sum, true, dparr);
 
-                    if (n > now_x && '1' != cells[now_x + 1][now_y])
+                    if (n > now_x && '1' != carr[now_x + 1][now_y])
                     {
                         // 下插头
                         unsigned int st = state;
@@ -167,13 +176,17 @@ void func(char carr[][MAX_MN], unsigned int dparr[][MAX_MN][262144])
                         insertFunc(nAct, now_x, now_y, st, sum, false, dparr);
                     }
 
-                    if (m > now_y && '1' != cells[now_x][now_y + 1])
+                    if (m > now_y && '1' != carr[now_x][now_y + 1])
                     {
-                        // 右插头
-                        unsigned int st = state;
-                        setState(st, now_y, 1);
+                        int rightUp = getState(state, now_y + 1);
+                        if (0 == rightUp)
+                        {
+                            // 右插头
+                            unsigned int st = state;
+                            setState(st, now_y, 1);
 
-                        insertFunc(nAct, now_x, now_y, st, sum, false, dparr);
+                            insertFunc(nAct, now_x, now_y, st, sum, false, dparr);
+                        }
                     }
                 }
                 else if (0 < left && 0 < up)
@@ -217,11 +230,11 @@ int main()
 
     // init
     // 初始化 revstate
-    for (unsigned int i = 1; i < 262144; i++)
+    for (unsigned int i = 1; i < (1 << (m + 1)); i++)
     {
         if (0 == revstate[i])
         {
-            unsigned int revi = reverse(i);
+            unsigned int revi = reverse(i, m);
             revstate[i] = revi;
             revstate[revi] = i;
         }
@@ -230,7 +243,42 @@ int main()
     func(cells, dp);
     func(revcells, revdp);
 
-    
+    unsigned int maxst = (1 << (m + 1)) - 1;
+    for (size_t i = 1; i <= n; i++)
+    {
+        for (size_t j = 1; j <= m; j++)
+        {
+            unsigned long long total = 0;
+
+            if ('1' != cells[i][j])
+            {
+                for (unsigned int st = 0; st <= maxst; st++)
+                {
+                    long long s = 0;
+                    if (s = dp[i][j][st])
+                    {
+                        unsigned int revst = revstate[st];
+                        long long revs = 0;
+                        if (revs = revdp[n + 1 - i][m + 1 - j][revst])
+                        {
+                            total += s * revs;
+                            total %= MOD;
+                        }
+                    }
+                }
+            }
+
+            if (1 == j)
+            {
+                printf("%llu", total);
+            }
+            else
+            {
+                printf(" %llu", total);
+            }
+        }
+        printf("\n");
+    }
 
     return 0;
 }

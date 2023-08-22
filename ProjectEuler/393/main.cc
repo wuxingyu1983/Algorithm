@@ -52,7 +52,7 @@ public:
         dp[IDX][ST1][ST2] += CNT;             \
     }
 
-unsigned int dp[2][1 << (N + 1)][1 << N];       // dp[act][st1][st2]
+unsigned long long dp[2][1 << (N + 1)][1 << N];       // dp[act][st1][st2]
 Record qs[2][1 << (2 * N + 1)];
 int qTail[2];
 int act = 0;          // 当前生效的 map
@@ -90,7 +90,7 @@ int main()
         {
             unsigned short st1 = qs[act][iQ].state1;
             unsigned short st2 = qs[act][iQ].state2;
-            unsigned int cnt = dp[act][st1][st2];
+            unsigned long long cnt = dp[act][st1][st2];
 
             if (1 == now_y)
             {
@@ -223,7 +223,7 @@ int main()
 
         // 下一轮
         qTail[act] = 0;
-        memset(dp[act], 0, (1 << (N + 1)) * (1 << N) * sizeof(unsigned int));
+        memset(dp[act], 0, (1 << (N + 1)) * (1 << N) * sizeof(unsigned long long));
         act = nAct;
     }
 

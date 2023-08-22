@@ -41,6 +41,17 @@ public:
     ST &= ~((MASK) << ((POS)*BITS)); \
     ST |= (VAL) << ((POS)*BITS);
 
+#define insertFunc(IDX, ST1, ST2, CNT)        \
+    {                                         \
+        if (0 == dp[IDX][ST1][ST2])           \
+        {                                     \
+            qs[IDX][qTail[IDX]].state1 = ST1; \
+            qs[IDX][qTail[IDX]].state2 = ST2; \
+            qTail[IDX]++;                     \
+        }                                     \
+        dp[IDX][ST1][ST2] += CNT;             \
+    }
+
 unsigned int dp[2][1 << (N + 1)][1 << N];       // dp[act][st1][st2]
 Record qs[2][1 << (2 * N + 1)];
 int qTail[2];
@@ -79,10 +90,11 @@ int main()
         {
             unsigned short st1 = qs[act][iQ].state1;
             unsigned short st2 = qs[act][iQ].state2;
+            unsigned int cnt = dp[act][st1][st2];
 
             if (1 == now_y)
             {
-                st1 <<= 1;
+                st1 <<= BITS;
             }
 
             int left = 0, up = 0;
@@ -98,8 +110,121 @@ int main()
                 upCell = getState(st2, (now_y - 1));
             }
 
-            
+            if (1 == left && 1 == up)
+            {
+                // 非法
+            }
+            else if (0 == left && 0 == up)
+            {
+                setState(st2, (now_y - 1), 0);
+
+                if (0 == upCell)
+                {
+                    // 上面的 cell 为空，该cell的ant只能向上
+                    insertFunc(nAct, st1, st2, cnt);
+                }
+                else
+                {
+                    if (n > now_x)
+                    {
+                        // ant 向下
+                        unsigned short newst1 = st1;
+                        setState(newst1, (now_y - 1), 1);
+
+                        insertFunc(nAct, newst1, st2, cnt);
+                    }
+
+                    if (m > now_y)
+                    {
+                        // ant 向右
+                        unsigned short newst1 = st1;
+                        setState(newst1, now_y, 1);
+
+                        insertFunc(nAct, newst1, st2, cnt);
+                    }
+
+                    if (0 == leftCell)
+                    {
+                        // 该cell的ant移到左面
+                        setState(st2, (now_y - 2), 1);
+
+                        insertFunc(nAct, st1, st2, cnt);
+                    }
+                }
+            }
+            else
+            {
+                setState(st2, (now_y - 1), 1);
+
+                // only 1
+                if (1 == left)
+                {
+                    setState(st1, (now_y - 1), 0);
+
+                    if (0 == upCell)
+                    {
+                        // 上面的 cell 为空，该cell的ant只能向上
+                        insertFunc(nAct, st1, st2, cnt);
+                    }
+                    else
+                    {
+                        if (n > now_x)
+                        {
+                            // ant 向下
+                            unsigned short newst1 = st1;
+                            setState(newst1, (now_y - 1), 1);
+
+                            insertFunc(nAct, newst1, st2, cnt);
+                        }
+
+                        if (m > now_y)
+                        {
+                            // ant 向右
+                            unsigned short newst1 = st1;
+                            setState(newst1, now_y, 1);
+
+                            insertFunc(nAct, newst1, st2, cnt);
+                        }
+                    }
+                }
+                else
+                {
+                    // 1 == up
+                    setState(st1, now_y, 0);
+
+                    if (n > now_x)
+                    {
+                        // ant 向下
+                        unsigned short newst1 = st1;
+                        setState(newst1, (now_y - 1), 1);
+
+                        insertFunc(nAct, newst1, st2, cnt);
+                    }
+
+                    if (m > now_y)
+                    {
+                        // ant 向右
+                        unsigned short newst1 = st1;
+                        setState(newst1, now_y, 1);
+
+                        insertFunc(nAct, newst1, st2, cnt);
+                    }
+
+                    if (0 == leftCell)
+                    {
+                        // ant 向左
+                        setState(st2, (now_y - 2), 1);
+
+                        insertFunc(nAct, st1, st2, cnt);
+                    }
+                }
+            }
         }
+
+        // 下一轮
+        qTail[act] = 0;
+        memset(dp[act], 0, (1 << (N + 1)) * (1 << N) * sizeof(unsigned int));
+        act = nAct;
     }
 
     return 0;

@@ -24,7 +24,13 @@ using namespace std;
 
 #define DEBUG       0
 #define MAX_MN      8
+#define ST1_BITS    4
+#define ST1_MASK    15
+#define ST2_BITS    1
+#define ST2_MASK    1
 #define QS_SIZE     165536
+#define BLACK       1
+#define WHITE       0
 
 class Record
 {
@@ -69,6 +75,24 @@ inline void init()
     qTail[act] ++;
 }
 
+inline int getVal4St1(unsigned long long st, int pos)
+{
+    int ret = 0;
+
+    ret = (st >> (pos * ST1_BITS)) & ST1_MASK;
+
+    return ret;
+}
+
+inline int getVal4St2(unsigned short st, int pos)
+{
+    int ret = 0;
+
+    ret = (st >> (pos * ST2_BITS)) & ST2_MASK;
+
+    return ret;
+}
+
 int main()
 {
     int t;
@@ -88,6 +112,7 @@ int main()
         }
 
         init();
+        unsigned short st2Mask = (1 << w) - 1;
 
         while (0 < qTail[act])
         {
@@ -113,7 +138,111 @@ int main()
 
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                
+                unsigned char blks = qs[act][iQ].blocks;
+                unsigned long long st1 = qs[act][iQ].state1;
+                unsigned short st2 = qs[act][iQ].state2;
+                unsigned long long cnt = qs[act][iQ].cnt;
+
+                if (1 == now_y)
+                {
+                    st1 <<= ST1_BITS;
+
+                    st2 <<= ST2_BITS;
+                    st2 &= st2Mask;
+                }
+
+                int leftPlug = 0, upPlug = 0;
+                int leftCell = -1, leftUpCell = -1, upCell = -1;
+
+                if (1 < now_x)
+                {
+                    leftPlug = getVal4St1(st1, now_x - 1);
+                    leftCell = getVal4St2(st2, now_x - 2);
+                }
+
+                if (1 < now_y)
+                {
+                    upPlug = getVal4St1(st1, now_x);
+                    upCell = getVal4St2(st2, now_x);
+                }
+
+                if (1 < now_x && 1 < now_y)
+                {
+                    leftUpCell = getVal4St2(st2, now_x - 1);
+                }
+
+                if ('#' == cells[now_x][now_y])
+                {
+                    // black - 1
+                    if (BLACK == leftCell && BLACK == leftUpCell && BLACK == upCell)
+                    {
+                        // 非法
+                        continue;
+                    }
+
+                    if (0 == leftPlug && 0 == upPlug)
+                    {
+                        // 拐角
+
+                        // 向下
+
+                        // 向右
+
+                        // 该 cell 自成一个联通块
+
+                    }
+                    else if (0 == leftPlug)
+                    {
+
+                        // 就此打住，形成一个联通块
+                    }
+                    else if (0 == upPlug)
+                    {
+
+                        // 就此打住，形成一个联通块
+                    }
+                    else
+                    {
+                        // 2 个插头
+                        if (leftCell != upCell)
+                        {
+                            // 非法
+                            continue;
+                        }
+
+                        
+                    }
+                }
+                else if ('o' == cells[now_x][now_y])
+                {
+                    // white - 0
+                    if (WHITE == leftCell && WHITE == leftUpCell && WHITE == upCell)
+                    {
+                        // 非法
+                        continue;
+                    }
+
+                    if (0 == leftPlug && 0 == upPlug)
+                    {
+
+                    }
+                    else if (0 == leftPlug)
+                    {
+
+                    }
+                    else if (0 == upPlug)
+                    {
+
+                    }
+                    else
+                    {
+                        // 2 个插头
+                    }
+                }
+                else
+                {
+                    // 任意颜色
+                }
             }
 
             // 准备下一轮

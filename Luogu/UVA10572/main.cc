@@ -93,6 +93,88 @@ inline int getVal4St2(unsigned short st, int pos)
     return ret;
 }
 
+inline int getMinUnused(unsigned long long st)
+{
+    int ret = 0;
+    unsigned char flags[16] = {0};
+
+    for (size_t i = 0; i <= w; i++)
+    {
+        int v = getVal4St1(st, i);
+        flags[v] = 1;
+    }
+
+    for (size_t i = 1; i <= w; i++)
+    {
+        if (0 == flags[i])
+        {
+            ret = i;
+            break;
+        }
+    }
+    
+
+    return ret;
+}
+
+unsigned char blks;
+unsigned long long st1;
+unsigned short st2;
+unsigned long long cnt;
+int leftPlug, upPlug;
+int leftCell, leftUpCell, upCell;
+
+inline void func(int color)
+{
+    if (color == leftCell && color == leftUpCell && color == upCell)
+    {
+        // 非法
+        return;
+    }
+
+    if (0 == leftPlug && 0 == upPlug)
+    {
+        // 找到最小的、未使用的
+        int minUnused = getMinUnused(st1);
+
+        // 拐角
+        if (h > now_x && w > now_y)
+        {
+        }
+
+        // 向下
+        if (h > now_x)
+        {
+        }
+
+        // 向右
+        if (w > now_y)
+        {
+        }
+
+        // 该 cell 自成一个联通块
+    }
+    else if (0 == leftPlug)
+    {
+
+        // 就此打住，形成一个联通块
+    }
+    else if (0 == upPlug)
+    {
+
+        // 就此打住，形成一个联通块
+    }
+    else
+    {
+        // 2 个插头
+        if (leftCell != upCell)
+        {
+            // 非法
+            return;
+        }
+    }
+}
+
 int main()
 {
     int t;
@@ -138,10 +220,10 @@ int main()
 
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                unsigned char blks = qs[act][iQ].blocks;
-                unsigned long long st1 = qs[act][iQ].state1;
-                unsigned short st2 = qs[act][iQ].state2;
-                unsigned long long cnt = qs[act][iQ].cnt;
+                blks = qs[act][iQ].blocks;
+                st1 = qs[act][iQ].state1;
+                st2 = qs[act][iQ].state2;
+                cnt = qs[act][iQ].cnt;
 
                 if (1 == now_y)
                 {
@@ -173,75 +255,19 @@ int main()
 
                 if ('#' == cells[now_x][now_y])
                 {
-                    // black - 1
-                    if (BLACK == leftCell && BLACK == leftUpCell && BLACK == upCell)
-                    {
-                        // 非法
-                        continue;
-                    }
-
-                    if (0 == leftPlug && 0 == upPlug)
-                    {
-                        // 拐角
-
-                        // 向下
-
-                        // 向右
-
-                        // 该 cell 自成一个联通块
-
-                    }
-                    else if (0 == leftPlug)
-                    {
-
-                        // 就此打住，形成一个联通块
-                    }
-                    else if (0 == upPlug)
-                    {
-
-                        // 就此打住，形成一个联通块
-                    }
-                    else
-                    {
-                        // 2 个插头
-                        if (leftCell != upCell)
-                        {
-                            // 非法
-                            continue;
-                        }
-
-                        
-                    }
+                    // black
+                    func(BLACK);
                 }
                 else if ('o' == cells[now_x][now_y])
                 {
-                    // white - 0
-                    if (WHITE == leftCell && WHITE == leftUpCell && WHITE == upCell)
-                    {
-                        // 非法
-                        continue;
-                    }
-
-                    if (0 == leftPlug && 0 == upPlug)
-                    {
-
-                    }
-                    else if (0 == leftPlug)
-                    {
-
-                    }
-                    else if (0 == upPlug)
-                    {
-
-                    }
-                    else
-                    {
-                        // 2 个插头
-                    }
+                    // white
+                    func(WHITE);
                 }
                 else
                 {
                     // 任意颜色
+                    func(BLACK);
+                    func(WHITE);
                 }
             }
 

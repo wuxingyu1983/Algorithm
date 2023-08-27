@@ -136,6 +136,22 @@ inline int getMinUnused(unsigned long long st)
     return ret;
 }
 
+inline int getPlugCnt(unsigned long long st, int plug)
+{
+    int ret = 0;
+
+    for (size_t i = 0; i <= w; i++)
+    {
+        int v = getVal4St1(st, i);
+        if (v == plug)
+        {
+            ret ++;
+        } 
+    }
+
+    return ret;
+}
+
 unsigned char blks;
 unsigned long long st1;
 unsigned short st2;
@@ -143,13 +159,48 @@ unsigned long long cnt;
 int leftPlug, upPlug;
 int leftCell, leftUpCell, upCell;
 
-inline void func(int color)
+inline void addSts(unsigned long long newst1, unsigned short newst2, Record &rec, int idx, int color)
+{
+    unsigned long long key = 0;
+
+    key = newst2 | (newst1 << (w + 1)) | (blks << ((w + 1) * (ST1_BITS + ST2_BITS)));
+
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
+    if (it == cnts[idx].end())
+    {
+        // 加入队尾
+        memcpy(&(qs[idx][qTail[idx]]), &rec, sizeof(Record));
+
+        qs[idx][qTail[idx]].blocks = blks;
+        qs[idx][qTail[idx]].state1 = newst1;
+        qs[idx][qTail[idx]].state2 = newst2;
+        qs[idx][qTail[idx]].cnt = cnt;
+
+        qs[idx][qTail[idx]].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));
+        if (color)
+        {
+            qs[idx][qTail[idx]].grid[now_x - 1] |= 1 << (now_y - 1);
+        }
+
+        cnts[idx][key] = qTail[idx];
+        qTail[idx] ++;
+    }
+    else
+    {
+        qs[idx][it->second].cnt += cnt;
+    }
+}
+
+inline void func(int color, Record &rec, int idx)
 {
     if (color == leftCell && color == leftUpCell && color == upCell)
     {
         // 非法
         return;
     }
+
+    unsigned short newSt2 = st2;
+    newSt2 = setVal4St2(newSt2, now_x - 1, color);
 
     if (0 == leftPlug && 0 == upPlug)
     {
@@ -159,29 +210,164 @@ inline void func(int color)
         // 拐角
         if (h > now_x && w > now_y)
         {
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, minUnused);
+            newSt1 = setVal4St1(newSt1, now_x, minUnused);
+
+            addSts(newSt1, newSt2, rec, idx, color);
         }
 
         // 向下
         if (h > now_x)
         {
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, minUnused);
+            newSt1 = setVal4St1(newSt1, now_x, 0);
+
+            addSts(newSt1, newSt2, rec, idx, color);
         }
 
         // 向右
         if (w > now_y)
         {
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_x, minUnused);
+
+            addSts(newSt1, newSt2, rec, idx, color);
         }
 
         // 该 cell 自成一个联通块
+        {
+            blks ++;
+            if (2 < blks)
+            {
+                // 多余2个联通块，非法
+                return;
+            }
+            else if (2 == blks && false == (h == now_x && w == now_y))
+            {
+                // 2 个联通块 只可能出现在 最后一个 cell，否则非法
+                return;
+            }
+            else
+            {
+                // 合法的
+                unsigned long long newSt1 = st1;
+                newSt1 = setVal4St1(newSt1, now_x - 1, 0);
+                newSt1 = setVal4St1(newSt1, now_x, 0);
+
+                addSts(newSt1, newSt2, rec, idx, color);
+            }
+        }
     }
     else if (0 == leftPlug)
     {
+        // 有 下 插头
+        if (upCell != color)
+        {
+            // 非法
+            return;
+        }
 
-        // 就此打住，形成一个联通块
+        // 向下
+        if (h > now_x)
+        {
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, upPlug);
+            newSt1 = setVal4St1(newSt1, now_x, 0);
+
+            addSts(newSt1, newSt2, rec, idx, color);
+        }
+
+        // 向右
+        if (w > now_y)
+        {
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_x, upPlug);
+
+            addSts(newSt1, newSt2, rec, idx, color);
+        }
+
+        // 就此打住，可能形成一个联通块
+        {
+            int cnt = getPlugCnt(st1, upPlug);
+            if (1 == cnt)
+            {
+                blks++;
+                if (2 < blks)
+                {
+                    // 多余2个联通块，非法
+                    return;
+                }
+                else if (2 == blks && false == (h == now_x && w == now_y))
+                {
+                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
+                    return;
+                }
+            }
+
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_x, 0);
+
+            addSts(newSt1, newSt2, rec, idx, color);
+        }
     }
     else if (0 == upPlug)
     {
+        // 有 左 插头
+        if (leftCell != color)
+        {
+            // 非法
+            return;
+        }
 
-        // 就此打住，形成一个联通块
+        // 向下
+        if (h > now_x)
+        {
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, leftPlug);
+            newSt1 = setVal4St1(newSt1, now_x, 0);
+
+            addSts(newSt1, newSt2, rec, idx, color);
+        }
+
+        // 向右
+        if (w > now_y)
+        {
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_x, leftPlug);
+
+            addSts(newSt1, newSt2, rec, idx, color);
+        }
+
+        // 就此打住，可能形成一个联通块
+        {
+            int cnt = getPlugCnt(st1, leftPlug);
+            if (1 == cnt)
+            {
+                blks++;
+                if (2 < blks)
+                {
+                    // 多余2个联通块，非法
+                    return;
+                }
+                else if (2 == blks && false == (h == now_x && w == now_y))
+                {
+                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
+                    return;
+                }
+            }
+
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_x, 0);
+
+            addSts(newSt1, newSt2, rec, idx, color);
+        }
     }
     else
     {
@@ -275,18 +461,18 @@ int main()
                 if ('#' == cells[now_x][now_y])
                 {
                     // black
-                    func(BLACK);
+                    func(BLACK, qs[act][iQ], nAct);
                 }
                 else if ('o' == cells[now_x][now_y])
                 {
                     // white
-                    func(WHITE);
+                    func(WHITE, qs[act][iQ], nAct);
                 }
                 else
                 {
                     // 任意颜色
-                    func(BLACK);
-                    func(WHITE);
+                    func(BLACK, qs[act][iQ], nAct);
+                    func(WHITE, qs[act][iQ], nAct);
                 }
             }
 

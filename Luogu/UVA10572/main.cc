@@ -152,6 +152,22 @@ inline int getPlugCnt(unsigned long long st, int plug)
     return ret;
 }
 
+inline unsigned long long updateSt1(unsigned long long st, int from, int to)
+{
+    unsigned long long ret = st;
+
+    for (size_t i = 0; i <= w; i++)
+    {
+        int v = getVal4St1(ret, i);
+        if (v == from)
+        {
+            ret = setVal4St1(ret, i, to);
+        } 
+    }
+
+    return ret;
+}
+
 unsigned char blks;
 unsigned long long st1;
 unsigned short st2;
@@ -372,11 +388,37 @@ inline void func(int color, Record &rec, int idx)
     else
     {
         // 2 个插头
-        if (leftCell != upCell)
+        if (leftCell != upCell || color != leftCell)
         {
             // 非法
             return;
         }
+
+        unsigned long long newSt1 = st1;
+        if (leftPlug != upPlug)
+        {
+            newSt1 = updateSt1(newSt1, leftPlug, upPlug);
+        }
+        newSt1 = setVal4St1(newSt1, now_x - 1, 0);
+        newSt1 = setVal4St1(newSt1, now_x, 0);
+
+        int cnt = getPlugCnt(newSt1, upPlug);
+        if (0 == cnt)
+        {
+            blks++;
+            if (2 < blks)
+            {
+                // 多余2个联通块，非法
+                return;
+            }
+            else if (2 == blks && false == (h == now_x && w == now_y))
+            {
+                // 2 个联通块 只可能出现在 最后一个 cell，否则非法
+                return;
+            }
+        }
+
+        addSts(newSt1, newSt2, rec, idx, color);
     }
 }
 

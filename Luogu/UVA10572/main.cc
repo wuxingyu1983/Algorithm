@@ -84,11 +84,31 @@ inline int getVal4St1(unsigned long long st, int pos)
     return ret;
 }
 
+inline unsigned long long setVal4St1(unsigned long long st, int pos, unsigned long long val)
+{
+    unsigned long long ret = st;
+
+    ret &= ~(ST1_MASK << (pos * ST1_BITS));
+    ret |= val << (pos * ST1_BITS);
+
+    return ret;
+}
+
 inline int getVal4St2(unsigned short st, int pos)
 {
     int ret = 0;
 
     ret = (st >> (pos * ST2_BITS)) & ST2_MASK;
+
+    return ret;
+}
+
+inline unsigned short setVal4St2(unsigned short st, int pos, unsigned short val)
+{
+    unsigned short ret = st;
+
+    ret &= ~(ST2_MASK << (pos * ST2_BITS));
+    ret |= val << (pos * ST2_BITS);
 
     return ret;
 }
@@ -112,7 +132,6 @@ inline int getMinUnused(unsigned long long st)
             break;
         }
     }
-    
 
     return ret;
 }

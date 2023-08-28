@@ -168,14 +168,13 @@ inline unsigned long long updateSt1(unsigned long long st, int from, int to)
     return ret;
 }
 
-unsigned char blks;
 unsigned long long st1;
 unsigned short st2;
 unsigned long long cnt;
 int leftPlug, upPlug;
 int leftCell, leftUpCell, upCell;
 
-inline void addSts(unsigned long long newst1, unsigned short newst2, Record &rec, int idx, int color)
+inline void addSts(unsigned char blks, unsigned long long newst1, unsigned short newst2, Record &rec, int idx, int color)
 {
     unsigned long long key = 0;
 
@@ -207,7 +206,7 @@ inline void addSts(unsigned long long newst1, unsigned short newst2, Record &rec
     }
 }
 
-inline void func(int color, Record &rec, int idx)
+inline void func(int color, Record &rec, int blks, int idx)
 {
     if (color == leftCell && color == leftUpCell && color == upCell)
     {
@@ -230,7 +229,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, minUnused);
             newSt1 = setVal4St1(newSt1, now_x, minUnused);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
 
         // 向下
@@ -240,7 +239,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, minUnused);
             newSt1 = setVal4St1(newSt1, now_x, 0);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
 
         // 向右
@@ -250,7 +249,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, 0);
             newSt1 = setVal4St1(newSt1, now_x, minUnused);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
 
         // 该 cell 自成一个联通块
@@ -273,7 +272,7 @@ inline void func(int color, Record &rec, int idx)
                 newSt1 = setVal4St1(newSt1, now_x - 1, 0);
                 newSt1 = setVal4St1(newSt1, now_x, 0);
 
-                addSts(newSt1, newSt2, rec, idx, color);
+                addSts(blks, newSt1, newSt2, rec, idx, color);
             }
         }
     }
@@ -293,7 +292,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, upPlug);
             newSt1 = setVal4St1(newSt1, now_x, 0);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
 
         // 向右
@@ -303,7 +302,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, 0);
             newSt1 = setVal4St1(newSt1, now_x, upPlug);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
 
         // 就此打住，可能形成一个联通块
@@ -328,7 +327,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, 0);
             newSt1 = setVal4St1(newSt1, now_x, 0);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
     }
     else if (0 == upPlug)
@@ -347,7 +346,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, leftPlug);
             newSt1 = setVal4St1(newSt1, now_x, 0);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
 
         // 向右
@@ -357,7 +356,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, 0);
             newSt1 = setVal4St1(newSt1, now_x, leftPlug);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
 
         // 就此打住，可能形成一个联通块
@@ -382,7 +381,7 @@ inline void func(int color, Record &rec, int idx)
             newSt1 = setVal4St1(newSt1, now_x - 1, 0);
             newSt1 = setVal4St1(newSt1, now_x, 0);
 
-            addSts(newSt1, newSt2, rec, idx, color);
+            addSts(blks, newSt1, newSt2, rec, idx, color);
         }
     }
     else
@@ -418,7 +417,7 @@ inline void func(int color, Record &rec, int idx)
             }
         }
 
-        addSts(newSt1, newSt2, rec, idx, color);
+        addSts(blks, newSt1, newSt2, rec, idx, color);
     }
 }
 
@@ -467,7 +466,7 @@ int main()
 
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                blks = qs[act][iQ].blocks;
+                unsigned char blks = qs[act][iQ].blocks;
                 st1 = qs[act][iQ].state1;
                 st2 = qs[act][iQ].state2;
                 cnt = qs[act][iQ].cnt;
@@ -503,18 +502,18 @@ int main()
                 if ('#' == cells[now_x][now_y])
                 {
                     // black
-                    func(BLACK, qs[act][iQ], nAct);
+                    func(BLACK, qs[act][iQ], blks, nAct);
                 }
                 else if ('o' == cells[now_x][now_y])
                 {
                     // white
-                    func(WHITE, qs[act][iQ], nAct);
+                    func(WHITE, qs[act][iQ], blks, nAct);
                 }
                 else
                 {
                     // 任意颜色
-                    func(BLACK, qs[act][iQ], nAct);
-                    func(WHITE, qs[act][iQ], nAct);
+                    func(BLACK, qs[act][iQ], blks, nAct);
+                    func(WHITE, qs[act][iQ], blks, nAct);
                 }
             }
 

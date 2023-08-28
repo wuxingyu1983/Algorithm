@@ -454,7 +454,38 @@ int main()
                 if (h < now_x)
                 {
                     // finished
-                    // TBD
+                    unsigned long long sum = 0;
+                    Record * example = NULL;
+
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        if (0 == qs[act][iQ].state1)
+                        {
+                            sum += qs[act][iQ].cnt;
+                            example = &(qs[act][iQ]);
+                        }
+                    }
+
+                    // output
+                    cout << sum << endl;
+                    if (sum)
+                    {
+                        for (size_t row = 0; row < h; row++)
+                        {
+                            for (size_t col = 0; col < w; col++)
+                            {
+                                if (BLACK == (example->grid[row] & (1 << col)))
+                                {
+                                    cout << '#';
+                                }
+                                else
+                                {
+                                    cout << 'o';
+                                }
+                            }
+                            cout << endl;
+                        }
+                    }
 
                     break;
                 }

@@ -211,11 +211,17 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         return;
     }
 
-    unsigned short newSt2 = st2;
-    newSt2 = setVal4St2(newSt2, now_x - 1, color);
+    // 2个 cell 颜色相同，他们之间一定有一个 plug
+
+    unsigned short newSt2 = setVal4St2(newSt2, now_x - 1, color);
 
     if (0 == leftPlug && 0 == upPlug)
     {
+        if (leftCell == color || upCell == color)
+        {
+            return;
+        }
+
         // 找到最小的、未使用的
         int minUnused = getMinUnused(st1);
 
@@ -276,7 +282,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
     else if (0 == leftPlug)
     {
         // 有 下 插头
-        if (upCell != color)
+        if (upCell != color || leftCell == color)
         {
             // 非法
             return;
@@ -330,7 +336,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
     else if (0 == upPlug)
     {
         // 有 左 插头
-        if (leftCell != color)
+        if (leftCell != color || color == upCell)
         {
             // 非法
             return;
@@ -384,7 +390,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
     else
     {
         // 2 个插头
-        if (leftCell != upCell || color != leftCell)
+        if (color != upCell || color != leftCell)
         {
             // 非法
             return;
@@ -393,6 +399,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         unsigned long long newSt1 = st1;
         if (leftPlug != upPlug)
         {
+            // leftPlug ==> upPlug
             newSt1 = updateSt1(newSt1, leftPlug, upPlug);
         }
         newSt1 = setVal4St1(newSt1, now_x - 1, 0);

@@ -22,25 +22,26 @@
 
 using namespace std;
 
-#define DEBUG       0
-#define MAX_MN      8
-#define ST1_BITS    4
-#define ST1_MASK    15
-#define ST2_BITS    1
-#define ST2_MASK    1
+#define DEBUG 0
+#define MAX_MN 8
+#define ST1_BITS 4
+#define ST1_MASK 15
+#define ST2_BITS 1
+#define ST2_MASK 1
 #define QS_SIZE     165536
-#define BLACK       1
-#define WHITE       0
+//#define QS_SIZE 64
+#define BLACK 1
+#define WHITE 0
 
 class Record
 {
 public:
-    unsigned char blocks;               // 已经完结的联通块
-    unsigned long long state1;          // 轮廓线段状态
-    unsigned short state2;              // 轮廓cells状态
+    unsigned char blocks;      // 已经完结的联通块
+    unsigned long long state1; // 轮廓线段状态
+    unsigned short state2;     // 轮廓cells状态
     unsigned long long cnt;
 
-    unsigned char grid[8];              // 满足当前 state 状态下的 一组 可能的 grid
+    unsigned char grid[8]; // 满足当前 state 状态下的 一组 可能的 grid
 
     Record() {}
 };
@@ -49,8 +50,8 @@ Record qs[2][QS_SIZE];
 int qTail[2];
 char cells[MAX_MN + 1][MAX_MN + 1];
 int h, w;
-unordered_map<unsigned long long, unsigned int> cnts[2];    // key 是 blocks | st1 | st2 的组合，value 是在 qs 的下标
-int act = 0;                  // 当前生效的 map
+unordered_map<unsigned long long, unsigned int> cnts[2]; // key 是 blocks | st1 | st2 的组合，value 是在 qs 的下标
+int act = 0;                                             // 当前生效的 map
 int now_x, now_y;
 
 inline void init()
@@ -64,7 +65,7 @@ inline void init()
     cnts[0].clear();
     cnts[1].clear();
 
-    now_x =0;
+    now_x = 0;
     now_y = w;
 
     qs[act][0].blocks = 0;
@@ -72,7 +73,7 @@ inline void init()
     qs[act][0].state2 = 0;
     qs[act][0].cnt = 1;
 
-    qTail[act] ++;
+    qTail[act]++;
 }
 
 inline int getVal4St1(unsigned long long st, int pos)
@@ -145,8 +146,8 @@ inline int getPlugCnt(unsigned long long st, int plug)
         int v = getVal4St1(st, i);
         if (v == plug)
         {
-            ret ++;
-        } 
+            ret++;
+        }
     }
 
     return ret;
@@ -162,7 +163,7 @@ inline unsigned long long updateSt1(unsigned long long st, int from, int to)
         if (v == from)
         {
             ret = setVal4St1(ret, i, to);
-        } 
+        }
     }
 
     return ret;
@@ -195,7 +196,7 @@ inline void addSts(unsigned char blks, unsigned long long newst1, unsigned short
         }
 
         cnts[idx][key] = qTail[idx];
-        qTail[idx] ++;
+        qTail[idx]++;
     }
     else
     {
@@ -213,7 +214,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
 
     // 2个 cell 颜色相同，他们之间一定有一个 plug
 
-    unsigned short newSt2 = setVal4St2(newSt2, now_x - 1, color);
+    unsigned short newSt2 = setVal4St2(st2, now_y - 1, color);
 
     if (0 == leftPlug && 0 == upPlug)
     {
@@ -229,8 +230,8 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         if (h > now_x && w > now_y)
         {
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, minUnused);
-            newSt1 = setVal4St1(newSt1, now_x, minUnused);
+            newSt1 = setVal4St1(newSt1, now_y - 1, minUnused);
+            newSt1 = setVal4St1(newSt1, now_y, minUnused);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
@@ -239,8 +240,8 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         if (h > now_x)
         {
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, minUnused);
-            newSt1 = setVal4St1(newSt1, now_x, 0);
+            newSt1 = setVal4St1(newSt1, now_y - 1, minUnused);
+            newSt1 = setVal4St1(newSt1, now_y, 0);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
@@ -249,15 +250,15 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         if (w > now_y)
         {
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
-            newSt1 = setVal4St1(newSt1, now_x, minUnused);
+            newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_y, minUnused);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
 
         // 该 cell 自成一个联通块
         {
-            blks ++;
+            blks++;
             if (2 < blks)
             {
                 // 多余2个联通块，非法
@@ -272,8 +273,8 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             {
                 // 合法的
                 unsigned long long newSt1 = st1;
-                newSt1 = setVal4St1(newSt1, now_x - 1, 0);
-                newSt1 = setVal4St1(newSt1, now_x, 0);
+                newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+                newSt1 = setVal4St1(newSt1, now_y, 0);
 
                 addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
             }
@@ -292,8 +293,8 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         if (h > now_x)
         {
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, upPlug);
-            newSt1 = setVal4St1(newSt1, now_x, 0);
+            newSt1 = setVal4St1(newSt1, now_y - 1, upPlug);
+            newSt1 = setVal4St1(newSt1, now_y, 0);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
@@ -302,16 +303,16 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         if (w > now_y)
         {
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
-            newSt1 = setVal4St1(newSt1, now_x, upPlug);
+            newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_y, upPlug);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
 
         // 就此打住，可能形成一个联通块
         {
-            int cnt = getPlugCnt(st1, upPlug);
-            if (1 == cnt)
+            int plugCnt = getPlugCnt(st1, upPlug);
+            if (1 == plugCnt)
             {
                 blks++;
                 if (2 < blks)
@@ -327,8 +328,8 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             }
 
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
-            newSt1 = setVal4St1(newSt1, now_x, 0);
+            newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_y, 0);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
@@ -346,8 +347,8 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         if (h > now_x)
         {
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, leftPlug);
-            newSt1 = setVal4St1(newSt1, now_x, 0);
+            newSt1 = setVal4St1(newSt1, now_y - 1, leftPlug);
+            newSt1 = setVal4St1(newSt1, now_y, 0);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
@@ -356,16 +357,16 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
         if (w > now_y)
         {
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
-            newSt1 = setVal4St1(newSt1, now_x, leftPlug);
+            newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_y, leftPlug);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
 
         // 就此打住，可能形成一个联通块
         {
-            int cnt = getPlugCnt(st1, leftPlug);
-            if (1 == cnt)
+            int plugCnt = getPlugCnt(st1, leftPlug);
+            if (1 == plugCnt)
             {
                 blks++;
                 if (2 < blks)
@@ -381,8 +382,8 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             }
 
             unsigned long long newSt1 = st1;
-            newSt1 = setVal4St1(newSt1, now_x - 1, 0);
-            newSt1 = setVal4St1(newSt1, now_x, 0);
+            newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_y, 0);
 
             addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
         }
@@ -402,11 +403,11 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             // leftPlug ==> upPlug
             newSt1 = updateSt1(newSt1, leftPlug, upPlug);
         }
-        newSt1 = setVal4St1(newSt1, now_x - 1, 0);
-        newSt1 = setVal4St1(newSt1, now_x, 0);
+        newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+        newSt1 = setVal4St1(newSt1, now_y, 0);
 
-        int cnt = getPlugCnt(newSt1, upPlug);
-        if (0 == cnt)
+        int plugCnt = getPlugCnt(newSt1, upPlug);
+        if (0 == plugCnt)
         {
             blks++;
             if (2 < blks)
@@ -444,22 +445,22 @@ int main()
         }
 
         init();
-        unsigned short st2Mask = (1 << w) - 1;
-
+        unsigned short st2Mask = (1 << (w + 1)) - 1;
+        
         while (0 < qTail[act])
         {
             int nAct = 1 - act;
 
             if (w == now_y)
             {
-                now_x ++;
+                now_x++;
                 now_y = 1;
 
                 if (h < now_x)
                 {
                     // finished
                     unsigned long long sum = 0;
-                    Record * example = NULL;
+                    Record *example = NULL;
 
                     for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                     {
@@ -478,13 +479,13 @@ int main()
                         {
                             for (size_t col = 0; col < w; col++)
                             {
-                                if (BLACK == (example->grid[row] & (1 << col)))
+                                if (WHITE == (example->grid[row] & (1 << col)))
                                 {
-                                    cout << '#';
+                                    cout << 'o';
                                 }
                                 else
                                 {
-                                    cout << 'o';
+                                    cout << '#';
                                 }
                             }
                             cout << endl;
@@ -514,24 +515,24 @@ int main()
                     st2 &= st2Mask;
                 }
 
-                int leftPlug = 0, upPlug = 0;
-                int leftCell = -1, leftUpCell = -1, upCell = -1;
-
-                if (1 < now_x)
-                {
-                    leftPlug = getVal4St1(st1, now_x - 1);
-                    leftCell = getVal4St2(st2, now_x - 2);
-                }
+                leftPlug = 0, upPlug = 0;
+                leftCell = -1, leftUpCell = -1, upCell = -1;
 
                 if (1 < now_y)
                 {
-                    upPlug = getVal4St1(st1, now_x);
-                    upCell = getVal4St2(st2, now_x);
+                    leftPlug = getVal4St1(st1, now_y - 1);
+                    leftCell = getVal4St2(st2, now_y - 2);
+                }
+
+                if (1 < now_x)
+                {
+                    upPlug = getVal4St1(st1, now_y);
+                    upCell = getVal4St2(st2, now_y);
                 }
 
                 if (1 < now_x && 1 < now_y)
                 {
-                    leftUpCell = getVal4St2(st2, now_x - 1);
+                    leftUpCell = getVal4St2(st2, now_y - 1);
                 }
 
                 if ('#' == cells[now_x][now_y])
@@ -556,6 +557,12 @@ int main()
             qTail[act] = 0;
             cnts[act].clear();
 
+            if (0 == qTail[nAct])
+            {
+                cout << 0 << endl;
+                break;;
+            }
+            
             act = nAct;
         }
     }

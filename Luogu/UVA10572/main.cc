@@ -28,8 +28,7 @@ using namespace std;
 #define ST1_MASK 15
 #define ST2_BITS 1
 #define ST2_MASK 1
-#define QS_SIZE 165536
-// #define QS_SIZE 128
+#define QS_SIZE 20665536
 #define ANY 2
 #define BLACK 1
 #define WHITE 0
@@ -90,7 +89,7 @@ inline unsigned long long setVal4St1(unsigned long long st, int pos, unsigned lo
 {
     unsigned long long ret = st;
 
-    ret &= ~(ST1_MASK << (pos * ST1_BITS));
+    ret &= ~(((unsigned long long)ST1_MASK) << (pos * ST1_BITS));
     ret |= val << (pos * ST1_BITS);
 
     return ret;
@@ -175,9 +174,9 @@ int leftCell, leftUpCell, upCell;
 
 inline void addSts(unsigned char blks, unsigned long long newst1, unsigned short newst2, unsigned long long cnt, Record &rec, int idx, int color)
 {
-    unsigned long long key = 0;
+    unsigned long long key = newst2;
 
-    key = newst2 | (newst1 << (w + 1)) | (((unsigned long long)blks) << ((w + 1) * (ST1_BITS + ST2_BITS)));
+    key |= (newst1 << (w + 1)) | (((unsigned long long)blks) << ((w + 1) * (ST1_BITS + ST2_BITS)));
 
     unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
     if (it == cnts[idx].end())

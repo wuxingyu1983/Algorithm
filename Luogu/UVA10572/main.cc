@@ -28,7 +28,7 @@ using namespace std;
 #define ST1_MASK 15
 #define ST2_BITS 1
 #define ST2_MASK 1
-#define QS_SIZE 20665536
+#define QS_SIZE 523114
 #define ANY 2
 #define BLACK 1
 #define WHITE 0
@@ -36,10 +36,9 @@ using namespace std;
 class Record
 {
 public:
-    unsigned char blocks;      // 已经完结的联通块
     unsigned long long state1; // 轮廓线段状态
     unsigned short state2;     // 轮廓cells状态
-    unsigned long long cnt;
+    unsigned long long cnt[3];
 
     unsigned char grid[8]; // 满足当前 state 状态下的 一组 可能的 grid
 
@@ -68,10 +67,11 @@ inline void init()
     now_x = 0;
     now_y = w;
 
-    qs[act][0].blocks = 0;
     qs[act][0].state1 = 0;
     qs[act][0].state2 = 0;
-    qs[act][0].cnt = 1;
+    qs[act][0].cnt[0] = 1;
+    qs[act][0].cnt[1] = 0;
+    qs[act][0].cnt[2] = 0;
 
     qTail[act]++;
 }
@@ -206,40 +206,52 @@ unsigned long long recode(unsigned long long st)
     return ret;
 }
 
-inline void addSts(unsigned char blks, unsigned long long newst1, unsigned short newst2, unsigned long long cnt, Record &rec, int idx, int color)
+inline void addSts(unsigned long long newst1, unsigned short newst2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color)
 {
+    if (0 == cnt0 + cnt1 + cnt2)
+    {
+        return;
+    }
+
     unsigned long long key = newst2;
     newst1 = recode(newst1);
 
-    key |= (newst1 << (w + 1)) | (((unsigned long long)blks) << ((w + 1) * (ST1_BITS + ST2_BITS)));
+    key |= (newst1 << (w + 1));
+
+    int pInQ = qTail[idx];
 
     unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
     if (it == cnts[idx].end())
     {
         // 加入队尾
-        memcpy(&(qs[idx][qTail[idx]]), &rec, sizeof(Record));
+        memcpy(&(qs[idx][pInQ]), &rec, sizeof(Record));
 
-        qs[idx][qTail[idx]].blocks = blks;
-        qs[idx][qTail[idx]].state1 = newst1;
-        qs[idx][qTail[idx]].state2 = newst2;
-        qs[idx][qTail[idx]].cnt = cnt;
+        qs[idx][pInQ].state1 = newst1;
+        qs[idx][pInQ].state2 = newst2;
+        qs[idx][pInQ].cnt[0] = cnt0;
+        qs[idx][pInQ].cnt[1] = cnt1;
+        qs[idx][pInQ].cnt[2] = cnt2;
 
-        qs[idx][qTail[idx]].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));
+        qs[idx][pInQ].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));
         if (color)
         {
-            qs[idx][qTail[idx]].grid[now_x - 1] |= 1 << (now_y - 1);
+            qs[idx][pInQ].grid[now_x - 1] |= 1 << (now_y - 1);
         }
 
-        cnts[idx][key] = qTail[idx];
+        cnts[idx][key] = pInQ;
         qTail[idx]++;
     }
     else
     {
-        qs[idx][it->second].cnt += cnt;
+        pInQ = it->second;
+
+        qs[idx][pInQ].cnt[0] += cnt0;
+        qs[idx][pInQ].cnt[1] += cnt1;
+        qs[idx][pInQ].cnt[2] += cnt2;
     }
 }
 
-inline void func(int color, Record &rec, unsigned char blks, unsigned long long st1, unsigned short st2, unsigned long long cnt, int idx)
+inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, int idx)
 {
     if (color == leftCell && color == leftUpCell && color == upCell)
     {
@@ -268,7 +280,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, minUnused);
             newSt1 = setVal4St1(newSt1, now_y, minUnused);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向下
@@ -278,7 +290,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, minUnused);
             newSt1 = setVal4St1(newSt1, now_y, 0);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向右
@@ -288,30 +300,23 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, 0);
             newSt1 = setVal4St1(newSt1, now_y, minUnused);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 该 cell 自成一个联通块
         {
-            blks++;
-            if (2 < blks)
-            {
-                // 多余2个联通块，非法
-                return;
-            }
-            else if (2 == blks && false == (h == now_x && w == now_y))
+            unsigned long long newSt1 = st1;
+            newSt1 = setVal4St1(newSt1, now_y - 1, 0);
+            newSt1 = setVal4St1(newSt1, now_y, 0);
+            if (h == now_x && w == now_y)
             {
                 // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                return;
+                addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
             }
             else
             {
                 // 合法的
-                unsigned long long newSt1 = st1;
-                newSt1 = setVal4St1(newSt1, now_y - 1, 0);
-                newSt1 = setVal4St1(newSt1, now_y, 0);
-
-                addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+                addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
             }
         }
     }
@@ -331,7 +336,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, upPlug);
             newSt1 = setVal4St1(newSt1, now_y, upPlug);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向下
@@ -341,7 +346,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, upPlug);
             newSt1 = setVal4St1(newSt1, now_y, 0);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向右
@@ -351,32 +356,32 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, 0);
             newSt1 = setVal4St1(newSt1, now_y, upPlug);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 就此打住，可能形成一个联通块
         {
-            int plugCnt = getPlugCnt(st1, upPlug);
-            if (1 == plugCnt)
-            {
-                blks++;
-                if (2 < blks)
-                {
-                    // 多余2个联通块，非法
-                    return;
-                }
-                else if (2 == blks && false == (h == now_x && w == now_y))
-                {
-                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    return;
-                }
-            }
-
             unsigned long long newSt1 = st1;
             newSt1 = setVal4St1(newSt1, now_y - 1, 0);
             newSt1 = setVal4St1(newSt1, now_y, 0);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            int plugCnt = getPlugCnt(st1, upPlug);
+            if (1 == plugCnt)
+            {
+                if (h == now_x && w == now_y)
+                {
+                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
+                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
+                }
+                else
+                {
+                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
+                }
+            }
+            else
+            {
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
     }
     else if (0 == upPlug)
@@ -395,7 +400,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, leftPlug);
             newSt1 = setVal4St1(newSt1, now_y, leftPlug);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向下
@@ -405,7 +410,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, leftPlug);
             newSt1 = setVal4St1(newSt1, now_y, 0);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向右
@@ -415,32 +420,32 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, 0);
             newSt1 = setVal4St1(newSt1, now_y, leftPlug);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 就此打住，可能形成一个联通块
         {
-            int plugCnt = getPlugCnt(st1, leftPlug);
-            if (1 == plugCnt)
-            {
-                blks++;
-                if (2 < blks)
-                {
-                    // 多余2个联通块，非法
-                    return;
-                }
-                else if (2 == blks && false == (h == now_x && w == now_y))
-                {
-                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    return;
-                }
-            }
-
             unsigned long long newSt1 = st1;
             newSt1 = setVal4St1(newSt1, now_y - 1, 0);
             newSt1 = setVal4St1(newSt1, now_y, 0);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            int plugCnt = getPlugCnt(st1, leftPlug);
+            if (1 == plugCnt)
+            {
+                if (h == now_x && w == now_y)
+                {
+                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
+                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
+                }
+                else
+                {
+                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
+                }
+            }
+            else
+            {
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
     }
     else
@@ -465,7 +470,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, upPlug);
             newSt1 = setVal4St1(newSt1, now_y, upPlug);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向下
@@ -474,7 +479,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, upPlug);
             newSt1 = setVal4St1(newSt1, now_y, 0);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 向右
@@ -483,7 +488,7 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             newSt1 = setVal4St1(newSt1, now_y - 1, 0);
             newSt1 = setVal4St1(newSt1, now_y, upPlug);
 
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
         }
 
         // 就此打住，可能形成一个联通块
@@ -494,20 +499,20 @@ inline void func(int color, Record &rec, unsigned char blks, unsigned long long 
             int plugCnt = getPlugCnt(newSt1, upPlug);
             if (0 == plugCnt)
             {
-                blks++;
-                if (2 < blks)
-                {
-                    // 多余2个联通块，非法
-                    return;
-                }
-                else if (2 == blks && false == (h == now_x && w == now_y))
+                if (h == now_x && w == now_y)
                 {
                     // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    return;
+                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
+                }
+                else
+                {
+                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
                 }
             }
-
-            addSts(blks, newSt1, newSt2, cnt, rec, idx, color);
+            else
+            {
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
     }
 }
@@ -566,8 +571,11 @@ int main()
                     {
                         if (0 == qs[act][iQ].state1)
                         {
-                            sum += qs[act][iQ].cnt;
-                            example = &(qs[act][iQ]);
+                            sum += qs[act][iQ].cnt[2];
+                            if (/*NULL == example &&*/ qs[act][iQ].cnt[2])
+                            {
+                                example = &(qs[act][iQ]);
+                            }
                         }
                     }
 
@@ -602,10 +610,11 @@ int main()
 
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                unsigned char blks = qs[act][iQ].blocks;
                 unsigned long long st1 = qs[act][iQ].state1;
                 unsigned short st2 = qs[act][iQ].state2;
-                unsigned long long cnt = qs[act][iQ].cnt;
+                unsigned long long cnt0 = qs[act][iQ].cnt[0];
+                unsigned long long cnt1 = qs[act][iQ].cnt[1];
+                unsigned long long cnt2 = qs[act][iQ].cnt[2];
 
                 if (1 == now_y)
                 {
@@ -638,18 +647,18 @@ int main()
                 if (BLACK == cells[now_x][now_y])
                 {
                     // black
-                    func(BLACK, qs[act][iQ], blks, st1, st2, cnt, nAct);
+                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
                 }
                 else if (WHITE == cells[now_x][now_y])
                 {
                     // white
-                    func(WHITE, qs[act][iQ], blks, st1, st2, cnt, nAct);
+                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
                 }
                 else
                 {
                     // 任意颜色
-                    func(BLACK, qs[act][iQ], blks, st1, st2, cnt, nAct);
-                    func(WHITE, qs[act][iQ], blks, st1, st2, cnt, nAct);
+                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
+                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
                 }
             }
 

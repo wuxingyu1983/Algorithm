@@ -172,9 +172,44 @@ inline unsigned long long updateSt1(unsigned long long st, int from, int to)
 int leftPlug, upPlug;
 int leftCell, leftUpCell, upCell;
 
+unsigned long long recode(unsigned long long st)
+{
+    unsigned long long ret = st;
+    int now = 1;
+
+    for (size_t i = 0; i <= w; i++)
+    {
+        int old = getVal4St1(ret, i);
+        if (old == now)
+        {
+            now++;
+        }
+        else if (old > now)
+        {
+            for (size_t j = i; j <= w; j++)
+            {
+                int tmp = getVal4St1(ret, j);
+                if (tmp == old)
+                {
+                    ret = setVal4St1(ret, j, now);
+                }
+                else if (tmp == now)
+                {
+                    ret = setVal4St1(ret, j, old);
+                }
+            }
+
+            now++;
+        }
+    }
+
+    return ret;
+}
+
 inline void addSts(unsigned char blks, unsigned long long newst1, unsigned short newst2, unsigned long long cnt, Record &rec, int idx, int color)
 {
     unsigned long long key = newst2;
+    newst1 = recode(newst1);
 
     key |= (newst1 << (w + 1)) | (((unsigned long long)blks) << ((w + 1) * (ST1_BITS + ST2_BITS)));
 

@@ -40,9 +40,15 @@ public:
     unsigned short state2;     // 轮廓cells状态
     unsigned long long cnt[3];
 
-    unsigned char grid[8]; // 满足当前 state 状态下的 一组 可能的 grid
+    unsigned char grid[3][8]; // 满足当前 state 状态下的 一组 可能的 grid
+    bool flag[3];
 
-    Record() {}
+    Record()
+    {
+        flag[0] = false;
+        flag[1] = false;
+        flag[2] = false;
+    }
 };
 
 Record qs[2][QS_SIZE];
@@ -206,7 +212,7 @@ unsigned long long recode(unsigned long long st)
     return ret;
 }
 
-inline void addSts(unsigned long long newst1, unsigned short newst2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color)
+inline void addSts(unsigned long long newst1, unsigned short newst2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color, bool carry = false)
 {
     if (0 == cnt0 + cnt1 + cnt2)
     {
@@ -224,19 +230,14 @@ inline void addSts(unsigned long long newst1, unsigned short newst2, unsigned lo
     if (it == cnts[idx].end())
     {
         // 加入队尾
-        memcpy(&(qs[idx][pInQ]), &rec, sizeof(Record));
-
         qs[idx][pInQ].state1 = newst1;
         qs[idx][pInQ].state2 = newst2;
         qs[idx][pInQ].cnt[0] = cnt0;
         qs[idx][pInQ].cnt[1] = cnt1;
         qs[idx][pInQ].cnt[2] = cnt2;
-
-        qs[idx][pInQ].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));
-        if (color)
-        {
-            qs[idx][pInQ].grid[now_x - 1] |= 1 << (now_y - 1);
-        }
+        qs[idx][pInQ].flag[0] = false;
+        qs[idx][pInQ].flag[1] = false;
+        qs[idx][pInQ].flag[2] = false;
 
         cnts[idx][key] = pInQ;
         qTail[idx]++;
@@ -248,6 +249,47 @@ inline void addSts(unsigned long long newst1, unsigned short newst2, unsigned lo
         qs[idx][pInQ].cnt[0] += cnt0;
         qs[idx][pInQ].cnt[1] += cnt1;
         qs[idx][pInQ].cnt[2] += cnt2;
+    }
+
+    if (cnt0 && false == qs[idx][pInQ].flag[0])
+    {
+        memcpy(qs[idx][pInQ].grid[0], rec.grid[0], 8);
+        qs[idx][pInQ].grid[0][now_x - 1] &= 255 ^ (1 << (now_y - 1));
+        if (color)
+        {
+            qs[idx][pInQ].grid[0][now_x - 1] |= 1 << (now_y - 1);
+        }
+        qs[idx][pInQ].flag[0] = true;
+    }
+
+    if (cnt1 && false == qs[idx][pInQ].flag[1])
+    {
+        if (carry)
+        {
+            memcpy(qs[idx][pInQ].grid[1], rec.grid[0], 8);
+        }
+        else
+        {
+            memcpy(qs[idx][pInQ].grid[1], rec.grid[1], 8);
+        }
+
+        qs[idx][pInQ].grid[1][now_x - 1] &= 255 ^ (1 << (now_y - 1));
+        if (color)
+        {
+            qs[idx][pInQ].grid[1][now_x - 1] |= 1 << (now_y - 1);
+        }
+        qs[idx][pInQ].flag[1] = true;
+    }
+
+    if (cnt2 && false == qs[idx][pInQ].flag[2])
+    {
+        memcpy(qs[idx][pInQ].grid[2], rec.grid[1], 8);
+        qs[idx][pInQ].grid[2][now_x - 1] &= 255 ^ (1 << (now_y - 1));
+        if (color)
+        {
+            qs[idx][pInQ].grid[2][now_x - 1] |= 1 << (now_y - 1);
+        }
+        qs[idx][pInQ].flag[2] = true;
     }
 }
 
@@ -311,12 +353,12 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             if (h == now_x && w == now_y)
             {
                 // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
+                addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
             }
             else
             {
                 // 合法的
-                addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
+                addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
             }
         }
     }
@@ -371,11 +413,11 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 if (h == now_x && w == now_y)
                 {
                     // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
+                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
+                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
                 }
             }
             else
@@ -435,11 +477,11 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 if (h == now_x && w == now_y)
                 {
                     // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
+                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
+                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
                 }
             }
             else
@@ -502,11 +544,11 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 if (h == now_x && w == now_y)
                 {
                     // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color);
+                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color);
+                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
                 }
             }
             else
@@ -587,7 +629,7 @@ int main()
                         {
                             for (size_t col = 0; col < w; col++)
                             {
-                                if (WHITE == (example->grid[row] & (1 << col)))
+                                if (WHITE == (example->grid[2][row] & (1 << col)))
                                 {
                                     cout << 'o';
                                 }

@@ -28,7 +28,7 @@ using namespace std;
 #define ST1_MASK 15
 #define ST2_BITS 1
 #define ST2_MASK 1
-#define QS_SIZE 227238
+#define QS_SIZE 150000
 #define ANY 2
 #define BLACK 1
 #define WHITE 0
@@ -234,9 +234,16 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
 inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, unsigned char minUnused, int idx)
 {
     // 2个 cell 颜色相同，他们之间一定有一个 plug
-
     unsigned short newSt2 = st2;
     setVal4St2(newSt2, st2, now_y - 1, color);
+
+    int rightPlug = 0;
+    int rightCell = -1;
+    if (w > now_y && 1 < now_x)
+    {
+        rightPlug = getVal4St1(st1, now_y + 1);
+        rightCell = getVal4St2(st2, now_y + 1);
+    }
 
     if (0 == leftPlug && 0 == upPlug)
     {
@@ -248,11 +255,14 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         // 拐角
         if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
         {
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, minUnused);
-            setVal4St1(newSt1, newSt1, now_y, minUnused);
+            if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+            {
+                unsigned long long newSt1 = st1;
+                setVal4St1(newSt1, newSt1, now_y - 1, minUnused);
+                setVal4St1(newSt1, newSt1, now_y, minUnused);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 向下
@@ -268,11 +278,14 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         // 向右
         if (w > now_y && (1 - color) != cells[now_x][now_y + 1])
         {
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, 0);
-            setVal4St1(newSt1, newSt1, now_y, minUnused);
+            if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+            {
+                unsigned long long newSt1 = st1;
+                setVal4St1(newSt1, newSt1, now_y - 1, 0);
+                setVal4St1(newSt1, newSt1, now_y, minUnused);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 该 cell 自成一个联通块
@@ -304,11 +317,14 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         // 拐角
         if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
         {
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
-            setVal4St1(newSt1, newSt1, now_y, upPlug);
+            if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+            {
+                unsigned long long newSt1 = st1;
+                setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
+                setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 向下
@@ -324,11 +340,14 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         // 向右
         if (w > now_y && (1 - color) != cells[now_x][now_y + 1])
         {
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, 0);
-            setVal4St1(newSt1, newSt1, now_y, upPlug);
+            if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+            {
+                unsigned long long newSt1 = st1;
+                setVal4St1(newSt1, newSt1, now_y - 1, 0);
+                setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 就此打住，可能形成一个联通块
@@ -377,11 +396,14 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             // 拐角
             if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
             {
-                unsigned long long newSt1 = st1;
-                setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
-                setVal4St1(newSt1, newSt1, now_y, leftPlug);
+                if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+                {
+                    unsigned long long newSt1 = st1;
+                    setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
+                    setVal4St1(newSt1, newSt1, now_y, leftPlug);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                }
             }
 
             // 向下
@@ -398,11 +420,14 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         // 向右
         if (w > now_y && (1 - color) != cells[now_x][now_y + 1])
         {
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, 0);
-            setVal4St1(newSt1, newSt1, now_y, leftPlug);
+            if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+            {
+                unsigned long long newSt1 = st1;
+                setVal4St1(newSt1, newSt1, now_y - 1, 0);
+                setVal4St1(newSt1, newSt1, now_y, leftPlug);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 就此打住，可能形成一个联通块
@@ -458,10 +483,13 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             // 拐角
             if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
             {
-                setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
-                setVal4St1(newSt1, newSt1, now_y, upPlug);
+                if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+                {
+                    setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
+                    setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                }
             }
 
             // 向下
@@ -477,10 +505,13 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         // 向右
         if (w > now_y && (1 - color) != cells[now_x][now_y + 1])
         {
-            setVal4St1(newSt1, newSt1, now_y - 1, 0);
-            setVal4St1(newSt1, newSt1, now_y, upPlug);
+            if (0 > rightCell || (rightPlug && rightCell == color) || (0 == rightPlug && (1 - color) == rightCell))
+            {
+                setVal4St1(newSt1, newSt1, now_y - 1, 0);
+                setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 就此打住，可能形成一个联通块

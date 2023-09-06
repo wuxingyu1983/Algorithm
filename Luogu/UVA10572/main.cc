@@ -100,21 +100,14 @@ inline void init()
     NEW &= ~(ST2_MASK << ((POS)*ST2_BITS)); \
     NEW |= (VAL) << ((POS)*ST2_BITS);
 
-inline int getPlugCnt(unsigned long long st, int plug)
-{
-    int ret = 0;
-
-    for (size_t i = 0; i <= w; i++)
-    {
-        int v = getVal4St1(st, i);
-        if (v == plug)
-        {
-            ret++;
-        }
+#define getPlugCnt(CNT, ST, PLUG)        \
+    for (size_t i = 0; i <= w; i++)      \
+    {                                    \
+        if (PLUG == (getVal4St1(ST, i))) \
+        {                                \
+            CNT++;                       \
+        }                                \
     }
-
-    return ret;
-}
 
 inline unsigned long long updateSt1(unsigned long long st, int from, int to)
 {
@@ -351,7 +344,8 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             setVal4St1(newSt1, newSt1, now_y - 1, 0);
             setVal4St1(newSt1, newSt1, now_y, 0);
 
-            int plugCnt = getPlugCnt(st1, upPlug);
+            int plugCnt = 0;
+            getPlugCnt(plugCnt, st1, upPlug)
             if (1 == plugCnt)
             {
                 if (h == now_x && w == now_y)
@@ -424,7 +418,8 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             setVal4St1(newSt1, newSt1, now_y - 1, 0);
             setVal4St1(newSt1, newSt1, now_y, 0);
 
-            int plugCnt = getPlugCnt(st1, leftPlug);
+            int plugCnt = 0;
+            getPlugCnt(plugCnt, st1, leftPlug)
             if (1 == plugCnt)
             {
                 if (h == now_x && w == now_y)
@@ -500,7 +495,8 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             setVal4St1(newSt1, newSt1, now_y - 1, 0);
             setVal4St1(newSt1, newSt1, now_y, 0);
 
-            int plugCnt = getPlugCnt(newSt1, upPlug);
+            int plugCnt = 0;
+            getPlugCnt(plugCnt, newSt1, upPlug)
             if (0 == plugCnt)
             {
                 if (h == now_x && w == now_y)

@@ -43,7 +43,6 @@ public:
     unsigned char grid[3][8]; // 满足当前 state 状态下的 一组 可能的 grid
     bool flag[3];
     unsigned char minUnused;
-    unsigned char plugCunts[9];
 
     Record()
     {

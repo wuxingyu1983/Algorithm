@@ -28,7 +28,7 @@ using namespace std;
 #define ST1_MASK 15
 #define ST2_BITS 1
 #define ST2_MASK 1
-#define QS_SIZE 523114
+#define QS_SIZE 227238
 #define ANY 2
 #define BLACK 1
 #define WHITE 0
@@ -412,24 +412,33 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             return;
         }
 
-        // 拐角
-        if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
+        int lleftPlug = 0;
+        if (1 < now_y)
         {
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
-            setVal4St1(newSt1, newSt1, now_y, leftPlug);
-
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            lleftPlug = getVal4St1(st1, now_y - 2);
         }
 
-        // 向下
-        if (h > now_x && (1 - color) != cells[now_x + 1][now_y])
+        if (0 == lleftPlug)
         {
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
-            setVal4St1(newSt1, newSt1, now_y, 0);
+            // 拐角
+            if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
+            {
+                unsigned long long newSt1 = st1;
+                setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
+                setVal4St1(newSt1, newSt1, now_y, leftPlug);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
+
+            // 向下
+            if (h > now_x && (1 - color) != cells[now_x + 1][now_y])
+            {
+                unsigned long long newSt1 = st1;
+                setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
+                setVal4St1(newSt1, newSt1, now_y, 0);
+
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 向右
@@ -483,22 +492,31 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             newSt1 = updateSt1(newSt1, leftPlug, upPlug);
         }
 
-        // 拐角
-        if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
+        int lleftPlug = 0;
+        if (1 < now_y)
         {
-            setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
-            setVal4St1(newSt1, newSt1, now_y, upPlug);
-
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            lleftPlug = getVal4St1(st1, now_y - 2);
         }
 
-        // 向下
-        if (h > now_x && (1 - color) != cells[now_x + 1][now_y])
+        if (0 == lleftPlug)
         {
-            setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
-            setVal4St1(newSt1, newSt1, now_y, 0);
+            // 拐角
+            if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
+            {
+                setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
+                setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
+
+            // 向下
+            if (h > now_x && (1 - color) != cells[now_x + 1][now_y])
+            {
+                setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
+                setVal4St1(newSt1, newSt1, now_y, 0);
+
+                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            }
         }
 
         // 向右

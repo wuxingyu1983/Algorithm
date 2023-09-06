@@ -42,12 +42,15 @@ public:
 
     unsigned char grid[3][8]; // 满足当前 state 状态下的 一组 可能的 grid
     bool flag[3];
+    unsigned char minUnused;
+    unsigned char plugCunts[9];
 
     Record()
     {
         flag[0] = false;
         flag[1] = false;
         flag[2] = false;
+        minUnused = 1;
     }
 };
 
@@ -78,6 +81,7 @@ inline void init()
     qs[act][0].cnt[0] = 1;
     qs[act][0].cnt[1] = 0;
     qs[act][0].cnt[2] = 0;
+    qs[act][0].minUnused = 1;
 
     qTail[act]++;
 }
@@ -95,29 +99,6 @@ inline void init()
     NEW = OLD;                              \
     NEW &= ~(ST2_MASK << ((POS)*ST2_BITS)); \
     NEW |= (VAL) << ((POS)*ST2_BITS);
-
-inline int getMinUnused(unsigned long long st)
-{
-    int ret = 0;
-    unsigned char flags[16] = {0};
-
-    for (size_t i = 0; i <= w; i++)
-    {
-        int v = getVal4St1(st, i);
-        flags[v] = 1;
-    }
-
-    for (size_t i = 1; i <= w; i++)
-    {
-        if (0 == flags[i])
-        {
-            ret = i;
-            break;
-        }
-    }
-
-    return ret;
-}
 
 inline int getPlugCnt(unsigned long long st, int plug)
 {
@@ -155,7 +136,7 @@ int leftPlug, upPlug;
 int leftCell, leftUpCell, upCell;
 
 // 最小表示法重编码
-#define recode(NEWST, ST)                         \
+#define recode(NEWST, ST, UNUSED)                 \
     int bb[10];                                   \
     memset(bb, -1, sizeof(bb));                   \
     int bn = 1;                                   \
@@ -171,7 +152,8 @@ int leftCell, leftUpCell, upCell;
             }                                     \
             setVal4St1(NEWST, NEWST, i, bb[tmp]); \
         }                                         \
-    }
+    }                                             \
+    UNUSED = bn;
 
 inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color, bool carry = false)
 {
@@ -182,7 +164,8 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
 
     unsigned long long key = st2;
     unsigned long long newst1 = 0;
-    recode(newst1, st1)
+    unsigned char minUnused = 1;
+    recode(newst1, st1, minUnused)
 
     key |= (newst1 << (w + 1));
 
@@ -200,6 +183,7 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
         qs[idx][pInQ].flag[0] = false;
         qs[idx][pInQ].flag[1] = false;
         qs[idx][pInQ].flag[2] = false;
+        qs[idx][pInQ].minUnused = minUnused;
 
         cnts[idx][key] = pInQ;
         qTail[idx]++;
@@ -255,7 +239,7 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
     }
 }
 
-inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, int idx)
+inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, unsigned char minUnused, int idx)
 {
     if (color == leftCell && color == leftUpCell && color == upCell)
     {
@@ -274,9 +258,6 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         {
             return;
         }
-
-        // 找到最小的、未使用的
-        int minUnused = getMinUnused(st1);
 
         // 拐角
         if (h > now_x && w > now_y && (1 - color) != cells[now_x + 1][now_y] && (1 - color) != cells[now_x][now_y + 1])
@@ -638,6 +619,7 @@ int main()
                 unsigned long long cnt0 = qs[act][iQ].cnt[0];
                 unsigned long long cnt1 = qs[act][iQ].cnt[1];
                 unsigned long long cnt2 = qs[act][iQ].cnt[2];
+                unsigned char minUnused = qs[act][iQ].minUnused;
 
                 if (1 == now_y)
                 {
@@ -670,18 +652,18 @@ int main()
                 if (BLACK == cells[now_x][now_y])
                 {
                     // black
-                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
+                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
                 }
                 else if (WHITE == cells[now_x][now_y])
                 {
                     // white
-                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
+                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
                 }
                 else
                 {
                     // 任意颜色
-                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
-                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, nAct);
+                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
+                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
                 }
             }
 

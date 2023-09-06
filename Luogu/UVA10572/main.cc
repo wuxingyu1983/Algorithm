@@ -28,7 +28,7 @@ using namespace std;
 #define ST1_MASK 15
 #define ST2_BITS 1
 #define ST2_MASK 1
-#define QS_SIZE 150000
+#define QS_SIZE 70000
 #define ANY 2
 #define BLACK 1
 #define WHITE 0
@@ -285,7 +285,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             else
             {
                 // 合法的
-                addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                {
+                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                }
             }
         }
     }
@@ -351,7 +354,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                    {
+                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    }
                 }
             }
             else
@@ -431,7 +437,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                    {
+                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    }
                 }
             }
             else
@@ -521,7 +530,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                    {
+                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    }
                 }
             }
             else

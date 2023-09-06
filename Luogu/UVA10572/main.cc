@@ -607,7 +607,7 @@ int main()
                     }
 
                     // output
-                    cout << sum << endl;
+                    printf("%lld\n", sum);
                     if (sum)
                     {
                         for (size_t row = 0; row < h; row++)
@@ -616,14 +616,14 @@ int main()
                             {
                                 if (WHITE == (example->grid[2][row] & (1 << col)))
                                 {
-                                    cout << 'o';
+                                    printf("o");
                                 }
                                 else
                                 {
-                                    cout << '#';
+                                    printf("#");
                                 }
                             }
-                            cout << endl;
+                            printf("\n");
                         }
                     }
 
@@ -691,7 +691,7 @@ int main()
 
             if (0 == qTail[nAct])
             {
-                cout << 0 << endl;
+                printf("0\n");
                 break;
             }
 

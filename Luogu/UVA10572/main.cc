@@ -154,49 +154,35 @@ inline unsigned long long updateSt1(unsigned long long st, int from, int to)
 int leftPlug, upPlug;
 int leftCell, leftUpCell, upCell;
 
-unsigned long long recode(unsigned long long st)
-{
-    unsigned long long ret = st;
-    int now = 1;
-
-    for (size_t i = 0; i <= w; i++)
-    {
-        int old = getVal4St1(ret, i);
-        if (old == now)
-        {
-            now++;
-        }
-        else if (old > now)
-        {
-            for (size_t j = i; j <= w; j++)
-            {
-                int tmp = getVal4St1(ret, j);
-                if (tmp == old)
-                {
-                    setVal4St1(ret, ret, j, now);
-                }
-                else if (tmp == now)
-                {
-                    setVal4St1(ret, ret, j, old);
-                }
-            }
-
-            now++;
-        }
+// 最小表示法重编码
+#define recode(NEWST, ST)                         \
+    int bb[10];                                   \
+    memset(bb, -1, sizeof(bb));                   \
+    int bn = 1;                                   \
+    bb[0] = 0;                                    \
+    for (int i = 0; i <= w; i++)                  \
+    {                                             \
+        int tmp = getVal4St1(ST, i);              \
+        if (tmp)                                  \
+        {                                         \
+            if (0 > bb[tmp])                      \
+            {                                     \
+                bb[tmp] = bn++;                   \
+            }                                     \
+            setVal4St1(NEWST, NEWST, i, bb[tmp]); \
+        }                                         \
     }
 
-    return ret;
-}
-
-inline void addSts(unsigned long long newst1, unsigned short newst2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color, bool carry = false)
+inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color, bool carry = false)
 {
     if (0 == cnt0 + cnt1 + cnt2)
     {
         return;
     }
 
-    unsigned long long key = newst2;
-    newst1 = recode(newst1);
+    unsigned long long key = st2;
+    unsigned long long newst1 = 0;
+    recode(newst1, st1)
 
     key |= (newst1 << (w + 1));
 
@@ -207,7 +193,7 @@ inline void addSts(unsigned long long newst1, unsigned short newst2, unsigned lo
     {
         // 加入队尾
         qs[idx][pInQ].state1 = newst1;
-        qs[idx][pInQ].state2 = newst2;
+        qs[idx][pInQ].state2 = st2;
         qs[idx][pInQ].cnt[0] = cnt0;
         qs[idx][pInQ].cnt[1] = cnt1;
         qs[idx][pInQ].cnt[2] = cnt2;

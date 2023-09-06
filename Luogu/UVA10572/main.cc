@@ -108,22 +108,6 @@ inline void init()
         }                                \
     }
 
-inline unsigned long long updateSt1(unsigned long long st, int from, int to)
-{
-    unsigned long long ret = st;
-
-    for (size_t i = 0; i <= w; i++)
-    {
-        int v = getVal4St1(ret, i);
-        if (v == from)
-        {
-            setVal4St1(ret, ret, i, to);
-        }
-    }
-
-    return ret;
-}
-
 int leftPlug, upPlug;
 int leftCell, upCell;
 
@@ -469,7 +453,14 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
         if (leftPlug != upPlug)
         {
             // leftPlug ==> upPlug
-            newSt1 = updateSt1(newSt1, leftPlug, upPlug);
+            for (size_t i = 0; i <= w; i++)
+            {
+                int v = getVal4St1(newSt1, i);
+                if (v == leftPlug)
+                {
+                    setVal4St1(newSt1, newSt1, i, upPlug);
+                }
+            }
         }
 
         int lleftPlug = 0;

@@ -125,7 +125,7 @@ inline unsigned long long updateSt1(unsigned long long st, int from, int to)
 }
 
 int leftPlug, upPlug;
-int leftCell, leftUpCell, upCell;
+int leftCell, upCell;
 
 // 最小表示法重编码
 #define recode(NEWST, ST, UNUSED)                 \
@@ -233,12 +233,6 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
 
 inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, unsigned char minUnused, int idx)
 {
-    if (color == leftCell && color == leftUpCell && color == upCell)
-    {
-        // 非法
-        return;
-    }
-
     // 2个 cell 颜色相同，他们之间一定有一个 plug
 
     unsigned short newSt2 = st2;
@@ -625,7 +619,7 @@ int main()
                 }
 
                 leftPlug = 0, upPlug = 0;
-                leftCell = -1, leftUpCell = -1, upCell = -1;
+                leftCell = -1, upCell = -1;
 
                 if (1 < now_y)
                 {
@@ -637,11 +631,6 @@ int main()
                 {
                     upPlug = getVal4St1(st1, now_y);
                     upCell = getVal4St2(st2, now_y);
-                }
-
-                if (1 < now_x && 1 < now_y)
-                {
-                    leftUpCell = getVal4St2(st2, now_y - 1);
                 }
 
                 if (BLACK == cells[now_x][now_y])

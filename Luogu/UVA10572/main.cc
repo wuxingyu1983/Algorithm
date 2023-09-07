@@ -40,15 +40,11 @@ public:
     unsigned short state2;     // 轮廓cells状态
     unsigned long long cnt[3];
 
-    unsigned char grid[3][8]; // 满足当前 state 状态下的 一组 可能的 grid
-    bool flag[3];
+    unsigned char grid[8]; // 满足当前 state 状态下的 一组 可能的 grid
     unsigned char minUnused;
 
     Record()
     {
-        flag[0] = false;
-        flag[1] = false;
-        flag[2] = false;
         minUnused = 1;
     }
 };
@@ -134,7 +130,7 @@ int leftCell, upCell;
     }                                             \
     UNUSED = bn;
 
-inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color, bool carry = false)
+inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color)
 {
     if (0 == cnt0 + cnt1 + cnt2)
     {
@@ -159,10 +155,14 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
         qs[idx][pInQ].cnt[0] = cnt0;
         qs[idx][pInQ].cnt[1] = cnt1;
         qs[idx][pInQ].cnt[2] = cnt2;
-        qs[idx][pInQ].flag[0] = false;
-        qs[idx][pInQ].flag[1] = false;
-        qs[idx][pInQ].flag[2] = false;
         qs[idx][pInQ].minUnused = minUnused;
+
+        memcpy(qs[idx][pInQ].grid, rec.grid, 8);
+        qs[idx][pInQ].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));
+        if (color)
+        {
+            qs[idx][pInQ].grid[now_x - 1] |= 1 << (now_y - 1);
+        }
 
         cnts[idx][key] = pInQ;
         qTail[idx]++;
@@ -174,47 +174,6 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
         qs[idx][pInQ].cnt[0] += cnt0;
         qs[idx][pInQ].cnt[1] += cnt1;
         qs[idx][pInQ].cnt[2] += cnt2;
-    }
-
-    if (cnt0 && false == qs[idx][pInQ].flag[0])
-    {
-        memcpy(qs[idx][pInQ].grid[0], rec.grid[0], 8);
-        qs[idx][pInQ].grid[0][now_x - 1] &= 255 ^ (1 << (now_y - 1));
-        if (color)
-        {
-            qs[idx][pInQ].grid[0][now_x - 1] |= 1 << (now_y - 1);
-        }
-        qs[idx][pInQ].flag[0] = true;
-    }
-
-    if (cnt1 && false == qs[idx][pInQ].flag[1])
-    {
-        if (carry)
-        {
-            memcpy(qs[idx][pInQ].grid[1], rec.grid[0], 8);
-        }
-        else
-        {
-            memcpy(qs[idx][pInQ].grid[1], rec.grid[1], 8);
-        }
-
-        qs[idx][pInQ].grid[1][now_x - 1] &= 255 ^ (1 << (now_y - 1));
-        if (color)
-        {
-            qs[idx][pInQ].grid[1][now_x - 1] |= 1 << (now_y - 1);
-        }
-        qs[idx][pInQ].flag[1] = true;
-    }
-
-    if (cnt2 && false == qs[idx][pInQ].flag[2])
-    {
-        memcpy(qs[idx][pInQ].grid[2], rec.grid[1], 8);
-        qs[idx][pInQ].grid[2][now_x - 1] &= 255 ^ (1 << (now_y - 1));
-        if (color)
-        {
-            qs[idx][pInQ].grid[2][now_x - 1] |= 1 << (now_y - 1);
-        }
-        qs[idx][pInQ].flag[2] = true;
     }
 }
 
@@ -367,7 +326,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 {
                     if (0 == sum)
                     {
-                        memcpy(example, rec.grid[0], 8);
+                        memcpy(example, rec.grid, 8);
                         example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
                         if (color)
                         {
@@ -470,7 +429,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                     {
                         if (0 == sum)
                         {
-                            memcpy(example, rec.grid[0], 8);
+                            memcpy(example, rec.grid, 8);
                             example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
                             if (color)
                             {
@@ -587,7 +546,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                     {
                         if (0 == sum)
                         {
-                            memcpy(example, rec.grid[0], 8);
+                            memcpy(example, rec.grid, 8);
                             example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
                             if (color)
                             {
@@ -714,7 +673,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                     {
                         if (0 == sum)
                         {
-                            memcpy(example, rec.grid[0], 8);
+                            memcpy(example, rec.grid, 8);
                             example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
                             if (color)
                             {

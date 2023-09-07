@@ -274,6 +274,15 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
 
         // 该 cell 自成一个联通块
         {
+            if (h > now_x && color == cells[now_x + 1][now_y])
+            {
+                return;
+            }
+            if (w > now_y && color == cells[now_x][now_y + 1])
+            {
+                return;
+            }
+
             unsigned long long newSt1 = st1;
             setVal4St1(newSt1, newSt1, now_y - 1, 0);
             setVal4St1(newSt1, newSt1, now_y, 0);
@@ -339,6 +348,15 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
 
         // 就此打住，可能形成一个联通块
         {
+            if (h > now_x && color == cells[now_x + 1][now_y])
+            {
+                return;
+            }
+            if (w > now_y && color == cells[now_x][now_y + 1])
+            {
+                return;
+            }
+
             unsigned long long newSt1 = st1;
             setVal4St1(newSt1, newSt1, now_y - 1, 0);
             setVal4St1(newSt1, newSt1, now_y, 0);
@@ -422,6 +440,15 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
 
         // 就此打住，可能形成一个联通块
         {
+            if (h > now_x && color == cells[now_x + 1][now_y])
+            {
+                return;
+            }
+            if (w > now_y && color == cells[now_x][now_y + 1])
+            {
+                return;
+            }
+
             unsigned long long newSt1 = st1;
             setVal4St1(newSt1, newSt1, now_y - 1, 0);
             setVal4St1(newSt1, newSt1, now_y, 0);
@@ -516,6 +543,15 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
 
         // 就此打住，可能形成一个联通块
         {
+            if (h > now_x && color == cells[now_x + 1][now_y])
+            {
+                return;
+            }
+            if (w > now_y && color == cells[now_x][now_y + 1])
+            {
+                return;
+            }
+
             setVal4St1(newSt1, newSt1, now_y - 1, 0);
             setVal4St1(newSt1, newSt1, now_y, 0);
 

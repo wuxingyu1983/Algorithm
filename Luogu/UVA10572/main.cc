@@ -38,7 +38,7 @@ class Record
 public:
     unsigned long long state1; // 轮廓线段状态
     unsigned short state2;     // 轮廓cells状态
-    unsigned long long cnt[3];
+    unsigned long long cnt;
 
     unsigned char grid[8]; // 满足当前 state 状态下的 一组 可能的 grid
     unsigned char minUnused;
@@ -76,9 +76,7 @@ inline void init()
 
     qs[act][0].state1 = 0;
     qs[act][0].state2 = 0;
-    qs[act][0].cnt[0] = 1;
-    qs[act][0].cnt[1] = 0;
-    qs[act][0].cnt[2] = 0;
+    qs[act][0].cnt = 1;
     qs[act][0].minUnused = 1;
 
     qTail[act]++;
@@ -130,13 +128,8 @@ int leftCell, upCell;
     }                                             \
     UNUSED = bn;
 
-inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, Record &rec, int idx, int color)
+inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt, Record &rec, int idx, int color)
 {
-    if (0 == cnt0 + cnt1 + cnt2)
-    {
-        return;
-    }
-
     unsigned long long key = st2;
     unsigned long long newst1 = 0;
     unsigned char minUnused = 1;
@@ -144,17 +137,14 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
 
     key |= (newst1 << (w + 1));
 
-    int pInQ = qTail[idx];
-
     unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
     if (it == cnts[idx].end())
     {
+        int pInQ = qTail[idx];
         // 加入队尾
         qs[idx][pInQ].state1 = newst1;
         qs[idx][pInQ].state2 = st2;
-        qs[idx][pInQ].cnt[0] = cnt0;
-        qs[idx][pInQ].cnt[1] = cnt1;
-        qs[idx][pInQ].cnt[2] = cnt2;
+        qs[idx][pInQ].cnt = cnt;
         qs[idx][pInQ].minUnused = minUnused;
 
         memcpy(qs[idx][pInQ].grid, rec.grid, 8);
@@ -169,11 +159,7 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
     }
     else
     {
-        pInQ = it->second;
-
-        qs[idx][pInQ].cnt[0] += cnt0;
-        qs[idx][pInQ].cnt[1] += cnt1;
-        qs[idx][pInQ].cnt[2] += cnt2;
+        qs[idx][it->second].cnt += cnt;
     }
 }
 
@@ -251,7 +237,7 @@ inline bool checkValid(int color, unsigned long long st1, unsigned short st2)
     return ret;
 }
 
-inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, unsigned char minUnused, int idx)
+inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt, unsigned char minUnused, int idx)
 {
     // 2个 cell 颜色相同，他们之间一定有一个 plug
     unsigned short newSt2 = st2;
@@ -281,7 +267,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, minUnused);
                 setVal4St1(newSt1, newSt1, now_y, minUnused);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -292,7 +278,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             setVal4St1(newSt1, newSt1, now_y - 1, minUnused);
             setVal4St1(newSt1, newSt1, now_y, 0);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            addSts(newSt1, newSt2, cnt, rec, idx, color);
         }
 
         // 向右
@@ -304,7 +290,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, 0);
                 setVal4St1(newSt1, newSt1, now_y, minUnused);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -354,7 +340,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                             }
                         }
                     }
-                    sum += cnt0;
+                    sum += cnt;
                 }
             }
         }
@@ -377,7 +363,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
                 setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -388,7 +374,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
             setVal4St1(newSt1, newSt1, now_y, 0);
 
-            addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+            addSts(newSt1, newSt2, cnt, rec, idx, color);
         }
 
         // 向右
@@ -400,7 +386,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, 0);
                 setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -457,13 +443,13 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                                 }
                             }
                         }
-                        sum += cnt0;
+                        sum += cnt;
                     }
                 }
             }
             else
             {
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
     }
@@ -493,7 +479,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                     setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
                     setVal4St1(newSt1, newSt1, now_y, leftPlug);
 
-                    addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color);
                 }
             }
 
@@ -504,7 +490,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
                 setVal4St1(newSt1, newSt1, now_y, 0);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -517,7 +503,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, 0);
                 setVal4St1(newSt1, newSt1, now_y, leftPlug);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -574,13 +560,13 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                                 }
                             }
                         }
-                        sum += cnt0;
+                        sum += cnt;
                     }
                 }
             }
             else
             {
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
     }
@@ -623,7 +609,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                     setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
                     setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                    addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color);
                 }
             }
 
@@ -633,7 +619,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
                 setVal4St1(newSt1, newSt1, now_y, 0);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -645,7 +631,7 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 setVal4St1(newSt1, newSt1, now_y - 1, 0);
                 setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
 
@@ -701,13 +687,13 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                                 }
                             }
                         }
-                        sum += cnt0;
+                        sum += cnt;
                     }
                 }
             }
             else
             {
-                addSts(newSt1, newSt2, cnt0, cnt1, cnt2, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color);
             }
         }
     }
@@ -772,9 +758,7 @@ int main()
             {
                 unsigned long long st1 = qs[act][iQ].state1;
                 unsigned short st2 = qs[act][iQ].state2;
-                unsigned long long cnt0 = qs[act][iQ].cnt[0];
-                unsigned long long cnt1 = qs[act][iQ].cnt[1];
-                unsigned long long cnt2 = qs[act][iQ].cnt[2];
+                unsigned long long cnt = qs[act][iQ].cnt;
                 unsigned char minUnused = qs[act][iQ].minUnused;
 
                 if (1 == now_y)
@@ -803,18 +787,18 @@ int main()
                 if (BLACK == cells[now_x][now_y])
                 {
                     // black
-                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
+                    func(BLACK, qs[act][iQ], st1, st2, cnt, minUnused, nAct);
                 }
                 else if (WHITE == cells[now_x][now_y])
                 {
                     // white
-                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
+                    func(WHITE, qs[act][iQ], st1, st2, cnt, minUnused, nAct);
                 }
                 else
                 {
                     // 任意颜色
-                    func(BLACK, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
-                    func(WHITE, qs[act][iQ], st1, st2, cnt0, cnt1, cnt2, minUnused, nAct);
+                    func(BLACK, qs[act][iQ], st1, st2, cnt, minUnused, nAct);
+                    func(WHITE, qs[act][iQ], st1, st2, cnt, minUnused, nAct);
                 }
             }
 

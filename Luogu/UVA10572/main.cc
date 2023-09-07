@@ -28,7 +28,7 @@ using namespace std;
 #define ST1_MASK 15
 #define ST2_BITS 1
 #define ST2_MASK 1
-#define QS_SIZE 70000
+#define QS_SIZE 60000
 #define ANY 2
 #define BLACK 1
 #define WHITE 0
@@ -60,11 +60,14 @@ int h, w;
 unordered_map<unsigned long long, unsigned int> cnts[2]; // key 是 blocks | st1 | st2 的组合，value 是在 qs 的下标
 int act = 0;                                             // 当前生效的 map
 int now_x, now_y;
+unsigned long long sum;
+unsigned char example[8];
 
 inline void init()
 {
     // 每一个 test 前，初始化
     act = 0;
+    sum = 0;
 
     qTail[0] = 0;
     qTail[1] = 0;
@@ -357,23 +360,42 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 return;
             }
 
-            unsigned long long newSt1 = st1;
-            setVal4St1(newSt1, newSt1, now_y - 1, 0);
-            setVal4St1(newSt1, newSt1, now_y, 0);
-            if (h == now_x && w == now_y)
+            // 合法的
+            if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
             {
-                // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
-            }
-            else
-            {
-                // 合法的
-                if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                if (checkValid(color, st1, st2))
                 {
-                    if (checkValid(color, st1, st2))
+                    if (0 == sum)
                     {
-                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                        memcpy(example, rec.grid[0], 8);
+                        example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
+                        if (color)
+                        {
+                            example[now_x - 1] |= 1 << (now_y - 1);
+                        }
+
+                        for (size_t y = now_y; y < w; y++)
+                        {
+                            example[now_x - 1] &= 255 ^ (1 << y);
+                            if (1 - color)
+                            {
+                                example[now_x - 1] |= 1 << y;
+                            }
+                        }
+
+                        if (h > now_x)
+                        {
+                            if (1 - color)
+                            {
+                                example[h - 1] = 255;
+                            }
+                            else
+                            {
+                                example[h - 1] = 0;
+                            }
+                        }
                     }
+                    sum += cnt0;
                 }
             }
         }
@@ -442,19 +464,41 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             getPlugCnt(plugCnt, st1, upPlug)
             if (1 == plugCnt)
             {
-                if (h == now_x && w == now_y)
+                if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
                 {
-                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
-                }
-                else
-                {
-                    if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                    if (checkValid(color, st1, st2))
                     {
-                        if (checkValid(color, st1, st2))
+                        if (0 == sum)
                         {
-                            addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                            memcpy(example, rec.grid[0], 8);
+                            example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
+                            if (color)
+                            {
+                                example[now_x - 1] |= 1 << (now_y - 1);
+                            }
+
+                            for (size_t y = now_y; y < w; y++)
+                            {
+                                example[now_x - 1] &= 255 ^ (1 << y);
+                                if (1 - color)
+                                {
+                                    example[now_x - 1] |= 1 << y;
+                                }
+                            }
+
+                            if (h > now_x)
+                            {
+                                if (1 - color)
+                                {
+                                    example[h - 1] = 255;
+                                }
+                                else
+                                {
+                                    example[h - 1] = 0;
+                                }
+                            }
                         }
+                        sum += cnt0;
                     }
                 }
             }
@@ -537,19 +581,41 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             getPlugCnt(plugCnt, st1, leftPlug)
             if (1 == plugCnt)
             {
-                if (h == now_x && w == now_y)
+                if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
                 {
-                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
-                }
-                else
-                {
-                    if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                    if (checkValid(color, st1, st2))
                     {
-                        if (checkValid(color, st1, st2))
+                        if (0 == sum)
                         {
-                            addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                            memcpy(example, rec.grid[0], 8);
+                            example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
+                            if (color)
+                            {
+                                example[now_x - 1] |= 1 << (now_y - 1);
+                            }
+
+                            for (size_t y = now_y; y < w; y++)
+                            {
+                                example[now_x - 1] &= 255 ^ (1 << y);
+                                if (1 - color)
+                                {
+                                    example[now_x - 1] |= 1 << y;
+                                }
+                            }
+
+                            if (h > now_x)
+                            {
+                                if (1 - color)
+                                {
+                                    example[h - 1] = 255;
+                                }
+                                else
+                                {
+                                    example[h - 1] = 0;
+                                }
+                            }
                         }
+                        sum += cnt0;
                     }
                 }
             }
@@ -642,19 +708,41 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
             getPlugCnt(plugCnt, newSt1, upPlug)
             if (0 == plugCnt)
             {
-                if (h == now_x && w == now_y)
+                if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
                 {
-                    // 2 个联通块 只可能出现在 最后一个 cell，否则非法
-                    addSts(newSt1, newSt2, 0, cnt0, cnt1, rec, idx, color, true);
-                }
-                else
-                {
-                    if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
+                    if (checkValid(color, st1, st2))
                     {
-                        if (checkValid(color, st1, st2))
+                        if (0 == sum)
                         {
-                            addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                            memcpy(example, rec.grid[0], 8);
+                            example[now_x - 1] &= 255 ^ (1 << (now_y - 1));
+                            if (color)
+                            {
+                                example[now_x - 1] |= 1 << (now_y - 1);
+                            }
+
+                            for (size_t y = now_y; y < w; y++)
+                            {
+                                example[now_x - 1] &= 255 ^ (1 << y);
+                                if (1 - color)
+                                {
+                                    example[now_x - 1] |= 1 << y;
+                                }
+                            }
+
+                            if (h > now_x)
+                            {
+                                if (1 - color)
+                                {
+                                    example[h - 1] = 255;
+                                }
+                                else
+                                {
+                                    example[h - 1] = 0;
+                                }
+                            }
                         }
+                        sum += cnt0;
                     }
                 }
             }
@@ -713,42 +801,6 @@ int main()
                 if (h < now_x)
                 {
                     // finished
-                    unsigned long long sum = 0;
-                    Record *example = NULL;
-
-                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                    {
-                        if (0 == qs[act][iQ].state1)
-                        {
-                            sum += qs[act][iQ].cnt[2];
-                            if (/*NULL == example &&*/ qs[act][iQ].cnt[2])
-                            {
-                                example = &(qs[act][iQ]);
-                            }
-                        }
-                    }
-
-                    // output
-                    printf("%lld\n", sum);
-                    if (sum)
-                    {
-                        for (size_t row = 0; row < h; row++)
-                        {
-                            for (size_t col = 0; col < w; col++)
-                            {
-                                if (WHITE == (example->grid[2][row] & (1 << col)))
-                                {
-                                    printf("o");
-                                }
-                                else
-                                {
-                                    printf("#");
-                                }
-                            }
-                            printf("\n");
-                        }
-                    }
-
                     break;
                 }
             }
@@ -811,13 +863,28 @@ int main()
             qTail[act] = 0;
             cnts[act].clear();
 
-            if (0 == qTail[nAct])
-            {
-                printf("0\n");
-                break;
-            }
-
             act = nAct;
+        }
+
+        // output
+        printf("%lld\n", sum);
+        if (sum)
+        {
+            for (size_t row = 0; row < h; row++)
+            {
+                for (size_t col = 0; col < w; col++)
+                {
+                    if (WHITE == (example[row] & (1 << col)))
+                    {
+                        printf("o");
+                    }
+                    else
+                    {
+                        printf("#");
+                    }
+                }
+                printf("\n");
+            }
         }
     }
 

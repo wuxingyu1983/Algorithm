@@ -215,6 +215,80 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
     }
 }
 
+inline bool checkValid(int color, unsigned long long st1, unsigned short st2)
+{
+    bool ret = true;
+
+    // 判断 now_x 行 now_y + 1 到 w
+    for (size_t y = now_y + 1; y <= w; y++)
+    {
+        if (color == cells[now_x][y])
+        {
+            return false;
+        }
+
+        int plug = getVal4St1(st1, y);
+        int cell = getVal4St2(st2, y);
+
+        if (plug)
+        {
+            if (color == cell)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            // plug == 0
+            if (1 - color == cell)
+            {
+                return false;
+            }
+        }
+    }
+
+    if (h > now_x)
+    {
+        // 判断 now_x + 1 行
+        for (size_t y = 1; y < now_y; y++)
+        {
+            if (color == cells[now_x + 1][y])
+            {
+                return false;
+            }
+
+            int plug = getVal4St1(st1, y - 1);
+            int cell = getVal4St2(st2, y - 1);
+
+            if (plug)
+            {
+                if (color == cell)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                // plug == 0
+                if (1 - color == cell)
+                {
+                    return false;
+                }
+            }
+        }
+
+        for (size_t y = now_y; y <= w; y++)
+        {
+            if (color == cells[now_x + 1][y])
+            {
+                return false;
+            }
+        }
+    }
+
+    return ret;
+}
+
 inline void func(int color, Record &rec, unsigned long long st1, unsigned short st2, unsigned long long cnt0, unsigned long long cnt1, unsigned long long cnt2, unsigned char minUnused, int idx)
 {
     // 2个 cell 颜色相同，他们之间一定有一个 plug
@@ -296,7 +370,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 // 合法的
                 if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
                 {
-                    addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    if (checkValid(color, st1, st2))
+                    {
+                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                    }
                 }
             }
         }
@@ -374,7 +451,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 {
                     if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
                     {
-                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                        if (checkValid(color, st1, st2))
+                        {
+                            addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                        }
                     }
                 }
             }
@@ -466,7 +546,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 {
                     if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
                     {
-                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                        if (checkValid(color, st1, st2))
+                        {
+                            addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                        }
                     }
                 }
             }
@@ -568,7 +651,10 @@ inline void func(int color, Record &rec, unsigned long long st1, unsigned short 
                 {
                     if (h == now_x || (h - 2 < now_x && w - 2 < now_y))
                     {
-                        addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                        if (checkValid(color, st1, st2))
+                        {
+                            addSts(newSt1, newSt2, 0, cnt0, 0, rec, idx, color, true);
+                        }
                     }
                 }
             }

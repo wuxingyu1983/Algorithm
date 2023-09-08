@@ -53,7 +53,7 @@ Record qs[2][QS_SIZE];
 int qTail[2];
 char cells[MAX_MN + 1][MAX_MN + 1];
 int h, w;
-unordered_map<unsigned long long, unsigned int> cnts[2]; // key 是 blocks | st1 | st2 的组合，value 是在 qs 的下标
+unordered_map<unsigned long long, unsigned int> cnts[2][512];
 int act = 0;                                             // 当前生效的 map
 int now_x, now_y;
 unsigned long long sum;
@@ -68,8 +68,11 @@ inline void init()
     qTail[0] = 0;
     qTail[1] = 0;
 
-    cnts[0].clear();
-    cnts[1].clear();
+    for (int i = (1 << (w + 1)) - 1; i >= 0; i--)
+    {
+        cnts[0][i].clear();
+        cnts[1][i].clear();
+    }
 
     now_x = 0;
     now_y = w;
@@ -108,6 +111,17 @@ inline void init()
 int leftPlug, upPlug;
 int leftCell, upCell;
 
+class Key
+{
+public:
+    unsigned long long key;
+    unsigned char minUnused;
+
+    Key(){}
+};
+
+unordered_map<unsigned long long, Key> keyMap;
+
 // 最小表示法重编码
 #define recode(NEWST, ST, UNUSED)                 \
     int bb[10];                                   \
@@ -130,15 +144,29 @@ int leftCell, upCell;
 
 inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt, Record &rec, int idx, int color)
 {
-    unsigned long long key = st2;
     unsigned long long newst1 = 0;
     unsigned char minUnused = 1;
-    recode(newst1, st1, minUnused)
 
-    key |= (newst1 << (w + 1));
+    unordered_map<unsigned long long, Key>::iterator itK = keyMap.find(st1);
+    if (itK == keyMap.end())
+    {
+        recode(newst1, st1, minUnused)
 
-    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
-    if (it == cnts[idx].end())
+        Key elem;
+        elem.key = newst1;
+        elem.minUnused = minUnused;
+        keyMap[st1] = elem;
+    }
+    else
+    {
+        newst1 = itK->second.key;
+        minUnused = itK->second.minUnused;
+    }
+
+    unsigned long long key = newst1;
+
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx][st2].find(key);
+    if (it == cnts[idx][st2].end())
     {
         int pInQ = qTail[idx];
         // 加入队尾
@@ -154,7 +182,7 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
             qs[idx][pInQ].grid[now_x - 1] |= 1 << (now_y - 1);
         }
 
-        cnts[idx][key] = pInQ;
+        cnts[idx][st2][key] = pInQ;
         qTail[idx]++;
     }
     else
@@ -804,7 +832,10 @@ int main()
 
             // 准备下一轮
             qTail[act] = 0;
-            cnts[act].clear();
+            for (int i = (1 << (w + 1)) - 1; i >= 0; i--)
+            {
+                cnts[act][i].clear();
+            }
 
             act = nAct;
         }

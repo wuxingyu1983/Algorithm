@@ -54,7 +54,7 @@ int qTail[2];
 char cells[MAX_MN + 1][MAX_MN + 1];
 int h, w;
 unordered_map<unsigned long long, unsigned int> cnts[2][512];
-int act = 0;                                             // 当前生效的 map
+int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned long long sum;
 unsigned char example[8];
@@ -85,14 +85,14 @@ inline void init()
     qTail[act]++;
 }
 
-#define getVal4St1(ST, POS) ((ST) >> ((POS) * ST1_BITS)) & ST1_MASK
+#define getVal4St1(ST, POS) ((ST) >> ((POS)*ST1_BITS)) & ST1_MASK
 
 #define setVal4St1(NEW, OLD, POS, VAL)                            \
     NEW = OLD;                                                    \
     NEW &= ~(((unsigned long long)ST1_MASK) << ((POS)*ST1_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST1_BITS);
 
-#define getVal4St2(ST, POS) ((ST) >> ((POS) * ST2_BITS)) & ST2_MASK
+#define getVal4St2(ST, POS) ((ST) >> ((POS)*ST2_BITS)) & ST2_MASK
 
 #define setVal4St2(NEW, OLD, POS, VAL)      \
     NEW = OLD;                              \
@@ -117,7 +117,7 @@ public:
     unsigned long long key;
     unsigned char minUnused;
 
-    Key(){}
+    Key() {}
 };
 
 unordered_map<unsigned long long, Key> keyMap;
@@ -142,25 +142,78 @@ unordered_map<unsigned long long, Key> keyMap;
     }                                             \
     UNUSED = bn;
 
-inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt, Record &rec, int idx, int color)
+#define addSts(ST1, ST2, CNT, REC, IDX, COLOR, UNUSED)                                       \
+    unsigned char unused = UNUSED;                                                           \
+    unsigned long long st1InM = 0;                                                           \
+    if (0 == unused)                                                                         \
+    {                                                                                        \
+        recode(st1InM, ST1, unused)                                                          \
+            unordered_map<unsigned long long, Key>::iterator itK = keyMap.find(ST1);         \
+        if (itK == keyMap.end())                                                             \
+        {                                                                                    \
+            Key elem;                                                                        \
+            elem.key = st1InM;                                                               \
+            elem.minUnused = unused;                                                         \
+            keyMap[ST1] = elem;                                                              \
+        }                                                                                    \
+        else                                                                                 \
+        {                                                                                    \
+            st1InM = itK->second.key;                                                        \
+            unused = itK->second.minUnused;                                                  \
+        }                                                                                    \
+    }                                                                                        \
+    else                                                                                     \
+    {                                                                                        \
+        st1InM = ST1;                                                                        \
+    }                                                                                        \
+    unsigned long long key = st1InM;                                                         \
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX][ST2].find(key); \
+    if (it == cnts[IDX][ST2].end())                                                          \
+    {                                                                                        \
+        int pInQ = qTail[IDX];                                                               \
+        qs[IDX][pInQ].state1 = st1InM;                                                       \
+        qs[IDX][pInQ].state2 = ST2;                                                          \
+        qs[IDX][pInQ].cnt = CNT;                                                             \
+        qs[IDX][pInQ].minUnused = unused;                                                    \
+        memcpy(qs[IDX][pInQ].grid, REC.grid, 8);                                             \
+        qs[IDX][pInQ].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));                           \
+        if (COLOR)                                                                           \
+        {                                                                                    \
+            qs[IDX][pInQ].grid[now_x - 1] |= 1 << (now_y - 1);                               \
+        }                                                                                    \
+        cnts[IDX][ST2][key] = pInQ;                                                          \
+        qTail[IDX]++;                                                                        \
+    }                                                                                        \
+    else                                                                                     \
+    {                                                                                        \
+        qs[IDX][it->second].cnt += CNT;                                                      \
+    }
+/*
+inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt, Record &rec, int idx, int color, unsigned char minUnused)
 {
     unsigned long long newst1 = 0;
-    unsigned char minUnused = 1;
 
-    unordered_map<unsigned long long, Key>::iterator itK = keyMap.find(st1);
-    if (itK == keyMap.end())
+    if (0 == minUnused)
     {
         recode(newst1, st1, minUnused)
 
-        Key elem;
-        elem.key = newst1;
-        elem.minUnused = minUnused;
-        keyMap[st1] = elem;
+        unordered_map<unsigned long long, Key>::iterator itK = keyMap.find(st1);
+        if (itK == keyMap.end())
+        {
+            Key elem;
+            elem.key = newst1;
+            elem.minUnused = minUnused;
+            keyMap[st1] = elem;
+        }
+        else
+        {
+            newst1 = itK->second.key;
+            minUnused = itK->second.minUnused;
+        }
     }
     else
     {
-        newst1 = itK->second.key;
-        minUnused = itK->second.minUnused;
+        newst1 = st1;
     }
 
     unsigned long long key = newst1;
@@ -190,7 +243,7 @@ inline void addSts(unsigned long long st1, unsigned short st2, unsigned long lon
         qs[idx][it->second].cnt += cnt;
     }
 }
-
+*/
 inline bool checkValid(int color, unsigned long long st1, unsigned short st2)
 {
     bool ret = true;
@@ -305,7 +358,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, minUnused);
                     setVal4St1(newSt1, newSt1, now_y, minUnused);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                 }
             }
 
@@ -316,7 +369,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                 setVal4St1(newSt1, newSt1, now_y - 1, minUnused);
                 setVal4St1(newSt1, newSt1, now_y, 0);
 
-                addSts(newSt1, newSt2, cnt, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
             }
 
             // 向右
@@ -328,7 +381,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, 0);
                     setVal4St1(newSt1, newSt1, now_y, minUnused);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                 }
             }
 
@@ -401,7 +454,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
                     setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, minUnused);
                 }
             }
 
@@ -412,7 +465,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                 setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
                 setVal4St1(newSt1, newSt1, now_y, 0);
 
-                addSts(newSt1, newSt2, cnt, rec, idx, color);
+                addSts(newSt1, newSt2, cnt, rec, idx, color, minUnused);
             }
 
             // 向右
@@ -424,7 +477,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, 0);
                     setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, minUnused);
                 }
             }
 
@@ -486,7 +539,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                 }
             }
         }
@@ -516,7 +569,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                         setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
                         setVal4St1(newSt1, newSt1, now_y, leftPlug);
 
-                        addSts(newSt1, newSt2, cnt, rec, idx, color);
+                        addSts(newSt1, newSt2, cnt, rec, idx, color, minUnused);
                     }
                 }
 
@@ -527,7 +580,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, leftPlug);
                     setVal4St1(newSt1, newSt1, now_y, 0);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, minUnused);
                 }
             }
 
@@ -540,7 +593,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, 0);
                     setVal4St1(newSt1, newSt1, now_y, leftPlug);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, minUnused);
                 }
             }
 
@@ -602,7 +655,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                 }
             }
         }
@@ -645,7 +698,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                         setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
                         setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                        addSts(newSt1, newSt2, cnt, rec, idx, color);
+                        addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                     }
                 }
 
@@ -655,7 +708,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, upPlug);
                     setVal4St1(newSt1, newSt1, now_y, 0);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                 }
             }
 
@@ -667,7 +720,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                     setVal4St1(newSt1, newSt1, now_y - 1, 0);
                     setVal4St1(newSt1, newSt1, now_y, upPlug);
 
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                 }
             }
 
@@ -728,7 +781,7 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
                 }
                 else
                 {
-                    addSts(newSt1, newSt2, cnt, rec, idx, color);
+                    addSts(newSt1, newSt2, cnt, rec, idx, color, 0);
                 }
             }
         }
@@ -738,19 +791,20 @@ inline void func(int c, Record &rec, unsigned long long st1, unsigned short st2,
 int main()
 {
     int t;
-
-    cin >> t;
+    t = 1;
+    //    cin >> t;
 
     for (size_t it = 0; it < t; it++)
     {
-        cin >> h >> w;
+        //        cin >> h >> w;
+        h = w = 8;
 
         for (size_t row = 1; row <= h; row++)
         {
             for (size_t col = 1; col <= w; col++)
             {
-                char ch;
-                cin >> ch;
+                char ch = '.';
+                //                cin >> ch;
 
                 if ('#' == ch)
                 {

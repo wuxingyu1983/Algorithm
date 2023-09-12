@@ -67,13 +67,13 @@ inline void init()
 
     qTail[0] = 0;
     qTail[1] = 0;
-
+/*
     for (int i = (1 << (w + 1)) - 1; i >= 0; i--)
     {
         cnts[0][i].clear();
         cnts[1][i].clear();
     }
-
+*/
     now_x = 0;
     now_y = w;
 
@@ -142,51 +142,51 @@ unordered_map<unsigned long long, Key> keyMap;
     }                                             \
     UNUSED = bn;
 
-#define addSts(ST1, ST2, CNT, REC, IDX, COLOR, UNUSED)                                       \
-    unsigned char unused = UNUSED;                                                           \
-    unsigned long long st1InM = 0;                                                           \
-    if (0 == unused)                                                                         \
-    {                                                                                        \
-        recode(st1InM, ST1, unused)                                                          \
-            unordered_map<unsigned long long, Key>::iterator itK = keyMap.find(ST1);         \
-        if (itK == keyMap.end())                                                             \
-        {                                                                                    \
-            Key elem;                                                                        \
-            elem.key = st1InM;                                                               \
-            elem.minUnused = unused;                                                         \
-            keyMap[ST1] = elem;                                                              \
-        }                                                                                    \
-        else                                                                                 \
-        {                                                                                    \
-            st1InM = itK->second.key;                                                        \
-            unused = itK->second.minUnused;                                                  \
-        }                                                                                    \
-    }                                                                                        \
-    else                                                                                     \
-    {                                                                                        \
-        st1InM = ST1;                                                                        \
-    }                                                                                        \
-    unsigned long long key = st1InM;                                                         \
-    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX][ST2].find(key); \
-    if (it == cnts[IDX][ST2].end())                                                          \
-    {                                                                                        \
-        int pInQ = qTail[IDX];                                                               \
-        qs[IDX][pInQ].state1 = st1InM;                                                       \
-        qs[IDX][pInQ].state2 = ST2;                                                          \
-        qs[IDX][pInQ].cnt = CNT;                                                             \
-        qs[IDX][pInQ].minUnused = unused;                                                    \
-        memcpy(qs[IDX][pInQ].grid, REC.grid, 8);                                             \
-        qs[IDX][pInQ].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));                           \
-        if (COLOR)                                                                           \
-        {                                                                                    \
-            qs[IDX][pInQ].grid[now_x - 1] |= 1 << (now_y - 1);                               \
-        }                                                                                    \
-        cnts[IDX][ST2][key] = pInQ;                                                          \
-        qTail[IDX]++;                                                                        \
-    }                                                                                        \
-    else                                                                                     \
-    {                                                                                        \
-        qs[IDX][it->second].cnt += CNT;                                                      \
+#define addSts(ST1, ST2, CNT, REC, IDX, COLOR, UNUSED)                                                                                       \
+    unsigned char unused = UNUSED;                                                                                                           \
+    unsigned long long st1InM = 0;                                                                                                           \
+    if (0 == unused)                                                                                                                         \
+    {                                                                                                                                        \
+        recode(st1InM, ST1, unused)                                                                                                          \
+            unordered_map<unsigned long long, Key>::iterator itK = keyMap.find(ST1);                                                         \
+        if (itK == keyMap.end())                                                                                                             \
+        {                                                                                                                                    \
+            Key elem;                                                                                                                        \
+            elem.key = st1InM;                                                                                                               \
+            elem.minUnused = unused;                                                                                                         \
+            keyMap[ST1] = elem;                                                                                                              \
+        }                                                                                                                                    \
+        else                                                                                                                                 \
+        {                                                                                                                                    \
+            st1InM = itK->second.key;                                                                                                        \
+            unused = itK->second.minUnused;                                                                                                  \
+        }                                                                                                                                    \
+    }                                                                                                                                        \
+    else                                                                                                                                     \
+    {                                                                                                                                        \
+        st1InM = ST1;                                                                                                                        \
+    }                                                                                                                                        \
+    unsigned long long key = st1InM;                                                                                                         \
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX][ST2].find(key);                                                 \
+    if (it == cnts[IDX][ST2].end() || qTail[IDX] <= it->second || st1InM != qs[IDX][it->second].state1 || ST2 != qs[IDX][it->second].state2) \
+    {                                                                                                                                        \
+        int pInQ = qTail[IDX];                                                                                                               \
+        qs[IDX][pInQ].state1 = st1InM;                                                                                                       \
+        qs[IDX][pInQ].state2 = ST2;                                                                                                          \
+        qs[IDX][pInQ].cnt = CNT;                                                                                                             \
+        qs[IDX][pInQ].minUnused = unused;                                                                                                    \
+        memcpy(qs[IDX][pInQ].grid, REC.grid, 8);                                                                                             \
+        qs[IDX][pInQ].grid[now_x - 1] &= 255 ^ (1 << (now_y - 1));                                                                           \
+        if (COLOR)                                                                                                                           \
+        {                                                                                                                                    \
+            qs[IDX][pInQ].grid[now_x - 1] |= 1 << (now_y - 1);                                                                               \
+        }                                                                                                                                    \
+        cnts[IDX][ST2][key] = pInQ;                                                                                                          \
+        qTail[IDX]++;                                                                                                                        \
+    }                                                                                                                                        \
+    else                                                                                                                                     \
+    {                                                                                                                                        \
+        qs[IDX][it->second].cnt += CNT;                                                                                                      \
     }
 /*
 inline void addSts(unsigned long long st1, unsigned short st2, unsigned long long cnt, Record &rec, int idx, int color, unsigned char minUnused)
@@ -794,7 +794,7 @@ int main()
     t = 1;
     //    cin >> t;
 
-    for (size_t it = 0; it < t; it++)
+    for (size_t iTest = 0; iTest < t; iTest ++)
     {
         //        cin >> h >> w;
         h = w = 8;
@@ -893,11 +893,12 @@ int main()
 
             // 准备下一轮
             qTail[act] = 0;
+/*
             for (int i = (1 << (w + 1)) - 1; i >= 0; i--)
             {
                 cnts[act][i].clear();
             }
-
+*/
             act = nAct;
         }
 

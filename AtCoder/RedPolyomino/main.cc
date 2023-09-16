@@ -76,6 +76,28 @@ inline unsigned int recode(unsigned int st)
     return ret;
 }
 
+inline int getMinUnused(unsigned int st)
+{
+    int ret = 1;
+    int flags[10] = {0};
+    for (size_t i = 0; i < w; i++)
+    {
+        int tmp = getSt(st, i);
+        flags[tmp]++;
+    }
+
+    for (size_t i = 1; i < w; i++)
+    {
+        if (flags[i])
+        {
+            ret = i;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 inline void addSt(unsigned int st, Record &rec, int idx, bool added)
 {
     unsigned int key = recode(st);
@@ -87,7 +109,10 @@ inline void addSt(unsigned int st, Record &rec, int idx, bool added)
         qs[idx][pInQ].state = key;
         if (added)
         {
-            sum += rec.cnt[k - 1];
+            if (2 == getMinUnused(key))
+            {
+                sum += rec.cnt[k - 1];
+            }
             for (size_t i = 0; i < k - 1; i++)
             {
                 qs[idx][pInQ].cnt[i + 1] = rec.cnt[i];
@@ -109,7 +134,10 @@ inline void addSt(unsigned int st, Record &rec, int idx, bool added)
     {
         if (added)
         {
-            sum += rec.cnt[k - 1];
+            if (2 == getMinUnused(key))
+            {
+                sum += rec.cnt[k - 1];
+            }
             for (size_t i = 0; i < k - 1; i++)
             {
                 qs[idx][it->second].cnt[i + 1] += rec.cnt[i];
@@ -201,7 +229,7 @@ int main()
 
                 // no paint
                 {
-                    
+
                 }
             }
             else
@@ -216,22 +244,7 @@ int main()
                 {
                     // paint it red
                     // find min unused
-                    int minUnused = 1;
-                    int flags[10] = {0};
-                    for (size_t i = 0; i < w; i++)
-                    {
-                        int tmp = getSt(st, i);
-                        flags[tmp] ++;
-                    }
-
-                    for (size_t i = 1; i < w; i++)
-                    {
-                        if (flags[i])
-                        {
-                            minUnused = i;
-                            break;
-                        }
-                    }
+                    int minUnused = getMinUnused(st);
                     
                     setSt(st, now_y - 1, minUnused);
 

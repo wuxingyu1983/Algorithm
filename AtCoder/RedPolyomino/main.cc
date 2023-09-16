@@ -48,20 +48,43 @@ int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned long long sum = 0;
 
-#define getST(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
+#define getSt(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
 
 #define setSt(ST, POS, VAL)              \
     ST &= ~(ST_MASK << ((POS)*ST_BITS)); \
     ST |= (VAL) << ((POS)*ST_BITS);
 
+inline unsigned int recode(unsigned int st)
+{
+    unsigned int ret = 0;
+    int bb[10];
+    memset(bb, -1, sizeof(bb));
+    int bn = 1;
+    bb[0] = 0;
+    for (int i = 0; i < w; i++)
+    {
+        int tmp = getSt(st, i);
+        if (tmp)
+        {
+            if (0 > bb[tmp])
+            {
+                bb[tmp] = bn++;
+            }
+            setSt(ret, i, bb[tmp]);
+        }
+    }
+    return ret;
+}
+
 inline void addSt(unsigned int st, Record &rec, int idx, bool added)
 {
-    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
+    unsigned int key = recode(st);
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(key);
     if (it == cnts[idx].end())
     {
         int pInQ = qTail[idx];
         // 加入队尾
-        qs[idx][pInQ].state = st;
+        qs[idx][pInQ].state = key;
         if (added)
         {
             sum += rec.cnt[k - 1];
@@ -79,7 +102,7 @@ inline void addSt(unsigned int st, Record &rec, int idx, bool added)
             }
         }
 
-        cnts[idx][st] = pInQ;
+        cnts[idx][key] = pInQ;
         qTail[idx]++;
     }
     else
@@ -152,12 +175,12 @@ int main()
 
             if (1 < now_y)
             {
-                left = getST(st, now_y - 2);
+                left = getSt(st, now_y - 2);
             }
 
             if (1 < now_x)
             {
-                up = getST(st, now_y - 1);
+                up = getSt(st, now_y - 1);
             }
 
             if (left && up)
@@ -170,15 +193,50 @@ int main()
             }
             else if (up)
             {
+                if ('.' == cells[now_x - 1][now_y - 1])
+                {
+                    // paint it red
+                    addSt(st, qs[act][iQ], nAct, true);
+                }
 
+                // no paint
+                {
+                    
+                }
             }
             else
             {
                 // 0 == left && 0 == up
-                // do nothing
-                addSt(st, qs[act][iQ], nAct, false);
+                // no paint
+                {
+                    addSt(st, qs[act][iQ], nAct, false);
+                }
 
+                if ('.' == cells[now_x - 1][now_y - 1])
+                {
+                    // paint it red
+                    // find min unused
+                    int minUnused = 1;
+                    int flags[10] = {0};
+                    for (size_t i = 0; i < w; i++)
+                    {
+                        int tmp = getSt(st, i);
+                        flags[tmp] ++;
+                    }
 
+                    for (size_t i = 1; i < w; i++)
+                    {
+                        if (flags[i])
+                        {
+                            minUnused = i;
+                            break;
+                        }
+                    }
+                    
+                    setSt(st, now_y - 1, minUnused);
+
+                    addSt(st, qs[act][iQ], nAct, true);
+                }
             }
         }
 

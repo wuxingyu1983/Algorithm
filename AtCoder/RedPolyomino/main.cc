@@ -213,11 +213,63 @@ int main()
 
             if (left && up)
             {
-                
+                // no paint
+                {
+                    int stCp = st;
+                    setSt(stCp, now_y - 1, 0);
+
+                    int i;
+                    for (i = 0; i < w; i++)
+                    {
+                        int tmp = getSt(stCp, i);
+
+                        if (tmp == up)
+                        {
+                            addSt(stCp, qs[act][iQ], nAct, false);
+                            break;
+                        }
+                        else if (tmp && tmp != up)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (w == i)
+                    {
+                        addSt(stCp, qs[act][iQ], nAct, false);
+                    }
+                }
+
+                if ('.' == cells[now_x - 1][now_y - 1])
+                {
+                    // paint it red
+                    // up ==> left
+                    int stCp = st;
+                    for (size_t i = 0; i < w; i++)
+                    {
+                        if (up == (getSt(stCp, i)))
+                        {
+                            setSt(stCp, i, left);
+                        }
+                    }
+
+                    addSt(stCp, qs[act][iQ], nAct, true);
+                }
             }
             else if (left)
             {
+                // no paint
+                {
+                    addSt(st, qs[act][iQ], nAct, false);
+                }
 
+                if ('.' == cells[now_x - 1][now_y - 1])
+                {
+                    // paint it red
+                    setSt(st, now_y - 1, left);
+
+                    addSt(st, qs[act][iQ], nAct, true);
+                }
             }
             else if (up)
             {
@@ -229,7 +281,28 @@ int main()
 
                 // no paint
                 {
+                    setSt(st, now_y - 1, 0);
 
+                    int i;
+                    for (i = 0; i < w; i++)
+                    {
+                        int tmp = getSt(st, i);
+
+                        if (tmp == up)
+                        {
+                            addSt(st, qs[act][iQ], nAct, false);
+                            break;
+                        }
+                        else if (tmp && tmp != up)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (w == i)
+                    {
+                        addSt(st, qs[act][iQ], nAct, false);
+                    }
                 }
             }
             else

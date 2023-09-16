@@ -168,6 +168,11 @@ int main()
         }
     }
 
+    if (1 == n && 1 == k && '.' == cells[0][0])
+    {
+        sum = 1;
+    }
+
     // init
     now_x = 0;
     now_y = w;

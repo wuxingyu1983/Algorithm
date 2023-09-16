@@ -26,7 +26,7 @@ using namespace std;
 #define MAX_N 8
 #define ST_BITS 3
 #define ST_MASK 7
-#define QS_SIZE 120000
+#define QS_SIZE 1200
 
 int n, k;
 int h, w;
@@ -87,7 +87,7 @@ inline int getMinUnused(unsigned int st)
         flags[tmp]++;
     }
 
-    for (size_t i = 1; i < w; i++)
+    for (size_t i = 1; i <= w; i++)
     {
         if (0 == flags[i])
         {
@@ -284,25 +284,28 @@ int main()
                 {
                     setSt(st, now_y - 1, 0);
 
-                    bool f = true;
-                    int i;
-                    for (i = 0; i < w; i++)
+                    if (st)
                     {
-                        int tmp = getSt(st, i);
-
-                        if (tmp == up)
+                        bool f = true;
+                        int i;
+                        for (i = 0; i < w; i++)
                         {
-                            break;
-                        }
-                        else if (tmp && tmp != up)
-                        {
-                            f = false;
-                        }
-                    }
+                            int tmp = getSt(st, i);
 
-                    if (f || i < w)
-                    {
-                        addSt(st, qs[act][iQ], nAct, false);
+                            if (tmp == up)
+                            {
+                                break;
+                            }
+                            else if (tmp && tmp != up)
+                            {
+                                f = false;
+                            }
+                        }
+
+                        if (f || i < w)
+                        {
+                            addSt(st, qs[act][iQ], nAct, false);
+                        }
                     }
                 }
             }

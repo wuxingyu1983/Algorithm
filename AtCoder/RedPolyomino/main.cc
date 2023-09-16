@@ -26,7 +26,7 @@ using namespace std;
 #define MAX_N 8
 #define ST_BITS 3
 #define ST_MASK 7
-#define QS_SIZE 60000
+#define QS_SIZE 120000
 
 int n, k;
 int h, w;
@@ -79,7 +79,8 @@ inline unsigned int recode(unsigned int st)
 inline int getMinUnused(unsigned int st)
 {
     int ret = 1;
-    int flags[10] = {0};
+    int flags[10];
+    memset(flags, 0, sizeof(flags));
     for (size_t i = 0; i < w; i++)
     {
         int tmp = getSt(st, i);
@@ -88,7 +89,7 @@ inline int getMinUnused(unsigned int st)
 
     for (size_t i = 1; i < w; i++)
     {
-        if (flags[i])
+        if (0 == flags[i])
         {
             ret = i;
             break;
@@ -218,6 +219,7 @@ int main()
                     int stCp = st;
                     setSt(stCp, now_y - 1, 0);
 
+                    bool f = true;
                     int i;
                     for (i = 0; i < w; i++)
                     {
@@ -225,16 +227,15 @@ int main()
 
                         if (tmp == up)
                         {
-                            addSt(stCp, qs[act][iQ], nAct, false);
                             break;
                         }
                         else if (tmp && tmp != up)
                         {
-                            break;
+                            f = false;
                         }
                     }
 
-                    if (w == i)
+                    if (f || i < w)
                     {
                         addSt(stCp, qs[act][iQ], nAct, false);
                     }
@@ -283,6 +284,7 @@ int main()
                 {
                     setSt(st, now_y - 1, 0);
 
+                    bool f = true;
                     int i;
                     for (i = 0; i < w; i++)
                     {
@@ -290,16 +292,15 @@ int main()
 
                         if (tmp == up)
                         {
-                            addSt(st, qs[act][iQ], nAct, false);
                             break;
                         }
                         else if (tmp && tmp != up)
                         {
-                            break;
+                            f = false;
                         }
                     }
 
-                    if (w == i)
+                    if (f || i < w)
                     {
                         addSt(st, qs[act][iQ], nAct, false);
                     }
@@ -318,7 +319,7 @@ int main()
                     // paint it red
                     // find min unused
                     int minUnused = getMinUnused(st);
-                    
+
                     setSt(st, now_y - 1, minUnused);
 
                     addSt(st, qs[act][iQ], nAct, true);
@@ -328,6 +329,7 @@ int main()
 
         qTail[act] = 0;
         cnts[act].clear();
+        memset(qs[act], 0, QS_SIZE * sizeof(Record));
         act = nAct;
     }
 

@@ -99,6 +99,26 @@ inline void init()
     cnts[1].clear();
 }
 
+inline void addST(unsigned int st, int sum, int idx)
+{
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
+    if (it == cnts[idx].end())
+    {
+        qs[idx][qTail[idx]].state = st;
+        qs[idx][qTail[idx]].sum = sum;
+        
+        cnts[idx][st] = qTail[idx];                                                                                                          \
+        qTail[idx]++;    
+    }
+    else
+    {
+        if (sum < qs[idx][it->second].sum)
+        {
+            qs[idx][it->second].sum = sum;
+        }
+    }
+}
+
 int main()
 {
     while (true)
@@ -121,12 +141,28 @@ int main()
             {
                 if ('#' != cells[1][col])
                 {
+                    if (1 < h)
+                    {
+                        if ('#' == cells[2][col] || 'W' == cells[2][col] || 'L' == cells[2][col])
+                        {
+                            continue;
+                        }
+                    }
+
                     unsigned int st = 0;
 
                     setVal4St(st, st, (col - 1), 3);
 
                     qs[act][qTail[act]].state = st;
                     qs[act][qTail[act]].sum = cells[1][col] - '0';
+
+                    if (1 == h)
+                    {
+                        if (0 > ans || ans > qs[act][qTail[act]].sum)
+                        {
+                            ans = qs[act][qTail[act]].sum;
+                        }
+                    }
 
                     qTail[act]++;
                 }
@@ -165,7 +201,23 @@ int main()
                         st <<= ST_BITS;
                     }
 
-                    
+                    if ('#' == cells[now_x][now_y])
+                    {
+                        // do nothing
+                        addST(st, sum, nAct);
+                    }
+                    else if ('W' == cells[now_x][now_y])
+                    {
+
+                    }
+                    else if ('L' == cells[now_x][now_y])
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
                 }
 
                 qTail[act] = 0;

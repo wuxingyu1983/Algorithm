@@ -25,12 +25,37 @@ using namespace std;
 #define DEBUG   0
 #define MAX_H   21
 #define MAX_W   11
+#define QS_SIZE 60000
+#define ST_BITS 2
+#define ST_MASK 3
+
+#define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
+
+#define setVal4St1(NEW, OLD, POS, VAL)                            \
+    NEW = OLD;                                                    \
+    NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
+    NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
 
 int h, w;
 char cells[MAX_H][MAX_W];
 int first_start, first_end;
 int last_start, last_end;
 int ans;
+
+class Record
+{
+public:
+    unsigned int state; // 轮廓线段状态
+    int sum;
+
+    Record() {}
+};
+
+Record qs[2][QS_SIZE];
+int qTail[2];
+unordered_map<unsigned int, unsigned int> cnts[2];
+int act = 0; // 当前生效的 map
+int now_x, now_y;
 
 inline void init()
 {
@@ -84,7 +109,7 @@ int main()
 
         if (first_start <= first_end && last_start <= last_end)
         {
-            
+
         }
 
         cout << ans << endl;

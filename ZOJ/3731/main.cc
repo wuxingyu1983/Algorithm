@@ -208,11 +208,37 @@ int main()
                     }
                     else if ('W' == cells[now_x][now_y])
                     {
+                        // check
+                        int cnt = 0;
+                        for (size_t i = 0; i < now_y - 1; i++)
+                        {
+                            if (0 < (getVal4St(st, i)))
+                            {
+                                cnt ++;
+                            }
+                        }
 
+                        if (0 == (cnt & 1))
+                        {
+                            addST(st, sum, nAct);
+                        }
                     }
                     else if ('L' == cells[now_x][now_y])
                     {
+                        // check
+                        int cnt = 0;
+                        for (size_t i = 0; i < now_y - 1; i++)
+                        {
+                            if (0 < (getVal4St(st, i)))
+                            {
+                                cnt++;
+                            }
+                        }
 
+                        if (1 == (cnt & 1))
+                        {
+                            addST(st, sum, nAct);
+                        }
                     }
                     else
                     {

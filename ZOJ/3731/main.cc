@@ -31,8 +31,8 @@ using namespace std;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
 
-#define setVal4St1(NEW, OLD, POS, VAL)                            \
-    NEW = OLD;                                                    \
+#define setVal4St(NEW, OLD, POS, VAL)                           \
+    NEW = OLD;                                                  \
     NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
 
@@ -89,6 +89,11 @@ inline void init()
             last_end = col - 1;
         }
     }
+
+    act = 0;
+
+    qTail[0] = 0;
+    qTail[1] = 0;
 }
 
 int main()
@@ -109,7 +114,25 @@ int main()
 
         if (first_start <= first_end && last_start <= last_end)
         {
+            for (size_t col = first_start; col <= first_end; col++)
+            {
+                if ('#' != cells[1][col])
+                {
+                    unsigned int st = 0;
 
+                    setVal4St(st, st, (col - 1), 3);
+
+                    qs[act][qTail[act]].state = st;
+                    qs[act][qTail[act]].sum = cells[1][col] - '0';
+
+                    qTail[act]++;
+                }
+            }
+
+            now_x = 1;
+            now_y = w;
+
+            
         }
 
         cout << ans << endl;

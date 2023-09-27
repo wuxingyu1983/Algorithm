@@ -231,6 +231,31 @@ int main()
                     }
                     else if (up)
                     {
+                        if (w > now_y)
+                        {
+                            if ('0' <= cells[now_x][now_y + 1] && '9' >= cells[now_x][now_y + 1])
+                            {
+                                addST(st, sum, nAct);
+                            }
+                        }
+
+                        if (h == now_x && 3 == left)
+                        {
+                            setVal4St(st, st, (now_y - 1), up);
+                            setVal4St(st, st, now_y, 0);
+
+                            addST(st, sum, nAct);
+                        }
+                        else if (h > now_x)
+                        {
+                            if ('0' <= cells[now_x + 1][now_y] && '9' >= cells[now_x + 1][now_y])
+                            {
+                                setVal4St(st, st, (now_y - 1), up);
+                                setVal4St(st, st, now_y, 0);
+
+                                addST(st, sum, nAct);
+                            }
+                        }
                     }
                     else
                     {

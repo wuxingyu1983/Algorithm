@@ -199,11 +199,14 @@ int main()
                     left = getVal4St(st, now_y - 1);
                     up = getVal4St(st, now_y);
 
+                    sum += cells[now_x][now_y] - '0';
+
                     if (left && up)
                     {
                     }
                     else if (left)
                     {
+
                     }
                     else if (up)
                     {
@@ -212,6 +215,25 @@ int main()
                     {
                         // 0 == left && 0 == up
                         // do nothing
+                        addST(st, sum, nAct);
+
+                        if (h > now_x && w > now_y)
+                        {
+                            if ('#' == cells[now_x + 1][now_y] || 'W' == cells[now_x + 1][now_y] || 'L' == cells[now_x + 1][now_y])
+                            {
+                                continue;
+                            }
+
+                            if ('#' == cells[now_x][now_y + 1] || 'W' == cells[now_x][now_y + 1] || 'L' == cells[now_x][now_y + 1])
+                            {
+                                continue;
+                            }
+
+                            setVal4St(st, st, (now_y - 1), 1);
+                            setVal4St(st, st, now_y, 2);
+                            
+                            addST(st, sum, nAct);
+                        }
                     }
                 }
             }

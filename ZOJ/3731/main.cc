@@ -38,8 +38,6 @@ using namespace std;
 
 int h, w;
 char cells[MAX_H][MAX_W];
-int first_start, first_end;
-int last_start, last_end;
 int ans;
 
 class Record
@@ -60,36 +58,6 @@ int now_x, now_y;
 inline void init()
 {
     ans = -1;
-
-    first_start = last_start = 1;
-    first_end = last_end = w;
-
-    for (size_t col = 1; col <= w; col++)
-    {
-        if ('W' == cells[1][col])
-        {
-            first_start = col + 1;
-        }
-        
-        if ('W' == cells[h][col])
-        {
-            last_start = col + 1;
-        }
-    }
-
-    for (size_t col = w; col >= 1; col--)
-    {
-        if ('L' == cells[1][col])
-        {
-            first_end = col - 1;
-        }
-
-        if ('L' == cells[h][col])
-        {
-            last_end = col - 1;
-        }
-    }
-
     act = 0;
 
     qTail[0] = 0;
@@ -97,6 +65,27 @@ inline void init()
 
     cnts[0].clear();
     cnts[1].clear();
+
+    for (size_t col = 1; col <= w; col++)
+    {
+        if ('#' == cells[1][col] || 'W' == cells[1][col] || 'L' == cells[1][col])
+        {
+        }
+        else
+        {
+            unsigned int st = 0;
+
+            setVal4St(st, st, (col - 1), 3);
+
+            qs[act][qTail[act]].state = st;
+            qs[act][qTail[act]].sum = 0;
+
+            qTail[act]++;
+        }
+    }
+
+    now_x = 0;
+    now_y = w;
 }
 
 inline void addST(unsigned int st, int sum, int idx)
@@ -135,121 +124,101 @@ int main()
 
         init();
 
-        if (first_start <= first_end && last_start <= last_end)
+        while (0 < qTail[act])
         {
-            for (size_t col = first_start; col <= first_end; col++)
+            int nAct = 1 - act;
+
+            if (w == now_y)
             {
-                if ('#' != cells[1][col])
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
                 {
-                    if (1 < h)
-                    {
-                        if ('#' == cells[2][col] || 'W' == cells[2][col] || 'L' == cells[2][col])
-                        {
-                            continue;
-                        }
-                    }
-
-                    unsigned int st = 0;
-
-                    setVal4St(st, st, (col - 1), 3);
-
-                    qs[act][qTail[act]].state = st;
-                    qs[act][qTail[act]].sum = cells[1][col] - '0';
-
-                    if (1 == h)
-                    {
-                        if (0 > ans || ans > qs[act][qTail[act]].sum)
-                        {
-                            ans = qs[act][qTail[act]].sum;
-                        }
-                    }
-
-                    qTail[act]++;
+                    // finished
+                    break;
                 }
             }
-
-            now_x = 1;
-            now_y = w;
-
-            while (0 < qTail[act])
+            else
             {
-                int nAct = 1 - act;
+                now_y++;
+            }
 
-                if (w == now_y)
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int st = qs[act][iQ].state;
+                int sum = qs[act][iQ].sum;
+
+                if (1 == now_y)
                 {
-                    now_x++;
-                    now_y = 1;
+                    st <<= ST_BITS;
+                }
 
-                    if (h < now_x)
+                if ('#' == cells[now_x][now_y])
+                {
+                    // do nothing
+                    addST(st, sum, nAct);
+                }
+                else if ('W' == cells[now_x][now_y])
+                {
+                    // check
+                    int cnt = 0;
+                    for (size_t i = 0; i < now_y - 1; i++)
                     {
-                        // finished
-                        break;
+                        if (0 < (getVal4St(st, i)))
+                        {
+                            cnt++;
+                        }
+                    }
+
+                    if (0 == (cnt & 1))
+                    {
+                        addST(st, sum, nAct);
+                    }
+                }
+                else if ('L' == cells[now_x][now_y])
+                {
+                    // check
+                    int cnt = 0;
+                    for (size_t i = 0; i < now_y - 1; i++)
+                    {
+                        if (0 < (getVal4St(st, i)))
+                        {
+                            cnt++;
+                        }
+                    }
+
+                    if (1 == (cnt & 1))
+                    {
+                        addST(st, sum, nAct);
                     }
                 }
                 else
                 {
-                    now_y++;
-                }
+                    int left = 0, up = 0;
+                    left = getVal4St(st, now_y - 1);
+                    up = getVal4St(st, now_y);
 
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                {
-                    unsigned int st = qs[act][iQ].state;
-                    int sum = qs[act][iQ].sum;
-
-                    if (1 == now_y)
+                    if (left && up)
                     {
-                        st <<= ST_BITS;
                     }
-
-                    if ('#' == cells[now_x][now_y])
+                    else if (left)
                     {
-                        // do nothing
-                        addST(st, sum, nAct);
                     }
-                    else if ('W' == cells[now_x][now_y])
+                    else if (up)
                     {
-                        // check
-                        int cnt = 0;
-                        for (size_t i = 0; i < now_y - 1; i++)
-                        {
-                            if (0 < (getVal4St(st, i)))
-                            {
-                                cnt ++;
-                            }
-                        }
-
-                        if (0 == (cnt & 1))
-                        {
-                            addST(st, sum, nAct);
-                        }
-                    }
-                    else if ('L' == cells[now_x][now_y])
-                    {
-                        // check
-                        int cnt = 0;
-                        for (size_t i = 0; i < now_y - 1; i++)
-                        {
-                            if (0 < (getVal4St(st, i)))
-                            {
-                                cnt++;
-                            }
-                        }
-
-                        if (1 == (cnt & 1))
-                        {
-                            addST(st, sum, nAct);
-                        }
                     }
                     else
                     {
-
+                        // 0 == left && 0 == up
+                        // do nothing
                     }
                 }
-
-                qTail[act] = 0;
-                cnts[act].clear();
-                act = nAct;
             }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
         }
 
         cout << ans << endl;

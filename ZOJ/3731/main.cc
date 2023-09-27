@@ -94,6 +94,9 @@ inline void init()
 
     qTail[0] = 0;
     qTail[1] = 0;
+
+    cnts[0].clear();
+    cnts[1].clear();
 }
 
 int main()
@@ -132,7 +135,43 @@ int main()
             now_x = 1;
             now_y = w;
 
-            
+            while (0 < qTail[act])
+            {
+                int nAct = 1 - act;
+
+                if (w == now_y)
+                {
+                    now_x++;
+                    now_y = 1;
+
+                    if (h < now_x)
+                    {
+                        // finished
+                        break;
+                    }
+                }
+                else
+                {
+                    now_y++;
+                }
+
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    unsigned int st = qs[act][iQ].state;
+                    int sum = qs[act][iQ].sum;
+
+                    if (1 == now_y)
+                    {
+                        st <<= ST_BITS;
+                    }
+
+                    
+                }
+
+                qTail[act] = 0;
+                cnts[act].clear();
+                act = nAct;
+            }
         }
 
         cout << ans << endl;

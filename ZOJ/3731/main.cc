@@ -136,6 +136,16 @@ int main()
                 if (h < now_x)
                 {
                     // finished
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        if (qs[act][iQ].state)
+                        {
+                            if (0 > ans || ans > qs[act][iQ].sum)
+                            {
+                                ans = qs[act][iQ].sum;
+                            }
+                        }
+                    }
                     break;
                 }
             }

@@ -201,8 +201,81 @@ int main()
 
                     sum += cells[now_x][now_y] - '0';
 
+                    setVal4St(st, st, (now_y - 1), 0);
+                    setVal4St(st, st, now_y, 0);
+
                     if (left && up)
                     {
+                        if (1 == left && 1 == up)
+                        {
+                            int pos = now_y + 1;
+                            int s = 1;
+                            while (pos <= w)
+                            {
+                                int v = getVal4St(st, pos);
+                                if (1 == v)
+                                {
+                                    s++;
+                                }
+                                else if (2 == v)
+                                {
+                                    s--;
+                                    if (0 == s)
+                                    {
+                                        setVal4St(st, st, pos, 1);
+                                        addST(st, sum, nAct);
+                                        break;
+                                    }
+                                }
+
+                                pos ++;
+                            }
+                        }
+                        else if (2 == left && 2 == up)
+                        {
+                            int pos = now_y - 2;
+                            int s = 1;
+                            while (0 <= pos)
+                            {
+                                int v = getVal4St(st, pos);
+                                if (2 == v)
+                                {
+                                    s++;
+                                }
+                                else if (1 == v)
+                                {
+                                    s--;
+                                    if (0 == s)
+                                    {
+                                        setVal4St(st, st, pos, 2);
+                                        addST(st, sum, nAct);
+                                        break;
+                                    }
+                                }
+
+                                pos --;
+                            }
+                        }
+                        else if (1 == left && 2 == up)
+                        {
+                            // invalid
+                        }
+                        else if (2 == left && 1 == up)
+                        {
+                            addST(st, sum, nAct);
+                        }
+                        else if (3 == left && 3 == up)
+                        {
+                            // invalid
+                        }
+                        else if ((3 == left && 1 == up) || (1 == left && 3 == up))
+                        {
+
+                        }
+                        else if ((3 == left && 2 == up) || (2 == left && 3 == up))
+                        {
+
+                        }
                     }
                     else if (left)
                     {

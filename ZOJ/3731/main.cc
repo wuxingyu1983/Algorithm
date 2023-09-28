@@ -66,7 +66,7 @@ inline void init()
     cnts[0].clear();
     cnts[1].clear();
 
-    for (size_t col = 1; col <= w; col++)
+    for (int col = 1; col <= w; col++)
     {
         if ('0' <= cells[1][col] && '9' >= cells[1][col])
         {
@@ -107,13 +107,11 @@ inline void addST(unsigned int st, int sum, int idx)
 
 int main()
 {
-    while (true)
+    while (scanf("%d %d", &h, &w) == 2)
     {
-        cin >> h >> w;
-
-        for (size_t row = 1; row <= h; row++)
+        for (int row = 1; row <= h; row++)
         {
-            for (size_t col = 1; col <= w; col++)
+            for (int col = 1; col <= w; col++)
             {
                 cin >> cells[row][col];
             }
@@ -133,7 +131,7 @@ int main()
                 if (h < now_x)
                 {
                     // finished
-                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    for (int iQ = 0; iQ < qTail[act]; iQ++)
                     {
                         if (qs[act][iQ].state)
                         {
@@ -151,7 +149,7 @@ int main()
                 now_y++;
             }
 
-            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            for (int iQ = 0; iQ < qTail[act]; iQ++)
             {
                 unsigned int st = qs[act][iQ].state;
                 int sum = qs[act][iQ].sum;
@@ -170,7 +168,7 @@ int main()
                 {
                     // check
                     int cnt = 0;
-                    for (size_t i = 0; i < now_y - 1; i++)
+                    for (int i = 0; i < now_y - 1; i++)
                     {
                         if (0 < (getVal4St(st, i)))
                         {
@@ -187,7 +185,7 @@ int main()
                 {
                     // check
                     int cnt = 0;
-                    for (size_t i = 0; i < now_y - 1; i++)
+                    for (int i = 0; i < now_y - 1; i++)
                     {
                         if (0 < (getVal4St(st, i)))
                         {

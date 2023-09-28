@@ -68,10 +68,7 @@ inline void init()
 
     for (size_t col = 1; col <= w; col++)
     {
-        if ('#' == cells[1][col] || 'W' == cells[1][col] || 'L' == cells[1][col])
-        {
-        }
-        else
+        if ('0' <= cells[1][col] && '9' >= cells[1][col])
         {
             unsigned int st = 0;
 
@@ -209,13 +206,13 @@ int main()
                     left = getVal4St(st, now_y - 1);
                     up = getVal4St(st, now_y);
 
-                    sum += cells[now_x][now_y] - '0';
-
-                    setVal4St(st, st, (now_y - 1), 0);
-                    setVal4St(st, st, now_y, 0);
-
                     if (left && up)
                     {
+                        sum += cells[now_x][now_y] - '0';
+
+                        setVal4St(st, st, (now_y - 1), 0);
+                        setVal4St(st, st, now_y, 0);
+
                         if (1 == left && 1 == up)
                         {
                             int pos = now_y + 1;
@@ -238,7 +235,7 @@ int main()
                                     }
                                 }
 
-                                pos ++;
+                                pos++;
                             }
                         }
                         else if (2 == left && 2 == up)
@@ -263,7 +260,7 @@ int main()
                                     }
                                 }
 
-                                pos --;
+                                pos--;
                             }
                         }
                         else if (1 == left && 2 == up)
@@ -300,7 +297,7 @@ int main()
                                     }
                                 }
 
-                                pos ++;
+                                pos++;
                             }
                         }
                         else if ((3 == left && 2 == up) || (2 == left && 3 == up))
@@ -325,12 +322,14 @@ int main()
                                     }
                                 }
 
-                                pos --;
+                                pos--;
                             }
                         }
                     }
                     else if (left)
                     {
+                        sum += cells[now_x][now_y] - '0';
+
                         if (h == now_x && 3 == left)
                         {
                             addST(st, sum, nAct);
@@ -356,6 +355,8 @@ int main()
                     }
                     else if (up)
                     {
+                        sum += cells[now_x][now_y] - '0';
+
                         if (w > now_y)
                         {
                             if ('0' <= cells[now_x][now_y + 1] && '9' >= cells[now_x][now_y + 1])
@@ -364,7 +365,7 @@ int main()
                             }
                         }
 
-                        if (h == now_x && 3 == left)
+                        if (h == now_x && 3 == up)
                         {
                             setVal4St(st, st, (now_y - 1), up);
                             setVal4St(st, st, now_y, 0);
@@ -387,6 +388,8 @@ int main()
                         // 0 == left && 0 == up
                         // do nothing
                         addST(st, sum, nAct);
+
+                        sum += cells[now_x][now_y] - '0';
 
                         if (h > now_x && w > now_y)
                         {

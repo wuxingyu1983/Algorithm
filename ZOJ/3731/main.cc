@@ -22,19 +22,19 @@
 
 using namespace std;
 
-#define DEBUG   0
-#define MAX_H   21
-#define MAX_W   11
+#define DEBUG 0
+#define MAX_H 21
+#define MAX_W 11
 #define QS_SIZE 60000
 #define ST_BITS 2
 #define ST_MASK 3
 
 #define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
 
-#define setVal4St(NEW, OLD, POS, VAL)                           \
-    NEW = OLD;                                                  \
-    NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
-    NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
+#define setVal4St(NEW, OLD, POS, VAL)     \
+    NEW = OLD;                            \
+    NEW &= ~(ST_MASK << ((POS)*ST_BITS)); \
+    NEW |= (VAL) << ((POS)*ST_BITS);
 
 int h, w;
 char cells[MAX_H][MAX_W];
@@ -95,9 +95,9 @@ inline void addST(unsigned int st, int sum, int idx)
     {
         qs[idx][qTail[idx]].state = st;
         qs[idx][qTail[idx]].sum = sum;
-        
-        cnts[idx][st] = qTail[idx];                                                                                                          \
-        qTail[idx]++;    
+
+        cnts[idx][st] = qTail[idx];
+        qTail[idx]++;
     }
     else
     {
@@ -277,7 +277,7 @@ int main()
 
                             setVal4St(st, st, (now_y - 1), 1);
                             setVal4St(st, st, now_y, 2);
-                            
+
                             addST(st, sum, nAct);
                         }
                     }

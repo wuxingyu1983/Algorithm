@@ -100,6 +100,24 @@ inline unsigned char recode(unsigned char st)
     return ret;
 }
 
+inline int findMinUnused(unsigned char st)
+{
+    int ret = 0;
+
+    for (int i = 0; i <= w; i++)
+    {
+        int tmp = getVal4St1(st, i);
+        if (tmp > ret)
+        {
+            ret = tmp;
+        }
+    }
+
+    ret++;
+
+    return ret;
+}
+
 inline void addSts(unsigned char st1, unsigned long long st2, unsigned long long cnt, int idx)
 {
     unsigned char newst1 = recode(st1);
@@ -207,6 +225,8 @@ int main()
             int left = getVal4St1(st1, now_y - 1);
             int up = getVal4St1(st1, now_y);
 
+            unsigned char newst1;
+            unsigned long long newst2;
             for (int type = 2; type <= 12; type++)
             {
                 int remain = getVal4St2(st2, type);
@@ -218,7 +238,12 @@ int main()
                     {
                         if (up)
                         {
+                            setVal4St1(newst1, st1, now_y - 1, up);
+                            setVal4St1(newst1, newst1, now_y, 0);
 
+                            setVal4St2(newst2, st2, type, remain - 1);
+
+                            addSts(newst1, newst2, cnt, nAct);
                         }
                         else
                         {

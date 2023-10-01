@@ -63,6 +63,68 @@ unsigned long long ans = 0;
     NEW &= ~(((unsigned long long)ST2_MASK) << ((POS)*ST2_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST2_BITS);
 
+inline unsigned char recode(unsigned char st)
+{
+    unsigned char ret = st;
+
+    int bb[10];
+    memset(bb, -1, sizeof(bb));
+    int bn = 2;
+    bb[0] = 0;
+    for (int i = 0; i <= w; i++)
+    {
+        int tmp = getVal4St1(st, i);
+        if (tmp)
+        {
+            if (1 == tmp)
+            {
+                bb[1] = 1;
+            }
+            else
+            {
+                if (0 > bb[tmp])
+                {
+                    bb[tmp] = bn++;
+                }
+                setVal4St1(ret, ret, i, bb[tmp]);
+            }
+        }
+    }
+
+    if (0 == bb[1])
+    {
+        // invalid
+        ret = 0;
+    }
+
+    return ret;
+}
+
+inline void addSts(unsigned char st1, unsigned long long st2, unsigned long long cnt, int idx)
+{
+    unsigned char newst1 = recode(st1);
+
+    if (0 < newst1)
+    {
+        unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx][newst1].find(st2);
+        if (it == cnts[idx][newst1].end())
+        {
+            int pInQ = qTail[idx];
+            // 加入队尾
+            qs[idx][pInQ].state1 = newst1;
+            qs[idx][pInQ].state2 = st2;
+            qs[idx][pInQ].cnt = cnt;
+
+            cnts[idx][newst1][st2] = pInQ;
+            qTail[idx]++;
+        }
+        else
+        {
+            qs[idx][it->second].cnt += cnt;
+        }
+    }
+}
+
 int main()
 {
     cin >> h >> w;
@@ -131,7 +193,56 @@ int main()
             now_y++;
         }
 
-        
+        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        {
+            unsigned char st1 = qs[act][iQ].state1;
+            unsigned long long st2 = qs[act][iQ].state2;
+            unsigned long long cnt = qs[act][iQ].cnt;
+
+            if (1 == now_y)
+            {
+                st1 <<= ST1_BITS;
+            }
+
+            int left = getVal4St1(st1, now_y - 1);
+            int up = getVal4St1(st1, now_y);
+
+            for (int type = 2; type <= 12; type++)
+            {
+                int remain = getVal4St2(st2, type);
+                if (0 < remain)
+                {
+                    switch (type)
+                    {
+                    case 2:
+                    {
+                        if (up)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    break;
+
+                    default:
+                        break;
+                    }
+                }
+            }
+
+            if (false == (1 == now_x && 1 == now_y) && false == (h == now_x && w == now_y)) 
+            {
+                // type 1
+                int remain = getVal4St2(st2, 1);
+                if (0 < remain)
+                {
+                    
+                }
+            }
+        }
 
         qTail[act] = 0;
         for (int i = 0; i < 256; i++)

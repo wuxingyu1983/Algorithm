@@ -232,19 +232,22 @@ int main()
             for (int type = 2; type <= 12; type++)
             {
                 int remain = getVal4St2(st2, type);
+
                 if (0 < remain)
                 {
+                    newst1 = st1;
+
                     switch (type)
                     {
                     case 2:
                     {
                         if (up)
                         {
-                            setVal4St1(newst1, st1, now_y - 1, up);
+                            setVal4St1(newst1, newst1, now_y - 1, up);
                         }
                         else
                         {
-                            setVal4St1(newst1, st1, now_y - 1, minUnused);
+                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
                         }
 
                         setVal4St1(newst1, newst1, now_y, 0);
@@ -258,11 +261,11 @@ int main()
                     {
                         if (left)
                         {
-                            setVal4St1(newst1, st1, now_y, left);
+                            setVal4St1(newst1, newst1, now_y, left);
                         }
                         else
                         {
-                            setVal4St1(newst1, st1, now_y, minUnused);
+                            setVal4St1(newst1, newst1, now_y, minUnused);
                         }
 
                         setVal4St1(newst1, newst1, now_y - 1, 0);
@@ -276,11 +279,11 @@ int main()
                     {
                         if (up) 
                         {
-                            setVal4St1(newst1, st1, now_y, up);
+                            setVal4St1(newst1, newst1, now_y, up);
                         }
                         else
                         {
-                            setVal4St1(newst1, st1, now_y, minUnused);
+                            setVal4St1(newst1, newst1, now_y, minUnused);
                         }
 
                         setVal4St1(newst1, newst1, now_y - 1, 0);
@@ -292,7 +295,7 @@ int main()
                     break;
                     case 5:
                     {
-                        setVal4St1(newst1, st1, now_y - 1, minUnused);
+                        setVal4St1(newst1, newst1, now_y - 1, minUnused);
                         setVal4St1(newst1, newst1, now_y, minUnused);
 
                         setVal4St2(newst2, st2, type, remain - 1);
@@ -304,11 +307,11 @@ int main()
                     {
                         if (left)
                         {
-                            setVal4St1(newst1, st1, now_y - 1, left);
+                            setVal4St1(newst1, newst1, now_y - 1, left);
                         }
                         else
                         {
-                            setVal4St1(newst1, st1, now_y - 1, minUnused);
+                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
                         }
 
                         setVal4St1(newst1, newst1, now_y, 0);
@@ -320,7 +323,17 @@ int main()
                     break;
                     case 7:
                     {
+                        if (left && up)
+                        {
 
+                        }
+
+                        setVal4St1(newst1, newst1, now_y - 1, 0);
+                        setVal4St1(newst1, newst1, now_y, 0);
+
+                        setVal4St2(newst2, st2, type, remain - 1);
+
+                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     default:

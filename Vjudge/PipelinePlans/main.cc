@@ -225,6 +225,8 @@ int main()
             int left = getVal4St1(st1, now_y - 1);
             int up = getVal4St1(st1, now_y);
 
+            int minUnused = findMinUnused(st1);
+
             unsigned char newst1;
             unsigned long long newst2;
             for (int type = 2; type <= 12; type++)
@@ -239,19 +241,88 @@ int main()
                         if (up)
                         {
                             setVal4St1(newst1, st1, now_y - 1, up);
-                            setVal4St1(newst1, newst1, now_y, 0);
-
-                            setVal4St2(newst2, st2, type, remain - 1);
-
-                            addSts(newst1, newst2, cnt, nAct);
                         }
                         else
                         {
-
+                            setVal4St1(newst1, st1, now_y - 1, minUnused);
                         }
+
+                        setVal4St1(newst1, newst1, now_y, 0);
+
+                        setVal4St2(newst2, st2, type, remain - 1);
+
+                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
+                    case 3:
+                    {
+                        if (left)
+                        {
+                            setVal4St1(newst1, st1, now_y, left);
+                        }
+                        else
+                        {
+                            setVal4St1(newst1, st1, now_y, minUnused);
+                        }
 
+                        setVal4St1(newst1, newst1, now_y - 1, 0);
+
+                        setVal4St2(newst2, st2, type, remain - 1);
+
+                        addSts(newst1, newst2, cnt, nAct);
+                    }
+                    break;
+                    case 4:
+                    {
+                        if (up) 
+                        {
+                            setVal4St1(newst1, st1, now_y, up);
+                        }
+                        else
+                        {
+                            setVal4St1(newst1, st1, now_y, minUnused);
+                        }
+
+                        setVal4St1(newst1, newst1, now_y - 1, 0);
+
+                        setVal4St2(newst2, st2, type, remain - 1);
+
+                        addSts(newst1, newst2, cnt, nAct);
+                    }
+                    break;
+                    case 5:
+                    {
+                        setVal4St1(newst1, st1, now_y - 1, minUnused);
+                        setVal4St1(newst1, newst1, now_y, minUnused);
+
+                        setVal4St2(newst2, st2, type, remain - 1);
+
+                        addSts(newst1, newst2, cnt, nAct);
+                    }
+                    break;
+                    case 6:
+                    {
+                        if (left)
+                        {
+                            setVal4St1(newst1, st1, now_y - 1, left);
+                        }
+                        else
+                        {
+                            setVal4St1(newst1, st1, now_y - 1, minUnused);
+                        }
+
+                        setVal4St1(newst1, newst1, now_y, 0);
+
+                        setVal4St2(newst2, st2, type, remain - 1);
+
+                        addSts(newst1, newst2, cnt, nAct);
+                    }
+                    break;
+                    case 7:
+                    {
+
+                    }
+                    break;
                     default:
                         break;
                     }

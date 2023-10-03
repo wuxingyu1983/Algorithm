@@ -173,7 +173,7 @@ int main()
     {
         if (t[i])
         {
-            setVal4St1(st, st, i, t[i]);
+            setVal4St2(st, st, i, t[i]);
         }
     }
 
@@ -588,7 +588,7 @@ int main()
                 }
             }
 
-            if (false == (1 == now_x && 1 == now_y) && false == (h == now_x && w == now_y)) 
+            if (false == (1 == now_x && 1 == now_y) && false == (h == now_x && w == now_y))
             {
                 // type 1
                 int remain = getVal4St2(st2, 1);

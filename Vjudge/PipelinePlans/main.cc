@@ -22,18 +22,17 @@
 
 using namespace std;
 
-#define MAX_W 3
 #define ST1_BITS 2
 #define ST1_MASK 3
 #define ST2_BITS 4
 #define ST2_MASK 15
-#define QS_SIZE 60000
+ #define QS_SIZE 60000
 
 class Record
 {
 public:
-    unsigned char state1;           // 轮廓线段状态
-    unsigned long long state2;      // 各种类瓷砖的数量
+    unsigned char state1;      // 轮廓线段状态
+    unsigned long long state2; // 各种类瓷砖的数量
     unsigned long long cnt;
 
     Record() {}
@@ -48,6 +47,7 @@ int pos[13] = {0, 1, 3, 2, 6, 5, 4, 7, 9, 8, 11, 10, 12};
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned long long ans = 0;
+int gMask = 0;
 
 #define getVal4St1(ST, POS) ((ST) >> ((POS)*ST1_BITS)) & ST1_MASK
 
@@ -120,6 +120,11 @@ inline int findMinUnused(unsigned char st)
 
 inline void addSts(unsigned char st1, unsigned long long st2, unsigned long long cnt, int idx)
 {
+    if (w == now_y)
+    {
+        st1 &= gMask;
+    }
+
     unsigned char key = recode(st1);
 
     if (0 < key)
@@ -176,6 +181,8 @@ int main()
             setVal4St2(st, st, i, t[i]);
         }
     }
+
+    gMask = (1 << (w * ST1_BITS)) - 1;
 
     act = 0;
 
@@ -594,6 +601,7 @@ int main()
                 int remain = getVal4St2(st2, 1);
                 if (0 < remain)
                 {
+                    newst1 = st1;
                     setVal4St1(newst1, newst1, now_y - 1, 0);
                     setVal4St1(newst1, newst1, now_y, 0);
 

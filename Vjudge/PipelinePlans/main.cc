@@ -91,7 +91,7 @@ inline unsigned char recode(unsigned char st)
         }
     }
 
-    if (0 == bb[1])
+    if (0 > bb[1])
     {
         // invalid
         ret = 0;
@@ -120,20 +120,20 @@ inline int findMinUnused(unsigned char st)
 
 inline void addSts(unsigned char st1, unsigned long long st2, unsigned long long cnt, int idx)
 {
-    unsigned char newst1 = recode(st1);
+    unsigned char key = recode(st1);
 
-    if (0 < newst1)
+    if (0 < key)
     {
-        unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx][newst1].find(st2);
-        if (it == cnts[idx][newst1].end())
+        unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx][key].find(st2);
+        if (it == cnts[idx][key].end())
         {
             int pInQ = qTail[idx];
             // 加入队尾
-            qs[idx][pInQ].state1 = newst1;
+            qs[idx][pInQ].state1 = key;
             qs[idx][pInQ].state2 = st2;
             qs[idx][pInQ].cnt = cnt;
 
-            cnts[idx][newst1][st2] = pInQ;
+            cnts[idx][key][st2] = pInQ;
             qTail[idx]++;
         }
         else
@@ -241,279 +241,350 @@ int main()
                     {
                     case 2:
                     {
-                        if (up)
+                        if (h == now_x && w == now_y)
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, up);
+                            if (1 == up)
+                            {
+                                ans += cnt;
+                            }
+                            continue;
                         }
                         else
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                            if (up)
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, up);
+                            }
+                            else
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                            }
+                            setVal4St1(newst1, newst1, now_y, 0);
                         }
-
-                        setVal4St1(newst1, newst1, now_y, 0);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 3:
                     {
-                        if (left)
+                        if (h == now_x && w == now_y)
                         {
-                            setVal4St1(newst1, newst1, now_y, left);
+                            if (1 == left)
+                            {
+                                ans += cnt;
+                            }
+                            continue;
                         }
                         else
                         {
-                            setVal4St1(newst1, newst1, now_y, minUnused);
+                            setVal4St1(newst1, newst1, now_y - 1, 0);
+                            if (left)
+                            {
+                                setVal4St1(newst1, newst1, now_y, left);
+                            }
+                            else
+                            {
+                                setVal4St1(newst1, newst1, now_y, minUnused);
+                            }
                         }
-
-                        setVal4St1(newst1, newst1, now_y - 1, 0);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 4:
                     {
-                        if (up)
+                        if (h == now_x && w == now_y)
                         {
-                            setVal4St1(newst1, newst1, now_y, up);
+                            if (1 == up)
+                            {
+                                ans += cnt;
+                            }
+                            continue;
                         }
                         else
                         {
-                            setVal4St1(newst1, newst1, now_y, minUnused);
+                            setVal4St1(newst1, newst1, now_y - 1, 0);
+                            if (up)
+                            {
+                                setVal4St1(newst1, newst1, now_y, up);
+                            }
+                            else
+                            {
+                                setVal4St1(newst1, newst1, now_y, minUnused);
+                            }
                         }
-
-                        setVal4St1(newst1, newst1, now_y - 1, 0);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 5:
                     {
-                        setVal4St1(newst1, newst1, now_y - 1, minUnused);
-                        setVal4St1(newst1, newst1, now_y, minUnused);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
+                        if (h == now_x && w == now_y)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                            setVal4St1(newst1, newst1, now_y, minUnused);
+                        }
                     }
                     break;
                     case 6:
                     {
-                        if (left)
+                        if (h == now_x && w == now_y)
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, left);
+                            if (1 == left)
+                            {
+                                ans += cnt;
+                            }
+                            continue;
                         }
                         else
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                            if (left)
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, left);
+                            }
+                            else
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                            }
+                            setVal4St1(newst1, newst1, now_y, 0);
                         }
-
-                        setVal4St1(newst1, newst1, now_y, 0);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 7:
                     {
-                        if (left && up)
+                        if (h == now_x && w == now_y)
                         {
-                            if (left != up)
+                            if (1 == left || 1 == up)
                             {
-                                if (left > up)
+                                ans += cnt;
+                            }
+                            continue;
+                        }
+                        else
+                        {
+                            if (left && up)
+                            {
+                                if (left != up)
                                 {
-                                    swap(left, up);
-                                }
-
-                                // left < up, up ==> left
-                                for (int i = 0; i <= w; i++)
-                                {
-                                    int tmp = getVal4St1(newst1, i);
-                                    if (tmp == up)
+                                    if (left > up)
                                     {
-                                        setVal4St1(newst1, newst1, i, left);
+                                        swap(left, up);
+                                    }
+
+                                    // left < up, up ==> left
+                                    for (int i = 0; i <= w; i++)
+                                    {
+                                        int tmp = getVal4St1(newst1, i);
+                                        if (tmp == up)
+                                        {
+                                            setVal4St1(newst1, newst1, i, left);
+                                        }
                                     }
                                 }
                             }
+
+                            setVal4St1(newst1, newst1, now_y - 1, 0);
+                            setVal4St1(newst1, newst1, now_y, 0);
                         }
-
-                        setVal4St1(newst1, newst1, now_y - 1, 0);
-                        setVal4St1(newst1, newst1, now_y, 0);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 8:
                     {
-                        if (up)
+                        if (h == now_x && w == now_y)
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, up);
-                            setVal4St1(newst1, newst1, now_y, up);
+                            if (1 == up)
+                            {
+                                ans += cnt;
+                            }
+                            continue;
                         }
                         else
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
-                            setVal4St1(newst1, newst1, now_y, minUnused);
+                            if (up)
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, up);
+                                setVal4St1(newst1, newst1, now_y, up);
+                            }
+                            else
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                                setVal4St1(newst1, newst1, now_y, minUnused);
+                            }
                         }
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 9:
                     {
-                        if (left)
+                        if (h == now_x && w == now_y)
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, left);
-                            setVal4St1(newst1, newst1, now_y, left);
+                            if (1 == left)
+                            {
+                                ans += cnt;
+                            }
+                            continue;
                         }
                         else
                         {
-                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
-                            setVal4St1(newst1, newst1, now_y, minUnused);
+                            if (left)
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, left);
+                                setVal4St1(newst1, newst1, now_y, left);
+                            }
+                            else
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                                setVal4St1(newst1, newst1, now_y, minUnused);
+                            }
                         }
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 10:
                     {
-                        if (left && up)
+                        if (h == now_x && w == now_y)
                         {
-                            if (left != up)
+                            if (1 == left || 1 == up)
                             {
-                                if (left > up)
-                                {
-                                    swap(left, up);
-                                }
-
-                                // left < up, up ==> left
-                                for (int i = 0; i <= w; i++)
-                                {
-                                    int tmp = getVal4St1(newst1, i);
-                                    if (tmp == up)
-                                    {
-                                        setVal4St1(newst1, newst1, i, left);
-                                    }
-                                }
+                                ans += cnt;
                             }
-
-                            setVal4St1(newst1, newst1, now_y - 1, left);
-                        }
-                        else if (0 == left && 0 == up)
-                        {
-                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                            continue;
                         }
                         else
                         {
-                            // left, up 中有一个 > 0
-                            setVal4St1(newst1, newst1, now_y - 1, (left + up));
+                            if (left && up)
+                            {
+                                if (left != up)
+                                {
+                                    if (left > up)
+                                    {
+                                        swap(left, up);
+                                    }
+
+                                    // left < up, up ==> left
+                                    for (int i = 0; i <= w; i++)
+                                    {
+                                        int tmp = getVal4St1(newst1, i);
+                                        if (tmp == up)
+                                        {
+                                            setVal4St1(newst1, newst1, i, left);
+                                        }
+                                    }
+                                }
+
+                                setVal4St1(newst1, newst1, now_y - 1, left);
+                            }
+                            else if (0 == left && 0 == up)
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                            }
+                            else
+                            {
+                                // left, up 中有一个 > 0
+                                setVal4St1(newst1, newst1, now_y - 1, (left + up));
+                            }
+                            setVal4St1(newst1, newst1, now_y, 0);
                         }
-                        
-                        setVal4St1(newst1, newst1, now_y, 0);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 11:
                     {
-                        if (left && up)
+                        if (h == now_x && w == now_y)
                         {
-                            if (left != up)
+                            if (1 == left || 1 == up)
                             {
-                                if (left > up)
-                                {
-                                    swap(left, up);
-                                }
-
-                                // left < up, up ==> left
-                                for (int i = 0; i <= w; i++)
-                                {
-                                    int tmp = getVal4St1(newst1, i);
-                                    if (tmp == up)
-                                    {
-                                        setVal4St1(newst1, newst1, i, left);
-                                    }
-                                }
+                                ans += cnt;
                             }
-
-                            setVal4St1(newst1, newst1, now_y, left);
-                        }
-                        else if (0 == left && 0 == up)
-                        {
-                            setVal4St1(newst1, newst1, now_y, minUnused);
+                            continue;
                         }
                         else
                         {
-                            // left, up 中有一个 > 0
-                            setVal4St1(newst1, newst1, now_y, (left + up));
+                            setVal4St1(newst1, newst1, now_y - 1, 0);
+                            if (left && up)
+                            {
+                                if (left != up)
+                                {
+                                    if (left > up)
+                                    {
+                                        swap(left, up);
+                                    }
+
+                                    // left < up, up ==> left
+                                    for (int i = 0; i <= w; i++)
+                                    {
+                                        int tmp = getVal4St1(newst1, i);
+                                        if (tmp == up)
+                                        {
+                                            setVal4St1(newst1, newst1, i, left);
+                                        }
+                                    }
+                                }
+
+                                setVal4St1(newst1, newst1, now_y, left);
+                            }
+                            else if (0 == left && 0 == up)
+                            {
+                                setVal4St1(newst1, newst1, now_y, minUnused);
+                            }
+                            else
+                            {
+                                // left, up 中有一个 > 0
+                                setVal4St1(newst1, newst1, now_y, (left + up));
+                            }
                         }
-
-                        setVal4St1(newst1, newst1, now_y - 1, 0);
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     case 12:
                     default:
                     {
-                        if (left && up)
+                        if (h == now_x && w == now_y)
                         {
-                            if (left != up)
+                            if (1 == left || 1 == up)
                             {
-                                if (left > up)
-                                {
-                                    swap(left, up);
-                                }
-
-                                // left < up, up ==> left
-                                for (int i = 0; i <= w; i++)
-                                {
-                                    int tmp = getVal4St1(newst1, i);
-                                    if (tmp == up)
-                                    {
-                                        setVal4St1(newst1, newst1, i, left);
-                                    }
-                                }
+                                ans += cnt;
                             }
-
-                            setVal4St1(newst1, newst1, now_y - 1, left);
-                            setVal4St1(newst1, newst1, now_y, left);
-                        }
-                        else if (0 == left && 0 == up)
-                        {
-                            setVal4St1(newst1, newst1, now_y - 1, minUnused);
-                            setVal4St1(newst1, newst1, now_y, minUnused);
+                            continue;
                         }
                         else
                         {
-                            // left, up 中有一个 > 0
-                            setVal4St1(newst1, newst1, now_y - 1, (left + up));
-                            setVal4St1(newst1, newst1, now_y, (left + up));
+                            if (left && up)
+                            {
+                                if (left != up)
+                                {
+                                    if (left > up)
+                                    {
+                                        swap(left, up);
+                                    }
+
+                                    // left < up, up ==> left
+                                    for (int i = 0; i <= w; i++)
+                                    {
+                                        int tmp = getVal4St1(newst1, i);
+                                        if (tmp == up)
+                                        {
+                                            setVal4St1(newst1, newst1, i, left);
+                                        }
+                                    }
+                                }
+
+                                setVal4St1(newst1, newst1, now_y - 1, left);
+                                setVal4St1(newst1, newst1, now_y, left);
+                            }
+                            else if (0 == left && 0 == up)
+                            {
+                                setVal4St1(newst1, newst1, now_y - 1, minUnused);
+                                setVal4St1(newst1, newst1, now_y, minUnused);
+                            }
+                            else
+                            {
+                                // left, up 中有一个 > 0
+                                setVal4St1(newst1, newst1, now_y - 1, (left + up));
+                                setVal4St1(newst1, newst1, now_y, (left + up));
+                            }
                         }
-
-                        setVal4St2(newst2, st2, type, remain - 1);
-
-                        addSts(newst1, newst2, cnt, nAct);
                     }
                     break;
                     }
+
+                    setVal4St2(newst2, st2, type, remain - 1);
+
+                    addSts(newst1, newst2, cnt, nAct);
                 }
             }
 

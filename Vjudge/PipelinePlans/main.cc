@@ -22,16 +22,16 @@
 
 using namespace std;
 
-#define ST1_BITS 2
-#define ST1_MASK 3
+#define ST1_BITS 3
+#define ST1_MASK 7
 #define ST2_BITS 4
 #define ST2_MASK 15
-#define QS_SIZE 60000
+#define QS_SIZE 600000
 
 class Record
 {
 public:
-    unsigned char state1;      // 轮廓线段状态
+    unsigned short state1;     // 轮廓线段状态
     unsigned long long state2; // 各种类瓷砖的数量
     unsigned long long cnt;
 
@@ -41,7 +41,7 @@ public:
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned long long, unsigned int> cnts[2][256];
+unordered_map<unsigned long long, unsigned int> cnts[2][4096];
 int pos[13] = {0, 1, 3, 2, 6, 5, 4, 7, 9, 8, 11, 10, 12};
 
 int act = 0; // 当前生效的 map
@@ -63,9 +63,9 @@ int gMask = 0;
     NEW &= ~(((unsigned long long)ST2_MASK) << ((POS)*ST2_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST2_BITS);
 
-inline unsigned char recode(unsigned char st)
+inline unsigned short recode(unsigned short st)
 {
-    unsigned char ret = st;
+    unsigned short ret = st;
 
     int bb[10];
     memset(bb, -1, sizeof(bb));
@@ -100,7 +100,7 @@ inline unsigned char recode(unsigned char st)
     return ret;
 }
 
-inline int findMinUnused(unsigned char st)
+inline int findMinUnused(unsigned short st)
 {
     int ret = 0;
 
@@ -118,14 +118,14 @@ inline int findMinUnused(unsigned char st)
     return ret;
 }
 
-inline void addSts(unsigned char st1, unsigned long long st2, unsigned long long cnt, int idx)
+inline void addSts(unsigned short st1, unsigned long long st2, unsigned long long cnt, int idx)
 {
     if (w == now_y)
     {
         st1 &= gMask;
     }
 
-    unsigned char key = recode(st1);
+    unsigned short key = recode(st1);
 
     if (0 < key)
     {
@@ -220,7 +220,7 @@ int main()
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
-            unsigned char st1 = qs[act][iQ].state1;
+            unsigned short st1 = qs[act][iQ].state1;
             unsigned long long st2 = qs[act][iQ].state2;
             unsigned long long cnt = qs[act][iQ].cnt;
 
@@ -234,7 +234,7 @@ int main()
 
             int minUnused = findMinUnused(st1);
 
-            unsigned char newst1;
+            unsigned short newst1;
             unsigned long long newst2;
             for (int type = 2; type <= 12; type++)
             {
@@ -644,7 +644,7 @@ int main()
         }
 
         qTail[act] = 0;
-        for (int i = 0; i < 256; i++)
+        for (int i = 0; i < 4096; i++)
         {
             cnts[act][i].clear();
         }

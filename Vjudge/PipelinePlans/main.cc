@@ -26,7 +26,7 @@ using namespace std;
 #define ST1_MASK 3
 #define ST2_BITS 4
 #define ST2_MASK 15
- #define QS_SIZE 60000
+#define QS_SIZE 60000
 
 class Record
 {
@@ -371,8 +371,10 @@ int main()
                             {
                                 if (left != up)
                                 {
+                                    bool flag = false;
                                     if (left > up)
                                     {
+                                        flag = true;
                                         swap(left, up);
                                     }
 
@@ -384,6 +386,11 @@ int main()
                                         {
                                             setVal4St1(newst1, newst1, i, left);
                                         }
+                                    }
+
+                                    if (flag)
+                                    {
+                                        swap(left, up);
                                     }
                                 }
                             }
@@ -457,10 +464,13 @@ int main()
                         {
                             if (left && up)
                             {
+                                bool flag = false;
+
                                 if (left != up)
                                 {
                                     if (left > up)
                                     {
+                                        flag = true;
                                         swap(left, up);
                                     }
 
@@ -476,6 +486,11 @@ int main()
                                 }
 
                                 setVal4St1(newst1, newst1, now_y - 1, left);
+
+                                if (flag)
+                                {
+                                    swap(left, up);
+                                }
                             }
                             else if (0 == left && 0 == up)
                             {
@@ -505,10 +520,13 @@ int main()
                             setVal4St1(newst1, newst1, now_y - 1, 0);
                             if (left && up)
                             {
+                                bool flag = false;
+
                                 if (left != up)
                                 {
                                     if (left > up)
                                     {
+                                        flag = true;
                                         swap(left, up);
                                     }
 
@@ -524,6 +542,11 @@ int main()
                                 }
 
                                 setVal4St1(newst1, newst1, now_y, left);
+
+                                if (flag)
+                                {
+                                    swap(left, up);
+                                }
                             }
                             else if (0 == left && 0 == up)
                             {
@@ -552,10 +575,13 @@ int main()
                         {
                             if (left && up)
                             {
+                                bool flag = false;
+
                                 if (left != up)
                                 {
                                     if (left > up)
                                     {
+                                        flag = true;
                                         swap(left, up);
                                     }
 
@@ -572,6 +598,11 @@ int main()
 
                                 setVal4St1(newst1, newst1, now_y - 1, left);
                                 setVal4St1(newst1, newst1, now_y, left);
+
+                                if (flag)
+                                {
+                                    swap(left, up);
+                                }
                             }
                             else if (0 == left && 0 == up)
                             {

@@ -239,12 +239,81 @@ int main()
                         setVal4St(newst, newst, now_y - 1, minUnused);
                     }
                     setVal4St(newst, newst, now_y, 0);
-                    
+
                     addSts(newst, nAct);
                 }
                 else if ('L' == cells[now_x][now_y])
                 {
+                    unsigned long long newst = st;
 
+                    // '|_'
+                    {
+                        setVal4St(newst, newst, now_y - 1, 0);
+
+                        if (up)
+                        {
+                            setVal4St(newst, newst, now_y, up);
+                        }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y, minUnused);
+                        }
+
+                        addSts(newst, nAct);
+                    }
+
+                    // 右转90度
+                    {
+                        setVal4St(newst, newst, now_y - 1, minUnused);
+                        setVal4St(newst, newst, now_y, minUnused);
+                        
+                        addSts(newst, nAct);
+                    }
+                    
+                    // 右转90度
+                    {
+                        if (left)
+                        {
+                            setVal4St(newst, newst, now_y - 1, left);
+                        }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                        }
+
+                        setVal4St(newst, newst, now_y, 0);
+
+                        addSts(newst, nAct);
+                    }
+
+                    // 右转90度, '_|'
+                    {
+                        if (left && up)
+                        {
+                            if (left != up)
+                                {
+                                    if (left > up)
+                                    {
+                                        swap(left, up);
+                                    }
+
+                                    // left < up, up ==> left
+                                    for (int i = 0; i <= w; i++)
+                                    {
+                                        int tmp = getVal4St(newst, i);
+                                        if (tmp == up)
+                                        {
+                                            setVal4St(newst, newst, i, left);
+                                        }
+                                    }
+                                }
+                        }
+
+                        setVal4St(newst, newst, now_y - 1, 0);
+                        setVal4St(newst, newst, now_y, 0);
+                        
+                        addSts(newst, nAct);
+                    }
                 }
                 else if ('T' == cells[now_x][now_y])
                 {

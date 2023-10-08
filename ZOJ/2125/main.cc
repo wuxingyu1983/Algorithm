@@ -24,7 +24,7 @@ using namespace std;
 
 #define ST_BITS 4
 #define ST_MASK 15
-#define QS_SIZE 600000
+#define QS_SIZE 1000000
 
 class Record
 {
@@ -52,7 +52,7 @@ unsigned long long gMask = 0;
     NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
 
-inline unsigned long long recode(unsigned long long st, int(&bb)[10])
+inline unsigned long long recode(unsigned long long st, int (&bb)[16])
 {
     unsigned long long ret = st;
 
@@ -67,7 +67,7 @@ inline unsigned long long recode(unsigned long long st, int(&bb)[10])
         {
             if (1 == tmp)
             {
-                bb[1] ++;
+                bb[1]++;
             }
             else
             {
@@ -114,7 +114,7 @@ inline void addSts(unsigned long long st, int idx)
         st &= gMask;
     }
 
-    int bb[10];
+    int bb[16];
     unsigned long long key = recode(st, bb);
 
     if (0 < key)
@@ -227,7 +227,7 @@ int main()
                 else if ('-' == cells[now_x][now_y])
                 {
                     unsigned long long newst = st;
-                    
+
                     // '-'
                     setVal4St(newst, newst, now_y - 1, 0);
                     if (left)
@@ -277,10 +277,10 @@ int main()
                     {
                         setVal4St(newst, newst, now_y - 1, minUnused);
                         setVal4St(newst, newst, now_y, minUnused);
-                        
+
                         addSts(newst, nAct);
                     }
-                    
+
                     // 右转90度
                     {
                         if (left)

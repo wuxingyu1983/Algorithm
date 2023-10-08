@@ -421,8 +421,50 @@ int main()
                 }
                 else
                 {
-                    // '+'
+                    unsigned long long newst = st;
 
+                    // '+'
+                    if (left && up)
+                    {
+                        if (left != up)
+                        {
+                            if (left > up)
+                            {
+                                swap(left, up);
+                            }
+
+                            // left < up, up ==> left
+                            for (int i = 0; i <= w; i++)
+                            {
+                                int tmp = getVal4St(newst, i);
+                                if (tmp == up)
+                                {
+                                    setVal4St(newst, newst, i, left);
+                                }
+                            }
+                        }
+
+                        // '_|_'
+                        setVal4St(newst, newst, now_y - 1, left);
+                        setVal4St(newst, newst, now_y, left);
+
+                        addSts(newst, nAct);
+                    }
+                    else if (0 == left && 0 == up)
+                    {
+                        setVal4St(newst, newst, now_y - 1, minUnused);
+                        setVal4St(newst, newst, now_y, minUnused);
+
+                        addSts(newst, nAct);
+                    }
+                    else
+                    {
+                        // left 和 up 有一个非0
+                        setVal4St(newst, newst, now_y - 1, (left + up));
+                        setVal4St(newst, newst, now_y, (left + up));
+
+                        addSts(newst, nAct);
+                    }
                 }
             }
 

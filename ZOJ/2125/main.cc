@@ -288,36 +288,136 @@ int main()
 
                     // 右转90度, '_|'
                     {
+                        newst = st;
+
                         if (left && up)
                         {
                             if (left != up)
+                            {
+                                if (left > up)
                                 {
-                                    if (left > up)
-                                    {
-                                        swap(left, up);
-                                    }
+                                    swap(left, up);
+                                }
 
-                                    // left < up, up ==> left
-                                    for (int i = 0; i <= w; i++)
+                                // left < up, up ==> left
+                                for (int i = 0; i <= w; i++)
+                                {
+                                    int tmp = getVal4St(newst, i);
+                                    if (tmp == up)
                                     {
-                                        int tmp = getVal4St(newst, i);
-                                        if (tmp == up)
-                                        {
-                                            setVal4St(newst, newst, i, left);
-                                        }
+                                        setVal4St(newst, newst, i, left);
                                     }
                                 }
+                            }
                         }
 
                         setVal4St(newst, newst, now_y - 1, 0);
                         setVal4St(newst, newst, now_y, 0);
-                        
+
                         addSts(newst, nAct);
                     }
                 }
                 else if ('T' == cells[now_x][now_y])
                 {
+                    unsigned long long newst = st;
 
+                    {
+                        if (left && up)
+                        {
+                            if (left != up)
+                            {
+                                if (left > up)
+                                {
+                                    swap(left, up);
+                                }
+
+                                // left < up, up ==> left
+                                for (int i = 0; i <= w; i++)
+                                {
+                                    int tmp = getVal4St(newst, i);
+                                    if (tmp == up)
+                                    {
+                                        setVal4St(newst, newst, i, left);
+                                    }
+                                }
+                            }
+
+                            // '_|_'
+                            setVal4St(newst, newst, now_y - 1, 0);
+                            setVal4St(newst, newst, now_y, left);
+
+                            addSts(newst, nAct);
+
+                            // 左转90度
+                            setVal4St(newst, newst, now_y - 1, left);
+                            setVal4St(newst, newst, now_y, 0);
+
+                            addSts(newst, nAct);
+                        }
+                        else if (0 == left && 0 == up)
+                        {
+                            // '_|_'
+                            setVal4St(newst, newst, now_y - 1, 0);
+                            setVal4St(newst, newst, now_y, minUnused);
+
+                            addSts(newst, nAct);
+
+                            // 左转90度
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                            setVal4St(newst, newst, now_y, 0);
+
+                            addSts(newst, nAct);
+                        }
+                        else
+                        {
+                            // left 和 up 有一个非0
+                            // '_|_'
+                            setVal4St(newst, newst, now_y - 1, 0);
+                            setVal4St(newst, newst, now_y, (left + up));
+
+                            addSts(newst, nAct);
+
+                            // 左转90度
+                            setVal4St(newst, newst, now_y - 1, (left + up));
+                            setVal4St(newst, newst, now_y, 0);
+
+                            addSts(newst, nAct);
+                        }
+                    }
+
+                    newst = st;
+
+                    // 左转90度
+                    {
+                        if (left)
+                        {
+                            setVal4St(newst, newst, now_y - 1, left);
+                            setVal4St(newst, newst, now_y, left);
+                        }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                            setVal4St(newst, newst, now_y, minUnused);
+                        }
+
+                        addSts(newst, nAct);
+                    }
+
+                    // 左转90度
+                    {
+                        if (up)
+                        {
+                            setVal4St(newst, newst, now_y - 1, up);
+                            setVal4St(newst, newst, now_y, up);
+                        }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                            setVal4St(newst, newst, now_y, minUnused);
+                        }
+
+                        addSts(newst, nAct);
+                    }
                 }
                 else
                 {

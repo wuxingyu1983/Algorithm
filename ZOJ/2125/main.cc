@@ -30,6 +30,7 @@ class Record
 {
 public:
     unsigned long long state;
+    unsigned int cnt;
 
     Record() {}
 };
@@ -51,14 +52,14 @@ unsigned long long gMask = 0;
     NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
 
-inline unsigned long long recode(unsigned long long st)
+inline unsigned long long recode(unsigned long long st, int(&bb)[10])
 {
     unsigned long long ret = st;
 
-    int bb[10];
     memset(bb, -1, sizeof(bb));
     int bn = 2;
     bb[0] = 0;
+    bb[1] = 0;
     for (int i = 0; i <= w; i++)
     {
         int tmp = getVal4St(st, i);
@@ -66,7 +67,7 @@ inline unsigned long long recode(unsigned long long st)
         {
             if (1 == tmp)
             {
-                bb[1] = 1;
+                bb[1] ++;
             }
             else
             {
@@ -113,7 +114,8 @@ inline void addSts(unsigned long long st, int idx)
         st &= gMask;
     }
 
-    unsigned long long key = recode(st);
+    int bb[10];
+    unsigned long long key = recode(st, bb);
 
     if (0 < key)
     {
@@ -123,6 +125,7 @@ inline void addSts(unsigned long long st, int idx)
             int pInQ = qTail[idx];
             // 加入队尾
             qs[idx][pInQ].state = key;
+            qs[idx][pInQ].cnt = bb[1];
 
             cnts[idx][key] = pInQ;
             qTail[idx]++;
@@ -144,6 +147,7 @@ inline void init(int start)
     cnts[1].clear();
 
     qs[act][0].state = ((unsigned long long)1) << ((start - 1) * ST_BITS);
+    qs[act][0].cnt = 1;
 
     qTail[act]++;
 }
@@ -181,6 +185,13 @@ int main()
                 if (h < now_x)
                 {
                     // finished
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        if (ans < qs[act][iQ].cnt)
+                        {
+                            ans = qs[act][iQ].cnt;
+                        }
+                    }
                     break;
                 }
             }

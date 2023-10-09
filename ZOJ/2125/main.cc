@@ -30,7 +30,7 @@ class Record
 {
 public:
     unsigned long long state;
-    unsigned int cnt;
+    int cnt;
 
     Record() {}
 };
@@ -203,6 +203,7 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 unsigned long long st = qs[act][iQ].state;
+                int cnt = qs[act][iQ].cnt;
 
                 if (1 == now_y)
                 {
@@ -217,47 +218,66 @@ int main()
                 if ('.' == cells[now_x][now_y])
                 {
                     // empty
-                    unsigned long long newst = st;
+                    if (1 == left)
+                    {
+                        cnt--;
+                    }
+                    if (1 == up)
+                    {
+                        cnt--;
+                    }
 
-                    setVal4St(newst, newst, now_y - 1, 0);
-                    setVal4St(newst, newst, now_y, 0);
+                    if (0 < cnt)
+                    {
+                        unsigned long long newst = st;
 
-                    addSts(newst, nAct);
+                        setVal4St(newst, newst, now_y - 1, 0);
+                        setVal4St(newst, newst, now_y, 0);
+
+                        addSts(newst, nAct);
+                    }
                 }
                 else if ('-' == cells[now_x][now_y])
                 {
                     unsigned long long newst = st;
 
                     // '-'
-                    setVal4St(newst, newst, now_y - 1, 0);
-                    if (left)
+                    if (false == (1 == cnt && 1 == up))
                     {
-                        setVal4St(newst, newst, now_y, left);
+                        setVal4St(newst, newst, now_y - 1, 0);
+                        if (left)
+                        {
+                            setVal4St(newst, newst, now_y, left);
+                        }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y, minUnused);
+                        }
+                        addSts(newst, nAct);
                     }
-                    else
-                    {
-                        setVal4St(newst, newst, now_y, minUnused);
-                    }
-                    addSts(newst, nAct);
 
                     // '|'
-                    if (up)
+                    if (false == (1 == cnt && 1 == left))
                     {
-                        setVal4St(newst, newst, now_y - 1, up);
-                    }
-                    else
-                    {
-                        setVal4St(newst, newst, now_y - 1, minUnused);
-                    }
-                    setVal4St(newst, newst, now_y, 0);
+                        if (up)
+                        {
+                            setVal4St(newst, newst, now_y - 1, up);
+                        }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                        }
+                        setVal4St(newst, newst, now_y, 0);
 
-                    addSts(newst, nAct);
+                        addSts(newst, nAct);
+                    }
                 }
                 else if ('L' == cells[now_x][now_y])
                 {
                     unsigned long long newst = st;
 
                     // '|_'
+                    if (false == (1 == cnt && 1 == left))
                     {
                         setVal4St(newst, newst, now_y - 1, 0);
 
@@ -275,13 +295,28 @@ int main()
 
                     // 右转90度
                     {
-                        setVal4St(newst, newst, now_y - 1, minUnused);
-                        setVal4St(newst, newst, now_y, minUnused);
+                        if (1 == left)
+                        {
+                            cnt--;
+                        }
+                        if (1 == up)
+                        {
+                            cnt--;
+                        }
 
-                        addSts(newst, nAct);
+                        if (0 < cnt)
+                        {
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                            setVal4St(newst, newst, now_y, minUnused);
+
+                            addSts(newst, nAct);
+                        }
                     }
 
+                    cnt = qs[act][iQ].cnt;
+
                     // 右转90度
+                    if (false == (1 == cnt && 1 == up))
                     {
                         if (left)
                         {
@@ -399,6 +434,7 @@ int main()
                     newst = st;
 
                     // 左转90度
+                    if (false == (1 == cnt && 1 == up))
                     {
                         if (left)
                         {
@@ -415,6 +451,7 @@ int main()
                     }
 
                     // 左转90度
+                    if (false == (1 == cnt && 1 == left))
                     {
                         if (up)
                         {

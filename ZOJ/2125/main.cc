@@ -31,6 +31,7 @@ class Record
 public:
     unsigned long long state;
     int cnt;
+    unsigned int minUnused;
 
     Record() {}
 };
@@ -52,9 +53,15 @@ unsigned long long gMask = 0;
     NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
 
-inline unsigned long long recode(unsigned long long st, int (&bb)[16])
+inline void addSts(unsigned long long st, int idx)
 {
-    unsigned long long ret = st;
+    if (w == now_y)
+    {
+        st &= gMask;
+    }
+
+    int bb[16];
+    unsigned long long key = st;
 
     memset(bb, -1, sizeof(bb));
     int bn = 2;
@@ -75,49 +82,12 @@ inline unsigned long long recode(unsigned long long st, int (&bb)[16])
                 {
                     bb[tmp] = bn++;
                 }
-                setVal4St(ret, ret, i, bb[tmp]);
+                setVal4St(key, key, i, bb[tmp]);
             }
         }
     }
 
-    if (0 > bb[1])
-    {
-        // invalid
-        ret = 0;
-    }
-
-    return ret;
-}
-
-inline int findMinUnused(unsigned long long st)
-{
-    int ret = 0;
-
-    for (int i = 0; i <= w; i++)
-    {
-        int tmp = getVal4St(st, i);
-        if (tmp > ret)
-        {
-            ret = tmp;
-        }
-    }
-
-    ret++;
-
-    return ret;
-}
-
-inline void addSts(unsigned long long st, int idx)
-{
-    if (w == now_y)
-    {
-        st &= gMask;
-    }
-
-    int bb[16];
-    unsigned long long key = recode(st, bb);
-
-    if (0 < key)
+    if (0 < bb[1])
     {
         unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
         if (it == cnts[idx].end())
@@ -126,6 +96,7 @@ inline void addSts(unsigned long long st, int idx)
             // 加入队尾
             qs[idx][pInQ].state = key;
             qs[idx][pInQ].cnt = bb[1];
+            qs[idx][pInQ].minUnused = bn;
 
             cnts[idx][key] = pInQ;
             qTail[idx]++;
@@ -204,13 +175,12 @@ int main()
             {
                 unsigned long long st = qs[act][iQ].state;
                 int cnt = qs[act][iQ].cnt;
+                unsigned int minUnused = qs[act][iQ].minUnused;
 
                 if (1 == now_y)
                 {
                     st <<= ST_BITS;
                 }
-
-                int minUnused = findMinUnused(st);
 
                 int left = getVal4St(st, now_y - 1);
                 int up = getVal4St(st, now_y);

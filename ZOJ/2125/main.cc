@@ -72,7 +72,7 @@ inline void addSts(unsigned long long st, int idx)
     for (int i = 0; i <= w; i++)
     {
         int tmp = getVal4St(st, i);
-        if (0 < tmp)
+        if (tmp)
         {
             if (1 == tmp)
             {
@@ -226,13 +226,16 @@ int main()
                     // '-'
                     if (false == (1 == cnt && 1 == up))
                     {
+                        setVal4St(newst, newst, now_y - 1, 0);
                         if (left)
                         {
-                            setVal4St(newst, newst, now_y - 1, 0);
                             setVal4St(newst, newst, now_y, left);
-
-                            addSts(newst, nAct);
                         }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y, minUnused);
+                        }
+                        addSts(newst, nAct);
                     }
 
                     // '|'
@@ -241,10 +244,14 @@ int main()
                         if (up)
                         {
                             setVal4St(newst, newst, now_y - 1, up);
-                            setVal4St(newst, newst, now_y, 0);
-
-                            addSts(newst, nAct);
                         }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                        }
+                        setVal4St(newst, newst, now_y, 0);
+
+                        addSts(newst, nAct);
                     }
                 }
                 else if ('L' == cells[now_x][now_y])
@@ -254,13 +261,18 @@ int main()
                     // '|_'
                     if (false == (1 == cnt && 1 == left))
                     {
+                        setVal4St(newst, newst, now_y - 1, 0);
+
                         if (up)
                         {
-                            setVal4St(newst, newst, now_y - 1, 0);
                             setVal4St(newst, newst, now_y, up);
-
-                            addSts(newst, nAct);
                         }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y, minUnused);
+                        }
+
+                        addSts(newst, nAct);
                     }
 
                     // 右转90度
@@ -291,10 +303,15 @@ int main()
                         if (left)
                         {
                             setVal4St(newst, newst, now_y - 1, left);
-                            setVal4St(newst, newst, now_y, 0);
-
-                            addSts(newst, nAct);
                         }
+                        else
+                        {
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                        }
+
+                        setVal4St(newst, newst, now_y, 0);
+
+                        addSts(newst, nAct);
                     }
 
                     // 右转90度, '_|'
@@ -367,20 +384,17 @@ int main()
                         }
                         else if (0 == left && 0 == up)
                         {
-                            // do nothing
-                            /*
-                                                        // '_|_'
-                                                        setVal4St(newst, newst, now_y - 1, 0);
-                                                        setVal4St(newst, newst, now_y, minUnused);
+                            // '_|_'
+                            setVal4St(newst, newst, now_y - 1, 0);
+                            setVal4St(newst, newst, now_y, minUnused);
 
-                                                        addSts(newst, nAct);
+                            addSts(newst, nAct);
 
-                                                        // 左转90度
-                                                        setVal4St(newst, newst, now_y - 1, minUnused);
-                                                        setVal4St(newst, newst, now_y, 0);
+                            // 左转90度
+                            setVal4St(newst, newst, now_y - 1, minUnused);
+                            setVal4St(newst, newst, now_y, 0);
 
-                                                        addSts(newst, nAct);
-                            */
+                            addSts(newst, nAct);
                         }
                         else
                         {

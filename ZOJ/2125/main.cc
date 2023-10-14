@@ -61,12 +61,14 @@ inline void addSts(unsigned long long st, int idx)
     }
 
     int bb[16];
+    int bits[16];
     unsigned long long key = st;
 
     memset(bb, -1, sizeof(bb));
+    memset(bits, 0, sizeof(bits));
+
     int bn = 2;
     bb[0] = 0;
-    bb[1] = 0;
     for (int i = 0; i <= w; i++)
     {
         int tmp = getVal4St(st, i);
@@ -74,7 +76,7 @@ inline void addSts(unsigned long long st, int idx)
         {
             if (1 == tmp)
             {
-                bb[1]++;
+                bits[1]++;
             }
             else
             {
@@ -83,19 +85,29 @@ inline void addSts(unsigned long long st, int idx)
                     bb[tmp] = bn++;
                 }
                 setVal4St(key, key, i, bb[tmp]);
+                bits[bb[tmp]] ++;
             }
         }
     }
 
-    if (0 < bb[1])
+    if (0 < bits[1])
     {
+        for (int i = 0; i <= w; i++)
+        {
+            int tmp = getVal4St(st, i);
+            if (1 < tmp && 1 == bits[tmp])
+            {
+                setVal4St(key, key, i, 0);
+            }
+        }
+
         unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
         if (it == cnts[idx].end())
         {
             int pInQ = qTail[idx];
             // 加入队尾
             qs[idx][pInQ].state = key;
-            qs[idx][pInQ].cnt = bb[1];
+            qs[idx][pInQ].cnt = bits[1];
             qs[idx][pInQ].minUnused = bn;
 
             cnts[idx][key] = pInQ;

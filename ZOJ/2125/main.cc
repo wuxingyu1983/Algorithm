@@ -24,7 +24,7 @@ using namespace std;
 
 #define ST_BITS 4
 #define ST_MASK 15
-#define QS_SIZE 1000000
+#define QS_SIZE 50000
 
 class Record
 {
@@ -62,42 +62,43 @@ inline void addSts(unsigned long long st, int idx)
 
     int bb[16];
     int bits[16];
-    unsigned long long key = st;
 
     memset(bb, -1, sizeof(bb));
     memset(bits, 0, sizeof(bits));
 
-    int bn = 2;
-    bb[0] = 0;
     for (int i = 0; i <= w; i++)
     {
         int tmp = getVal4St(st, i);
-        if (tmp)
+        if (0 < tmp)
         {
-            if (1 == tmp)
-            {
-                bits[1]++;
-            }
-            else
-            {
-                if (0 > bb[tmp])
-                {
-                    bb[tmp] = bn++;
-                }
-                setVal4St(key, key, i, bb[tmp]);
-                bits[bb[tmp]] ++;
-            }
+            bits[tmp]++;
         }
     }
 
     if (0 < bits[1])
     {
+        unsigned long long key = st;
+
+        int bn = 2;
+        bb[0] = 0;
         for (int i = 0; i <= w; i++)
         {
             int tmp = getVal4St(st, i);
-            if (1 < tmp && 1 == bits[tmp])
+            if (1 < tmp)
             {
-                setVal4St(key, key, i, 0);
+                if (1 == bits[tmp])
+                {
+                    setVal4St(key, key, i, 0);
+                }
+                else
+                {
+                    if (0 > bb[tmp])
+                    {
+                        bb[tmp] = bn++;
+                    }
+                    setVal4St(key, key, i, bb[tmp]);
+                    bits[bb[tmp]]++;
+                }
             }
         }
 
@@ -141,7 +142,7 @@ int main()
     gMask -= 1;
 
     int start;
-    while (scanf("%d", &start))
+    for (; ~scanf("%d", &start);)
     {
         for (size_t col = 1; col <= 9; col++)
         {

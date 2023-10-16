@@ -60,11 +60,10 @@ inline void addSts(unsigned long long st, int idx)
         st &= gMask;
     }
 
-    int bb[16];
-    int bits[16];
-
-    memset(bb, -1, sizeof(bb));
+    int bits[20];
     memset(bits, 0, sizeof(bits));
+
+    int fired = 0;
 
     for (int i = 0; i <= w; i++)
     {
@@ -72,32 +71,51 @@ inline void addSts(unsigned long long st, int idx)
         if (0 < tmp)
         {
             bits[tmp]++;
+
+            if (9 >= tmp)
+            {
+                fired++;
+            }
         }
     }
 
-    if (0 < bits[1])
+    if (0 < fired)
     {
+        int bb[20];
+        memset(bb, -1, sizeof(bb));
+
         unsigned long long key = st;
 
-        int bn = 2;
+        int fn = 1;
+        int bn = 10;
         bb[0] = 0;
         for (int i = 0; i <= w; i++)
         {
             int tmp = getVal4St(st, i);
-            if (1 < tmp)
+            if (0 < tmp)
             {
-                if (1 == bits[tmp])
-                {
-                    setVal4St(key, key, i, 0);
-                }
-                else
+                if (9 >= tmp)
                 {
                     if (0 > bb[tmp])
                     {
-                        bb[tmp] = bn++;
+                        bb[tmp] = fn++;
                     }
                     setVal4St(key, key, i, bb[tmp]);
-                    bits[bb[tmp]]++;
+                }
+                else
+                {
+                    if (1 == bits[tmp])
+                    {
+                        setVal4St(key, key, i, 0);
+                    }
+                    else
+                    {
+                        if (0 > bb[tmp])
+                        {
+                            bb[tmp] = bn++;
+                        }
+                        setVal4St(key, key, i, bb[tmp]);
+                    }
                 }
             }
         }
@@ -108,7 +126,7 @@ inline void addSts(unsigned long long st, int idx)
             int pInQ = qTail[idx];
             // 加入队尾
             qs[idx][pInQ].state = key;
-            qs[idx][pInQ].cnt = bits[1];
+            qs[idx][pInQ].cnt = fired;
             qs[idx][pInQ].minUnused = bn;
 
             cnts[idx][key] = pInQ;
@@ -132,6 +150,7 @@ inline void init(unsigned long long st)
 
     qs[act][0].state = st;
     qs[act][0].cnt = 9;
+    qs[act][0].minUnused = 10;
 
     qTail[act]++;
 }
@@ -148,7 +167,7 @@ int main()
         initSt |= i;
     }
 
-//    for (; ~scanf("%d", &start);)
+    //    for (; ~scanf("%d", &start);)
     {
         for (size_t col = 1; col <= 9; col++)
         {

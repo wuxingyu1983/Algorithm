@@ -24,7 +24,7 @@ using namespace std;
 
 #define ST_BITS 4
 #define ST_MASK 15
-#define QS_SIZE 1000000
+#define QS_SIZE 50000
 
 class Record
 {
@@ -151,7 +151,7 @@ int main()
         initSt |= 1;
     }
 
-    //    for (; ~scanf("%d", &start);)
+    while (true)
     {
         for (size_t col = 1; col <= 9; col++)
         {
@@ -479,6 +479,9 @@ int main()
             cnts[act].clear();
             act = nAct;
         }
+
+        string str;
+        getline(cin, str);
 
         cout << ans << endl;
     }

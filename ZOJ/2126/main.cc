@@ -22,9 +22,9 @@
 
 using namespace std;
 
-#define ST_BITS 5
-#define ST_MASK 31
-#define QS_SIZE 100000
+#define ST_BITS 4
+#define ST_MASK 15
+#define QS_SIZE 1000000
 
 class Record
 {
@@ -63,46 +63,30 @@ inline void addSts(unsigned long long st, int idx)
     int bits[20];
     memset(bits, 0, sizeof(bits));
 
-    int fired = 0;
-
     for (int i = 0; i <= w; i++)
     {
         int tmp = getVal4St(st, i);
         if (0 < tmp)
         {
             bits[tmp]++;
-
-            if (9 >= tmp)
-            {
-                fired++;
-            }
         }
     }
 
-    if (0 < fired)
+    if (0 < bits[1])
     {
         int bb[20];
         memset(bb, -1, sizeof(bb));
 
         unsigned long long key = st;
 
-        int fn = 1;
-        int bn = 10;
+        int bn = 2;
         bb[0] = 0;
         for (int i = 0; i <= w; i++)
         {
             int tmp = getVal4St(st, i);
             if (0 < tmp)
             {
-                if (9 >= tmp)
-                {
-                    if (0 > bb[tmp])
-                    {
-                        bb[tmp] = fn++;
-                    }
-                    setVal4St(key, key, i, bb[tmp]);
-                }
-                else
+                if (1 < tmp)
                 {
                     if (1 == bits[tmp])
                     {
@@ -126,7 +110,7 @@ inline void addSts(unsigned long long st, int idx)
             int pInQ = qTail[idx];
             // 加入队尾
             qs[idx][pInQ].state = key;
-            qs[idx][pInQ].cnt = fired;
+            qs[idx][pInQ].cnt = bits[1];
             qs[idx][pInQ].minUnused = bn;
 
             cnts[idx][key] = pInQ;
@@ -150,7 +134,7 @@ inline void init(unsigned long long st)
 
     qs[act][0].state = st;
     qs[act][0].cnt = 9;
-    qs[act][0].minUnused = 10;
+    qs[act][0].minUnused = 2;
 
     qTail[act]++;
 }
@@ -164,7 +148,7 @@ int main()
     for (int i = w; i > 0; i--)
     {
         initSt <<= ST_BITS;
-        initSt |= i;
+        initSt |= 1;
     }
 
     //    for (; ~scanf("%d", &start);)

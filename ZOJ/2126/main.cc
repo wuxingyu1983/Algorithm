@@ -151,13 +151,19 @@ int main()
         initSt |= 1;
     }
 
+    char ch[10];
     while (true)
     {
         for (size_t col = 1; col <= 9; col++)
         {
+            if (!(~scanf("%s", ch)))
+            {
+                return 0;
+            }
+
             for (size_t row = 1; row <= 6; row++)
             {
-                cin >> cells[row][col];
+                cells[row][col] = ch[row - 1];
             }
         }
 

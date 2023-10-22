@@ -30,7 +30,6 @@ namespace BIGNUM
 {
 
     const int __base = 1e8;
-    const int P10[] = {1, 10, int(1e2), int(1e3), int(1e4), int(1e5), int(1e6), int(1e7), int(1e8), int(1e9)};
     const int MAX_BUF_SIZE = 109;
     char __buf[MAX_BUF_SIZE];
 
@@ -407,25 +406,65 @@ class Record
 {
 public:
     unsigned short state;
-    unsigned long long cnt;
+    bignum cnt;
     unsigned int minUnused;
 
     Record() {}
 };
+
+Record qs[2][QS_SIZE];
+int qTail[2];
+int h, w;
+unordered_map<unsigned short, unsigned int> cnts[2];    // state => index
+
+int act = 0; // 当前生效的 map
+int now_x, now_y;
+unsigned short gMask = 0;
+
+bignum ans = 0;
+
+#define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
+
+#define setVal4St(NEW, OLD, POS, VAL)                           \
+    NEW = OLD;                                                  \
+    NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
+    NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
+
+inline void init()
+{
+
+}
 
 int main()
 {
     int t;
     cin >> t;
 
-    while (0 < t)
+    while (0 < t --)
     {
         string str;
         getline(cin, str);
 
+        cin >> h >> w;
 
+        if (h < w)
+        {
+            swap(h, w);
+        }
 
-        t --;
+        if (1 == w)
+        {
+
+        }
+        else
+        {
+            h --;
+            w --;
+
+            init();
+
+            
+        }
     }
     
 

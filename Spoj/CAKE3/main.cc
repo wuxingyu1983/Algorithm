@@ -23,7 +23,7 @@
 using namespace std;
 
 #define ST_BITS 3
-#define ST_MASK 7 
+#define ST_MASK 7
 #define QS_SIZE 50000
 
 namespace BIGNUM
@@ -415,7 +415,7 @@ public:
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned short, unsigned int> cnts[2];    // state => index
+unordered_map<unsigned short, unsigned int> cnts[2]; // state => index
 
 int act = 0; // 当前生效的 map
 int now_x, now_y;
@@ -432,7 +432,6 @@ bignum ans = 0;
 
 inline void init()
 {
-
 }
 
 int main()
@@ -440,7 +439,7 @@ int main()
     int t;
     cin >> t;
 
-    while (0 < t --)
+    while (0 < t--)
     {
         string str;
         getline(cin, str);
@@ -454,19 +453,22 @@ int main()
 
         if (1 == w)
         {
+            ans = 1;
+            for (size_t i = 0; i < h - 1; i++)
+            {
+                ans += ans;
+            }
 
+            cout << ans << endl;
         }
         else
         {
-            h --;
-            w --;
+            h--;
+            w--;
 
             init();
-
-            
         }
     }
-    
 
     return 0;
 }

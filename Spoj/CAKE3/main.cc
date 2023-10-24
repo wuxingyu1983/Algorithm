@@ -531,6 +531,50 @@ int main()
             w--;
 
             init();
+
+            while (0 < qTail[act])
+            {
+                int nAct = 1 - act;
+
+                if (w == now_y)
+                {
+                    now_x++;
+                    now_y = 1;
+
+                    if (h < now_x)
+                    {
+                        // finished
+                        // TBD
+
+                        break;
+                    }
+                }
+                else
+                {
+                    now_y++;
+                }
+
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    unsigned short st = qs[act][iQ].state;
+                    bignum cnt = qs[act][iQ].cnt;
+                    unsigned int minUnused = qs[act][iQ].minUnused;
+
+                    if (1 == now_y)
+                    {
+                        st <<= ST_BITS;
+                    }
+
+                    int left = getVal4St(st, now_y - 1);
+                    int up = getVal4St(st, now_y);
+
+                    
+                }
+
+                qTail[act] = 0;
+                cnts[act].clear();
+                act = nAct;
+            }
         }
     }
 

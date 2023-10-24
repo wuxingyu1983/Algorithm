@@ -430,8 +430,72 @@ bignum ans = 0;
     NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
 
+inline void addSts(unsigned short st, bignum cnt, int idx)
+{
+    if (w == now_y)
+    {
+        st &= gMask;
+    }
+
+    int bb[10];
+    memset(bb, -1, sizeof(bb));
+
+    unsigned short key = st;
+
+    int bn = 1;
+    bb[0] = 0;
+    for (int i = 0; i <= w; i++)
+    {
+        int tmp = getVal4St(st, i);
+        if (0 < tmp)
+        {
+            if (0 > bb[tmp])
+            {
+                bb[tmp] = bn++;
+            }
+            setVal4St(key, key, i, bb[tmp]);
+        }
+    }
+
+    unordered_map<unsigned short, unsigned int>::iterator it = cnts[idx].find(key);
+    if (it == cnts[idx].end())
+    {
+        int pInQ = qTail[idx];
+        // 加入队尾
+        qs[idx][pInQ].state = key;
+        qs[idx][pInQ].cnt = cnt;
+        qs[idx][pInQ].minUnused = bn;
+
+        cnts[idx][key] = pInQ;
+        qTail[idx]++;
+    }
+    else
+    {
+        qs[idx][it->second].cnt += cnt;
+    }
+}
+
 inline void init()
 {
+    act = 0;
+
+    qTail[0] = 0;
+    qTail[1] = 0;
+
+    now_x = 0;
+    now_y = w;
+
+    gMask = 1 << (w * ST_BITS);
+    gMask -= 1;
+
+    cnts[0].clear();
+    cnts[1].clear();
+
+    qs[act][0].state = 0;
+    qs[act][0].cnt = 1;
+    qs[act][0].minUnused = 1;
+
+    qTail[act]++;
 }
 
 int main()

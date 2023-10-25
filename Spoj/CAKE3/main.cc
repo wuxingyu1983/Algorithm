@@ -568,7 +568,52 @@ int main()
                     int left = getVal4St(st, now_y - 1);
                     int up = getVal4St(st, now_y);
 
-                    
+                    if (1 == now_x && 1 == now_y)
+                    {
+                        {
+                            addSts(st, 2, nAct);
+                        }
+
+                        {
+                            unsigned short newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 1);
+                            addSts(st, 3, nAct);
+                        }
+
+                        {
+                            unsigned short newSt = st;
+                            setVal4St(newSt, newSt, now_y, 1);
+                            addSts(st, 3, nAct);
+                        }
+
+                        {
+                            unsigned short newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 1);
+                            setVal4St(newSt, newSt, now_y, 1);
+                            addSts(st, 4, nAct);
+                        }
+                    }
+                    else if (1 == now_y)
+                    {
+                        if (left)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else if (1 == now_x)
+                    {
+                        if (up)
+                        {
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else
+                    {
+                    }
                 }
 
                 qTail[act] = 0;

@@ -577,42 +577,134 @@ int main()
                         {
                             unsigned short newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 1);
-                            addSts(st, 3, nAct);
+                            addSts(newSt, 3, nAct);
                         }
 
                         {
                             unsigned short newSt = st;
                             setVal4St(newSt, newSt, now_y, 1);
-                            addSts(st, 3, nAct);
+                            addSts(newSt, 3, nAct);
                         }
 
                         {
                             unsigned short newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 1);
                             setVal4St(newSt, newSt, now_y, 1);
-                            addSts(st, 4, nAct);
+                            addSts(newSt, 4, nAct);
                         }
                     }
-                    else if (1 == now_y)
+                    else if (1 == now_y || 1 == now_x)
                     {
-                        if (left)
+                        int val = left + up;
+                        if (val)
                         {
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 0);
+                                setVal4St(newSt, newSt, now_y, 0);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            bignum tmp = cnt;
+                            tmp += cnt;
+                            
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, val);
+                                setVal4St(newSt, newSt, now_y, 0);
+                                addSts(newSt, tmp, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 0);
+                                setVal4St(newSt, newSt, now_y, val);
+                                addSts(newSt, tmp, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, val);
+                                setVal4St(newSt, newSt, now_y, val);
+                                addSts(newSt, tmp, nAct);
+                            }
                         }
                         else
                         {
-                        }
-                    }
-                    else if (1 == now_x)
-                    {
-                        if (up)
-                        {
-                        }
-                        else
-                        {
+                            {
+                                addSts(st, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, minUnused);
+                                setVal4St(newSt, newSt, now_y, 0);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 0);
+                                setVal4St(newSt, newSt, now_y, minUnused);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            bignum tmp = cnt;
+                            tmp += cnt;
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, minUnused);
+                                setVal4St(newSt, newSt, now_y, minUnused);
+                                addSts(newSt, tmp, nAct);
+                            }
                         }
                     }
                     else
                     {
+                        if (left && up)
+                        {
+
+                        }
+                        else if (left || up)
+                        {
+                            int val = left + up;
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, val);
+                                setVal4St(newSt, newSt, now_y, 0);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 0);
+                                setVal4St(newSt, newSt, now_y, val);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, val);
+                                setVal4St(newSt, newSt, now_y, val);
+                                addSts(newSt, cnt, nAct);
+                            }
+                        }
+                        else
+                        {
+                            // 0 == left && 0 == up
+                            {
+                                addSts(st, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, minUnused);
+                                setVal4St(newSt, newSt, now_y, minUnused);
+                                addSts(newSt, cnt, nAct);
+                            }
+                        }
                     }
                 }
 

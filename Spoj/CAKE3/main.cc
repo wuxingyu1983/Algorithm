@@ -496,6 +496,8 @@ inline void init()
     qs[act][0].minUnused = 1;
 
     qTail[act]++;
+
+    ans = 0;
 }
 
 int main()

@@ -544,7 +544,10 @@ int main()
                     if (h < now_x)
                     {
                         // finished
-                        // TBD
+                        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                        {
+                            ans += qs[act][iQ].cnt;
+                        }
 
                         break;
                     }
@@ -664,7 +667,46 @@ int main()
                     {
                         if (left && up)
                         {
+                            if (left != up)
+                            {
+                                // up ==> left
+                                for (int i = 0; i <= w; i++)
+                                {
+                                    int tmp = getVal4St(st, i);
+                                    if (tmp == up)
+                                    {
+                                        setVal4St(st, st, i, left);
+                                    }
+                                }
+                            }
 
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 0);
+                                setVal4St(newSt, newSt, now_y, 0);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, left);
+                                setVal4St(newSt, newSt, now_y, 0);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 0);
+                                setVal4St(newSt, newSt, now_y, left);
+                                addSts(newSt, cnt, nAct);
+                            }
+
+                            {
+                                unsigned short newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, left);
+                                setVal4St(newSt, newSt, now_y, left);
+                                addSts(newSt, cnt, nAct);
+                            }
                         }
                         else if (left || up)
                         {
@@ -712,6 +754,8 @@ int main()
                 cnts[act].clear();
                 act = nAct;
             }
+
+            cout << ans << endl;
         }
     }
 

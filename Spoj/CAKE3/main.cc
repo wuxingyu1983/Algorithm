@@ -419,7 +419,6 @@ unordered_map<unsigned short, unsigned int> cnts[2]; // state => index
 
 int act = 0; // 当前生效的 map
 int now_x, now_y;
-unsigned short gMask = 0;
 
 bignum ans = 0;
 
@@ -432,11 +431,6 @@ bignum ans = 0;
 
 inline void addSts(unsigned short st, bignum cnt, int idx)
 {
-    if (w == now_y)
-    {
-        st &= gMask;
-    }
-
     int bb[10];
     memset(bb, -1, sizeof(bb));
 
@@ -484,9 +478,6 @@ inline void init()
 
     now_x = 0;
     now_y = w;
-
-    gMask = 1 << (w * ST_BITS);
-    gMask -= 1;
 
     cnts[0].clear();
     cnts[1].clear();
@@ -564,11 +555,6 @@ int main()
                     unsigned short st = qs[act][iQ].state;
                     bignum cnt = qs[act][iQ].cnt;
                     unsigned int minUnused = qs[act][iQ].minUnused;
-
-                    if (1 == now_y)
-                    {
-                        st <<= ST_BITS;
-                    }
 
                     int left = getVal4St(st, now_y - 1);
                     int up = getVal4St(st, now_y);

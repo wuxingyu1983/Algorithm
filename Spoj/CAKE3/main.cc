@@ -411,7 +411,10 @@ public:
     unsigned int nxtClr;
     unsigned char nxtBlk[8];
 
-    Record() {}
+    Record()
+    {
+        memset(nxtBlk, 0, sizeof(nxtBlk));
+    }
 };
 
 Record qs[2][QS_SIZE];
@@ -426,10 +429,10 @@ bignum ans = 0;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
 
-#define setVal4St(NEW, OLD, POS, VAL)                           \
-    NEW = OLD;                                                  \
-    NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
-    NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
+#define setVal4St(NEW, OLD, POS, VAL)     \
+    NEW = OLD;                            \
+    NEW &= ~(ST_MASK << ((POS)*ST_BITS)); \
+    NEW |= (VAL) << ((POS)*ST_BITS);
 
 inline void addSts(unsigned int st, bignum cnt, int idx)
 {
@@ -487,6 +490,10 @@ inline void init()
     qs[act][0].state = 0;
     qs[act][0].cnt = 1;
     qs[act][0].nxtClr = 1;
+    for (size_t i = 1; i <= w; i++)
+    {
+        qs[act][0].nxtBlk[i] = 1;
+    }
 
     qTail[act]++;
 
@@ -541,6 +548,7 @@ int main()
             {
                 unsigned int st = qs[act][iQ].state;
                 bignum cnt = qs[act][iQ].cnt;
+                unsigned int blk = qs[act][iQ].block;
                 unsigned int nxtClr = qs[act][iQ].nxtClr;
 
                 int left = getVal4St(st, now_y - 1);
@@ -548,31 +556,66 @@ int main()
 
                 unsigned int newSt;
 
-                // new color
-                {
-                    setVal4St(newSt, st, now_y, nxtClr);
-                    addSts(newSt, cnt, nAct);
-                }
+                bool flag = false;       // 是否能阻断 up 的 block
 
-                if (left || up)
+                if (up)
                 {
+                    // 当前 cell 同 up
                     if (left == up)
                     {
-                        setVal4St(newSt, st, now_y, left);
-                        addSts(newSt, cnt, nAct);
+                        // left, up 合并
                     }
                     else
                     {
-                        if (left)
-                        {
-                            setVal4St(newSt, st, now_y, left);
-                            addSts(newSt, cnt, nAct);
-                        }
+                    }
 
-                        if (up)
+                    {
+                        if (2 < qs[act][iQ].nxtBlk[up])
                         {
-                            setVal4St(newSt, st, now_y, up);
-                            addSts(newSt, cnt, nAct);
+                            // up 颜色至少 2 个 block
+                            int upBlk = getVal4St(blk, now_y);
+                            int tmpCnt = 0;
+
+                            for (size_t i = 1; i <= w; i++)
+                            {
+                                if (up == (getVal4St(st, i)))
+                                {
+                                    if (upBlk == (getVal4St(blk, i)))
+                                    {
+                                        tmpCnt++;
+                                        if (1 < tmpCnt)
+                                        {
+                                            flag = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            flag = true;
+                        }
+                    }
+                }
+                else
+                {
+                    flag = true;
+                }
+
+                // 当前 cell 同 left
+                if (left && flag)
+                {
+
+                }
+
+                // 当前 cell 非 left, up
+                if (flag)
+                {
+                    for (size_t clr = 1; clr <= nxtClr; clr++)
+                    {
+                        if (clr != left && clr != up)
+                        {
                         }
                     }
                 }

@@ -405,9 +405,11 @@ using namespace BIGNUM;
 class Record
 {
 public:
-    unsigned short state;
+    unsigned int state;
+    unsigned int block;
     bignum cnt;
-    unsigned int minUnused;
+    unsigned int nxtClr;
+    unsigned char nxtBlk[8];
 
     Record() {}
 };
@@ -415,7 +417,7 @@ public:
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned short, unsigned int> cnts[2]; // state => index
+unordered_map<unsigned int, unsigned int> cnts[2]; // state => index
 
 int act = 0; // 当前生效的 map
 int now_x, now_y;
@@ -429,12 +431,12 @@ bignum ans = 0;
     NEW &= ~(((unsigned long long)ST_MASK) << ((POS)*ST_BITS)); \
     NEW |= ((unsigned long long)(VAL)) << ((POS)*ST_BITS);
 
-inline void addSts(unsigned short st, bignum cnt, int idx)
+inline void addSts(unsigned int st, bignum cnt, int idx)
 {
     int bb[10];
     memset(bb, -1, sizeof(bb));
 
-    unsigned short key = st;
+    unsigned int key = st;
 
     int bn = 1;
     bb[0] = 0;
@@ -451,14 +453,14 @@ inline void addSts(unsigned short st, bignum cnt, int idx)
         }
     }
 
-    unordered_map<unsigned short, unsigned int>::iterator it = cnts[idx].find(key);
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(key);
     if (it == cnts[idx].end())
     {
         int pInQ = qTail[idx];
         // 加入队尾
         qs[idx][pInQ].state = key;
         qs[idx][pInQ].cnt = cnt;
-        qs[idx][pInQ].minUnused = bn;
+        qs[idx][pInQ].nxtClr = bn;
 
         cnts[idx][key] = pInQ;
         qTail[idx]++;
@@ -484,7 +486,7 @@ inline void init()
 
     qs[act][0].state = 0;
     qs[act][0].cnt = 1;
-    qs[act][0].minUnused = 1;
+    qs[act][0].nxtClr = 1;
 
     qTail[act]++;
 
@@ -508,243 +510,80 @@ int main()
             swap(h, w);
         }
 
-        if (1 == w)
+        init();
+
+        while (0 < qTail[act])
         {
-            ans = 1;
-            for (size_t i = 0; i < h - 1; i++)
+            int nAct = 1 - act;
+
+            if (w == now_y)
             {
-                ans += ans;
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
+                {
+                    // finished
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        ans += qs[act][iQ].cnt;
+                    }
+
+                    break;
+                }
+            }
+            else
+            {
+                now_y++;
             }
 
-            cout << ans << endl;
-        }
-        else
-        {
-            h--;
-            w--;
-
-            init();
-
-            while (0 < qTail[act])
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                int nAct = 1 - act;
+                unsigned int st = qs[act][iQ].state;
+                bignum cnt = qs[act][iQ].cnt;
+                unsigned int nxtClr = qs[act][iQ].nxtClr;
 
-                if (w == now_y)
+                int left = getVal4St(st, now_y - 1);
+                int up = getVal4St(st, now_y);
+
+                unsigned int newSt;
+
+                // new color
                 {
-                    now_x++;
-                    now_y = 1;
-
-                    if (h < now_x)
-                    {
-                        // finished
-                        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                        {
-                            ans += qs[act][iQ].cnt;
-                        }
-
-                        break;
-                    }
-                }
-                else
-                {
-                    now_y++;
+                    setVal4St(newSt, st, now_y, nxtClr);
+                    addSts(newSt, cnt, nAct);
                 }
 
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                if (left || up)
                 {
-                    unsigned short st = qs[act][iQ].state;
-                    bignum cnt = qs[act][iQ].cnt;
-                    unsigned int minUnused = qs[act][iQ].minUnused;
-
-                    int left = getVal4St(st, now_y - 1);
-                    int up = getVal4St(st, now_y);
-
-                    if (1 == now_x && 1 == now_y)
+                    if (left == up)
                     {
-                        {
-                            addSts(st, 2, nAct);
-                        }
-
-                        {
-                            unsigned short newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, 1);
-                            addSts(newSt, 3, nAct);
-                        }
-
-                        {
-                            unsigned short newSt = st;
-                            setVal4St(newSt, newSt, now_y, 1);
-                            addSts(newSt, 3, nAct);
-                        }
-
-                        {
-                            unsigned short newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, 1);
-                            setVal4St(newSt, newSt, now_y, 1);
-                            addSts(newSt, 4, nAct);
-                        }
-                    }
-                    else if (1 == now_y || 1 == now_x)
-                    {
-                        int val = left + up;
-                        if (val)
-                        {
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, 0);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            bignum tmp = cnt;
-                            tmp += cnt;
-                            
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, val);
-                                setVal4St(newSt, newSt, now_y, 0);
-                                addSts(newSt, tmp, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, val);
-                                addSts(newSt, tmp, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, val);
-                                setVal4St(newSt, newSt, now_y, val);
-                                addSts(newSt, tmp, nAct);
-                            }
-                        }
-                        else
-                        {
-                            {
-                                addSts(st, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, minUnused);
-                                setVal4St(newSt, newSt, now_y, 0);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, minUnused);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            bignum tmp = cnt;
-                            tmp += cnt;
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, minUnused);
-                                setVal4St(newSt, newSt, now_y, minUnused);
-                                addSts(newSt, tmp, nAct);
-                            }
-                        }
+                        setVal4St(newSt, st, now_y, left);
+                        addSts(newSt, cnt, nAct);
                     }
                     else
                     {
-                        if (left && up)
+                        if (left)
                         {
-                            if (left != up)
-                            {
-                                // up ==> left
-                                for (int i = 0; i <= w; i++)
-                                {
-                                    int tmp = getVal4St(st, i);
-                                    if (tmp == up)
-                                    {
-                                        setVal4St(st, st, i, left);
-                                    }
-                                }
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, 0);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, left);
-                                setVal4St(newSt, newSt, now_y, 0);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, left);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, left);
-                                setVal4St(newSt, newSt, now_y, left);
-                                addSts(newSt, cnt, nAct);
-                            }
+                            setVal4St(newSt, st, now_y, left);
+                            addSts(newSt, cnt, nAct);
                         }
-                        else if (left || up)
+
+                        if (up)
                         {
-                            int val = left + up;
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, val);
-                                setVal4St(newSt, newSt, now_y, 0);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, val);
-                                addSts(newSt, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, val);
-                                setVal4St(newSt, newSt, now_y, val);
-                                addSts(newSt, cnt, nAct);
-                            }
-                        }
-                        else
-                        {
-                            // 0 == left && 0 == up
-                            {
-                                addSts(st, cnt, nAct);
-                            }
-
-                            {
-                                unsigned short newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, minUnused);
-                                setVal4St(newSt, newSt, now_y, minUnused);
-                                addSts(newSt, cnt, nAct);
-                            }
+                            setVal4St(newSt, st, now_y, up);
+                            addSts(newSt, cnt, nAct);
                         }
                     }
                 }
-
-                qTail[act] = 0;
-                cnts[act].clear();
-                act = nAct;
             }
 
-            cout << ans << endl;
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
         }
+
+        cout << ans << endl;
     }
 
     return 0;

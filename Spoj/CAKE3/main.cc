@@ -409,11 +409,11 @@ public:
     unsigned int block;
     bignum cnt;
     unsigned int nxtClr;
-    unsigned char nxtBlk[8];
+//    unsigned char nxtBlk[8];
 
     Record()
     {
-        memset(nxtBlk, 0, sizeof(nxtBlk));
+//        memset(nxtBlk, 0, sizeof(nxtBlk));
     }
 };
 
@@ -490,10 +490,6 @@ inline void init()
     qs[act][0].state = 0;
     qs[act][0].cnt = 1;
     qs[act][0].nxtClr = 1;
-    for (size_t i = 1; i <= w; i++)
-    {
-        qs[act][0].nxtBlk[i] = 1;
-    }
 
     qTail[act]++;
 
@@ -554,9 +550,24 @@ int main()
                 int left = getVal4St(st, now_y - 1);
                 int up = getVal4St(st, now_y);
 
-                unsigned int newSt;
+                unsigned int newSt, newBlk;
+                unsigned char nxtBlk[8];
+                memset(nxtBlk, 1, sizeof(nxtBlk));
 
                 bool flag = false;       // 是否能阻断 up 的 block
+
+                for (size_t i = 1; i <= w; i++)
+                {
+                    int oneClr = getVal4St(st, i);
+                    if (0 < oneClr)
+                    {
+                        int oneBlk = getVal4St(blk, i);
+                        if (nxtBlk[oneClr] < (1 + oneBlk))
+                        {
+                            nxtBlk[oneClr] = 1 + oneBlk;
+                        }
+                    }
+                }
 
                 if (up)
                 {
@@ -570,7 +581,7 @@ int main()
                     }
 
                     {
-                        if (2 < qs[act][iQ].nxtBlk[up])
+                        if (2 < nxtBlk[up])
                         {
                             // up 颜色至少 2 个 block
                             int upBlk = getVal4St(blk, now_y);
@@ -603,19 +614,24 @@ int main()
                     flag = true;
                 }
 
-                // 当前 cell 同 left
-                if (left && flag)
-                {
-
-                }
-
                 // 当前 cell 非 left, up
                 if (flag)
                 {
+                    if (left)
+                    {
+                        // 当前 cell 同 left
+                        setVal4St(newSt, st, now_y, left);
+
+                        int leftBlk = getVal4St(blk, now_y - 1);
+                        setVal4St(newBlk, blk, now_y, leftBlk);
+                    }
+
                     for (size_t clr = 1; clr <= nxtClr; clr++)
                     {
                         if (clr != left && clr != up)
                         {
+                            setVal4St(newSt, st, now_y, clr);
+                            setVal4St(newBlk, blk, now_y, nxtBlk[clr]);
                         }
                     }
                 }

@@ -571,15 +571,6 @@ int main()
 
                 if (up)
                 {
-                    // 当前 cell 同 up
-                    if (left == up)
-                    {
-                        // left, up 合并
-                    }
-                    else
-                    {
-                    }
-
                     {
                         if (2 < nxtBlk[up])
                         {
@@ -607,6 +598,16 @@ int main()
                         {
                             flag = true;
                         }
+                    }
+
+                    // 当前 cell 同 up
+                    newSt = st;
+                    newBlk = blk;
+
+                    if (left == up)
+                    {
+                        // left, up 合并
+                        
                     }
                 }
                 else

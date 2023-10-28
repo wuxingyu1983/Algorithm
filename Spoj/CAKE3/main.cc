@@ -24,7 +24,7 @@ using namespace std;
 
 #define ST_BITS 3
 #define ST_MASK 7
-#define QS_SIZE 50000
+#define QS_SIZE 1000
 
 namespace BIGNUM
 {

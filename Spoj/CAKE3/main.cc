@@ -665,7 +665,7 @@ int main()
                 // 当前 cell 非 left, up
                 if (flag)
                 {
-                    if (left)
+                    if (left && left != up)
                     {
                         // 当前 cell 同 left
                         setVal4St(newSt, st, now_y, left);

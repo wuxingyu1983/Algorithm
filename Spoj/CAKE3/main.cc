@@ -487,6 +487,7 @@ inline void init()
     cnts[1].clear();
 
     qs[act][0].state = 0;
+    qs[act][0].block = 0;
     qs[act][0].cnt = 1;
     qs[act][0].nxtClr = 1;
 
@@ -560,10 +561,8 @@ int main()
                 int up = getVal4St(st, now_y);
 
                 unsigned int newSt, newBlk;
-                unsigned char nxtBlk[8];
+                unsigned char nxtBlk[8]; // nxtBlk[clr] 该 clr 的下一个 block
                 memset(nxtBlk, 1, sizeof(nxtBlk));
-
-                bool flag = false;       // 是否能阻断 up 的 block
 
                 for (size_t i = 1; i <= w; i++)
                 {
@@ -578,35 +577,35 @@ int main()
                     }
                 }
 
+                bool flag = false; // 是否能阻断 up 的 block
+
                 if (up)
                 {
+                    if (2 < nxtBlk[up])
                     {
-                        if (2 < nxtBlk[up])
-                        {
-                            // up 颜色至少 2 个 block
-                            int upBlk = getVal4St(blk, now_y);
-                            int tmpCnt = 0;
+                        // up 颜色至少 2 个 block
+                        int upBlk = getVal4St(blk, now_y);
+                        int tmpCnt = 0;
 
-                            for (size_t i = 1; i <= w; i++)
+                        for (size_t i = 1; i <= w; i++)
+                        {
+                            if (up == (getVal4St(st, i)))
                             {
-                                if (up == (getVal4St(st, i)))
+                                if (upBlk == (getVal4St(blk, i)))
                                 {
-                                    if (upBlk == (getVal4St(blk, i)))
+                                    tmpCnt++;
+                                    if (1 < tmpCnt)
                                     {
-                                        tmpCnt++;
-                                        if (1 < tmpCnt)
-                                        {
-                                            flag = true;
-                                            break;
-                                        }
+                                        flag = true;
+                                        break;
                                     }
                                 }
                             }
                         }
-                        else
-                        {
-                            flag = true;
-                        }
+                    }
+                    else
+                    {
+                        flag = true;
                     }
 
                     // 当前 cell 同 up
@@ -628,9 +627,8 @@ int main()
                                 {
                                     setVal4St(newBlk, newBlk, i, upBlk);
                                 }
-                                
                             }
-                            
+
                             // recode block
                             {
                                 int bb[10];
@@ -655,9 +653,9 @@ int main()
                                 }
                             }
                         }
-
-                        addSts(st, newBlk, cnt, nAct);
                     }
+
+                    addSts(st, newBlk, cnt, nAct);
                 }
                 else
                 {

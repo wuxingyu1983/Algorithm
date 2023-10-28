@@ -409,12 +409,8 @@ public:
     unsigned int block;
     bignum cnt;
     unsigned int nxtClr;
-//    unsigned char nxtBlk[8];
 
-    Record()
-    {
-//        memset(nxtBlk, 0, sizeof(nxtBlk));
-    }
+    Record() {}
 };
 
 Record qs[2][QS_SIZE];
@@ -607,7 +603,45 @@ int main()
                     if (left == up)
                     {
                         // left, up 合并
-                        
+                        int leftBlk = getVal4St(blk, now_y - 1);
+                        int upBlk = getVal4St(blk, now_y);
+
+                        if (leftBlk != upBlk)
+                        {
+                            // block 合并, leftBlk ==> upBlk
+                            for (size_t i = 1; i <= w; i++)
+                            {
+                                if (up == (getVal4St(st, i)) && leftBlk == (getVal4St(newBlk, i)))
+                                {
+                                    setVal4St(newBlk, newBlk, i, upBlk);
+                                }
+                                
+                            }
+                            
+                            // recode block
+                            {
+                                int bb[10];
+                                memset(bb, -1, sizeof(bb));
+
+                                int bn = 1;
+                                bb[0] = 0;
+                                for (int i = 1; i <= w; i++)
+                                {
+                                    if (up == (getVal4St(st, i)))
+                                    {
+                                        int tmp = getVal4St(newBlk, i);
+                                        if (0 < tmp)
+                                        {
+                                            if (0 > bb[tmp])
+                                            {
+                                                bb[tmp] = bn++;
+                                            }
+                                            setVal4St(newBlk, newBlk, i, bb[tmp]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 else

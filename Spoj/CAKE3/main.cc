@@ -416,7 +416,7 @@ public:
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned int, unsigned int> cnts[2]; // state => index
+unordered_map<unsigned long long, unsigned int> cnts[2]; // state => index
 
 int act = 0; // 当前生效的 map
 int now_x, now_y;
@@ -430,12 +430,10 @@ bignum ans = 0;
     NEW &= ~(ST_MASK << ((POS)*ST_BITS)); \
     NEW |= (VAL) << ((POS)*ST_BITS);
 
-inline void addSts(unsigned int st, bignum cnt, int idx)
+inline void addSts(unsigned int st, unsigned int blk, bignum cnt, int idx)
 {
     int bb[10];
     memset(bb, -1, sizeof(bb));
-
-    unsigned int key = st;
 
     int bn = 1;
     bb[0] = 0;
@@ -448,16 +446,21 @@ inline void addSts(unsigned int st, bignum cnt, int idx)
             {
                 bb[tmp] = bn++;
             }
-            setVal4St(key, key, i, bb[tmp]);
+            setVal4St(st, st, i, bb[tmp]);
         }
     }
 
-    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(key);
+    unsigned long long key = st;
+    key <<= 32;
+    key |= blk;
+
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
     if (it == cnts[idx].end())
     {
         int pInQ = qTail[idx];
         // 加入队尾
-        qs[idx][pInQ].state = key;
+        qs[idx][pInQ].state = st;
+        qs[idx][pInQ].block = blk;
         qs[idx][pInQ].cnt = cnt;
         qs[idx][pInQ].nxtClr = bn;
 
@@ -523,9 +526,19 @@ int main()
                 if (h < now_x)
                 {
                     // finished
+                    int valid = 0;
+                    for (size_t i = 1; i <= w; i++)
+                    {
+                        valid |= 1;
+                        valid <<= ST_BITS;
+                    }
+
                     for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                     {
-                        ans += qs[act][iQ].cnt;
+                        if (valid == qs[act][iQ].block)
+                        {
+                            ans += qs[act][iQ].cnt;
+                        }
                     }
 
                     break;
@@ -642,6 +655,8 @@ int main()
                                 }
                             }
                         }
+
+                        addSts(st, newBlk, cnt, nAct);
                     }
                 }
                 else
@@ -659,6 +674,8 @@ int main()
 
                         int leftBlk = getVal4St(blk, now_y - 1);
                         setVal4St(newBlk, blk, now_y, leftBlk);
+
+                        addSts(newSt, newBlk, cnt, nAct);
                     }
 
                     for (size_t clr = 1; clr <= nxtClr; clr++)
@@ -667,6 +684,8 @@ int main()
                         {
                             setVal4St(newSt, st, now_y, clr);
                             setVal4St(newBlk, blk, now_y, nxtBlk[clr]);
+
+                            addSts(newSt, newBlk, cnt, nAct);
                         }
                     }
                 }

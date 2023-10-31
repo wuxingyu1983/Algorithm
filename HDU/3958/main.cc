@@ -119,7 +119,7 @@ int main()
 
         if (1 == (abs(sx - tx) + abs(sy - ty)))
         {
-            
+
         }
         else
         {
@@ -154,7 +154,49 @@ int main()
                     if (1 == now_y)
                     {
                         st1 <<= ST1_BITS;
-                        st2 <<= ST2_BITS;
+                    }
+
+                    int leftPlug = 0, upPlug = 0;
+                    int leftCell = 0, upCell = 0; // 0 -- 障碍物, 1 -- path 的一部分
+
+                    leftPlug = getVal4St1(st1, now_y - 1);
+                    leftCell = getVal4St2(st2, now_y - 1);
+
+                    if (1 < now_x)
+                    {
+                        upPlug = getVal4St1(st1, now_y);
+                        upCell = getVal4St2(st2, now_y);
+                    }
+
+                    if (leftPlug && upPlug)
+                    {
+                        if ('.' == cells[now_x][now_y])
+                        {
+
+                        }
+                    }
+                    else if (leftPlug || upPlug)
+                    {
+                        if ('.' == cells[now_x][now_y])
+                        {
+                            
+                        }
+                        else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
+                        {
+
+                        }
+                    }
+                    else
+                    {
+                        // 0 == leftPlug && 0 == upPlug
+                        if ('.' == cells[now_x][now_y])
+                        {
+                            
+                        }
+                        else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
+                        {
+                            
+                        }
                     }
                 }
 

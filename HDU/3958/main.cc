@@ -160,18 +160,103 @@ int main()
                     int leftCell = 0, upCell = 0; // 0 -- 障碍物, 1 -- path 的一部分
 
                     leftPlug = getVal4St1(st1, now_y - 1);
+                    upPlug = getVal4St1(st1, now_y);
+                    
                     leftCell = getVal4St2(st2, now_y - 1);
-
-                    if (1 < now_x)
-                    {
-                        upPlug = getVal4St1(st1, now_y);
-                        upCell = getVal4St2(st2, now_y);
-                    }
+                    upCell = getVal4St2(st2, now_y);
 
                     if (leftPlug && upPlug)
                     {
                         if ('.' == cells[now_x][now_y])
                         {
+                            unsigned int newSt1 = st1;
+                            unsigned short newSt2 = st2;
+
+                            if (3 == leftPlug && 3 == upPlug)
+                            {
+                                // do nothing
+                            }
+                            else if (3 == leftPlug || 3 == upPlug)
+                            {
+                                if (1 == leftPlug || 1 == upPlug)
+                                {
+
+                                }
+                                else
+                                {
+                                    // 2 == leftPlug || 2 == upPlug
+
+                                }
+                            }
+                            else
+                            {
+                                // leftPlug 和 upPlug 都不为 3
+                                if (1 == leftPlug && 1 == upPlug)
+                                {
+                                    int pos = now_y + 1;
+                                    int s = 1;
+                                    while (pos <= w)
+                                    {
+                                        int v = getVal4St1(newSt1, pos);
+                                        if (1 == v)
+                                        {
+                                            s++;
+                                        }
+                                        else if (2 == v)
+                                        {
+                                            s--;
+                                            if (0 == s)
+                                            {
+                                                setVal4St1(newSt1, newSt1, pos, 1);
+                                                break;
+                                            }
+                                        }
+
+                                        pos++;
+                                    }
+                                }
+                                else if (2 == leftPlug && 2 == upPlug)
+                                {
+                                    int pos = now_y - 2;
+                                    int s = 1;
+                                    while (0 <= pos)
+                                    {
+                                        int v = getVal4St1(newSt1, pos);
+                                        if (2 == v)
+                                        {
+                                            s++;
+                                        }
+                                        else if (1 == v)
+                                        {
+                                            s--;
+                                            if (0 == s)
+                                            {
+                                                setVal4St1(newSt1, newSt1, pos, 2);
+                                                break;
+                                            }
+                                        }
+
+                                        pos--;
+                                    }
+                                }
+                                else if (2 == leftPlug && 1 == upPlug)
+                                {
+                                    // do nothing
+                                }
+                                else
+                                {
+                                    // 1 == leftPlug && 2 == upPlug
+                                    // 非法
+                                    continue;
+                                }
+                            }
+
+                            setVal4St1(newSt1, newSt1, now_y - 1, 0);
+                            setVal4St1(newSt1, newSt1, now_y, 0);
+
+                            setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
+
+                            //  TBD -- addSt
 
                         }
                     }
@@ -189,7 +274,11 @@ int main()
                     else
                     {
                         // 0 == leftPlug && 0 == upPlug
-                        if ('.' == cells[now_x][now_y])
+                        if ('B' == cells[now_x][now_y])
+                        {
+
+                        }
+                        else if ('.' == cells[now_x][now_y])
                         {
                             
                         }

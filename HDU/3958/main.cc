@@ -180,12 +180,52 @@ int main()
                             {
                                 if (1 == leftPlug || 1 == upPlug)
                                 {
+                                    int pos = now_y + 1;
+                                    int s = 1;
+                                    while (pos <= w)
+                                    {
+                                        int v = getVal4St1(newSt1, pos);
+                                        if (1 == v)
+                                        {
+                                            s++;
+                                        }
+                                        else if (2 == v)
+                                        {
+                                            s--;
+                                            if (0 == s)
+                                            {
+                                                setVal4St1(newSt1, newSt1, pos, 3);
+                                                break;
+                                            }
+                                        }
 
+                                        pos++;
+                                    }
                                 }
                                 else
                                 {
                                     // 2 == leftPlug || 2 == upPlug
+                                    int pos = now_y - 2;
+                                    int s = 1;
+                                    while (0 <= pos)
+                                    {
+                                        int v = getVal4St1(newSt1, pos);
+                                        if (2 == v)
+                                        {
+                                            s++;
+                                        }
+                                        else if (1 == v)
+                                        {
+                                            s--;
+                                            if (0 == s)
+                                            {
+                                                setVal4St1(newSt1, newSt1, pos, 3);
+                                                break;
+                                            }
+                                        }
 
+                                        pos--;
+                                    }
                                 }
                             }
                             else

@@ -302,13 +302,97 @@ int main()
                     }
                     else if (leftPlug || upPlug)
                     {
-                        if ('.' == cells[now_x][now_y])
+                        if (1 == leftCell && 1 == upCell)
                         {
-                            
                         }
-                        else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
+                        else
                         {
+                            unsigned int newSt1 = st1;
+                            unsigned short newSt2 = st2;
+                            int val = leftPlug + upPlug;
 
+                            if ('.' == cells[now_x][now_y])
+                            {
+                                // 左、上没有路径
+                                if (h > now_x && 'B' != cells[now_x + 1][now_y])
+                                {
+                                    setVal4St1(newSt1, newSt1, now_y - 1, val);
+                                    setVal4St1(newSt1, newSt1, now_y, 0);
+
+                                    setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
+
+                                    //  TBD -- addSt
+                                }
+
+                                if (w > now_y && 'B' != cells[now_x][now_y + 1])
+                                {
+                                    setVal4St1(newSt1, newSt1, now_y - 1, 0);
+                                    setVal4St1(newSt1, newSt1, now_y, val);
+
+                                    setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
+
+                                    //  TBD -- addSt
+                                }
+                            }
+                            else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
+                            {
+                                if (1 == val)
+                                {
+                                    int pos = now_y + 1;
+                                    int s = 1;
+                                    while (pos <= w)
+                                    {
+                                        int v = getVal4St1(newSt1, pos);
+                                        if (1 == v)
+                                        {
+                                            s++;
+                                        }
+                                        else if (2 == v)
+                                        {
+                                            s--;
+                                            if (0 == s)
+                                            {
+                                                setVal4St1(newSt1, newSt1, pos, 3);
+                                                break;
+                                            }
+                                        }
+
+                                        pos++;
+                                    }
+                                }
+                                else
+                                {
+                                    // 2 == val
+                                    int pos = now_y - 2;
+                                    int s = 1;
+                                    while (0 <= pos)
+                                    {
+                                        int v = getVal4St1(newSt1, pos);
+                                        if (2 == v)
+                                        {
+                                            s++;
+                                        }
+                                        else if (1 == v)
+                                        {
+                                            s--;
+                                            if (0 == s)
+                                            {
+                                                setVal4St1(newSt1, newSt1, pos, 3);
+                                                break;
+                                            }
+                                        }
+
+                                        pos--;
+                                    }
+                                }
+
+                                setVal4St1(newSt1, newSt1, now_y - 1, 0);
+                                setVal4St1(newSt1, newSt1, now_y, 0);
+
+                                setVal4St2(newSt2, newSt2, now_y, 1); // 1 -- path 的一部分
+
+                                //  TBD -- addSt
+                            }
                         }
                     }
                     else

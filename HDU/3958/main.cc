@@ -86,6 +86,36 @@ inline void init()
     qTail[act]++;
 }
 
+inline void addSts(unsigned int st1, unsigned short st2, unsigned int len, Record &rec, char ch, int idx)
+{
+    unsigned long long key = st1;
+    key <<= 16;
+    key |= st2;
+
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
+    if (it == cnts[idx].end())
+    {
+        int pInQ = qTail[idx];
+        // 加入队尾
+        qs[idx][pInQ].state1 = st1;
+        qs[idx][pInQ].state2 = st2;
+        qs[idx][pInQ].len = len;
+
+        memcpy(qs[idx][pInQ].grid, rec.grid, MAX_H * MAX_W);
+        qs[idx][pInQ].grid[now_x][now_y] = ch;
+
+        cnts[idx][key] = pInQ;
+        qTail[idx]++;
+    }
+    else
+    {
+        if (len > qs[idx][it->second].len)
+        {
+            qs[idx][it->second].len = len;
+        }
+    }
+}
+
 int main()
 {
     int t;
@@ -119,7 +149,7 @@ int main()
 
         if (1 == (abs(sx - tx) + abs(sy - ty)))
         {
-
+            // S、T 紧挨着
         }
         else
         {
@@ -298,7 +328,7 @@ int main()
 
                             setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
 
-                            //  TBD -- addSt
+                            addSts(newSt1, newSt2, len + 1, qs[act][iQ], '.', nAct);
 
                         }
                     }
@@ -306,6 +336,7 @@ int main()
                     {
                         if (1 == leftCell && 1 == upCell)
                         {
+                            // 左、上 都是 path 的一部分
                         }
                         else
                         {
@@ -323,7 +354,7 @@ int main()
 
                                     setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
 
-                                    //  TBD -- addSt
+                                    addSts(newSt1, newSt2, len + 1, qs[act][iQ], '.', nAct);
                                 }
 
                                 if (w > now_y && 'B' != cells[now_x][now_y + 1])
@@ -333,7 +364,7 @@ int main()
 
                                     setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
 
-                                    //  TBD -- addSt
+                                    addSts(newSt1, newSt2, len + 1, qs[act][iQ], '.', nAct);
                                 }
                             }
                             else if ('S' == cells[now_x][now_y] || 'T' == cells[now_x][now_y])
@@ -393,7 +424,7 @@ int main()
 
                                 setVal4St2(newSt2, newSt2, now_y, 1); // 1 -- path 的一部分
 
-                                //  TBD -- addSt
+                                addSts(newSt1, newSt2, len + 1, qs[act][iQ], cells[now_x][now_y], nAct);
                             }
                         }
                     }
@@ -407,14 +438,14 @@ int main()
                         {
                             setVal4St2(newSt2, newSt2, now_y, 0);       // 0 -- 障碍物(B)
 
-                            //  TBD -- addSt
+                            addSts(newSt1, newSt2, len, qs[act][iQ], 'B', nAct);
                         }
                         else if ('.' == cells[now_x][now_y])
                         {
                             // 设置 W
                             setVal4St2(newSt2, newSt2, now_y, 0);       // 0 -- 障碍物(W)
 
-                            //  TBD -- addSt
+                            addSts(newSt1, newSt2, len, qs[act][iQ], 'W', nAct);
 
 
                             if (0 == leftCell && 0 == upCell)
@@ -427,7 +458,7 @@ int main()
 
                                     setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
 
-                                    //  TBD -- addSt
+                                    addSts(newSt1, newSt2, len + 1, qs[act][iQ], '.', nAct);
                                 }
                             }
                         }
@@ -443,7 +474,7 @@ int main()
 
                                     setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
 
-                                    //  TBD -- addSt
+                                    addSts(newSt1, newSt2, len + 1, qs[act][iQ], cells[now_x][now_y], nAct);
                                 }
 
                                 if (w > now_y && 'B' != cells[now_x][now_y + 1])
@@ -453,7 +484,7 @@ int main()
 
                                     setVal4St2(newSt2, newSt2, now_y, 1);       // 1 -- path 的一部分
 
-                                    //  TBD -- addSt
+                                    addSts(newSt1, newSt2, len + 1, qs[act][iQ], cells[now_x][now_y], nAct);
                                 }
                             }
                         }

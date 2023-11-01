@@ -112,6 +112,8 @@ inline void addSts(unsigned int st1, unsigned short st2, unsigned int len, Recor
         if (len > qs[idx][it->second].len)
         {
             qs[idx][it->second].len = len;
+            memcpy(qs[idx][it->second].grid, rec.grid, MAX_H * MAX_W);
+            qs[idx][it->second].grid[now_x][now_y] = ch;
         }
     }
 }
@@ -123,7 +125,7 @@ int main()
 
     int sx, sy, tx, ty;
 
-    while (t --)
+    for (size_t iT = 1; iT <= t; iT++)
     {
         cin >> h >> w;
 
@@ -150,6 +152,16 @@ int main()
         if (1 == (abs(sx - tx) + abs(sy - ty)))
         {
             // S、T 紧挨着
+            printf("Case %lu: 2\n", iT);
+            for (size_t row = 1; row <= h; row++)
+            {
+                for (size_t col = 1; col <= w; col++)
+                {
+                    printf("%c", cells[row][col]);
+                }
+                printf("\n");
+            }
+            printf("\n");
         }
         else
         {
@@ -167,7 +179,30 @@ int main()
                     if (h < now_x)
                     {
                         // finished
-                        // TBD
+                        unsigned int len = 0;
+                        unsigned int idx = 0;
+                        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                        {
+                            if (0 == qs[act][iQ].state1)
+                            {
+                                if (len < qs[act][iQ].len)
+                                {
+                                    len = qs[act][iQ].len;
+                                    idx = iQ;
+                                }
+                            }
+                        }
+
+                        printf("Case %lu: %d\n", iT, len);
+                        for (size_t row = 1; row <= h; row++)
+                        {
+                            for (size_t col = 1; col <= w; col++)
+                            {
+                                printf("%c", qs[act][idx].grid[row][col]);
+                            }
+                            printf("\n");
+                        }
+                        printf("\n");
 
                         break;
                     }

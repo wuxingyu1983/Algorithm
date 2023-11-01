@@ -81,7 +81,7 @@ inline void init()
 
     qs[act][0].state1 = 0;
     qs[act][0].state2 = 0;
-    qs[act][0].len = 1;
+    qs[act][0].len = 0;
 
     qTail[act]++;
 }
@@ -137,6 +137,8 @@ int main()
                     if (h < now_x)
                     {
                         // finished
+                        // TBD
+
                         break;
                     }
                 }

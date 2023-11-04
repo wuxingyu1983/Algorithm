@@ -323,20 +323,108 @@ int main()
                             continue;
                         }                        
 
-                        setVal4St(newSt, st, now_y - 1, 0);
-                        setVal4St(newSt, st, now_y, 0);
+                        setVal4St(newSt, newSt, now_y - 1, 0);
+                        setVal4St(newSt, newSt, now_y, 0);
 
                         addSts(newSt, len + 1, nAct);
                     }
                 }
                 else if ('2' == cells[now_x][now_y])
                 {
+                    unsigned int newSt = st;
+                    if (0 == left && 0 == up)
+                    {
+                        if (h > now_x && '1' != cells[now_x + 1][now_y])
+                        {
+                            setVal4St(newSt, st, now_y - 1, 3);
+                            setVal4St(newSt, st, now_y, 0);
 
+                            addSts(newSt, len + 1, nAct);
+                        }
+
+                        if (w > now_y && '1' != cells[now_x][now_y + 1])
+                        {
+                            setVal4St(newSt, st, now_y - 1, 0);
+                            setVal4St(newSt, st, now_y, 3);
+
+                            addSts(newSt, len + 1, nAct);
+                        }
+                    }
+                    else if (0 == left || 0 == up)
+                    {
+                        int val = left + up;
+                        if (3 == val)
+                        {
+                            // do nothing
+                        }
+                        else if (1 == val)
+                        {
+                            forwardFunc(newSt, 1, 2, 3);
+                        }
+                        else if (2 == val)
+                        {
+                            backwardFunc(newSt, 2, 1, 3);
+                        }
+                        else
+                        {
+                            // 非法
+                            continue;
+                        }
+
+                        setVal4St(newSt, st, now_y - 1, 0);
+                        setVal4St(newSt, st, now_y, 0);
+
+                        addSts(newSt, len + 1, nAct);
+                    }
                 }
                 else
                 {
                     // '3' == cells[now_x][now_y]
+                    unsigned int newSt = st;
+                    if (0 == left && 0 == up)
+                    {
+                        if (h > now_x && '1' != cells[now_x + 1][now_y])
+                        {
+                            setVal4St(newSt, st, now_y - 1, 6);
+                            setVal4St(newSt, st, now_y, 0);
 
+                            addSts(newSt, len + 1, nAct);
+                        }
+
+                        if (w > now_y && '1' != cells[now_x][now_y + 1])
+                        {
+                            setVal4St(newSt, st, now_y - 1, 0);
+                            setVal4St(newSt, st, now_y, 6);
+
+                            addSts(newSt, len + 1, nAct);
+                        }
+                    }
+                    else if (0 == left || 0 == up)
+                    {
+                        int val = left + up;
+                        if (6 == val)
+                        {
+                            // do nothing
+                        }
+                        else if (4 == val)
+                        {
+                            forwardFunc(newSt, 4, 5, 4);
+                        }
+                        else if (5 == val)
+                        {
+                            backwardFunc(newSt, 5, 4, 5);
+                        }
+                        else
+                        {
+                            // 非法
+                            continue;
+                        }
+
+                        setVal4St(newSt, st, now_y - 1, 0);
+                        setVal4St(newSt, st, now_y, 0);
+
+                        addSts(newSt, len + 1, nAct);
+                    }
                 }
             }
 

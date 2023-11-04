@@ -348,16 +348,18 @@ int main()
                     {
                         if (h > now_x && '1' != cells[now_x + 1][now_y])
                         {
-                            setVal4St(newSt, st, now_y - 1, 3);
-                            setVal4St(newSt, st, now_y, 0);
+                            newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 3);
+                            setVal4St(newSt, newSt, now_y, 0);
 
                             addSts(newSt, len + 1, nAct);
                         }
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
                         {
-                            setVal4St(newSt, st, now_y - 1, 0);
-                            setVal4St(newSt, st, now_y, 3);
+                            newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 0);
+                            setVal4St(newSt, newSt, now_y, 3);
 
                             addSts(newSt, len + 1, nAct);
                         }
@@ -383,8 +385,8 @@ int main()
                             continue;
                         }
 
-                        setVal4St(newSt, st, now_y - 1, 0);
-                        setVal4St(newSt, st, now_y, 0);
+                        setVal4St(newSt, newSt, now_y - 1, 0);
+                        setVal4St(newSt, newSt, now_y, 0);
 
                         addSts(newSt, len + 1, nAct);
                     }
@@ -397,16 +399,18 @@ int main()
                     {
                         if (h > now_x && '1' != cells[now_x + 1][now_y])
                         {
-                            setVal4St(newSt, st, now_y - 1, 6);
-                            setVal4St(newSt, st, now_y, 0);
+                            newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 6);
+                            setVal4St(newSt, newSt, now_y, 0);
 
                             addSts(newSt, len + 1, nAct);
                         }
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
                         {
-                            setVal4St(newSt, st, now_y - 1, 0);
-                            setVal4St(newSt, st, now_y, 6);
+                            newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 0);
+                            setVal4St(newSt, newSt, now_y, 6);
 
                             addSts(newSt, len + 1, nAct);
                         }
@@ -432,8 +436,8 @@ int main()
                             continue;
                         }
 
-                        setVal4St(newSt, st, now_y - 1, 0);
-                        setVal4St(newSt, st, now_y, 0);
+                        setVal4St(newSt, newSt, now_y - 1, 0);
+                        setVal4St(newSt, newSt, now_y, 0);
 
                         addSts(newSt, len + 1, nAct);
                     }

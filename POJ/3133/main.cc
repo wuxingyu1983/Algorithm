@@ -150,7 +150,72 @@ int main()
                     st <<= ST_BITS;
                 }
 
-                
+
+                int left = getVal4St(st, now_y - 1);
+                int up = getVal4St(st, now_y);
+
+                if ('1' == cells[now_x][now_y])
+                {
+                    // 障碍物
+                    addSts(st, len, nAct);
+                }
+                else if ('0' == cells[now_x][now_y])
+                {
+                    if (0 == left && 0 == up)
+                    {
+                        // do nothing
+                        addSts(st, len, nAct);
+
+                        if (h > now_x && w > now_y && '1' != cells[now_x + 1][now_y] && '1' != cells[now_x][now_y + 1])
+                        {
+                            unsigned int newSt;
+                            setVal4St(newSt, st, now_y - 1, 1);
+                            setVal4St(newSt, st, now_y, 2);
+
+                            addSts(newSt, len + 1, nAct);
+
+                            setVal4St(newSt, st, now_y - 1, 4);
+                            setVal4St(newSt, st, now_y, 5);
+
+                            addSts(newSt, len + 1, nAct);
+                        }
+                    }
+                    else if (0 == left || 0 == up)
+                    {
+                        // 有1个 plug
+                        int val = left + up;
+                        unsigned int newSt;
+
+                        if (h > now_x && '1' != cells[now_x + 1][now_y])
+                        {
+                            setVal4St(newSt, st, now_y - 1, val);
+                            setVal4St(newSt, st, now_y, 0);
+
+                            addSts(newSt, len + 1, nAct);
+                        }
+
+                        if (w > now_y && '1' != cells[now_x][now_y + 1])
+                        {
+                            setVal4St(newSt, st, now_y - 1, 0);
+                            setVal4St(newSt, st, now_y, val);
+
+                            addSts(newSt, len + 1, nAct);
+                        }
+                    }
+                    else
+                    {
+                        // 有2个 plug
+                    }
+                }
+                else if ('2' == cells[now_x][now_y])
+                {
+
+                }
+                else
+                {
+                    // '3' == cells[now_x][now_y]
+
+                }
             }
 
             qTail[act] = 0;

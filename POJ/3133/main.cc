@@ -180,7 +180,16 @@ int main()
                 if (h < now_x)
                 {
                     // finished
-                    // TBD
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        if (0 == qs[act][iQ].state)
+                        {
+                            if (0 == ans || ans > (qs[act][iQ].len - 2))
+                            {
+                                ans = qs[act][iQ].len - 2;
+                            }
+                        }
+                    }
 
                     break;
                 }
@@ -218,14 +227,15 @@ int main()
 
                         if (h > now_x && w > now_y && '1' != cells[now_x + 1][now_y] && '1' != cells[now_x][now_y + 1])
                         {
-                            unsigned int newSt;
-                            setVal4St(newSt, st, now_y - 1, 1);
-                            setVal4St(newSt, st, now_y, 2);
+                            unsigned int newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 1);
+                            setVal4St(newSt, newSt, now_y, 2);
 
                             addSts(newSt, len + 1, nAct);
 
-                            setVal4St(newSt, st, now_y - 1, 4);
-                            setVal4St(newSt, st, now_y, 5);
+                            newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 4);
+                            setVal4St(newSt, newSt, now_y, 5);
 
                             addSts(newSt, len + 1, nAct);
                         }
@@ -238,16 +248,18 @@ int main()
 
                         if (h > now_x && '1' != cells[now_x + 1][now_y])
                         {
-                            setVal4St(newSt, st, now_y - 1, val);
-                            setVal4St(newSt, st, now_y, 0);
+                            newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, val);
+                            setVal4St(newSt, newSt, now_y, 0);
 
                             addSts(newSt, len + 1, nAct);
                         }
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
                         {
-                            setVal4St(newSt, st, now_y - 1, 0);
-                            setVal4St(newSt, st, now_y, val);
+                            newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 0);
+                            setVal4St(newSt, newSt, now_y, val);
 
                             addSts(newSt, len + 1, nAct);
                         }
@@ -285,7 +297,7 @@ int main()
                             }
                             else if (5 == left || 5 == up)
                             {
-                                backwardFunc(newSt, 5, 4, 3);
+                                backwardFunc(newSt, 5, 4, 6);
                             }
                             else
                             {
@@ -408,11 +420,11 @@ int main()
                         }
                         else if (4 == val)
                         {
-                            forwardFunc(newSt, 4, 5, 4);
+                            forwardFunc(newSt, 4, 5, 6);
                         }
                         else if (5 == val)
                         {
-                            backwardFunc(newSt, 5, 4, 5);
+                            backwardFunc(newSt, 5, 4, 6);
                         }
                         else
                         {

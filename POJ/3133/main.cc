@@ -95,6 +95,56 @@ inline void addSts(unsigned int st, unsigned int len, int idx)
     }
 }
 
+inline void forwardFunc(unsigned int &newSt, int plusVal, int minusVal, int newVal)
+{
+    int pos = now_y + 1;
+    int s = 1;
+    while (pos <= w)
+    {
+        int v = getVal4St(newSt, pos);
+        if (plusVal == v)
+        {
+            s++;
+        }
+        else if (minusVal == v)
+        {
+            s--;
+            if (0 == s)
+            {
+                setVal4St(newSt, newSt, pos, newVal);
+                break;
+            }
+        }
+
+        pos++;
+    }
+}
+
+inline void backwardFunc(unsigned int &newSt, int plusVal, int minusVal, int newVal)
+{
+    int pos = now_y - 2;
+    int s = 1;
+    while (0 <= pos)
+    {
+        int v = getVal4St(newSt, pos);
+        if (plusVal == v)
+        {
+            s++;
+        }
+        else if (minusVal == v)
+        {
+            s--;
+            if (0 == s)
+            {
+                setVal4St(newSt, newSt, pos, newVal);
+                break;
+            }
+        }
+
+        pos--;
+    }
+}
+
 int main()
 {
     while (true)
@@ -205,6 +255,78 @@ int main()
                     else
                     {
                         // 有2个 plug
+                        unsigned int newSt = st;
+
+                        if ((3 == left && 3 == up) || (6 == left && 6 == up))
+                        {
+                            // do nothing
+                        }
+                        else if (3 == left || 3 == up)
+                        {
+                            if (1 == left || 1 == up)
+                            {
+                                forwardFunc(newSt, 1, 2, 3);
+                            }
+                            else if (2 == left || 2 == up)
+                            {
+                                backwardFunc(newSt, 2, 1, 3);
+                            }
+                            else
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
+                        else if (6 == left || 6 == up)
+                        {
+                            if (4 == left || 4 == up)
+                            {
+                                forwardFunc(newSt, 4, 5, 6);
+                            }
+                            else if (5 == left || 5 == up)
+                            {
+                                backwardFunc(newSt, 5, 4, 3);
+                            }
+                            else
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
+                        else if (1 == left && 1 == up)
+                        {
+
+                        }
+                        else if (2 == left && 2 == up)
+                        {
+
+                        }
+                        else if (4 == left && 4 == up)
+                        {
+
+                        }
+                        else if (5 == left && 5 == up)
+                        {
+
+                        }
+                        else if (2 == left && 1 == up)
+                        {
+
+                        }
+                        else if (5 == left && 4 == up)
+                        {
+
+                        }
+                        else
+                        {
+                            // 非法
+                            continue;
+                        }                        
+
+                        setVal4St(newSt, st, now_y - 1, 0);
+                        setVal4St(newSt, st, now_y, 0);
+
+                        addSts(newSt, len + 1, nAct);
                     }
                 }
                 else if ('2' == cells[now_x][now_y])

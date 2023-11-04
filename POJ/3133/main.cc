@@ -295,27 +295,27 @@ int main()
                         }
                         else if (1 == left && 1 == up)
                         {
-
+                            forwardFunc(newSt, 1, 2, 1);  
                         }
                         else if (2 == left && 2 == up)
                         {
-
+                            backwardFunc(newSt, 2, 1, 2);
                         }
                         else if (4 == left && 4 == up)
                         {
-
+                            forwardFunc(newSt, 4, 5, 4);  
                         }
                         else if (5 == left && 5 == up)
                         {
-
+                            backwardFunc(newSt, 5, 4, 5);
                         }
                         else if (2 == left && 1 == up)
                         {
-
+                            // do nothing
                         }
                         else if (5 == left && 4 == up)
                         {
-
+                            // do nothing
                         }
                         else
                         {

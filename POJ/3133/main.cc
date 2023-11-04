@@ -118,6 +118,45 @@ int main()
 
         int ans = 0;
 
+        while (0 < qTail[act])
+        {
+            int nAct = 1 - act;
+
+            if (w == now_y)
+            {
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
+                {
+                    // finished
+                    // TBD
+
+                    break;
+                }
+            }
+            else
+            {
+                now_y++;
+            }
+
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int st = qs[act][iQ].state;
+                unsigned int len = qs[act][iQ].len;
+
+                if (1 == now_y)
+                {
+                    st <<= ST_BITS;
+                }
+
+                
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
 
         cout << ans << endl;
     }

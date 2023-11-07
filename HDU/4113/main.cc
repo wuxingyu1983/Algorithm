@@ -300,7 +300,7 @@ int main()
                             setVal4St(newSt, newSt, now_y - 1, 0);
                             setVal4St(newSt, newSt, now_y, val);
 
-                            addSts(st, vrts, len + 1, nAct);
+                            addSts(newSt, vrts, len + 1, nAct);
                         }
                     }
 
@@ -334,7 +334,7 @@ int main()
                             setVal4St(newSt, newSt, now_y - 1, val);
                             setVal4St(newSt, newSt, now_y, 0);
 
-                            addSts(st, vrts + 1, len + 1, nAct);
+                            addSts(newSt, vrts + 1, len + 1, nAct);
                         }
                     }
                 }
@@ -393,7 +393,7 @@ int main()
                             setVal4St(newSt, newSt, now_y - 1, 1);
                             setVal4St(newSt, newSt, now_y, 2);
 
-                            addSts(st, vrts + 1, len + 2, nAct);
+                            addSts(newSt, vrts + 1, len + 2, nAct);
                         }
                     }
                 }

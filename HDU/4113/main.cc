@@ -76,6 +76,29 @@ inline void init()
     qTail[act]++;
 }
 
+inline void addSts(unsigned int st, unsigned int vrts, unsigned int len, int idx)
+{
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
+    if (it == cnts[idx].end())
+    {
+        int pInQ = qTail[idx];
+        // 加入队尾
+        qs[idx][pInQ].state = st;
+        qs[idx][pInQ].vrts = vrts;
+        qs[idx][pInQ].len = len;
+
+        cnts[idx][st] = pInQ;
+        qTail[idx]++;
+    }
+    else
+    {
+        if (len < qs[idx][it->second].len)
+        {
+            qs[idx][it->second].len = len;
+        }
+    }
+}
+
 int main()
 {
     int t;
@@ -172,11 +195,51 @@ int main()
 
                     if (1 == left && 1 == up)
                     {
+                        int pos = now_y + 1;
+                        int s = 1;
+                        while (pos <= w)
+                        {
+                            int v = getVal4St(newSt, pos);
+                            if (1 == v)
+                            {
+                                s++;
+                            }
+                            else if (2 == v)
+                            {
+                                s--;
+                                if (0 == s)
+                                {
+                                    setVal4St(newSt, newSt, pos, 1);
+                                    break;
+                                }
+                            }
 
+                            pos++;
+                        }
                     }
                     else if (2 == left && 2 == up)
                     {
+                        int pos = now_y - 2;
+                        int s = 1;
+                        while (0 <= pos)
+                        {
+                            int v = getVal4St(newSt, pos);
+                            if (2 == v)
+                            {
+                                s++;
+                            }
+                            else if (1 == v)
+                            {
+                                s--;
+                                if (0 == s)
+                                {
+                                    setVal4St(newSt, newSt, pos, 2);
+                                    break;
+                                }
+                            }
 
+                            pos--;
+                        }
                     }
                     else if (2 == left && 1 == up)
                     {
@@ -200,6 +263,8 @@ int main()
 
                         continue;
                     }
+
+                    addSts(newSt, vrts, len, nAct);
                 }
                 else if (left || up)
                 {

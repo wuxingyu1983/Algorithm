@@ -273,7 +273,53 @@ int main()
                 else
                 {
                     // 0 == left && 0 == up
+                    {
+                        // 没有引出新的线段
+                        if ('o' == cells[now_x][now_y])
+                        {
+                            if (0 == (vrts & 1))
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
+                        else if ('x' == cells[now_x][now_y])
+                        {
+                            if (1 == (vrts & 1))
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
 
+                        addSts(st, vrts, len, nAct);
+                    }
+
+                    if (h > now_x && w > now_y)
+                    {
+                        if ('o' == cells[now_x][now_y])
+                        {
+                            if (1 == (vrts & 1))
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
+                        else if ('x' == cells[now_x][now_y])
+                        {
+                            if (0 == (vrts & 1))
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
+
+                        unsigned newSt = st;
+                        setVal4St(newSt, newSt, now_y - 1, 1);
+                        setVal4St(newSt, newSt, now_y, 2);
+
+                        addSts(st, vrts + 1, len + 2, nAct);
+                    }
                 }
             }
 

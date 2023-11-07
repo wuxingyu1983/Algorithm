@@ -85,11 +85,19 @@ int main()
     {
         cin >> h >> w;
 
+        int lastO_x, lastO_y;
+
         for (size_t row = 1; row <= h; row++)
         {
             for (size_t col = 1; col <= w; col++)
             {
                 cin >> cells[row][col];
+
+                if ('o' == cells[row][col])
+                {
+                    lastO_x = row;
+                    lastO_y = col;
+                }
             }
         }
 
@@ -99,7 +107,115 @@ int main()
         int ans = -1;
         init();
 
+        while (0 < qTail[act])
+        {
+            int nAct = 1 - act;
 
+            if (w == now_y)
+            {
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
+                {
+                    // finished
+                    // TBD
+
+                    break;
+                }
+            }
+            else
+            {
+                now_y++;
+            }
+
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int st = qs[act][iQ].state;
+                unsigned int vrts = qs[act][iQ].vrts;
+                unsigned int len = qs[act][iQ].len;
+
+                if (1 == now_y)
+                {
+                    st <<= ST_BITS;
+                    vrts = 0;
+                }
+
+                int left = getVal4St(st, now_y - 1);
+                int up = getVal4St(st, now_y);
+
+                if (left && up)
+                {
+                    if (h > now_x && w > now_y)
+                    {
+                        if ('o' == cells[now_x][now_y])
+                        {
+                            if (0 == (vrts & 1))
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
+                        else if ('x' == cells[now_x][now_y])
+                        {
+                            if (1 == (vrts & 1))
+                            {
+                                // 非法
+                                continue;
+                            }
+                        }
+                    }
+
+                    unsigned int newSt = st;
+                    setVal4St(newSt, newSt, now_y - 1, 0);
+                    setVal4St(newSt, newSt, now_y, 0);
+
+                    if (1 == left && 1 == up)
+                    {
+
+                    }
+                    else if (2 == left && 2 == up)
+                    {
+
+                    }
+                    else if (2 == left && 1 == up)
+                    {
+                        // do nothing
+                    }
+                    else
+                    {
+                        // 1 == leftPlug && 2 == upPlug
+                        // 行程回路，判断是否有效
+                        if (0 == newSt)
+                        {
+                            if ((now_x > lastO_x + 1) || (now_x == lastO_x + 1 && now_y > lastO_y))
+                            {
+                                // 合法
+                                if (0 > ans || ans > len)
+                                {
+                                    ans = len;
+                                }
+                            }
+                        }
+
+                        continue;
+                    }
+                }
+                else if (left || up)
+                {
+
+                }
+                else
+                {
+                    // 0 == left && 0 == up
+
+                }
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
 
         printf("Case #%d: %d\n", it, ans);
     }

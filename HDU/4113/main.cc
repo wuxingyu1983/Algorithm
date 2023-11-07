@@ -268,19 +268,88 @@ int main()
                 }
                 else if (left || up)
                 {
+                    int val = left + up;
 
+                    if (w > now_y)
+                    {
+                        // --
+                        bool flag = true;
+                        if (h > now_x)
+                        {
+                            if ('o' == cells[now_x][now_y])
+                            {
+                                if (0 == (vrts & 1))
+                                {
+                                    // 非法
+                                    flag = false;
+                                }
+                            }
+                            else if ('x' == cells[now_x][now_y])
+                            {
+                                if (1 == (vrts & 1))
+                                {
+                                    // 非法
+                                    flag = false;
+                                }
+                            }
+                        }
+
+                        if (flag)
+                        {
+                            unsigned newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 0);
+                            setVal4St(newSt, newSt, now_y, val);
+
+                            addSts(st, vrts, len + 1, nAct);
+                        }
+                    }
+
+                    if (h > now_x)
+                    {
+                        // |
+                        bool flag = true;
+                        if (w > now_y)
+                        {
+                            if ('o' == cells[now_x][now_y])
+                            {
+                                if (1 == (vrts & 1))
+                                {
+                                    // 非法
+                                    flag = false;
+                                }
+                            }
+                            else if ('x' == cells[now_x][now_y])
+                            {
+                                if (0 == (vrts & 1))
+                                {
+                                    // 非法
+                                    flag = false;
+                                }
+                            }
+                        }
+
+                        if (flag)
+                        {
+                            unsigned newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, val);
+                            setVal4St(newSt, newSt, now_y, 0);
+
+                            addSts(st, vrts + 1, len + 1, nAct);
+                        }
+                    }
                 }
                 else
                 {
                     // 0 == left && 0 == up
                     {
                         // 没有引出新的线段
+                        bool flag = true;
                         if ('o' == cells[now_x][now_y])
                         {
                             if (0 == (vrts & 1))
                             {
                                 // 非法
-                                continue;
+                                flag = false;
                             }
                         }
                         else if ('x' == cells[now_x][now_y])
@@ -288,21 +357,25 @@ int main()
                             if (1 == (vrts & 1))
                             {
                                 // 非法
-                                continue;
+                                flag = false;
                             }
                         }
 
-                        addSts(st, vrts, len, nAct);
+                        if (flag)
+                        {
+                            addSts(st, vrts, len, nAct);
+                        }
                     }
 
                     if (h > now_x && w > now_y)
                     {
+                        bool flag = true;
                         if ('o' == cells[now_x][now_y])
                         {
                             if (1 == (vrts & 1))
                             {
                                 // 非法
-                                continue;
+                                flag = false;
                             }
                         }
                         else if ('x' == cells[now_x][now_y])
@@ -310,15 +383,18 @@ int main()
                             if (0 == (vrts & 1))
                             {
                                 // 非法
-                                continue;
+                                flag = false;
                             }
                         }
 
-                        unsigned newSt = st;
-                        setVal4St(newSt, newSt, now_y - 1, 1);
-                        setVal4St(newSt, newSt, now_y, 2);
+                        if (flag)
+                        {
+                            unsigned newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 1);
+                            setVal4St(newSt, newSt, now_y, 2);
 
-                        addSts(st, vrts + 1, len + 2, nAct);
+                            addSts(st, vrts + 1, len + 2, nAct);
+                        }
                     }
                 }
             }

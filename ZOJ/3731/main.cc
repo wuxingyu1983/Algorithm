@@ -368,14 +368,14 @@ int main()
                                 addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
                             }
 
-                            if (1 == now_x && h > now_x)
+                            if (false == have3 && 1 == now_x && h > now_x && '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y])
                             {
                                 // plug 3
                                 unsigned int newSt = st;
                                 setVal4St(newSt, newSt, now_y - 1, 3);
                                 setVal4St(newSt, newSt, now_y, 0);
 
-                                addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                                addST(newSt, vrts + 1, true, sum + (cells[now_x][now_y] - '0'), nAct);
                             }
                         }
                     }

@@ -129,10 +129,9 @@ int main()
                 if (h < now_x)
                 {
                     // finished
-                    // TBD
                     for (int iQ = 0; iQ < qTail[act]; iQ++)
                     {
-                        if (qs[act][iQ].state)
+                        if (0 == qs[act][iQ].state)
                         {
                             if (0 > ans || ans > qs[act][iQ].sum)
                             {
@@ -194,7 +193,126 @@ int main()
 
                     if (left && up)
                     {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, newSt, now_y - 1, 0);
+                        setVal4St(newSt, newSt, now_y, 0);
 
+                        if (1 == left && 1 == up)
+                        {
+                            int pos = now_y + 1;
+                            int s = 1;
+                            while (pos <= w)
+                            {
+                                int v = getVal4St(newSt, pos);
+                                if (1 == v)
+                                {
+                                    s++;
+                                }
+                                else if (2 == v)
+                                {
+                                    s--;
+                                    if (0 == s)
+                                    {
+                                        setVal4St(newSt, newSt, pos, 1);
+                                        break;
+                                    }
+                                }
+
+                                pos++;
+                            }
+                        }
+                        else if (2 == left && 2 == up)
+                        {
+                            int pos = now_y - 2;
+                            int s = 1;
+                            while (0 <= pos)
+                            {
+                                int v = getVal4St(newSt, pos);
+                                if (2 == v)
+                                {
+                                    s++;
+                                }
+                                else if (1 == v)
+                                {
+                                    s--;
+                                    if (0 == s)
+                                    {
+                                        setVal4St(newSt, newSt, pos, 2);
+                                        break;
+                                    }
+                                }
+
+                                pos--;
+                            }
+                        }
+                        else if (2 == left && 1 == up)
+                        {
+                            // do nothing
+                        }
+                        else if (1 == left && 2 == up)
+                        {
+                            // 闭环，回路，非法
+                            continue;
+                        }
+                        else
+                        {
+                            // left 和 up 中至少 有一个 3
+                            if (3 == left && 3 == up)
+                            {
+                                // do nothin
+                            }
+                            else if (1 == left || 1 == up)
+                            {
+                                int pos = now_y + 1;
+                                int s = 1;
+                                while (pos <= w)
+                                {
+                                    int v = getVal4St(newSt, pos);
+                                    if (1 == v)
+                                    {
+                                        s++;
+                                    }
+                                    else if (2 == v)
+                                    {
+                                        s--;
+                                        if (0 == s)
+                                        {
+                                            setVal4St(newSt, newSt, pos, 3);
+                                            break;
+                                        }
+                                    }
+
+                                    pos++;
+                                }
+                            }
+                            else
+                            {
+                                // 其中为 2
+                                int pos = now_y - 2;
+                                int s = 1;
+                                while (0 <= pos)
+                                {
+                                    int v = getVal4St(newSt, pos);
+                                    if (2 == v)
+                                    {
+                                        s++;
+                                    }
+                                    else if (1 == v)
+                                    {
+                                        s--;
+                                        if (0 == s)
+                                        {
+                                            setVal4St(newSt, newSt, pos, 3);
+                                            break;
+                                        }
+                                    }
+
+                                    pos--;
+                                }
+                            }
+                        }
+
+                        addST(newSt, vrts, have3, sum + (cells[now_x][now_y] - '0'), nAct);
                     }
                     else if (left || up)
                     {

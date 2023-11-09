@@ -201,37 +201,65 @@ int main()
                         int val = left + up;
                         if (3 == val && now_x == h)
                         {
+                            // |
                             unsigned int newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 0);
                             setVal4St(newSt, newSt, now_y, 0);
 
-                            addST(st, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                            addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
                         }
                         else
                         {
                             if (h > now_x && '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y])
                             {
+                                // |
                                 unsigned int newSt = st;
                                 setVal4St(newSt, newSt, now_y - 1, val);
                                 setVal4St(newSt, newSt, now_y, 0);
 
-                                addST(st, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                                addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
                             }
 
                             if (w > now_y && '#' != cells[now_x][now_y + 1] && 'W' != cells[now_x][now_y + 1] && 'L' != cells[now_x][now_y + 1])
                             {
+                                // --
                                 unsigned int newSt = st;
                                 setVal4St(newSt, newSt, now_y - 1, 0);
                                 setVal4St(newSt, newSt, now_y, val);
 
-                                addST(st, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                                addST(newSt, vrts, have3, sum + (cells[now_x][now_y] - '0'), nAct);
                             }
                         }                        
                     }
                     else
                     {
                         // 0 == left && 0 == up
+                        {
+                            // do nothing
+                            addST(st, vrts, have3, sum, nAct);
+                        }
 
+                        if ('#' != cells[now_x][now_y] && 'W' != cells[now_x][now_y] && 'L' != cells[now_x][now_y])
+                        {
+                            if (h > now_x &&  '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1] && 'W' != cells[now_x][now_y + 1] && 'L' != cells[now_x][now_y + 1])
+                            {
+                                unsigned int newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 1);
+                                setVal4St(newSt, newSt, now_y, 2);
+
+                                addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                            }
+
+                            if (1 == now_x && h > now_x)
+                            {
+                                // plug 3
+                                unsigned int newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 3);
+                                setVal4St(newSt, newSt, now_y, 0);
+
+                                addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                            }
+                        }
                     }
                 }
             }

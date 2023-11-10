@@ -47,7 +47,6 @@ class Record
 public:
     unsigned int state; // 轮廓线段状态
     unsigned int vrts;  // 垂直插头个数
-    bool have3;         // 是否已经出现 3 插头
     unsigned int sum;
 
     Record() {}
@@ -70,25 +69,29 @@ inline void init()
     cnts[0].clear();
     cnts[1].clear();
 
-    qs[act][0].state = 0;
-    qs[act][0].vrts = 0;
-    qs[act][0].have3 = false;
-    qs[act][0].sum = 0;
+    for (size_t col = 1; col <= w; col++)
+    {
+        if ('#' != cells[1][col] && 'W' != cells[1][col] && 'L' != cells[1][col])
+        {
+            qs[act][qTail[act]].state = 3 << ((col - 1)*ST_BITS);
+            qs[act][qTail[act]].vrts = 0;
+            qs[act][qTail[act]].sum = 0;
 
-    qTail[act]++;
+            qTail[act]++;
+        }
+    }
 
     now_x = 0;
     now_y = w;
 }
 
-inline void addST(unsigned int st, unsigned int vrts, bool have3, unsigned int sum, int idx)
+inline void addST(unsigned int st, unsigned int vrts, unsigned int sum, int idx)
 {
     unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
     if (it == cnts[idx].end())
     {
         qs[idx][qTail[idx]].state = st;
         qs[idx][qTail[idx]].vrts = vrts;
-        qs[idx][qTail[idx]].have3 = have3;
         qs[idx][qTail[idx]].sum = sum;
 
         cnts[idx][st] = qTail[idx];
@@ -151,16 +154,10 @@ int main()
             {
                 unsigned int st = qs[act][iQ].state;
                 unsigned int vrts = qs[act][iQ].vrts;
-                bool have3 = qs[act][iQ].have3;
                 unsigned int sum = qs[act][iQ].sum;
 
                 if (1 == now_y)
                 {
-                    if (1 < now_x && false == have3)
-                    {
-                        continue;
-                    }
-
                     st <<= ST_BITS;
                     vrts = 0;
                 }
@@ -169,21 +166,21 @@ int main()
                 {
                     // 障碍物
                     // do nothing
-                    addST(st, vrts, have3, sum, nAct);
+                    addST(st, vrts, sum, nAct);
                 }
                 else if ('W' == cells[now_x][now_y])
                 {
                     // check
                     if (0 == (vrts & 1))
                     {
-                        addST(st, vrts, have3, sum, nAct);
+                        addST(st, vrts, sum, nAct);
                     }
                 }
                 else if ('L' == cells[now_x][now_y])
                 {
                     if (1 == (vrts & 1))
                     {
-                        addST(st, vrts, have3, sum, nAct);
+                        addST(st, vrts, sum, nAct);
                     }
                 }
                 else
@@ -312,11 +309,12 @@ int main()
                             }
                         }
 
-                        addST(newSt, vrts, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                        addST(newSt, vrts, sum + (cells[now_x][now_y] - '0'), nAct);
                     }
                     else if (left || up)
                     {
                         int val = left + up;
+
                         if (3 == val && now_x == h)
                         {
                             // |
@@ -324,7 +322,7 @@ int main()
                             setVal4St(newSt, newSt, now_y - 1, 0);
                             setVal4St(newSt, newSt, now_y, 0);
 
-                            addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                            addST(newSt, vrts + 1, sum + (cells[now_x][now_y] - '0'), nAct);
                         }
                         else
                         {
@@ -335,7 +333,7 @@ int main()
                                 setVal4St(newSt, newSt, now_y - 1, val);
                                 setVal4St(newSt, newSt, now_y, 0);
 
-                                addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                                addST(newSt, vrts + 1, sum + (cells[now_x][now_y] - '0'), nAct);
                             }
 
                             if (w > now_y && '#' != cells[now_x][now_y + 1] && 'W' != cells[now_x][now_y + 1] && 'L' != cells[now_x][now_y + 1])
@@ -345,16 +343,16 @@ int main()
                                 setVal4St(newSt, newSt, now_y - 1, 0);
                                 setVal4St(newSt, newSt, now_y, val);
 
-                                addST(newSt, vrts, have3, sum + (cells[now_x][now_y] - '0'), nAct);
+                                addST(newSt, vrts, sum + (cells[now_x][now_y] - '0'), nAct);
                             }
-                        }                        
+                        }
                     }
                     else
                     {
                         // 0 == left && 0 == up
                         {
                             // do nothing
-                            addST(st, vrts, have3, sum, nAct);
+                            addST(st, vrts, sum, nAct);
                         }
 
                         if ('#' != cells[now_x][now_y] && 'W' != cells[now_x][now_y] && 'L' != cells[now_x][now_y])
@@ -365,17 +363,7 @@ int main()
                                 setVal4St(newSt, newSt, now_y - 1, 1);
                                 setVal4St(newSt, newSt, now_y, 2);
 
-                                addST(newSt, vrts + 1, have3, sum + (cells[now_x][now_y] - '0'), nAct);
-                            }
-
-                            if (false == have3 && 1 == now_x && h > now_x && '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y])
-                            {
-                                // plug 3
-                                unsigned int newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 3);
-                                setVal4St(newSt, newSt, now_y, 0);
-
-                                addST(newSt, vrts + 1, true, sum + (cells[now_x][now_y] - '0'), nAct);
+                                addST(newSt, vrts + 1, sum + (cells[now_x][now_y] - '0'), nAct);
                             }
                         }
                     }

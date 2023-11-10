@@ -27,7 +27,7 @@ using namespace std;
 #define DEBUG 0
 #define MAX_H 21
 #define MAX_W 11
-#define QS_SIZE 60000
+#define QS_SIZE 70000
 #define ST_BITS 2
 #define ST_MASK 3
 
@@ -355,16 +355,13 @@ int main()
                             addST(st, vrts, sum, nAct);
                         }
 
-                        if ('#' != cells[now_x][now_y] && 'W' != cells[now_x][now_y] && 'L' != cells[now_x][now_y])
+                        if (h > now_x && '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1] && 'W' != cells[now_x][now_y + 1] && 'L' != cells[now_x][now_y + 1])
                         {
-                            if (h > now_x &&  '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1] && 'W' != cells[now_x][now_y + 1] && 'L' != cells[now_x][now_y + 1])
-                            {
-                                unsigned int newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 1);
-                                setVal4St(newSt, newSt, now_y, 2);
+                            unsigned int newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 1);
+                            setVal4St(newSt, newSt, now_y, 2);
 
-                                addST(newSt, vrts + 1, sum + (cells[now_x][now_y] - '0'), nAct);
-                            }
+                            addST(newSt, vrts + 1, sum + (cells[now_x][now_y] - '0'), nAct);
                         }
                     }
                 }

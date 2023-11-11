@@ -85,6 +85,18 @@ inline void init()
     now_y = w;
 }
 
+inline bool isDigit(char ch)
+{
+    bool ret = false;
+
+    if ('#' != ch && 'W' != ch && 'L' != ch)
+    {
+        ret = true;
+    }
+
+    return ret;
+}
+
 inline void addST(unsigned int st, unsigned int vrts, unsigned int sum, int idx)
 {
     unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
@@ -315,36 +327,24 @@ int main()
                     {
                         int val = left + up;
 
-                        if (3 == val && now_x == h)
+                        if (h == now_x || (h > now_x && isDigit(cells[now_x + 1][now_y])))
                         {
                             // |
                             unsigned int newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, 0);
+                            setVal4St(newSt, newSt, now_y - 1, val);
                             setVal4St(newSt, newSt, now_y, 0);
 
                             addST(newSt, vrts + 1, sum + (cells[now_x][now_y] - '0'), nAct);
                         }
-                        else
+
+                        if (w > now_y && isDigit(cells[now_x][now_y + 1]))
                         {
-                            if (h > now_x && '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y])
-                            {
-                                // |
-                                unsigned int newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, val);
-                                setVal4St(newSt, newSt, now_y, 0);
+                            // --
+                            unsigned int newSt = st;
+                            setVal4St(newSt, newSt, now_y - 1, 0);
+                            setVal4St(newSt, newSt, now_y, val);
 
-                                addST(newSt, vrts + 1, sum + (cells[now_x][now_y] - '0'), nAct);
-                            }
-
-                            if (w > now_y && '#' != cells[now_x][now_y + 1] && 'W' != cells[now_x][now_y + 1] && 'L' != cells[now_x][now_y + 1])
-                            {
-                                // --
-                                unsigned int newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, val);
-
-                                addST(newSt, vrts, sum + (cells[now_x][now_y] - '0'), nAct);
-                            }
+                            addST(newSt, vrts, sum + (cells[now_x][now_y] - '0'), nAct);
                         }
                     }
                     else
@@ -355,7 +355,7 @@ int main()
                             addST(st, vrts, sum, nAct);
                         }
 
-                        if (h > now_x && '#' != cells[now_x + 1][now_y] && 'W' != cells[now_x + 1][now_y] && 'L' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1] && 'W' != cells[now_x][now_y + 1] && 'L' != cells[now_x][now_y + 1])
+                        if ((h == now_x || (h > now_x && isDigit(cells[now_x + 1][now_y]))) && w > now_y && isDigit(cells[now_x][now_y + 1]))
                         {
                             unsigned int newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 1);

@@ -41,6 +41,7 @@ using namespace std;
 int h, w;
 char cells[MAX_H][MAX_W];
 int ans;
+char flag[1048576];
 
 class Record
 {
@@ -120,6 +121,11 @@ inline void addST(unsigned int st, unsigned int vrts, unsigned int sum, int idx)
 
 int main()
 {
+    for (size_t i = 0; i < 10; i++)
+    {
+        flag[3 << (i * ST_BITS)] = 1;
+    }
+
     while (scanf("%d %d", &h, &w) == 2)
     {
         for (int row = 1; row <= h; row++)
@@ -146,7 +152,7 @@ int main()
                     // finished
                     for (int iQ = 0; iQ < qTail[act]; iQ++)
                     {
-                        if (0 == qs[act][iQ].state)
+                        if (flag[qs[act][iQ].state])
                         {
                             if (0 > ans || ans > qs[act][iQ].sum)
                             {

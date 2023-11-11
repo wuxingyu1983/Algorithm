@@ -4,7 +4,8 @@
 #include <cstdio>
 #include <vector>
 #include <set>
-#include <unordered_map>
+//#include <unordered_map>
+#include <map>
 #include <iostream>
 #include <algorithm>
 #include <stdio.h>
@@ -42,7 +43,8 @@ char cells[MAX_H][MAX_W];
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned int, unsigned int> cnts[2];
+//unordered_map<unsigned int, unsigned int> cnts[2];
+map<unsigned int, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 
@@ -75,7 +77,8 @@ inline void init()
 
 inline void addSts(unsigned int st, unsigned int len, int idx)
 {
-    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
+//    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
+    map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
     if (it == cnts[idx].end())
     {
         int pInQ = qTail[idx];

@@ -235,12 +235,6 @@ int main()
                             setVal4St(newSt, newSt, now_y, 2);
 
                             addSts(newSt, len + 1, nAct);
-
-                            newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, 4);
-                            setVal4St(newSt, newSt, now_y, 5);
-
-                            addSts(newSt, len + 1, nAct);
                         }
                     }
                     else if (0 == left || 0 == up)
@@ -294,13 +288,13 @@ int main()
                         }
                         else if (6 == left || 6 == up)
                         {
-                            if (4 == left || 4 == up)
+                            if (1 == left || 1 == up)
                             {
-                                forwardFunc(newSt, 4, 5, 6);
+                                forwardFunc(newSt, 1, 2, 6);
                             }
-                            else if (5 == left || 5 == up)
+                            else if (2 == left || 2 == up)
                             {
-                                backwardFunc(newSt, 5, 4, 6);
+                                backwardFunc(newSt, 2, 1, 6);
                             }
                             else
                             {
@@ -316,19 +310,7 @@ int main()
                         {
                             backwardFunc(newSt, 2, 1, 2);
                         }
-                        else if (4 == left && 4 == up)
-                        {
-                            forwardFunc(newSt, 4, 5, 4);  
-                        }
-                        else if (5 == left && 5 == up)
-                        {
-                            backwardFunc(newSt, 5, 4, 5);
-                        }
                         else if (2 == left && 1 == up)
-                        {
-                            // do nothing
-                        }
-                        else if (5 == left && 4 == up)
                         {
                             // do nothing
                         }
@@ -425,13 +407,13 @@ int main()
                         {
                             // do nothing
                         }
-                        else if (4 == val)
+                        else if (1 == val)
                         {
-                            forwardFunc(newSt, 4, 5, 6);
+                            forwardFunc(newSt, 1, 2, 6);
                         }
-                        else if (5 == val)
+                        else if (2 == val)
                         {
-                            backwardFunc(newSt, 5, 4, 6);
+                            backwardFunc(newSt, 2, 1, 6);
                         }
                         else
                         {

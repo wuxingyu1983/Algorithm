@@ -118,6 +118,28 @@ inline void addSts(unsigned int st, unsigned int len, int idx)
 }
 */
 
+#define forwardFunc(newSt, plusVal, minusVal, newVal)     \
+    {                                                     \
+        int pos = now_y + 1;                              \
+        int s = 1;                                        \
+        while (pos <= w)                                  \
+        {                                                 \
+            int v = getVal4St(newSt, pos);                \
+            if (plusVal == v)                             \
+                s++;                                      \
+            else if (minusVal == v)                       \
+            {                                             \
+                s--;                                      \
+                if (0 == s)                               \
+                {                                         \
+                    setVal4St(newSt, newSt, pos, newVal); \
+                    break;                                \
+                }                                         \
+            }                                             \
+            pos++;                                        \
+        }                                                 \
+    }
+/*
 inline void forwardFunc(unsigned int &newSt, int plusVal, int minusVal, int newVal)
 {
     int pos = now_y + 1;
@@ -142,7 +164,30 @@ inline void forwardFunc(unsigned int &newSt, int plusVal, int minusVal, int newV
         pos++;
     }
 }
+*/
 
+#define backwardFunc(newSt, plusVal, minusVal, newVal)    \
+    {                                                     \
+        int pos = now_y - 2;                              \
+        int s = 1;                                        \
+        while (0 <= pos)                                  \
+        {                                                 \
+            int v = getVal4St(newSt, pos);                \
+            if (plusVal == v)                             \
+                s++;                                      \
+            else if (minusVal == v)                       \
+            {                                             \
+                s--;                                      \
+                if (0 == s)                               \
+                {                                         \
+                    setVal4St(newSt, newSt, pos, newVal); \
+                    break;                                \
+                }                                         \
+            }                                             \
+            pos--;                                        \
+        }                                                 \
+    }
+/*
 inline void backwardFunc(unsigned int &newSt, int plusVal, int minusVal, int newVal)
 {
     int pos = now_y - 2;
@@ -167,7 +212,7 @@ inline void backwardFunc(unsigned int &newSt, int plusVal, int minusVal, int new
         pos--;
     }
 }
-
+*/
 int main()
 {
     while (true)

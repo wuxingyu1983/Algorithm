@@ -230,7 +230,7 @@ int main()
                         if (h > now_x && w > now_y && '1' != cells[now_x + 1][now_y] && '1' != cells[now_x][now_y + 1])
                         {
                             int rightUp = getVal4St(st, now_y + 1);
-                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            if (rightUp && ('2' == cells[now_x][now_y + 1] || '3' == cells[now_x][now_y + 1]))
                             {
                                 continue;
                             }
@@ -252,34 +252,37 @@ int main()
                         {
                             if ((3 == val && '3' == cells[now_x + 1][now_y]) || (6 == val && '2' == cells[now_x + 1][now_y]))
                             {
-                                continue;
                             }
+                            else
+                            {
+                                newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, val);
+                                setVal4St(newSt, newSt, now_y, 0);
 
-                            newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, val);
-                            setVal4St(newSt, newSt, now_y, 0);
-
-                            addSts(newSt, len + 1, nAct);
+                                addSts(newSt, len + 1, nAct);
+                            }
                         }
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
                         {
                             if ((3 == val && '3' == cells[now_x][now_y + 1]) || (6 == val && '2' == cells[now_x][now_y + 1]))
                             {
-                                continue;
                             }
-
-                            int rightUp = getVal4St(st, now_y + 1);
-                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            else
                             {
-                                continue;
+                                int rightUp = getVal4St(st, now_y + 1);
+                                if (rightUp && ('2' == cells[now_x][now_y + 1] || '3' == cells[now_x][now_y + 1]))
+                                {
+                                }
+                                else
+                                {
+                                    newSt = st;
+                                    setVal4St(newSt, newSt, now_y - 1, 0);
+                                    setVal4St(newSt, newSt, now_y, val);
+
+                                    addSts(newSt, len + 1, nAct);
+                                }
                             }
-
-                            newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, 0);
-                            setVal4St(newSt, newSt, now_y, val);
-
-                            addSts(newSt, len + 1, nAct);
                         }
                     }
                     else
@@ -356,14 +359,15 @@ int main()
                         {
                             if ('3' == cells[now_x + 1][now_y])
                             {
-                                continue;
                             }
+                            else
+                            {
+                                newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 3);
+                                setVal4St(newSt, newSt, now_y, 0);
 
-                            newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, 3);
-                            setVal4St(newSt, newSt, now_y, 0);
-
-                            addSts(newSt, len + 1, nAct);
+                                addSts(newSt, len + 1, nAct);
+                            }
                         }
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
@@ -374,7 +378,7 @@ int main()
                             }
 
                             int rightUp = getVal4St(st, now_y + 1);
-                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            if (rightUp && ('2' == cells[now_x][now_y + 1] || '3' == cells[now_x][now_y + 1]))
                             {
                                 continue;
                             }
@@ -423,14 +427,15 @@ int main()
                         {
                             if ('2' == cells[now_x + 1][now_y])
                             {
-                                continue;
                             }
+                            else
+                            {
+                                newSt = st;
+                                setVal4St(newSt, newSt, now_y - 1, 6);
+                                setVal4St(newSt, newSt, now_y, 0);
 
-                            newSt = st;
-                            setVal4St(newSt, newSt, now_y - 1, 6);
-                            setVal4St(newSt, newSt, now_y, 0);
-
-                            addSts(newSt, len + 1, nAct);
+                                addSts(newSt, len + 1, nAct);
+                            }
                         }
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
@@ -441,7 +446,7 @@ int main()
                             }
 
                             int rightUp = getVal4St(st, now_y + 1);
-                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            if (rightUp && ('2' == cells[now_x][now_y + 1] || '3' == cells[now_x][now_y + 1]))
                             {
                                 continue;
                             }

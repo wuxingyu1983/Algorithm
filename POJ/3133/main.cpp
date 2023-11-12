@@ -50,7 +50,8 @@ int now_x, now_y;
 
 #define setVal4St(ST, POS, VAL)     \
     ST &= ~(15 << ((POS)*ST_BITS)); \
-    ST |= (VAL) << ((POS)*ST_BITS);
+    if (VAL)                        \
+        ST |= (VAL) << ((POS)*ST_BITS);
 
 /*
 #define setVal4St(NEW, OLD, POS, VAL)     \

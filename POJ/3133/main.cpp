@@ -100,15 +100,8 @@ inline void init()
 
 int main()
 {
-    while (true)
+    while(scanf("%d %d", &h, &w) == 2 && h && w)
     {
-        scanf("%d %d", &h, &w);
-
-        if (0 == h && 0 == w)
-        {
-            break;
-        }
-
         for (size_t row = 1; row <= h; row++)
         {
             for (size_t col = 1; col <= w; col++)

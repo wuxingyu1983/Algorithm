@@ -75,6 +75,25 @@ inline void init()
     qTail[act]++;
 }
 
+#define addSts(ST, LEN, IDX)                                               \
+    {                                                                      \
+        map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(ST); \
+        if (it == cnts[IDX].end())                                         \
+        {                                                                  \
+            int pInQ = qTail[IDX];                                         \
+            qs[IDX][pInQ].state = ST;                                      \
+            qs[IDX][pInQ].len = LEN;                                       \
+            cnts[IDX][ST] = pInQ;                                          \
+            qTail[IDX]++;                                                  \
+        }                                                                  \
+        else                                                               \
+        {                                                                  \
+            if (LEN < qs[IDX][it->second].len)                             \
+                qs[IDX][it->second].len = LEN;                             \
+        }                                                                  \
+    }
+
+/*
 inline void addSts(unsigned int st, unsigned int len, int idx)
 {
     //    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
@@ -97,6 +116,7 @@ inline void addSts(unsigned int st, unsigned int len, int idx)
         }
     }
 }
+*/
 
 inline void forwardFunc(unsigned int &newSt, int plusVal, int minusVal, int newVal)
 {

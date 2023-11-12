@@ -4,8 +4,6 @@
 #include <cstdio>
 #include <vector>
 #include <set>
-// #include <unordered_map>
-#include <map>
 #include <iostream>
 #include <algorithm>
 #include <stdio.h>
@@ -50,10 +48,16 @@ int now_x, now_y;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
 
+#define setVal4St(ST, POS, VAL)     \
+    ST &= ~(15 << ((POS)*ST_BITS)); \
+    ST |= (VAL) << ((POS)*ST_BITS);
+
+/*
 #define setVal4St(NEW, OLD, POS, VAL)     \
     NEW = OLD;                            \
     NEW &= ~(ST_MASK << ((POS)*ST_BITS)); \
     NEW |= (VAL) << ((POS)*ST_BITS);
+*/
 
 inline void init()
 {
@@ -177,8 +181,8 @@ int main()
                             if (3 != cells[now_x + 1][now_y] && 3 != cells[now_x][now_y + 1])
                             {
                                 unsigned int newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 2);
-                                setVal4St(newSt, newSt, now_y, 2);
+                                // 2, 2
+                                setVal4St(newSt, now_y - 1, 10);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -186,8 +190,8 @@ int main()
                             if (2 != cells[now_x + 1][now_y] && 2 != cells[now_x][now_y + 1])
                             {
                                 unsigned int newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 3);
-                                setVal4St(newSt, newSt, now_y, 3);
+                                // 3, 3
+                                setVal4St(newSt, now_y - 1, 15);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -204,8 +208,7 @@ int main()
                             if (0 == cells[now_x + 1][now_y] || val == cells[now_x + 1][now_y])
                             {
                                 newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, val);
-                                setVal4St(newSt, newSt, now_y, 0);
+                                setVal4St(newSt, now_y - 1, val);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -216,8 +219,7 @@ int main()
                             if (0 == cells[now_x][now_y + 1] || val == cells[now_x][now_y + 1])
                             {
                                 newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, val);
+                                setVal4St(newSt, now_y - 1, val << 2);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -230,8 +232,7 @@ int main()
                         {
                             unsigned int newSt = st;
 
-                            setVal4St(newSt, newSt, now_y - 1, 0);
-                            setVal4St(newSt, newSt, now_y, 0);
+                            setVal4St(newSt, now_y - 1, 0);
 
                             addSts(newSt, len + 1, nAct);
                         }
@@ -247,8 +248,7 @@ int main()
                             if (3 != cells[now_x + 1][now_y])
                             {
                                 newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 2);
-                                setVal4St(newSt, newSt, now_y, 0);
+                                setVal4St(newSt, now_y - 1, 2);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -259,8 +259,7 @@ int main()
                             if (3 != cells[now_x][now_y + 1])
                             {
                                 newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, 2);
+                                setVal4St(newSt, now_y - 1, 8);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -271,8 +270,7 @@ int main()
                         int val = left + up;
                         if (2 == val)
                         {
-                            setVal4St(newSt, newSt, now_y - 1, 0);
-                            setVal4St(newSt, newSt, now_y, 0);
+                            setVal4St(newSt, now_y - 1, 0);
 
                             addSts(newSt, len + 1, nAct);
                         }
@@ -289,8 +287,7 @@ int main()
                             if (2 != cells[now_x + 1][now_y])
                             {
                                 newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 3);
-                                setVal4St(newSt, newSt, now_y, 0);
+                                setVal4St(newSt, now_y - 1, 3);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -301,8 +298,7 @@ int main()
                             if (2 != cells[now_x][now_y + 1])
                             {
                                 newSt = st;
-                                setVal4St(newSt, newSt, now_y - 1, 0);
-                                setVal4St(newSt, newSt, now_y, 3);
+                                setVal4St(newSt, now_y - 1, 12);
 
                                 addSts(newSt, len + 1, nAct);
                             }
@@ -313,8 +309,7 @@ int main()
                         int val = left + up;
                         if (3 == val)
                         {
-                            setVal4St(newSt, newSt, now_y - 1, 0);
-                            setVal4St(newSt, newSt, now_y, 0);
+                            setVal4St(newSt, now_y - 1, 0);
 
                             addSts(newSt, len + 1, nAct);
                         }
@@ -327,7 +322,7 @@ int main()
             act = nAct;
         }
 
-        cout << ans << endl;
+        printf("%d\n", ans);
     }
 
     return 0;

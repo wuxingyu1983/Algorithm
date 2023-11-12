@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <vector>
 #include <set>
-//#include <unordered_map>
+// #include <unordered_map>
 #include <map>
 #include <iostream>
 #include <algorithm>
@@ -33,7 +33,7 @@ using namespace std;
 class Record
 {
 public:
-    unsigned int state;   // 轮廓线段状态
+    unsigned int state; // 轮廓线段状态
     unsigned int len;
 
     Record() {}
@@ -43,7 +43,7 @@ char cells[MAX_H][MAX_W];
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-//unordered_map<unsigned int, unsigned int> cnts[2];
+// unordered_map<unsigned int, unsigned int> cnts[2];
 map<unsigned int, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
@@ -77,7 +77,7 @@ inline void init()
 
 inline void addSts(unsigned int st, unsigned int len, int idx)
 {
-//    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
+    //    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
     map<unsigned int, unsigned int>::iterator it = cnts[idx].find(st);
     if (it == cnts[idx].end())
     {
@@ -212,7 +212,6 @@ int main()
                     st <<= ST_BITS;
                 }
 
-
                 int left = getVal4St(st, now_y - 1);
                 int up = getVal4St(st, now_y);
 
@@ -230,6 +229,12 @@ int main()
 
                         if (h > now_x && w > now_y && '1' != cells[now_x + 1][now_y] && '1' != cells[now_x][now_y + 1])
                         {
+                            int rightUp = getVal4St(st, now_y + 1);
+                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            {
+                                continue;
+                            }
+
                             unsigned int newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 1);
                             setVal4St(newSt, newSt, now_y, 2);
@@ -245,6 +250,11 @@ int main()
 
                         if (h > now_x && '1' != cells[now_x + 1][now_y])
                         {
+                            if ((3 == val && '3' == cells[now_x + 1][now_y]) || (6 == val && '2' == cells[now_x + 1][now_y]))
+                            {
+                                continue;
+                            }
+
                             newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, val);
                             setVal4St(newSt, newSt, now_y, 0);
@@ -254,6 +264,17 @@ int main()
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
                         {
+                            if ((3 == val && '3' == cells[now_x][now_y + 1]) || (6 == val && '2' == cells[now_x][now_y + 1]))
+                            {
+                                continue;
+                            }
+
+                            int rightUp = getVal4St(st, now_y + 1);
+                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            {
+                                continue;
+                            }
+
                             newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 0);
                             setVal4St(newSt, newSt, now_y, val);
@@ -304,7 +325,7 @@ int main()
                         }
                         else if (1 == left && 1 == up)
                         {
-                            forwardFunc(newSt, 1, 2, 1);  
+                            forwardFunc(newSt, 1, 2, 1);
                         }
                         else if (2 == left && 2 == up)
                         {
@@ -318,7 +339,7 @@ int main()
                         {
                             // 非法
                             continue;
-                        }                        
+                        }
 
                         setVal4St(newSt, newSt, now_y - 1, 0);
                         setVal4St(newSt, newSt, now_y, 0);
@@ -333,6 +354,11 @@ int main()
                     {
                         if (h > now_x && '1' != cells[now_x + 1][now_y])
                         {
+                            if ('3' == cells[now_x + 1][now_y])
+                            {
+                                continue;
+                            }
+
                             newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 3);
                             setVal4St(newSt, newSt, now_y, 0);
@@ -342,6 +368,17 @@ int main()
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
                         {
+                            if ('3' == cells[now_x][now_y + 1])
+                            {
+                                continue;
+                            }
+
+                            int rightUp = getVal4St(st, now_y + 1);
+                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            {
+                                continue;
+                            }
+
                             newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 0);
                             setVal4St(newSt, newSt, now_y, 3);
@@ -384,6 +421,11 @@ int main()
                     {
                         if (h > now_x && '1' != cells[now_x + 1][now_y])
                         {
+                            if ('2' == cells[now_x + 1][now_y])
+                            {
+                                continue;
+                            }
+
                             newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 6);
                             setVal4St(newSt, newSt, now_y, 0);
@@ -393,6 +435,17 @@ int main()
 
                         if (w > now_y && '1' != cells[now_x][now_y + 1])
                         {
+                            if ('2' == cells[now_x][now_y + 1])
+                            {
+                                continue;
+                            }
+
+                            int rightUp = getVal4St(st, now_y + 1);
+                            if (rightUp && ('2' != cells[now_x][now_y + 1] || '3' != cells[now_x][now_y + 1]))
+                            {
+                                continue;
+                            }
+
                             newSt = st;
                             setVal4St(newSt, newSt, now_y - 1, 0);
                             setVal4St(newSt, newSt, now_y, 6);

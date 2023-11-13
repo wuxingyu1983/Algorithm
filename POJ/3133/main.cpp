@@ -41,7 +41,6 @@ int cells[MAX_H][MAX_W];
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-// unordered_map<unsigned int, unsigned int> cnts[2];
 int cnts[2][1048576];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
@@ -52,13 +51,6 @@ int now_x, now_y;
     ST &= ~(15 << ((POS)*ST_BITS)); \
     if (VAL)                        \
         ST |= (VAL) << ((POS)*ST_BITS);
-
-/*
-#define setVal4St(NEW, OLD, POS, VAL)     \
-    NEW = OLD;                            \
-    NEW &= ~(ST_MASK << ((POS)*ST_BITS)); \
-    NEW |= (VAL) << ((POS)*ST_BITS);
-*/
 
 inline void init()
 {
@@ -172,22 +164,30 @@ int main()
 
                         if (h > now_x && w > now_y && 1 != cells[now_x + 1][now_y] && 1 != cells[now_x][now_y + 1])
                         {
+                            int rightUp = getVal4St(st, now_y + 1);
+
                             if (3 != cells[now_x + 1][now_y] && 3 != cells[now_x][now_y + 1])
                             {
-                                unsigned int newSt = st;
-                                // 2, 2
-                                setVal4St(newSt, now_y - 1, 10);
+                                if (0 == rightUp || 2 == rightUp)
+                                {
+                                    unsigned int newSt = st;
+                                    // 2, 2
+                                    setVal4St(newSt, now_y - 1, 10);
 
-                                addSts(newSt, len + 1, nAct);
+                                    addSts(newSt, len + 1, nAct);
+                                }
                             }
 
                             if (2 != cells[now_x + 1][now_y] && 2 != cells[now_x][now_y + 1])
                             {
-                                unsigned int newSt = st;
-                                // 3, 3
-                                setVal4St(newSt, now_y - 1, 15);
+                                if (0 == rightUp || 3 == rightUp)
+                                {
+                                    unsigned int newSt = st;
+                                    // 3, 3
+                                    setVal4St(newSt, now_y - 1, 15);
 
-                                addSts(newSt, len + 1, nAct);
+                                    addSts(newSt, len + 1, nAct);
+                                }
                             }
                         }
                     }
@@ -210,12 +210,17 @@ int main()
 
                         if (w > now_y && 1 != cells[now_x][now_y + 1])
                         {
-                            if (0 == cells[now_x][now_y + 1] || val == cells[now_x][now_y + 1])
-                            {
-                                newSt = st;
-                                setVal4St(newSt, now_y - 1, val << 2);
+                            int rightUp = getVal4St(st, now_y + 1);
 
-                                addSts(newSt, len + 1, nAct);
+                            if (0 == rightUp || val == rightUp)
+                            {
+                                if (0 == cells[now_x][now_y + 1] || val == cells[now_x][now_y + 1])
+                                {
+                                    newSt = st;
+                                    setVal4St(newSt, now_y - 1, val << 2);
+
+                                    addSts(newSt, len + 1, nAct);
+                                }
                             }
                         }
                     }
@@ -250,12 +255,17 @@ int main()
 
                         if (w > now_y && 1 != cells[now_x][now_y + 1])
                         {
-                            if (3 != cells[now_x][now_y + 1])
-                            {
-                                newSt = st;
-                                setVal4St(newSt, now_y - 1, 8);
+                            int rightUp = getVal4St(st, now_y + 1);
 
-                                addSts(newSt, len + 1, nAct);
+                            if (0 == rightUp || 2 == rightUp)
+                            {
+                                if (3 != cells[now_x][now_y + 1])
+                                {
+                                    newSt = st;
+                                    setVal4St(newSt, now_y - 1, 8);
+
+                                    addSts(newSt, len + 1, nAct);
+                                }
                             }
                         }
                     }
@@ -289,12 +299,17 @@ int main()
 
                         if (w > now_y && 1 != cells[now_x][now_y + 1])
                         {
-                            if (2 != cells[now_x][now_y + 1])
-                            {
-                                newSt = st;
-                                setVal4St(newSt, now_y - 1, 12);
+                            int rightUp = getVal4St(st, now_y + 1);
 
-                                addSts(newSt, len + 1, nAct);
+                            if (0 == rightUp || 3 == rightUp)
+                            {
+                                if (2 != cells[now_x][now_y + 1])
+                                {
+                                    newSt = st;
+                                    setVal4St(newSt, now_y - 1, 12);
+
+                                    addSts(newSt, len + 1, nAct);
+                                }
                             }
                         }
                     }

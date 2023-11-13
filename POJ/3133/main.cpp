@@ -44,6 +44,7 @@ int h, w;
 int cnts[2][1048576];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
+int stSize;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
 
@@ -60,8 +61,8 @@ inline void init()
     qTail[0] = 0;
     qTail[1] = 0;
 
-    memset(cnts[0], -1, sizeof(cnts[0]));
-    memset(cnts[1], -1, sizeof(cnts[1]));
+    memset(cnts[0], -1, stSize);
+    memset(cnts[1], -1, stSize);
 
     now_x = 0;
     now_y = w;
@@ -94,6 +95,8 @@ int main()
 {
     while(scanf("%d %d", &h, &w) == 2 && h && w)
     {
+        stSize = 4 * (1 << (2 * (w + 1)));
+
         for (size_t row = 1; row <= h; row++)
         {
             for (size_t col = 1; col <= w; col++)
@@ -327,7 +330,7 @@ int main()
             }
 
             qTail[act] = 0;
-            memset(cnts[act], -1, sizeof(cnts[act]));
+            memset(cnts[act], -1, stSize);
             act = nAct;
         }
 

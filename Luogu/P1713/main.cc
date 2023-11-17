@@ -44,12 +44,12 @@ unordered_map<unsigned int, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 
-#define getVal4St(ST, POS) ((ST) >> ((POS)*ST_BITS)) & ST_MASK
+#define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
-#define setVal4St(ST, POS, VAL)     \
-    ST &= ~(15 << ((POS)*ST_BITS)); \
-    if (VAL)                        \
-        ST |= (VAL) << ((POS)*ST_BITS);
+#define setVal4St(ST, POS, VAL)       \
+    ST &= ~(15 << ((POS) * ST_BITS)); \
+    if (VAL)                          \
+        ST |= (VAL) << ((POS) * ST_BITS);
 
 #define addSts(ST, MAX, MIN, IDX)                                                    \
     {                                                                                \
@@ -70,6 +70,50 @@ int now_x, now_y;
             if (MAX > qs[IDX][it->second].max)                                       \
                 qs[IDX][it->second].max = MAX;                                       \
         }                                                                            \
+    }
+
+#define forwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                 \
+        int pos = now_y + 1;                          \
+        int s = 1;                                    \
+        while (pos <= w)                              \
+        {                                             \
+            int v = getVal4St(newSt, pos);            \
+            if (plusVal == v)                         \
+                s++;                                  \
+            else if (minusVal == v)                   \
+            {                                         \
+                s--;                                  \
+                if (0 == s)                           \
+                {                                     \
+                    setVal4St(newSt, pos, newVal);    \
+                    break;                            \
+                }                                     \
+            }                                         \
+            pos++;                                    \
+        }                                             \
+    }
+
+#define backwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                  \
+        int pos = now_y - 2;                           \
+        int s = 1;                                     \
+        while (0 <= pos)                               \
+        {                                              \
+            int v = getVal4St(newSt, pos);             \
+            if (plusVal == v)                          \
+                s++;                                   \
+            else if (minusVal == v)                    \
+            {                                          \
+                s--;                                   \
+                if (0 == s)                            \
+                {                                      \
+                    setVal4St(newSt, pos, newVal);     \
+                    break;                             \
+                }                                      \
+            }                                          \
+            pos--;                                     \
+        }                                              \
     }
 
 inline void init()
@@ -104,7 +148,7 @@ int main()
 
         cells[x][y] = 1;
     }
-    
+
     init();
 
     int max = 0, min = 0;
@@ -147,11 +191,41 @@ int main()
 
             if (h == now_x && 1 == now_y)
             {
+                if (0 == left && 0 == up)
+                {
+                    unsigned int newSt = st;
+                    setVal4St(newSt, now_y, 3);
 
+                    addSts(newSt, max + 1, min + 1, nAct);
+                }
+                else
+                {
+                    if (up)
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y - 1, 0);
+                        setVal4St(newSt, now_y, 0);
+
+                        if (3 == up)
+                        {
+                            // do nothin
+                        }
+                        else if (2 == up)
+                        {
+                            backwardFunc(newSt, 2, 1, 3);
+                        }
+                        else
+                        {
+                            // 1 == up
+                            forwardFunc(newSt, 1, 2, 3);
+                        }
+
+                        addSts(newSt, max + 1, min + 1, nAct);
+                    }
+                }
             }
             else
             {
-
             }
         }
 

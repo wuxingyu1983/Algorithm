@@ -22,16 +22,23 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_H   101
-#define MAX_W   13
+#define MAX_H   102
+#define MAX_W   14
 #define MAX_C   7
-#define ST_BITS 2
-#define ST_MASK 3
+#define ST_BITS 1
+#define ST_MASK 1
 #define QS_SIZE 60000
 #define MOD 1000000007
 
+#define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
+
+#define setVal4St(ST, POS, VAL)            \
+    ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
+    if (VAL)                               \
+        ST |= (VAL) << ((POS) * ST_BITS);
+
 unsigned int all = 1;
-unsigned int dp[MAX_H][MAX_W][4096][MAX_C][MAX_C];
+unsigned int dp[MAX_H][MAX_W][4096][MAX_C][MAX_C];  // dp[row][col][state][idxUp][idxDown]
 
 inline void getNext(char * p, int * next, int len)
 {
@@ -88,7 +95,44 @@ int main()
         getNext(up, nxtUp, c);
         getNext(down, nxtDown, c);
 
+        unsigned int cnt = 0;
+        unsigned int maxSt = 1 << w;
+        dp[1][1][0][0][0] = 1;
 
+        for (size_t row = 1; row <= h; row ++)
+        {
+            for (size_t col = 1; col <= w; col ++)
+            {
+                int nxtRow = row, nxtCol;
+
+                if (w == col)
+                {
+                    nxtRow = row + 1;
+                    nxtCol = 1;
+                }
+                else
+                {
+                    nxtCol = col + 1;
+                }
+
+                for (size_t st = 0; st < maxSt; st ++)
+                {
+                    for (size_t idxUp = 0; idxUp <= c; idxUp ++)
+                    {
+                        for (size_t idxDown = 0; idxDown <= c; idxDown ++)
+                        {
+                            if (dp[row][col][st][idxUp][idxDown])
+                            {
+                                // 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+
+        cout << (MOD + all - cnt) % MOD << endl;
     }
 
     return 0;

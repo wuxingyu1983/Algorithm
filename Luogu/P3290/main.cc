@@ -22,12 +22,11 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_H   102
-#define MAX_W   14
-#define MAX_C   7
+#define MAX_H 102
+#define MAX_W 14
+#define MAX_C 7
 #define ST_BITS 1
 #define ST_MASK 1
-#define QS_SIZE 60000
 #define MOD 1000000007
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
@@ -38,25 +37,25 @@ using namespace std;
         ST |= (VAL) << ((POS) * ST_BITS);
 
 unsigned int all = 1;
-unsigned int dp[MAX_H][MAX_W][4096][MAX_C][MAX_C];  // dp[row][col][state][idxUp][idxDown]
+unsigned int dp[MAX_H][MAX_W][4096][MAX_C][MAX_C]; // dp[row][col][state][idxUp][idxDown]
 
-inline void getNext(char * p, int * next, int len)
+inline void getNext(char *p, int *next, int len)
 {
-	next[0] = -1;
+    next[0] = -1;
     next[len] = 0;
-	int i = 0, j = -1;
+    int i = 0, j = -1;
 
-	while (i < len)
-	{
-		if (j == -1 || p[i] == p[j])
-		{
-			++i;
-			++j;
-			next[i] = j;
-		}	
-		else
-			j = next[j];
-	}
+    while (i < len)
+    {
+        if (j == -1 || p[i] == p[j])
+        {
+            ++i;
+            ++j;
+            next[i] = j;
+        }
+        else
+            j = next[j];
+    }
 
     // 处理 next[len]
     for (size_t i = 1; i < len; i++)
@@ -94,7 +93,7 @@ int main()
             all %= MOD;
         }
     }
-    
+
     for (size_t iQ = 0; iQ < q; iQ++)
     {
         char up[MAX_C], down[MAX_C];
@@ -124,9 +123,9 @@ int main()
         int nxtRow, nxtCol;
         int newIdxUp, newIdxDown;
 
-        for (size_t row = 1; row <= h; row ++)
+        for (size_t row = 1; row <= h; row++)
         {
-            for (size_t col = 1; col <= w; col ++)
+            for (size_t col = 1; col <= w; col++)
             {
                 nxtRow = row;
 
@@ -140,15 +139,16 @@ int main()
                     nxtCol = col + 1;
                 }
 
-                for (size_t st = 0; st < maxSt; st ++)
+                for (size_t idxUp = 0; idxUp <= c; idxUp++)
                 {
-                    for (size_t idxUp = 0; idxUp <= c; idxUp ++)
+                    for (size_t idxDown = 0; idxDown <= c; idxDown++)
                     {
-                        for (size_t idxDown = 0; idxDown <= c; idxDown ++)
+                        for (size_t st = 0; st < maxSt; st++)
                         {
                             if (dp[row][col][st][idxUp][idxDown])
                             {
                                 int flag = getVal4St(st, col - 1);
+                                int newSt = st;
 
                                 // W-白子，B-黑子，X-无子
                                 char colors[] = {'W', 'B', 'X'};
@@ -193,7 +193,11 @@ int main()
 
                                         if (c == newIdxUp)
                                         {
-                                            setVal4St(st, col - 1, 1);
+                                            setVal4St(newSt, col - 1, 1);
+                                        }
+                                        else
+                                        {
+                                            setVal4St(newSt, col - 1, 0);
                                         }
                                     }
 
@@ -242,8 +246,8 @@ int main()
                                                 newIdxDown = 0;
                                             }
 
-                                            dp[nxtRow][nxtCol][st][newIdxUp][newIdxDown] += dp[row][col][st][idxUp][idxDown];
-                                            dp[nxtRow][nxtCol][st][newIdxUp][newIdxDown] %= MOD;
+                                            dp[nxtRow][nxtCol][newSt][newIdxUp][newIdxDown] += dp[row][col][st][idxUp][idxDown];
+                                            dp[nxtRow][nxtCol][newSt][newIdxUp][newIdxDown] %= MOD;
                                         }
                                     }
                                 }
@@ -254,7 +258,7 @@ int main()
             }
         }
 
-        for (size_t st = 0; st < maxSt; st ++)
+        for (size_t st = 0; st < maxSt; st++)
         {
             cnt += dp[h + 1][1][st][0][0];
             cnt %= MOD;

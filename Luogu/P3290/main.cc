@@ -43,6 +43,7 @@ unsigned int dp[MAX_H][MAX_W][4096][MAX_C][MAX_C];  // dp[row][col][state][idxUp
 inline void getNext(char * p, int * next, int len)
 {
 	next[0] = -1;
+    next[len] = 0;
 	int i = 0, j = -1;
 
 	while (i < len)
@@ -56,6 +57,27 @@ inline void getNext(char * p, int * next, int len)
 		else
 			j = next[j];
 	}
+
+    // 处理 next[len]
+    for (size_t i = 1; i < len; i++)
+    {
+        for (size_t j = 0; i < len; j++)
+        {
+            if (len > j + i)
+            {
+                if (p[j] != p[j + i])
+                {
+                    break;
+                }
+            }
+        }
+
+        if (len == j + i)
+        {
+            next[len] = len - i;
+            break;
+        }
+    }
 }
 
 int main()
@@ -99,11 +121,14 @@ int main()
         unsigned int maxSt = 1 << w;
         dp[1][1][0][0][0] = 1;
 
+        int nxtRow, nxtCol;
+        int newIdxUp, newIdxDown;
+
         for (size_t row = 1; row <= h; row ++)
         {
             for (size_t col = 1; col <= w; col ++)
             {
-                int nxtRow = row, nxtCol;
+                nxtRow = row;
 
                 if (w == col)
                 {
@@ -123,14 +148,117 @@ int main()
                         {
                             if (dp[row][col][st][idxUp][idxDown])
                             {
-                                // 
+                                int flag = getVal4St(st, col - 1);
+
+                                // W-白子，B-黑子，X-无子
+                                char colors[] = {'W', 'B', 'X'};
+
+                                // 先处理第一行
+                                for (size_t i = 0; i < 3; i++)
+                                {
+                                    char color = colors[i];
+
+                                    // 先处理第一行
+                                    {
+                                        int j;
+                                        if (c == idxUp)
+                                        {
+                                            j = nxtUp[c];
+                                        }
+                                        else
+                                        {
+                                            j = idxUp;
+                                        }
+
+                                        if (color == up[j])
+                                        {
+                                            newIdxUp = j + 1;
+                                        }
+                                        else
+                                        {
+                                            while (0 <= j && color != up[j])
+                                            {
+                                                j = nxtUp[j];
+                                            }
+
+                                            if (0 <= j)
+                                            {
+                                                newIdxUp = j + 1;
+                                            }
+                                            else
+                                            {
+                                                newIdxUp = 0;
+                                            }
+                                        }
+
+                                        if (c == newIdxUp)
+                                        {
+                                            setVal4St(st, col - 1, 1);
+                                        }
+                                    }
+
+                                    // 再处理第二行
+                                    {
+                                        int j;
+                                        if (c == idxDown)
+                                        {
+                                            j = nxtDown[c];
+                                        }
+                                        else
+                                        {
+                                            j = idxDown;
+                                        }
+
+                                        if (color == down[j])
+                                        {
+                                            newIdxDown = j + 1;
+                                        }
+                                        else
+                                        {
+                                            while (0 <= j && color != down[j])
+                                            {
+                                                j = nxtDown[j];
+                                            }
+
+                                            if (0 <= j)
+                                            {
+                                                newIdxDown = j + 1;
+                                            }
+                                            else
+                                            {
+                                                newIdxDown = 0;
+                                            }
+                                        }
+
+                                        if (c == newIdxDown && 1 == flag)
+                                        {
+                                            // 第一、二行匹配上了，非法
+                                        }
+                                        else
+                                        {
+                                            if (1 == nxtCol)
+                                            {
+                                                newIdxUp = 0;
+                                                newIdxDown = 0;
+                                            }
+
+                                            dp[nxtRow][nxtCol][st][newIdxUp][newIdxDown] += dp[row][col][st][idxUp][idxDown];
+                                            dp[nxtRow][nxtCol][st][newIdxUp][newIdxDown] %= MOD;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        
+
+        for (size_t st = 0; st < maxSt; st ++)
+        {
+            cnt += dp[h + 1][1][st][0][0];
+            cnt %= MOD;
+        }
 
         cout << (MOD + all - cnt) % MOD << endl;
     }

@@ -36,8 +36,10 @@ using namespace std;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
+int act = 0;
 unsigned int all = 1;
-unsigned int dp[MAX_H][MAX_W][4096][MAX_C][MAX_C]; // dp[row][col][state][idxUp][idxDown]
+//unsigned int dp[MAX_H][MAX_W][4096][MAX_C][MAX_C]; // dp[row][col][state][idxUp][idxDown]
+unsigned int dp[2][MAX_W][4096][MAX_C][MAX_C]; // dp[row][col][state][idxUp][idxDown]
 
 inline void getNext(char *p, int *next, int len)
 {
@@ -118,20 +120,24 @@ int main()
 
         unsigned int cnt = 0;
         unsigned int maxSt = 1 << w;
-        dp[1][1][0][0][0] = 1;
+
+        act = 0;
+        dp[act][1][0][0][0] = 1;
 
         int nxtRow, nxtCol;
         int newIdxUp, newIdxDown;
 
         for (size_t row = 1; row <= h; row++)
         {
+            int nAct = 1 - act;
+
             for (size_t col = 1; col <= w; col++)
             {
-                nxtRow = row;
+                nxtRow = act;
 
                 if (w == col)
                 {
-                    nxtRow = row + 1;
+                    nxtRow = nAct;
                     nxtCol = 1;
                 }
                 else
@@ -145,7 +151,7 @@ int main()
                     {
                         for (size_t st = 0; st < maxSt; st++)
                         {
-                            if (dp[row][col][st][idxUp][idxDown])
+                            if (dp[act][col][st][idxUp][idxDown])
                             {
                                 int flag = getVal4St(st, col - 1);
                                 int newSt = st;
@@ -246,7 +252,7 @@ int main()
                                                 newIdxDown = 0;
                                             }
 
-                                            dp[nxtRow][nxtCol][newSt][newIdxUp][newIdxDown] += dp[row][col][st][idxUp][idxDown];
+                                            dp[nxtRow][nxtCol][newSt][newIdxUp][newIdxDown] += dp[act][col][st][idxUp][idxDown];
                                             dp[nxtRow][nxtCol][newSt][newIdxUp][newIdxDown] %= MOD;
                                         }
                                     }
@@ -256,11 +262,14 @@ int main()
                     }
                 }
             }
+
+            memset(dp[act], 0, sizeof(dp[act]));
+            act = nAct;
         }
 
         for (size_t st = 0; st < maxSt; st++)
         {
-            cnt += dp[h + 1][1][st][0][0];
+            cnt += dp[act][1][st][0][0];
             cnt %= MOD;
         }
 

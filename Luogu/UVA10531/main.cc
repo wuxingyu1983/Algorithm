@@ -39,6 +39,7 @@ public:
 };
 
 float cells[MAX_H][MAX_W];
+char flags[MAX_H][MAX_W];       // 0 - 概率为0，1 - 概率为1，2 - 概率为其他
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
@@ -85,8 +86,22 @@ int main()
             for (size_t col = 1; col <= w; col ++)
             {
                 cin >> cells[row][col];
+                if (fabsf(cells[row][col] - 1.0f) < 0.000001)
+                {
+                    flags[row][col] = 1;
+                }
+                else if (fabsf(cells[row][col] - 0.0f) < 0.000001)
+                {
+                    flags[row][col] = 0;
+                }
+                else
+                {
+                    flags[row][col] = 2;
+                }
             }
         }
+
+        init();
 
         
     }

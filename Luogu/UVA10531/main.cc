@@ -81,9 +81,9 @@ int main()
     {
         cin >> h >> w;
 
-        for (size_t row = 1; row <= h; row ++)
+        for (size_t row = 1; row <= h; row++)
         {
-            for (size_t col = 1; col <= w; col ++)
+            for (size_t col = 1; col <= w; col++)
             {
                 cin >> cells[row][col];
                 if (fabsf(cells[row][col] - 1.0f) < 0.000001)
@@ -103,7 +103,46 @@ int main()
 
         init();
 
-        
+        while (0 < qTail[act])
+        {
+            int nAct = 1 - act;
+
+            if (w == now_y)
+            {
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
+                {
+                    // finished
+                    break;
+                }
+            }
+            else
+            {
+                now_y++;
+            }
+
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int st = qs[act][iQ].state;
+                unsigned int total = qs[act][iQ].total;
+
+                if (1 == now_y)
+                {
+                    st <<= ST_BITS;
+                }
+
+                int left = getVal4St(st, now_y - 1);
+                int up = getVal4St(st, now_y);
+
+                
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
     }
 
     return 0;

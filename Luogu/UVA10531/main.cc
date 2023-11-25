@@ -39,6 +39,7 @@ public:
     Record() {}
 };
 
+unsigned int output[MAX_H][MAX_W];
 float cells[MAX_H][MAX_W];
 char flags[MAX_H][MAX_W];       // 0 - 概率为0，1 - 概率为1，2 - 概率为其他
 Record qs[2][QS_SIZE];
@@ -119,7 +120,15 @@ inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool b
     {
         qs[idx][it->second].total += total;
 
-        
+        for (size_t i = 1; i < (now_x * now_y); i++)
+        {
+            qs[idx][it->second].cnt[i] += rec.cnt[i];
+        }
+
+        if (blocked)
+        {
+            qs[idx][it->second].cnt[now_x * now_y] += total;
+        }
     }
 }
 
@@ -138,6 +147,8 @@ inline void init()
     qs[act][0].total = 1;
     qs[act][0].minUnused = 2;
     memset(qs[act][0].cnt, 0, sizeof(qs[act][0].cnt));
+
+    memset(output, 0, sizeof(output));
 
     qTail[act]++;
 }
@@ -185,6 +196,48 @@ int main()
                 if (h < now_x)
                 {
                     // finished
+                    unsigned int one = 1 << (w * ST_BITS);
+                    unsigned int mask = ST_MASK << (w * ST_BITS);
+                    unsigned int total = 0;
+
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        unsigned int st = qs[act][iQ].state;
+
+                        if (one == (st & mask))
+                        {
+                            total += qs[act][iQ].total;
+
+                            for (size_t row = 1; row <= h; row++)
+                            {
+                                for (size_t col = 1; col <= w; col++)
+                                {
+                                    output[row][col] += qs[act][iQ].cnt[w * (row - 1) + col];
+                                }
+                            }
+                        }
+                    }
+
+                    for (size_t row = 1; row <= h; row++)
+                    {
+                        for (size_t col = 1; col <= w; col++)
+                        {
+                            double p = output[row][col];
+                            p /= (double)total;
+
+                            if (col < w)
+                            {
+                                printf("%.6f ", p);
+                            }
+                            else
+                            {
+                                printf("%.6f\n", p);
+                            }
+                        }
+                    }
+
+                    printf("\n");
+
                     break;
                 }
             }
@@ -216,7 +269,7 @@ int main()
                                 unsigned int newSt = st;
                                 setVal4St(newSt, now_y, 0);
 
-                                // add st - TBD
+                                addSts(newSt, total, qs[act][iQ], nAct, true);
                             }
                         }
                         else
@@ -224,7 +277,7 @@ int main()
                             unsigned int newSt = st;
                             setVal4St(newSt, now_y, 0);
 
-                            // add st - TBD
+                            addSts(newSt, total, qs[act][iQ], nAct, true);
                         }
                     }
 
@@ -250,8 +303,7 @@ int main()
                             }
                         }
 
-                        // add st - TBD
-
+                        addSts(newSt, total, qs[act][iQ], nAct, false);
                     }
                 }
                 else
@@ -262,7 +314,7 @@ int main()
                         // 存在障碍物的可能性，障碍物
                         unsigned int newSt = st;
 
-                        // add st - TBD
+                        addSts(newSt, total, qs[act][iQ], nAct, true);
                     }
 
                     if (1 != flags[now_x][now_y])
@@ -279,8 +331,7 @@ int main()
                             setVal4St(newSt, now_y, minUnused);
                         }
 
-                        // add st - TBD
-
+                        addSts(newSt, total, qs[act][iQ], nAct, false);
                     }
                 }
             }

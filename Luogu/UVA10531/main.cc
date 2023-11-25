@@ -41,7 +41,7 @@ public:
 
 unsigned int output[MAX_H][MAX_W];
 float cells[MAX_H][MAX_W];
-char flags[MAX_H][MAX_W];       // 0 - 概率为0，1 - 概率为1，2 - 概率为其他
+char flags[MAX_H][MAX_W]; // 0 - 概率为0，1 - 概率为1，2 - 概率为其他
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
@@ -91,7 +91,7 @@ inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool b
     unsigned int newSt = st;
     unsigned char minUnused = 0;
 
-    recode(newSt, minUnused)
+    recode(newSt, minUnused);
 
     unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(newSt);
     if (it == cnts[idx].end())
@@ -102,16 +102,16 @@ inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool b
         qs[idx][pInQ].total = total;
         qs[idx][pInQ].minUnused = minUnused;
 
-        memcpy(&(qs[idx][pInQ].cnt[1]), &(rec.cnt[1]), sizeof(unsigned int) * now_x * now_y);
+        memcpy(&(qs[idx][pInQ].cnt[1]), &(rec.cnt[1]), sizeof(unsigned int) * (w * (now_x - 1) + now_y));
 
         if (blocked)
         {
-            qs[idx][pInQ].cnt[now_x * now_y] = total;
+            qs[idx][pInQ].cnt[w * (now_x - 1) + now_y] = total;
         }
         else
         {
-            qs[idx][pInQ].cnt[now_x * now_y] = 0;
-        }        
+            qs[idx][pInQ].cnt[w * (now_x - 1) + now_y] = 0;
+        }
 
         cnts[idx][newSt] = pInQ;
         qTail[idx]++;
@@ -120,14 +120,14 @@ inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool b
     {
         qs[idx][it->second].total += total;
 
-        for (size_t i = 1; i < (now_x * now_y); i++)
+        for (size_t i = 1; i < (w * (now_x - 1) + now_y); i++)
         {
             qs[idx][it->second].cnt[i] += rec.cnt[i];
         }
 
         if (blocked)
         {
-            qs[idx][it->second].cnt[now_x * now_y] += total;
+            qs[idx][it->second].cnt[w * (now_x - 1) + now_y] += total;
         }
     }
 }
@@ -158,7 +158,7 @@ int main()
     int t;
     cin >> t;
 
-    for (size_t iT = 0; iT < t; iT ++)
+    for (size_t iT = 0; iT < t; iT++)
     {
         cin >> h >> w;
 

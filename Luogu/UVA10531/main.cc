@@ -33,6 +33,7 @@ class Record
 public:
     unsigned int state; // 轮廓线段状态
     unsigned int total;
+    unsigned char minUnused;
     unsigned int cnt[31];
 
     Record() {}
@@ -54,6 +55,74 @@ int now_x, now_y;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
+// 最小表示法重编码
+#define recode(ST, UNUSED)             \
+    int bb[10];                        \
+    memset(bb, -1, sizeof(bb));        \
+    int bn = 2;                        \
+    bb[0] = 0;                         \
+    bb[1] = 1;                         \
+    for (int i = 1; i <= w; i++)       \
+    {                                  \
+        int tmp = getVal4St(ST, i);    \
+        if (1 < tmp)                   \
+        {                              \
+            if (0 > bb[tmp])           \
+            {                          \
+                bb[tmp] = bn++;        \
+            }                          \
+            setVal4St(ST, i, bb[tmp]); \
+        }                              \
+    }                                  \
+    UNUSED = bn;
+
+#define getColorCnt(CNT, ST, PLUG)      \
+    for (size_t i = 1; i <= w; i++)     \
+    {                                   \
+        if (PLUG == (getVal4St(ST, i))) \
+        {                               \
+            CNT++;                      \
+        }                               \
+    }
+
+inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool blocked)
+{
+    unsigned int newSt = st;
+    unsigned char minUnused = 0;
+
+    recode(newSt, minUnused)
+
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[idx].find(newSt);
+    if (it == cnts[idx].end())
+    {
+        int pInQ = qTail[idx];
+        // 加入队尾
+        qs[idx][pInQ].state = newSt;
+        qs[idx][pInQ].total = total;
+        qs[idx][pInQ].minUnused = minUnused;
+
+        memcpy(&(qs[idx][pInQ].cnt[1]), &(rec.cnt[1]), sizeof(unsigned int) * now_x * now_y);
+
+        if (blocked)
+        {
+            qs[idx][pInQ].cnt[now_x * now_y] = total;
+        }
+        else
+        {
+            qs[idx][pInQ].cnt[now_x * now_y] = 0;
+        }        
+
+        cnts[idx][newSt] = pInQ;
+        qTail[idx]++;
+    }
+    else
+    {
+        qs[idx][it->second].total += total;
+
+        
+    }
+}
+
 inline void init()
 {
     // 每一个 test 前，初始化
@@ -62,11 +131,12 @@ inline void init()
     qTail[0] = 0;
     qTail[1] = 0;
 
-    now_x = 0;
-    now_y = w;
+    now_x = 1;
+    now_y = 1;
 
-    qs[act][0].state = 3;
-    qs[act][0].total = 0;
+    qs[act][0].state = 1 << ST_BITS;
+    qs[act][0].total = 1;
+    qs[act][0].minUnused = 2;
     memset(qs[act][0].cnt, 0, sizeof(qs[act][0].cnt));
 
     qTail[act]++;
@@ -127,16 +197,92 @@ int main()
             {
                 unsigned int st = qs[act][iQ].state;
                 unsigned int total = qs[act][iQ].total;
-
-                if (1 == now_y)
-                {
-                    st <<= ST_BITS;
-                }
+                unsigned char minUnused = qs[act][iQ].minUnused;
 
                 int left = getVal4St(st, now_y - 1);
                 int up = getVal4St(st, now_y);
 
-                
+                if (up)
+                {
+                    if (0 != flags[now_x][now_y])
+                    {
+                        // 存在障碍物的可能性，障碍物
+                        if (1 == up)
+                        {
+                            int oneCnt = 0;
+                            getColorCnt(oneCnt, st, 1);
+                            if (1 < oneCnt)
+                            {
+                                unsigned int newSt = st;
+                                setVal4St(newSt, now_y, 0);
+
+                                // add st - TBD
+                            }
+                        }
+                        else
+                        {
+                            unsigned int newSt = st;
+                            setVal4St(newSt, now_y, 0);
+
+                            // add st - TBD
+                        }
+                    }
+
+                    if (1 != flags[now_x][now_y])
+                    {
+                        // 不一定百分百障碍物，非障碍物
+                        unsigned int newSt = st;
+
+                        if (left && left != up)
+                        {
+                            if (left > up)
+                            {
+                                swap(left, up);
+                            }
+
+                            // left < up, up ==> left
+                            for (size_t i = 1; i <= w; i++)
+                            {
+                                if (up == (getVal4St(newSt, i)))
+                                {
+                                    setVal4St(newSt, i, left);
+                                }
+                            }
+                        }
+
+                        // add st - TBD
+
+                    }
+                }
+                else
+                {
+                    // 0 == up
+                    if (0 != flags[now_x][now_y])
+                    {
+                        // 存在障碍物的可能性，障碍物
+                        unsigned int newSt = st;
+
+                        // add st - TBD
+                    }
+
+                    if (1 != flags[now_x][now_y])
+                    {
+                        // 不一定百分百障碍物，非障碍物
+                        unsigned int newSt = st;
+
+                        if (left)
+                        {
+                            setVal4St(newSt, now_y, left);
+                        }
+                        else
+                        {
+                            setVal4St(newSt, now_y, minUnused);
+                        }
+
+                        // add st - TBD
+
+                    }
+                }
             }
 
             qTail[act] = 0;

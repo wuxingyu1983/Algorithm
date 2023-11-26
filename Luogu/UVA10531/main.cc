@@ -124,6 +124,136 @@ inline void init()
     qs[act][0].minUnused = 1;
 
     qTail[act]++;
+
+    cnts[0].clear();
+    cnts[1].clear();
+}
+
+inline double func()
+{
+    double ret = 0;
+
+    init();
+
+    while (0 < qTail[act])
+    {
+        int nAct = 1 - act;
+
+        if (w == now_y)
+        {
+            now_x++;
+            now_y = 1;
+
+            if (h < now_x)
+            {
+                // finished
+                unsigned int one = 1 << (w * ST_BITS);
+                unsigned int mask = ST_MASK << (w * ST_BITS);
+
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    unsigned int st = qs[act][iQ].state;
+
+                    if (one == (st & mask))
+                    {
+                        ret += qs[act][iQ].p;
+                    }
+                }
+
+                break;
+            }
+        }
+        else
+        {
+            now_y++;
+        }
+
+        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        {
+            unsigned int st = qs[act][iQ].state;
+            double p = qs[act][iQ].p;
+            unsigned char minUnused = qs[act][iQ].minUnused;
+
+            int left = getVal4St(st, now_y - 1);
+            int up = getVal4St(st, now_y);
+
+            if (fabs(cells[now_x][now_y] - 1.0f) >= 1e-6)
+            {
+                // 可以有非障碍物
+                if (up)
+                {
+                    unsigned int newSt = st;
+
+                    if (left && left != up)
+                    {
+                        if (left > up)
+                        {
+                            swap(left, up);
+                        }
+
+                        // left < up, up ==> left
+                        for (size_t i = 1; i <= w; i++)
+                        {
+                            if (up == (getVal4St(newSt, i)))
+                            {
+                                setVal4St(newSt, i, left);
+                            }
+                        }
+                    }
+
+                    addSts(newSt, p * (1 - cells[now_x][now_y]), qs[act][iQ], nAct);
+                }
+                else
+                {
+                    unsigned int newSt = st;
+
+                    if (left)
+                    {
+                        setVal4St(newSt, now_y, left);
+                    }
+                    else
+                    {
+                        setVal4St(newSt, now_y, minUnused);
+                    }
+
+                    addSts(newSt, p * (1 - cells[now_x][now_y]), qs[act][iQ], nAct);
+                }
+            }
+
+            if (fabs(cells[now_x][now_y] - 0.0f) >= 1e-6)
+            {
+                // 可以有障碍物
+                if (1 < minUnused)
+                {
+                    if (1 == up)
+                    {
+                        int oneCnt = 0;
+                        getColorCnt(oneCnt, st, 1);
+                        if (1 < oneCnt)
+                        {
+                            unsigned int newSt = st;
+                            setVal4St(newSt, now_y, 0);
+
+                            addSts(newSt, p * cells[now_x][now_y], qs[act][iQ], nAct);
+                        }
+                    }
+                    else
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y, 0);
+
+                        addSts(newSt, p * cells[now_x][now_y], qs[act][iQ], nAct);
+                    }
+                }
+            }
+        }
+
+        qTail[act] = 0;
+        cnts[act].clear();
+        act = nAct;
+    }
+
+    return ret;
 }
 
 int main()
@@ -133,6 +263,11 @@ int main()
 
     for (size_t iT = 0; iT < t; iT++)
     {
+        if (iT)
+        {
+            printf("\n");
+        }
+
         cin >> h >> w;
 
         for (size_t row = 1; row <= h; row++)
@@ -142,129 +277,18 @@ int main()
                 cin >> cells[row][col];
             }
         }
+        
+        double sum = func();
 
-        init();
-
-        while (0 < qTail[act])
+        for (size_t row = 1; row <= h; row++)
         {
-            int nAct = 1 - act;
-
-            if (w == now_y)
+            for (size_t col = 1; col <= w; col++)
             {
-                now_x++;
-                now_y = 1;
-
-                if (h < now_x)
-                {
-                    // finished
-                    unsigned int one = 1 << (w * ST_BITS);
-                    unsigned int mask = ST_MASK << (w * ST_BITS);
-                    double total = 0;
-
-                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                    {
-                        unsigned int st = qs[act][iQ].state;
-
-                        if (one == (st & mask))
-                        {
-                            total += qs[act][iQ].p;
-
-                            // TBD
-                        }
-                    }
-
-                    printf("%.6f\n", total);
-                    break;
-                }
+                double cache = cells[row][col];
+                cells[row][col] = 1.0f;
+                printf("%.6lf%c", func() * cache / sum, (col == w) ? '\n' : ' ');
+                cells[row][col] = cache;
             }
-            else
-            {
-                now_y++;
-            }
-
-            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-            {
-                unsigned int st = qs[act][iQ].state;
-                double p = qs[act][iQ].p;
-                unsigned char minUnused = qs[act][iQ].minUnused;
-
-                int left = getVal4St(st, now_y - 1);
-                int up = getVal4St(st, now_y);
-
-                if (fabs(cells[now_x][now_y] - 1.0f) >= 1e-6)
-                {
-                    // 可以有非障碍物
-                    if (up)
-                    {
-                        unsigned int newSt = st;
-
-                        if (left && left != up)
-                        {
-                            if (left > up)
-                            {
-                                swap(left, up);
-                            }
-
-                            // left < up, up ==> left
-                            for (size_t i = 1; i <= w; i++)
-                            {
-                                if (up == (getVal4St(newSt, i)))
-                                {
-                                    setVal4St(newSt, i, left);
-                                }
-                            }
-                        }
-
-                        addSts(newSt, p * (1 - cells[now_x][now_y]), qs[act][iQ], nAct);
-                    }
-                    else
-                    {
-                        unsigned int newSt = st;
-
-                        if (left)
-                        {
-                            setVal4St(newSt, now_y, left);
-                        }
-                        else
-                        {
-                            setVal4St(newSt, now_y, minUnused);
-                        }
-
-                        addSts(newSt, p * (1 - cells[now_x][now_y]), qs[act][iQ], nAct);
-                    }
-                }
-
-                if (fabs(cells[now_x][now_y] - 0.0f) >= 1e-6)
-                {
-                    // 可以有障碍物
-                    if (1 < minUnused)
-                    {
-                        if (1 == up)
-                        {
-                            int oneCnt = 0;
-                            getColorCnt(oneCnt, st, 1);
-                            if (1 < oneCnt)
-                            {
-                                unsigned int newSt = st;
-                                setVal4St(newSt, now_y, 0);
-
-                                addSts(newSt, p * cells[now_x][now_y], qs[act][iQ], nAct);
-                            }
-                        }
-                        else
-                        {
-                            unsigned int newSt = st;
-                            setVal4St(newSt, now_y, 0);
-
-                            addSts(newSt, p * cells[now_x][now_y], qs[act][iQ], nAct);
-                        }
-                    }
-                }
-            }
-
-            qTail[act] = 0;
-            cnts[act].clear();
-            act = nAct;
         }
     }
 

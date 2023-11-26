@@ -26,22 +26,19 @@ using namespace std;
 #define MAX_W 7
 #define ST_BITS 2
 #define ST_MASK 3
-#define QS_SIZE 600000
+#define QS_SIZE 60000
 
 class Record
 {
 public:
     unsigned int state; // 轮廓线段状态
-    unsigned int total;
+    double p;
     unsigned char minUnused;
-    unsigned int cnt[31];
 
     Record() {}
 };
 
-unsigned int output[MAX_H][MAX_W];
-float cells[MAX_H][MAX_W];
-char flags[MAX_H][MAX_W]; // 0 - 概率为0，1 - 概率为1，2 - 概率为其他
+double cells[MAX_H][MAX_W];
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
@@ -86,7 +83,7 @@ int now_x, now_y;
         }                               \
     }
 
-inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool blocked)
+inline void addSts(unsigned int st, double p, Record &rec, int idx)
 {
     unsigned int newSt = st;
     unsigned char minUnused = 0;
@@ -99,36 +96,15 @@ inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool b
         int pInQ = qTail[idx];
         // 加入队尾
         qs[idx][pInQ].state = newSt;
-        qs[idx][pInQ].total = total;
+        qs[idx][pInQ].p = p;
         qs[idx][pInQ].minUnused = minUnused;
-
-        memcpy(&(qs[idx][pInQ].cnt[1]), &(rec.cnt[1]), sizeof(unsigned int) * (w * (now_x - 1) + now_y - 1));
-
-        if (blocked)
-        {
-            qs[idx][pInQ].cnt[w * (now_x - 1) + now_y] = total;
-        }
-        else
-        {
-            qs[idx][pInQ].cnt[w * (now_x - 1) + now_y] = 0;
-        }
 
         cnts[idx][newSt] = pInQ;
         qTail[idx]++;
     }
     else
     {
-        qs[idx][it->second].total += total;
-
-        for (size_t i = 1; i < (w * (now_x - 1) + now_y); i++)
-        {
-            qs[idx][it->second].cnt[i] += rec.cnt[i];
-        }
-
-        if (blocked)
-        {
-            qs[idx][it->second].cnt[w * (now_x - 1) + now_y] += total;
-        }
+        qs[idx][it->second].p += p;
     }
 }
 
@@ -140,15 +116,12 @@ inline void init()
     qTail[0] = 0;
     qTail[1] = 0;
 
-    now_x = 1;
-    now_y = 1;
+    now_x = 0;
+    now_y = w;
 
-    qs[act][0].state = 1 << ST_BITS;
-    qs[act][0].total = 1;
-    qs[act][0].minUnused = 2;
-    memset(qs[act][0].cnt, 0, sizeof(qs[act][0].cnt));
-
-    memset(output, 0, sizeof(output));
+    qs[act][0].state = 0;
+    qs[act][0].p = 1;
+    qs[act][0].minUnused = 1;
 
     qTail[act]++;
 }
@@ -167,19 +140,6 @@ int main()
             for (size_t col = 1; col <= w; col++)
             {
                 cin >> cells[row][col];
-
-                if (fabsf(cells[row][col] - 1.0f) < 0.000001)
-                {
-                    flags[row][col] = 1;
-                }
-                else if (fabsf(cells[row][col] - 0.0f) < 0.000001)
-                {
-                    flags[row][col] = 0;
-                }
-                else
-                {
-                    flags[row][col] = 2;
-                }
             }
         }
 
@@ -207,38 +167,13 @@ int main()
 
                         if (one == (st & mask))
                         {
-                            total += qs[act][iQ].total;
+                            total += qs[act][iQ].p;
 
-                            for (size_t row = 1; row <= h; row++)
-                            {
-                                for (size_t col = 1; col <= w; col++)
-                                {
-                                    output[row][col] += qs[act][iQ].cnt[w * (row - 1) + col];
-                                }
-                            }
+                            // TBD
                         }
                     }
 
-                    for (size_t row = 1; row <= h; row++)
-                    {
-                        for (size_t col = 1; col <= w; col++)
-                        {
-                            double p = output[row][col];
-                            p /= total;
-
-                            if (col < w)
-                            {
-                                printf("%.6f ", p);
-                            }
-                            else
-                            {
-                                printf("%.6f\n", p);
-                            }
-                        }
-                    }
-
-                    printf("\n");
-
+                    printf("%.6f\n", total);
                     break;
                 }
             }
@@ -250,41 +185,17 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 unsigned int st = qs[act][iQ].state;
-                unsigned int total = qs[act][iQ].total;
+                double p = qs[act][iQ].p;
                 unsigned char minUnused = qs[act][iQ].minUnused;
 
                 int left = getVal4St(st, now_y - 1);
                 int up = getVal4St(st, now_y);
 
-                if (up)
+                if (fabs(cells[now_x][now_y] - 1.0f) >= 1e-6)
                 {
-                    if (0 != flags[now_x][now_y])
+                    // 可以有非障碍物
+                    if (up)
                     {
-                        // 存在障碍物的可能性，障碍物
-                        if (1 == up)
-                        {
-                            int oneCnt = 0;
-                            getColorCnt(oneCnt, st, 1);
-                            if (1 < oneCnt)
-                            {
-                                unsigned int newSt = st;
-                                setVal4St(newSt, now_y, 0);
-
-                                addSts(newSt, total, qs[act][iQ], nAct, true);
-                            }
-                        }
-                        else
-                        {
-                            unsigned int newSt = st;
-                            setVal4St(newSt, now_y, 0);
-
-                            addSts(newSt, total, qs[act][iQ], nAct, true);
-                        }
-                    }
-
-                    if (1 != flags[now_x][now_y])
-                    {
-                        // 不一定百分百障碍物，非障碍物
                         unsigned int newSt = st;
 
                         if (left && left != up)
@@ -304,23 +215,10 @@ int main()
                             }
                         }
 
-                        addSts(newSt, total, qs[act][iQ], nAct, false);
+                        addSts(newSt, p * (1 - cells[now_x][now_y]), qs[act][iQ], nAct);
                     }
-                }
-                else
-                {
-                    // 0 == up
-                    if (0 != flags[now_x][now_y])
+                    else
                     {
-                        // 存在障碍物的可能性，障碍物
-                        unsigned int newSt = st;
-
-                        addSts(newSt, total, qs[act][iQ], nAct, true);
-                    }
-
-                    if (1 != flags[now_x][now_y])
-                    {
-                        // 不一定百分百障碍物，非障碍物
                         unsigned int newSt = st;
 
                         if (left)
@@ -332,7 +230,34 @@ int main()
                             setVal4St(newSt, now_y, minUnused);
                         }
 
-                        addSts(newSt, total, qs[act][iQ], nAct, false);
+                        addSts(newSt, p * (1 - cells[now_x][now_y]), qs[act][iQ], nAct);
+                    }
+                }
+
+                if (fabs(cells[now_x][now_y] - 0.0f) >= 1e-6)
+                {
+                    // 可以有障碍物
+                    if (1 < minUnused)
+                    {
+                        if (1 == up)
+                        {
+                            int oneCnt = 0;
+                            getColorCnt(oneCnt, st, 1);
+                            if (1 < oneCnt)
+                            {
+                                unsigned int newSt = st;
+                                setVal4St(newSt, now_y, 0);
+
+                                addSts(newSt, p * cells[now_x][now_y], qs[act][iQ], nAct);
+                            }
+                        }
+                        else
+                        {
+                            unsigned int newSt = st;
+                            setVal4St(newSt, now_y, 0);
+
+                            addSts(newSt, p * cells[now_x][now_y], qs[act][iQ], nAct);
+                        }
                     }
                 }
             }

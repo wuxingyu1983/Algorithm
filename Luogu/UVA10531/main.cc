@@ -26,7 +26,7 @@ using namespace std;
 #define MAX_W 7
 #define ST_BITS 2
 #define ST_MASK 3
-#define QS_SIZE 60000
+#define QS_SIZE 600000
 
 class Record
 {
@@ -102,7 +102,7 @@ inline void addSts(unsigned int st, unsigned total, Record &rec, int idx, bool b
         qs[idx][pInQ].total = total;
         qs[idx][pInQ].minUnused = minUnused;
 
-        memcpy(&(qs[idx][pInQ].cnt[1]), &(rec.cnt[1]), sizeof(unsigned int) * (w * (now_x - 1) + now_y));
+        memcpy(&(qs[idx][pInQ].cnt[1]), &(rec.cnt[1]), sizeof(unsigned int) * (w * (now_x - 1) + now_y - 1));
 
         if (blocked)
         {
@@ -167,6 +167,7 @@ int main()
             for (size_t col = 1; col <= w; col++)
             {
                 cin >> cells[row][col];
+
                 if (fabsf(cells[row][col] - 1.0f) < 0.000001)
                 {
                     flags[row][col] = 1;
@@ -198,7 +199,7 @@ int main()
                     // finished
                     unsigned int one = 1 << (w * ST_BITS);
                     unsigned int mask = ST_MASK << (w * ST_BITS);
-                    unsigned int total = 0;
+                    double total = 0;
 
                     for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                     {
@@ -223,7 +224,7 @@ int main()
                         for (size_t col = 1; col <= w; col++)
                         {
                             double p = output[row][col];
-                            p /= (double)total;
+                            p /= total;
 
                             if (col < w)
                             {

@@ -160,7 +160,174 @@ int main()
                     if (0 < paths[now_x][now_y].size())
                     {
                         // 电源
+                        if (left && up)
+                        {
+                            if (left != up)
+                            {
+                                vector<int> vs;
 
+                                for (size_t i = 0; i < paths[now_x][now_y].size(); i++)
+                                {
+                                    if (left != paths[now_x][now_y][i] && up != paths[now_x][now_y][i])
+                                    {
+                                        vs.push_back(paths[now_x][now_y][i]);
+                                    }
+                                }
+
+                                if (vs.size() + 2 == paths[now_x][now_y].size())
+                                {
+                                    if (0 == vs.size())
+                                    {
+                                        unsigned long long newSt = st;
+                                        setVal4St(newSt, now_y - 1, 0);
+                                        setVal4St(newSt, now_y, 0);
+
+                                        // TBD, addSt
+                                    }
+                                    else if (1 == vs.size())
+                                    {
+                                        if (h > now_x && 0 == cells[now_x + 1][now_y])
+                                        {
+                                            unsigned long long newSt = st;
+                                            setVal4St(newSt, now_y - 1, vs[0]);
+                                            setVal4St(newSt, now_y, 0);
+
+                                            // TBD, addSt
+                                        }
+
+                                        if (w > now_y && 0 == cells[now_x][now_y + 1])
+                                        {
+                                            unsigned long long newSt = st;
+                                            setVal4St(newSt, now_y - 1, 0);
+                                            setVal4St(newSt, now_y, vs[0]);
+
+                                            // TBD, addSt
+                                        }
+                                    }
+                                    else if (2 == vs.size())
+                                    {
+                                        if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                        {
+                                            unsigned long long newSt = st;
+                                            setVal4St(newSt, now_y - 1, vs[0]);
+                                            setVal4St(newSt, now_y, vs[1]);
+
+                                            // TBD, addSt
+
+                                            newSt = st;
+                                            setVal4St(newSt, now_y - 1, vs[1]);
+                                            setVal4St(newSt, now_y, vs[0]);
+
+                                            // TBD, addSt
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (left || up)
+                        {
+                            int val = left + up;
+                            vector<int> vs;
+
+                            for (size_t i = 0; i < paths[now_x][now_y].size(); i++)
+                            {
+                                if (val != paths[now_x][now_y][i])
+                                {
+                                    vs.push_back(paths[now_x][now_y][i]);
+                                }
+                            }
+
+                            if (vs.size() != paths[now_x][now_y].size())
+                            {
+                                if (0 == vs.size())
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, 0);
+                                    setVal4St(newSt, now_y, 0);
+
+                                    // TBD, addSt
+
+                                }
+                                else if (1 == vs.size())
+                                {
+                                    if (h > now_x && 0 == cells[now_x + 1][now_y])
+                                    {
+                                        unsigned long long newSt = st;
+                                        setVal4St(newSt, now_y - 1, vs[0]);
+                                        setVal4St(newSt, now_y, 0);
+
+                                        // TBD, addSt
+                                    }
+
+                                    if (w > now_y && 0 == cells[now_x][now_y + 1])
+                                    {
+                                        unsigned long long newSt = st;
+                                        setVal4St(newSt, now_y - 1, 0);
+                                        setVal4St(newSt, now_y, vs[0]);
+
+                                        // TBD, addSt
+                                    }
+                                }
+                                else if (2 == vs.size())
+                                {
+                                    if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                    {
+                                        unsigned long long newSt = st;
+                                        setVal4St(newSt, now_y - 1, vs[0]);
+                                        setVal4St(newSt, now_y, vs[1]);
+
+                                        // TBD, addSt
+
+                                        newSt = st;
+                                        setVal4St(newSt, now_y - 1, vs[1]);
+                                        setVal4St(newSt, now_y, vs[0]);
+
+                                        // TBD, addSt
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // 0 == left && 0 == up
+                            if (1 == paths[now_x][now_y].size())
+                            {
+                                if (h > now_x && 0 == cells[now_x + 1][now_y])
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
+                                    setVal4St(newSt, now_y, 0);
+
+                                    // TBD, addSt
+                                }
+
+                                if (w > now_y && 0 == cells[now_x][now_y + 1])
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, 0);
+                                    setVal4St(newSt, now_y, paths[now_x][now_y][0]);
+
+                                    // TBD, addSt
+                                }
+                            }
+                            else if (2 == paths[now_x][now_y].size())
+                            {
+                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
+                                    setVal4St(newSt, now_y, paths[now_x][now_y][1]);
+
+                                    // TBD, addSt
+
+                                    newSt = st;
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][1]);
+                                    setVal4St(newSt, now_y, paths[now_x][now_y][0]);
+
+                                    // TBD, addSt
+                                }
+                            }
+                        }
                     }
                     else
                     {

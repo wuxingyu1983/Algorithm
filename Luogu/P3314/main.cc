@@ -28,7 +28,7 @@ using namespace std;
 #define MAX_K 11
 #define ST_BITS 4
 #define ST_MASK 15 
-#define QS_SIZE 600000
+#define QS_SIZE 1000000
 #define MOD 25619849
 
 class Record
@@ -385,11 +385,14 @@ int main()
                                 {
                                     for (size_t color = 1; color <= k; color++)
                                     {
-                                        unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, color);
-                                        setVal4St(newSt, now_y, color);
+                                        if (color != left)
+                                        {
+                                            unsigned long long newSt = st;
+                                            setVal4St(newSt, now_y - 1, color);
+                                            setVal4St(newSt, now_y, color);
 
-                                        addSts(newSt, len + 2, cnt, nAct);
+                                            addSts(newSt, len + 2, cnt, nAct);
+                                        }
                                     }
                                 }
                             }
@@ -398,11 +401,7 @@ int main()
                                 if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                                 {
                                     // left ==> down, up ==> right
-                                    unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, left);
-                                    setVal4St(newSt, now_y, up);
-
-                                    addSts(newSt, len + 2, cnt, nAct);
+                                    addSts(st, len + 2, cnt, nAct);
                                 }
                             }
                         }

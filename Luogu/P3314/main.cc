@@ -28,7 +28,7 @@ using namespace std;
 #define MAX_K 11
 #define ST_BITS 4
 #define ST_MASK 15 
-#define QS_SIZE 60000
+#define QS_SIZE 600000
 #define MOD 25619849
 
 class Record
@@ -111,7 +111,150 @@ int main()
             paths[x + 1][y + 1].push_back(i);
         }
 
-        
+        init();
+
+        while (0 < qTail[act])
+        {
+            int nAct = 1 - act;
+
+            if (w == now_y)
+            {
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
+                {
+                    // finished
+                    // TBD
+
+                    break;
+                }
+            }
+            else
+            {
+                now_y++;
+            }
+
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned long long st = qs[act][iQ].state;
+                unsigned int len = qs[act][iQ].len;
+                unsigned int cnt = qs[act][iQ].cnt;
+
+                if (1 == now_y)
+                {
+                    st <<= ST_BITS;
+                }
+
+                if (1 == cells[now_x][now_y])
+                {
+                    // 障碍物
+                    // do nothing
+
+                }
+                else
+                {
+                    int left = getVal4St(st, now_y - 1);
+                    int up = getVal4St(st, now_y);
+
+                    if (0 < paths[now_x][now_y].size())
+                    {
+                        // 电源
+
+                    }
+                    else
+                    {
+                        // 普通格子
+                        if (left && up)
+                        {
+                            if (left == up)
+                            {
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, 0);
+                                    setVal4St(newSt, now_y, 0);
+
+                                    // TBD, addSt
+                                }
+
+                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                {
+                                    for (size_t color = 1; color <= k; color++)
+                                    {
+                                        unsigned long long newSt = st;
+                                        setVal4St(newSt, now_y - 1, color);
+                                        setVal4St(newSt, now_y, color);
+
+                                        // TBD, addSt
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                {
+                                    // left ==> down, up ==> right
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, left);
+                                    setVal4St(newSt, now_y, up);
+
+                                    // TBD, addSt
+                                }
+                            }
+                        }
+                        else if (left || up)
+                        {
+                            int val = left + up;
+                            if (h > now_x && 0 == cells[now_x + 1][now_y])
+                            {
+                                unsigned long long newSt = st;
+                                setVal4St(newSt, now_y - 1, val);
+                                setVal4St(newSt, now_y, 0);
+
+                                // TBD, addSt
+
+                            }
+
+                            if (w > now_y && 0 == cells[now_x][now_y + 1])
+                            {
+                                unsigned long long newSt = st;
+                                setVal4St(newSt, now_y - 1, 0);
+                                setVal4St(newSt, now_y, val);
+
+                                // TBD, addSt
+                            }
+                        }
+                        else
+                        {
+                            // 0 == left && 0 == up
+                            {
+                                unsigned long long newSt = st;
+                                setVal4St(newSt, now_y - 1, 0);
+                                setVal4St(newSt, now_y, 0);
+
+                                // TBD, addSt
+                            }
+
+                            if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                            {
+                                for (size_t color = 1; color <= k; color++)
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, color);
+                                    setVal4St(newSt, now_y, color);
+
+                                    // TBD, addSt
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
     }
 
     return 0;

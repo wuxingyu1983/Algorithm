@@ -158,9 +158,9 @@ int main()
                     {
                         if (0 == qs[act][iQ].state)
                         {
-                            if (0 > len || len < qs[act][iQ].len)
+                            if (0 > len || len > qs[act][iQ].len - k)
                             {
-                                len = qs[act][iQ].len;
+                                len = qs[act][iQ].len - k;
                                 cnt = qs[act][iQ].cnt;
                             }
                         }
@@ -220,7 +220,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, 0);
                                         setVal4St(newSt, now_y, 0);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 2, cnt, nAct);
                                     }
                                     else if (1 == vs.size())
                                     {
@@ -230,7 +230,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[0]);
                                             setVal4St(newSt, now_y, 0);
 
-                                            addSts(newSt, len + 1, cnt, nAct);
+                                            addSts(newSt, len + 3, cnt, nAct);
                                         }
 
                                         if (w > now_y && 0 == cells[now_x][now_y + 1])
@@ -239,7 +239,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, 0);
                                             setVal4St(newSt, now_y, vs[0]);
 
-                                            addSts(newSt, len + 1, cnt, nAct);
+                                            addSts(newSt, len + 3, cnt, nAct);
                                         }
                                     }
                                     else if (2 == vs.size())
@@ -250,13 +250,13 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[0]);
                                             setVal4St(newSt, now_y, vs[1]);
 
-                                            addSts(newSt, len + 1, cnt, nAct);
+                                            addSts(newSt, len + 4, cnt, nAct);
 
                                             newSt = st;
                                             setVal4St(newSt, now_y - 1, vs[1]);
                                             setVal4St(newSt, now_y, vs[0]);
 
-                                            addSts(newSt, len + 1, cnt, nAct);
+                                            addSts(newSt, len + 4, cnt, nAct);
                                         }
                                     }
                                 }
@@ -293,7 +293,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, vs[0]);
                                         setVal4St(newSt, now_y, 0);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 2, cnt, nAct);
                                     }
 
                                     if (w > now_y && 0 == cells[now_x][now_y + 1])
@@ -302,7 +302,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, 0);
                                         setVal4St(newSt, now_y, vs[0]);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 2, cnt, nAct);
                                     }
                                 }
                                 else if (2 == vs.size())
@@ -313,13 +313,13 @@ int main()
                                         setVal4St(newSt, now_y - 1, vs[0]);
                                         setVal4St(newSt, now_y, vs[1]);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 3, cnt, nAct);
 
                                         newSt = st;
                                         setVal4St(newSt, now_y - 1, vs[1]);
                                         setVal4St(newSt, now_y, vs[0]);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 3, cnt, nAct);
                                     }
                                 }
                             }
@@ -355,13 +355,13 @@ int main()
                                     setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
                                     setVal4St(newSt, now_y, paths[now_x][now_y][1]);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, len + 2, cnt, nAct);
 
                                     newSt = st;
                                     setVal4St(newSt, now_y - 1, paths[now_x][now_y][1]);
                                     setVal4St(newSt, now_y, paths[now_x][now_y][0]);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, len + 2, cnt, nAct);
                                 }
                             }
                         }
@@ -389,7 +389,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, color);
                                         setVal4St(newSt, now_y, color);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 2, cnt, nAct);
                                     }
                                 }
                             }
@@ -402,7 +402,7 @@ int main()
                                     setVal4St(newSt, now_y - 1, left);
                                     setVal4St(newSt, now_y, up);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, len + 2, cnt, nAct);
                                 }
                             }
                         }

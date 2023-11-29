@@ -184,6 +184,19 @@ int main()
                 now_y++;
             }
 
+            if (1 == cells[now_x][now_y])
+            {
+                if (1 == now_y)
+                {
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        qs[act][iQ].state <<= ST_BITS;
+                    }
+                }
+
+                continue;
+            }
+
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 unsigned long long st = qs[act][iQ].state;
@@ -195,109 +208,27 @@ int main()
                     st <<= ST_BITS;
                 }
 
-                if (1 == cells[now_x][now_y])
-                {
-                    // 障碍物
-                    addSts(st, len, cnt, nAct);
-                }
-                else
-                {
-                    int left = getVal4St(st, now_y - 1);
-                    int up = getVal4St(st, now_y);
+                int left = getVal4St(st, now_y - 1);
+                int up = getVal4St(st, now_y);
 
-                    if (0 < flags[now_x][now_y][0])
+                if (0 < flags[now_x][now_y][0])
+                {
+                    // 电源
+                    if (left && up)
                     {
-                        // 电源
-                        if (left && up)
+                        if (left != up)
                         {
-                            if (left != up)
-                            {
-                                vector<int> vs;
-
-                                for (size_t i = 0; i < paths[now_x][now_y].size(); i++)
-                                {
-                                    if (left != paths[now_x][now_y][i] && up != paths[now_x][now_y][i])
-                                    {
-                                        vs.push_back(paths[now_x][now_y][i]);
-                                    }
-                                }
-
-                                if (vs.size() + 2 == paths[now_x][now_y].size())
-                                {
-                                    if (0 == vs.size())
-                                    {
-                                        unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, 0);
-                                        setVal4St(newSt, now_y, 0);
-
-                                        addSts(newSt, len + 2, cnt, nAct);
-                                    }
-                                    else if (1 == vs.size())
-                                    {
-                                        if (h > now_x && 0 == cells[now_x + 1][now_y])
-                                        {
-                                            if (CHECK(flags[now_x + 1][now_y], vs[0]))
-                                            {
-                                                unsigned long long newSt = st;
-                                                setVal4St(newSt, now_y - 1, vs[0]);
-                                                setVal4St(newSt, now_y, 0);
-
-                                                addSts(newSt, len + 3, cnt, nAct);
-                                            }
-                                        }
-
-                                        if (w > now_y && 0 == cells[now_x][now_y + 1])
-                                        {
-                                            if (CHECK(flags[now_x][now_y + 1], vs[0]))
-                                            {
-                                                unsigned long long newSt = st;
-                                                setVal4St(newSt, now_y - 1, 0);
-                                                setVal4St(newSt, now_y, vs[0]);
-
-                                                addSts(newSt, len + 3, cnt, nAct);
-                                            }
-                                        }
-                                    }
-                                    else if (2 == vs.size())
-                                    {
-                                        if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
-                                        {
-                                            if (CHECK(flags[now_x + 1][now_y], vs[0]) && CHECK(flags[now_x][now_y + 1], vs[1]))
-                                            {
-                                                unsigned long long newSt = st;
-                                                setVal4St(newSt, now_y - 1, vs[0]);
-                                                setVal4St(newSt, now_y, vs[1]);
-
-                                                addSts(newSt, len + 4, cnt, nAct);
-                                            }
-
-                                            if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
-                                            {
-                                                unsigned long long newSt = st;
-                                                setVal4St(newSt, now_y - 1, vs[1]);
-                                                setVal4St(newSt, now_y, vs[0]);
-
-                                                addSts(newSt, len + 4, cnt, nAct);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (left || up)
-                        {
-                            int val = left + up;
                             vector<int> vs;
 
                             for (size_t i = 0; i < paths[now_x][now_y].size(); i++)
                             {
-                                if (val != paths[now_x][now_y][i])
+                                if (left != paths[now_x][now_y][i] && up != paths[now_x][now_y][i])
                                 {
                                     vs.push_back(paths[now_x][now_y][i]);
                                 }
                             }
 
-                            if (vs.size() + 1 == paths[now_x][now_y].size())
+                            if (vs.size() + 2 == paths[now_x][now_y].size())
                             {
                                 if (0 == vs.size())
                                 {
@@ -305,7 +236,7 @@ int main()
                                     setVal4St(newSt, now_y - 1, 0);
                                     setVal4St(newSt, now_y, 0);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, len + 2, cnt, nAct);
                                 }
                                 else if (1 == vs.size())
                                 {
@@ -317,7 +248,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[0]);
                                             setVal4St(newSt, now_y, 0);
 
-                                            addSts(newSt, len + 2, cnt, nAct);
+                                            addSts(newSt, len + 3, cnt, nAct);
                                         }
                                     }
 
@@ -329,7 +260,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, 0);
                                             setVal4St(newSt, now_y, vs[0]);
 
-                                            addSts(newSt, len + 2, cnt, nAct);
+                                            addSts(newSt, len + 3, cnt, nAct);
                                         }
                                     }
                                 }
@@ -343,7 +274,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[0]);
                                             setVal4St(newSt, now_y, vs[1]);
 
-                                            addSts(newSt, len + 3, cnt, nAct);
+                                            addSts(newSt, len + 4, cnt, nAct);
                                         }
 
                                         if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
@@ -352,61 +283,82 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[1]);
                                             setVal4St(newSt, now_y, vs[0]);
 
-                                            addSts(newSt, len + 3, cnt, nAct);
+                                            addSts(newSt, len + 4, cnt, nAct);
                                         }
                                     }
                                 }
                             }
                         }
-                        else
+                    }
+                    else if (left || up)
+                    {
+                        int val = left + up;
+                        vector<int> vs;
+
+                        for (size_t i = 0; i < paths[now_x][now_y].size(); i++)
                         {
-                            // 0 == left && 0 == up
-                            if (1 == paths[now_x][now_y].size())
+                            if (val != paths[now_x][now_y][i])
+                            {
+                                vs.push_back(paths[now_x][now_y][i]);
+                            }
+                        }
+
+                        if (vs.size() + 1 == paths[now_x][now_y].size())
+                        {
+                            if (0 == vs.size())
+                            {
+                                unsigned long long newSt = st;
+                                setVal4St(newSt, now_y - 1, 0);
+                                setVal4St(newSt, now_y, 0);
+
+                                addSts(newSt, len + 1, cnt, nAct);
+                            }
+                            else if (1 == vs.size())
                             {
                                 if (h > now_x && 0 == cells[now_x + 1][now_y])
                                 {
-                                    if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][0]))
+                                    if (CHECK(flags[now_x + 1][now_y], vs[0]))
                                     {
                                         unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
+                                        setVal4St(newSt, now_y - 1, vs[0]);
                                         setVal4St(newSt, now_y, 0);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 2, cnt, nAct);
                                     }
                                 }
 
                                 if (w > now_y && 0 == cells[now_x][now_y + 1])
                                 {
-                                    if (CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][0]))
+                                    if (CHECK(flags[now_x][now_y + 1], vs[0]))
                                     {
                                         unsigned long long newSt = st;
                                         setVal4St(newSt, now_y - 1, 0);
-                                        setVal4St(newSt, now_y, paths[now_x][now_y][0]);
+                                        setVal4St(newSt, now_y, vs[0]);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                        addSts(newSt, len + 2, cnt, nAct);
                                     }
                                 }
                             }
-                            else if (2 == paths[now_x][now_y].size())
+                            else if (2 == vs.size())
                             {
                                 if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                                 {
-                                    if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][0]) && CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][1]))
+                                    if (CHECK(flags[now_x + 1][now_y], vs[0]) && CHECK(flags[now_x][now_y + 1], vs[1]))
                                     {
                                         unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
-                                        setVal4St(newSt, now_y, paths[now_x][now_y][1]);
+                                        setVal4St(newSt, now_y - 1, vs[0]);
+                                        setVal4St(newSt, now_y, vs[1]);
 
-                                        addSts(newSt, len + 2, cnt, nAct);
+                                        addSts(newSt, len + 3, cnt, nAct);
                                     }
 
-                                    if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][1]) && CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][0]))
+                                    if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
                                     {
                                         unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, paths[now_x][now_y][1]);
-                                        setVal4St(newSt, now_y, paths[now_x][now_y][0]);
+                                        setVal4St(newSt, now_y - 1, vs[1]);
+                                        setVal4St(newSt, now_y, vs[0]);
 
-                                        addSts(newSt, len + 2, cnt, nAct);
+                                        addSts(newSt, len + 3, cnt, nAct);
                                     }
                                 }
                             }
@@ -414,58 +366,15 @@ int main()
                     }
                     else
                     {
-                        // 普通格子
-                        if (left && up)
+                        // 0 == left && 0 == up
+                        if (1 == paths[now_x][now_y].size())
                         {
-                            if (left == up)
-                            {
-                                {
-                                    unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, 0);
-                                    setVal4St(newSt, now_y, 0);
-
-                                    addSts(newSt, len + 1, cnt, nAct);
-                                }
-
-                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
-                                {
-                                    for (size_t color = 1; color <= k; color++)
-                                    {
-                                        if (color != left)
-                                        {
-                                            if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
-                                            {
-                                                unsigned long long newSt = st;
-                                                setVal4St(newSt, now_y - 1, color);
-                                                setVal4St(newSt, now_y, color);
-
-                                                addSts(newSt, len + 2, cnt, nAct);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
-                                {
-                                    // left ==> down, up ==> right
-                                    if (CHECK(flags[now_x + 1][now_y], left) && CHECK(flags[now_x][now_y + 1], up))
-                                    {
-                                        addSts(st, len + 2, cnt, nAct);
-                                    }
-                                }
-                            }
-                        }
-                        else if (left || up)
-                        {
-                            int val = left + up;
                             if (h > now_x && 0 == cells[now_x + 1][now_y])
                             {
-                                if (CHECK(flags[now_x + 1][now_y], val))
+                                if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][0]))
                                 {
                                     unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, val);
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
                                     setVal4St(newSt, now_y, 0);
 
                                     addSts(newSt, len + 1, cnt, nAct);
@@ -474,36 +383,132 @@ int main()
 
                             if (w > now_y && 0 == cells[now_x][now_y + 1])
                             {
-                                if (CHECK(flags[now_x][now_y + 1], val))
+                                if (CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][0]))
                                 {
                                     unsigned long long newSt = st;
                                     setVal4St(newSt, now_y - 1, 0);
-                                    setVal4St(newSt, now_y, val);
+                                    setVal4St(newSt, now_y, paths[now_x][now_y][0]);
 
                                     addSts(newSt, len + 1, cnt, nAct);
                                 }
                             }
                         }
-                        else
+                        else if (2 == paths[now_x][now_y].size())
                         {
-                            // 0 == left && 0 == up
+                            if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                             {
-                                // do nothing
-                                addSts(st, len, cnt, nAct);
+                                if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][0]) && CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][1]))
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
+                                    setVal4St(newSt, now_y, paths[now_x][now_y][1]);
+
+                                    addSts(newSt, len + 2, cnt, nAct);
+                                }
+
+                                if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][1]) && CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][0]))
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][1]);
+                                    setVal4St(newSt, now_y, paths[now_x][now_y][0]);
+
+                                    addSts(newSt, len + 2, cnt, nAct);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // 普通格子
+                    if (left && up)
+                    {
+                        if (left == up)
+                        {
+                            {
+                                unsigned long long newSt = st;
+                                setVal4St(newSt, now_y - 1, 0);
+                                setVal4St(newSt, now_y, 0);
+
+                                addSts(newSt, len + 1, cnt, nAct);
                             }
 
                             if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                             {
                                 for (size_t color = 1; color <= k; color++)
                                 {
-                                    if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
+                                    if (color != left)
                                     {
-                                        unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, color);
-                                        setVal4St(newSt, now_y, color);
+                                        if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
+                                        {
+                                            unsigned long long newSt = st;
+                                            setVal4St(newSt, now_y - 1, color);
+                                            setVal4St(newSt, now_y, color);
 
-                                        addSts(newSt, len + 1, cnt, nAct);
+                                            addSts(newSt, len + 2, cnt, nAct);
+                                        }
                                     }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                            {
+                                // left ==> down, up ==> right
+                                if (CHECK(flags[now_x + 1][now_y], left) && CHECK(flags[now_x][now_y + 1], up))
+                                {
+                                    addSts(st, len + 2, cnt, nAct);
+                                }
+                            }
+                        }
+                    }
+                    else if (left || up)
+                    {
+                        int val = left + up;
+                        if (h > now_x && 0 == cells[now_x + 1][now_y])
+                        {
+                            if (CHECK(flags[now_x + 1][now_y], val))
+                            {
+                                unsigned long long newSt = st;
+                                setVal4St(newSt, now_y - 1, val);
+                                setVal4St(newSt, now_y, 0);
+
+                                addSts(newSt, len + 1, cnt, nAct);
+                            }
+                        }
+
+                        if (w > now_y && 0 == cells[now_x][now_y + 1])
+                        {
+                            if (CHECK(flags[now_x][now_y + 1], val))
+                            {
+                                unsigned long long newSt = st;
+                                setVal4St(newSt, now_y - 1, 0);
+                                setVal4St(newSt, now_y, val);
+
+                                addSts(newSt, len + 1, cnt, nAct);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // 0 == left && 0 == up
+                        {
+                            // do nothing
+                            addSts(st, len, cnt, nAct);
+                        }
+
+                        if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                        {
+                            for (size_t color = 1; color <= k; color++)
+                            {
+                                if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, color);
+                                    setVal4St(newSt, now_y, color);
+
+                                    addSts(newSt, len + 1, cnt, nAct);
                                 }
                             }
                         }

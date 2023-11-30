@@ -54,9 +54,9 @@ int now_x, now_y;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
-#define setVal4St(ST, POS, VAL)                                  \
-    ST &= ~(((unsigned long long)ST_MASK) << ((POS) * ST_BITS)); \
-    if (VAL)                                                     \
+#define setVal4St(ST, POS, VAL)                              \
+    ST &= ~(((unsigned long long)255) << ((POS) * ST_BITS)); \
+    if (VAL)                                                 \
         ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
 
 #define addSts(ST, BITS, LEN, CNT, IDX)                                                     \
@@ -258,7 +258,6 @@ int main()
                                 {
                                     unsigned long long newSt = st;
                                     setVal4St(newSt, now_y - 1, 0);
-                                    setVal4St(newSt, now_y, 0);
 
                                     addSts(newSt, newBits, len + 2, cnt, nAct);
                                 }
@@ -270,7 +269,6 @@ int main()
                                         {
                                             unsigned long long newSt = st;
                                             setVal4St(newSt, now_y - 1, vs[0]);
-                                            setVal4St(newSt, now_y, 0);
 
                                             addSts(newSt, newBits, len + 3, cnt, nAct);
                                         }
@@ -281,8 +279,7 @@ int main()
                                         if (CHECK(flags[now_x][now_y + 1], vs[0]))
                                         {
                                             unsigned long long newSt = st;
-                                            setVal4St(newSt, now_y - 1, 0);
-                                            setVal4St(newSt, now_y, vs[0]);
+                                            setVal4St(newSt, now_y - 1, vs[0] << ST_BITS);
 
                                             addSts(newSt, newBits, len + 3, cnt, nAct);
                                         }
@@ -295,8 +292,7 @@ int main()
                                         if (CHECK(flags[now_x + 1][now_y], vs[0]) && CHECK(flags[now_x][now_y + 1], vs[1]))
                                         {
                                             unsigned long long newSt = st;
-                                            setVal4St(newSt, now_y - 1, vs[0]);
-                                            setVal4St(newSt, now_y, vs[1]);
+                                            setVal4St(newSt, now_y - 1, vs[0] + (vs[1] << ST_BITS));
 
                                             addSts(newSt, newBits, len + 4, cnt, nAct);
                                         }
@@ -304,8 +300,7 @@ int main()
                                         if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
                                         {
                                             unsigned long long newSt = st;
-                                            setVal4St(newSt, now_y - 1, vs[1]);
-                                            setVal4St(newSt, now_y, vs[0]);
+                                            setVal4St(newSt, now_y - 1, vs[1] + (vs[0] << ST_BITS));
 
                                             addSts(newSt, newBits, len + 4, cnt, nAct);
                                         }
@@ -339,7 +334,6 @@ int main()
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, 0);
-                                setVal4St(newSt, now_y, 0);
 
                                 addSts(newSt, newBits, len + 1, cnt, nAct);
                             }
@@ -351,7 +345,6 @@ int main()
                                     {
                                         unsigned long long newSt = st;
                                         setVal4St(newSt, now_y - 1, vs[0]);
-                                        setVal4St(newSt, now_y, 0);
 
                                         addSts(newSt, newBits, len + 2, cnt, nAct);
                                     }
@@ -362,8 +355,7 @@ int main()
                                     if (CHECK(flags[now_x][now_y + 1], vs[0]))
                                     {
                                         unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, 0);
-                                        setVal4St(newSt, now_y, vs[0]);
+                                        setVal4St(newSt, now_y - 1, vs[0] << ST_BITS);
 
                                         addSts(newSt, newBits, len + 2, cnt, nAct);
                                     }
@@ -376,8 +368,7 @@ int main()
                                     if (CHECK(flags[now_x + 1][now_y], vs[0]) && CHECK(flags[now_x][now_y + 1], vs[1]))
                                     {
                                         unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, vs[0]);
-                                        setVal4St(newSt, now_y, vs[1]);
+                                        setVal4St(newSt, now_y - 1, vs[0] + (vs[1] << ST_BITS));
 
                                         addSts(newSt, newBits, len + 3, cnt, nAct);
                                     }
@@ -385,8 +376,7 @@ int main()
                                     if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
                                     {
                                         unsigned long long newSt = st;
-                                        setVal4St(newSt, now_y - 1, vs[1]);
-                                        setVal4St(newSt, now_y, vs[0]);
+                                        setVal4St(newSt, now_y - 1, vs[1] + (vs[0] << ST_BITS));
 
                                         addSts(newSt, newBits, len + 3, cnt, nAct);
                                     }
@@ -405,7 +395,6 @@ int main()
                                 {
                                     unsigned long long newSt = st;
                                     setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
-                                    setVal4St(newSt, now_y, 0);
 
                                     addSts(newSt, bits, len + 1, cnt, nAct);
                                 }
@@ -416,8 +405,7 @@ int main()
                                 if (CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][0]))
                                 {
                                     unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, 0);
-                                    setVal4St(newSt, now_y, paths[now_x][now_y][0]);
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][0] << ST_BITS);
 
                                     addSts(newSt, bits, len + 1, cnt, nAct);
                                 }
@@ -430,8 +418,7 @@ int main()
                                 if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][0]) && CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][1]))
                                 {
                                     unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
-                                    setVal4St(newSt, now_y, paths[now_x][now_y][1]);
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][0] + (paths[now_x][now_y][1] << ST_BITS));
 
                                     addSts(newSt, bits, len + 2, cnt, nAct);
                                 }
@@ -439,8 +426,7 @@ int main()
                                 if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][1]) && CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][0]))
                                 {
                                     unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][1]);
-                                    setVal4St(newSt, now_y, paths[now_x][now_y][0]);
+                                    setVal4St(newSt, now_y - 1, paths[now_x][now_y][1] + (paths[now_x][now_y][0] << ST_BITS));
 
                                     addSts(newSt, bits, len + 2, cnt, nAct);
                                 }
@@ -472,7 +458,6 @@ int main()
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, 0);
-                                setVal4St(newSt, now_y, 0);
 
                                 addSts(newSt, newBits, len + 1, cnt, nAct);
                             }
@@ -486,8 +471,7 @@ int main()
                                         if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
                                         {
                                             unsigned long long newSt = st;
-                                            setVal4St(newSt, now_y - 1, color);
-                                            setVal4St(newSt, now_y, color);
+                                            setVal4St(newSt, now_y - 1, color + (color << ST_BITS));
 
                                             addSts(newSt, newBits, len + 2, cnt, nAct);
                                         }
@@ -516,7 +500,6 @@ int main()
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, val);
-                                setVal4St(newSt, now_y, 0);
 
                                 addSts(newSt, bits, len + 1, cnt, nAct);
                             }
@@ -527,8 +510,7 @@ int main()
                             if (CHECK(flags[now_x][now_y + 1], val))
                             {
                                 unsigned long long newSt = st;
-                                setVal4St(newSt, now_y - 1, 0);
-                                setVal4St(newSt, now_y, val);
+                                setVal4St(newSt, now_y - 1, val << ST_BITS);
 
                                 addSts(newSt, bits, len + 1, cnt, nAct);
                             }
@@ -549,8 +531,7 @@ int main()
                                 if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color) && 0 == (tmpBits & 1))
                                 {
                                     unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, color);
-                                    setVal4St(newSt, now_y, color);
+                                    setVal4St(newSt, now_y - 1, color + (color << ST_BITS));
 
                                     addSts(newSt, bits, len + 1, cnt, nAct);
                                 }

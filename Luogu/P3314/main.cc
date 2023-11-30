@@ -28,13 +28,14 @@ using namespace std;
 #define MAX_K 11
 #define ST_BITS 4
 #define ST_MASK 15
-#define QS_SIZE 600000
+#define QS_SIZE 1000000
 #define MOD 25619849
 
 class Record
 {
 public:
     unsigned long long state; // 轮廓线段状态
+    unsigned short bits;
     unsigned int len;
     unsigned int cnt;
 
@@ -58,31 +59,33 @@ int now_x, now_y;
     if (VAL)                                                     \
         ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
 
-#define addSts(ST, LEN, CNT, IDX)                                                          \
-    {                                                                                      \
-        unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX].find(ST); \
-        if (it == cnts[IDX].end())                                                         \
-        {                                                                                  \
-            int pInQ = qTail[IDX];                                                         \
-            qs[IDX][pInQ].state = ST;                                                      \
-            qs[IDX][pInQ].len = LEN;                                                       \
-            qs[IDX][pInQ].cnt = CNT;                                                       \
-            cnts[IDX][ST] = pInQ;                                                          \
-            qTail[IDX]++;                                                                  \
-        }                                                                                  \
-        else                                                                               \
-        {                                                                                  \
-            if (LEN < qs[IDX][it->second].len)                                             \
-            {                                                                              \
-                qs[IDX][it->second].len = LEN;                                             \
-                qs[IDX][it->second].cnt = CNT;                                             \
-            }                                                                              \
-            else if (LEN == qs[IDX][it->second].len)                                       \
-            {                                                                              \
-                qs[IDX][it->second].cnt += CNT;                                            \
-                qs[IDX][it->second].cnt %= MOD;                                            \
-            }                                                                              \
-        }                                                                                  \
+#define addSts(ST, BITS, LEN, CNT, IDX)                                                     \
+    {                                                                                       \
+        unsigned long long key = (ST << MAX_K) + BITS;                                      \
+        unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX].find(key); \
+        if (it == cnts[IDX].end())                                                          \
+        {                                                                                   \
+            int pInQ = qTail[IDX];                                                          \
+            qs[IDX][pInQ].state = ST;                                                       \
+            qs[IDX][pInQ].bits = BITS;                                                      \
+            qs[IDX][pInQ].len = LEN;                                                        \
+            qs[IDX][pInQ].cnt = CNT;                                                        \
+            cnts[IDX][key] = pInQ;                                                          \
+            qTail[IDX]++;                                                                   \
+        }                                                                                   \
+        else                                                                                \
+        {                                                                                   \
+            if (LEN < qs[IDX][it->second].len)                                              \
+            {                                                                               \
+                qs[IDX][it->second].len = LEN;                                              \
+                qs[IDX][it->second].cnt = CNT;                                              \
+            }                                                                               \
+            else if (LEN == qs[IDX][it->second].len)                                        \
+            {                                                                               \
+                qs[IDX][it->second].cnt += CNT;                                             \
+                qs[IDX][it->second].cnt %= MOD;                                             \
+            }                                                                               \
+        }                                                                                   \
     }
 
 #define CHECK(FLAG, VAL) \
@@ -105,6 +108,7 @@ inline void init()
     now_y = w;
 
     qs[act][0].state = 0;
+    qs[act][0].bits = 0;
     qs[act][0].len = 0;
     qs[act][0].cnt = 1;
 
@@ -200,6 +204,7 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 unsigned long long st = qs[act][iQ].state;
+                unsigned short bits = qs[act][iQ].bits;
                 unsigned int len = qs[act][iQ].len;
                 unsigned int cnt = qs[act][iQ].cnt;
 
@@ -213,11 +218,30 @@ int main()
 
                 if (0 < flags[now_x][now_y][0])
                 {
+                    unsigned char colorCnts[MAX_K];
+                    memset(colorCnts, 0, sizeof(colorCnts));
+
+                    for (size_t i = 0; i <= w; i++)
+                    {
+                        colorCnts[getVal4St(st, i)] ++;
+                    }
+
                     // 电源
                     if (left && up)
                     {
                         if (left != up)
                         {
+                            unsigned short newBits = bits;
+                            if (1 == colorCnts[left])
+                            {
+                                newBits |= 1 << left;
+                            }
+
+                            if (1 == colorCnts[up])
+                            {
+                                newBits |= 1 << up;
+                            }
+
                             vector<int> vs;
 
                             for (size_t i = 0; i < paths[now_x][now_y].size(); i++)
@@ -236,7 +260,7 @@ int main()
                                     setVal4St(newSt, now_y - 1, 0);
                                     setVal4St(newSt, now_y, 0);
 
-                                    addSts(newSt, len + 2, cnt, nAct);
+                                    addSts(newSt, newBits, len + 2, cnt, nAct);
                                 }
                                 else if (1 == vs.size())
                                 {
@@ -248,7 +272,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[0]);
                                             setVal4St(newSt, now_y, 0);
 
-                                            addSts(newSt, len + 3, cnt, nAct);
+                                            addSts(newSt, newBits, len + 3, cnt, nAct);
                                         }
                                     }
 
@@ -260,7 +284,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, 0);
                                             setVal4St(newSt, now_y, vs[0]);
 
-                                            addSts(newSt, len + 3, cnt, nAct);
+                                            addSts(newSt, newBits, len + 3, cnt, nAct);
                                         }
                                     }
                                 }
@@ -274,7 +298,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[0]);
                                             setVal4St(newSt, now_y, vs[1]);
 
-                                            addSts(newSt, len + 4, cnt, nAct);
+                                            addSts(newSt, newBits, len + 4, cnt, nAct);
                                         }
 
                                         if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
@@ -283,7 +307,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, vs[1]);
                                             setVal4St(newSt, now_y, vs[0]);
 
-                                            addSts(newSt, len + 4, cnt, nAct);
+                                            addSts(newSt, newBits, len + 4, cnt, nAct);
                                         }
                                     }
                                 }
@@ -294,6 +318,12 @@ int main()
                     {
                         int val = left + up;
                         vector<int> vs;
+
+                        unsigned short newBits = bits;
+                        if (1 == colorCnts[val])
+                        {
+                            newBits |= 1 << val;
+                        }
 
                         for (size_t i = 0; i < paths[now_x][now_y].size(); i++)
                         {
@@ -311,7 +341,7 @@ int main()
                                 setVal4St(newSt, now_y - 1, 0);
                                 setVal4St(newSt, now_y, 0);
 
-                                addSts(newSt, len + 1, cnt, nAct);
+                                addSts(newSt, newBits, len + 1, cnt, nAct);
                             }
                             else if (1 == vs.size())
                             {
@@ -323,7 +353,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, vs[0]);
                                         setVal4St(newSt, now_y, 0);
 
-                                        addSts(newSt, len + 2, cnt, nAct);
+                                        addSts(newSt, newBits, len + 2, cnt, nAct);
                                     }
                                 }
 
@@ -335,7 +365,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, 0);
                                         setVal4St(newSt, now_y, vs[0]);
 
-                                        addSts(newSt, len + 2, cnt, nAct);
+                                        addSts(newSt, newBits, len + 2, cnt, nAct);
                                     }
                                 }
                             }
@@ -349,7 +379,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, vs[0]);
                                         setVal4St(newSt, now_y, vs[1]);
 
-                                        addSts(newSt, len + 3, cnt, nAct);
+                                        addSts(newSt, newBits, len + 3, cnt, nAct);
                                     }
 
                                     if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
@@ -358,7 +388,7 @@ int main()
                                         setVal4St(newSt, now_y - 1, vs[1]);
                                         setVal4St(newSt, now_y, vs[0]);
 
-                                        addSts(newSt, len + 3, cnt, nAct);
+                                        addSts(newSt, newBits, len + 3, cnt, nAct);
                                     }
                                 }
                             }
@@ -377,7 +407,7 @@ int main()
                                     setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
                                     setVal4St(newSt, now_y, 0);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, bits, len + 1, cnt, nAct);
                                 }
                             }
 
@@ -389,7 +419,7 @@ int main()
                                     setVal4St(newSt, now_y - 1, 0);
                                     setVal4St(newSt, now_y, paths[now_x][now_y][0]);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, bits, len + 1, cnt, nAct);
                                 }
                             }
                         }
@@ -403,7 +433,7 @@ int main()
                                     setVal4St(newSt, now_y - 1, paths[now_x][now_y][0]);
                                     setVal4St(newSt, now_y, paths[now_x][now_y][1]);
 
-                                    addSts(newSt, len + 2, cnt, nAct);
+                                    addSts(newSt, bits, len + 2, cnt, nAct);
                                 }
 
                                 if (CHECK(flags[now_x + 1][now_y], paths[now_x][now_y][1]) && CHECK(flags[now_x][now_y + 1], paths[now_x][now_y][0]))
@@ -412,7 +442,7 @@ int main()
                                     setVal4St(newSt, now_y - 1, paths[now_x][now_y][1]);
                                     setVal4St(newSt, now_y, paths[now_x][now_y][0]);
 
-                                    addSts(newSt, len + 2, cnt, nAct);
+                                    addSts(newSt, bits, len + 2, cnt, nAct);
                                 }
                             }
                         }
@@ -425,19 +455,33 @@ int main()
                     {
                         if (left == up)
                         {
+                            unsigned char colorCnts[MAX_K];
+                            memset(colorCnts, 0, sizeof(colorCnts));
+
+                            for (size_t i = 0; i <= w; i++)
+                            {
+                                colorCnts[getVal4St(st, i)]++;
+                            }
+
+                            unsigned short newBits = bits;
+                            if (2 == colorCnts[left])
+                            {
+                                newBits |= 1 << left;
+                            }
+
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, 0);
                                 setVal4St(newSt, now_y, 0);
 
-                                addSts(newSt, len + 1, cnt, nAct);
+                                addSts(newSt, newBits, len + 1, cnt, nAct);
                             }
 
                             if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                             {
-                                for (size_t color = 1; color <= k; color++)
+                                for (size_t color = 1, tmpBits = bits >> 1; color <= k; color++, tmpBits >>= 1)
                                 {
-                                    if (color != left)
+                                    if (color != left && 0 == (tmpBits & 1))
                                     {
                                         if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
                                         {
@@ -445,7 +489,7 @@ int main()
                                             setVal4St(newSt, now_y - 1, color);
                                             setVal4St(newSt, now_y, color);
 
-                                            addSts(newSt, len + 2, cnt, nAct);
+                                            addSts(newSt, newBits, len + 2, cnt, nAct);
                                         }
                                     }
                                 }
@@ -458,7 +502,7 @@ int main()
                                 // left ==> down, up ==> right
                                 if (CHECK(flags[now_x + 1][now_y], left) && CHECK(flags[now_x][now_y + 1], up))
                                 {
-                                    addSts(st, len + 2, cnt, nAct);
+                                    addSts(st, bits, len + 2, cnt, nAct);
                                 }
                             }
                         }
@@ -474,7 +518,7 @@ int main()
                                 setVal4St(newSt, now_y - 1, val);
                                 setVal4St(newSt, now_y, 0);
 
-                                addSts(newSt, len + 1, cnt, nAct);
+                                addSts(newSt, bits, len + 1, cnt, nAct);
                             }
                         }
 
@@ -486,7 +530,7 @@ int main()
                                 setVal4St(newSt, now_y - 1, 0);
                                 setVal4St(newSt, now_y, val);
 
-                                addSts(newSt, len + 1, cnt, nAct);
+                                addSts(newSt, bits, len + 1, cnt, nAct);
                             }
                         }
                     }
@@ -495,20 +539,20 @@ int main()
                         // 0 == left && 0 == up
                         {
                             // do nothing
-                            addSts(st, len, cnt, nAct);
+                            addSts(st, bits, len, cnt, nAct);
                         }
 
                         if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                         {
-                            for (size_t color = 1; color <= k; color++)
+                            for (size_t color = 1, tmpBits = bits >> 1; color <= k; color++, tmpBits >>= 1)
                             {
-                                if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
+                                if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color) && 0 == (tmpBits & 1))
                                 {
                                     unsigned long long newSt = st;
                                     setVal4St(newSt, now_y - 1, color);
                                     setVal4St(newSt, now_y, color);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, bits, len + 1, cnt, nAct);
                                 }
                             }
                         }

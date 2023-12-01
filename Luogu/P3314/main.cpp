@@ -135,7 +135,7 @@ int now_x, now_y;
     }
 
 #define CHECK(FLAG, VAL) \
-    (0 == FLAG[0] || 0 < FLAG[VAL])
+    (10 < VAL || 0 == FLAG[0] || 0 < FLAG[VAL])
 
 inline void init()
 {
@@ -472,9 +472,8 @@ int main()
 
                                 if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                                 {
-                                    // 11 << 4 + 12
                                     unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, 188);
+                                    setVal4St(newSt, now_y - 1, 203);
 
                                     addSts(newSt, len + 2, cnt, nAct);
                                 }
@@ -528,8 +527,7 @@ int main()
                                 }
 
                                 {
-                                    // 11 << 4 + 12
-                                    setVal4St(newSt, now_y - 1, 188);
+                                    setVal4St(newSt, now_y - 1, 203);
                                     addSts(newSt, len + 2, cnt, nAct);
                                 }
                             }
@@ -539,8 +537,11 @@ int main()
                             // 一个已确定 path、一个未确定 path
                             if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                             {
-                                // left ==> down, up ==> right
-                                addSts(st, len + 2, cnt, nAct);
+                                if (CHECK(flags[now_x + 1][now_y], left) && CHECK(flags[now_x][now_y + 1], up))
+                                {
+                                    // left ==> down, up ==> right
+                                    addSts(st, len + 2, cnt, nAct);
+                                }
                             }
 
                             unsigned long long newSt = st;
@@ -567,8 +568,7 @@ int main()
                             }
 
                             {
-                                // 11 << 4 + 12
-                                setVal4St(newSt, now_y - 1, 188);
+                                setVal4St(newSt, now_y - 1, 203);
                                 addSts(newSt, len + 2, cnt, nAct);
                             }
                         }
@@ -608,9 +608,9 @@ int main()
 
                         if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                         {
-                            // 11 << 4 + 12
+                            // down - 11, up - 12
                             unsigned long long newSt = st;
-                            setVal4St(newSt, now_y - 1, 188);
+                            setVal4St(newSt, now_y - 1, 203);
 
                             addSts(newSt, len + 1, cnt, nAct);
                         }

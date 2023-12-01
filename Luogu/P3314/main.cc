@@ -51,6 +51,7 @@ int h, w;
 unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
+unsigned char gColorCnts[QS_SIZE][MAX_K];
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
@@ -97,6 +98,7 @@ inline void init()
     act = 0;
 
     memset(flags, 0, sizeof(flags));
+    memset(gColorCnts, 0, sizeof(gColorCnts));
 
     qTail[0] = 0;
     qTail[1] = 0;
@@ -218,8 +220,7 @@ int main()
 
                 if (0 < flags[now_x][now_y][0])
                 {
-                    unsigned char colorCnts[MAX_K];
-                    memset(colorCnts, 0, sizeof(colorCnts));
+                    unsigned char * colorCnts = gColorCnts[iQ];
 
                     for (size_t i = 0; i <= w; i++)
                     {
@@ -441,8 +442,7 @@ int main()
                     {
                         if (left == up)
                         {
-                            unsigned char colorCnts[MAX_K];
-                            memset(colorCnts, 0, sizeof(colorCnts));
+                            unsigned char  * colorCnts = gColorCnts[iQ];
 
                             for (size_t i = 0; i <= w; i++)
                             {
@@ -541,6 +541,7 @@ int main()
                 }
             }
 
+            memset(gColorCnts, 0, qTail[act] * MAX_K);
             qTail[act] = 0;
             cnts[act].clear();
             act = nAct;

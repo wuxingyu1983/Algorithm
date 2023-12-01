@@ -319,7 +319,6 @@ int main()
                         }
                         else
                         {
-                            unsigned long long newSt = st;
                             int leftEnd = 1, upEnd = 1;
                             int abCnt = 0;  // left 和 up 中大于 0 的个数
                             if (0 < left)
@@ -336,102 +335,102 @@ int main()
 
                             for (size_t i = 0; i < leftEnd; i++)
                             {
-                                if (0 == left || 10 < left || left == paths[now_x][now_y][i])
+                                for (size_t j = 0; j < upEnd; j++)
                                 {
-                                    int l = paths[now_x][now_y][i];
-                                    if (0 == left)
+                                    if ((0 == left || 10 < left || left == paths[now_x][now_y][i]) && (0 == up || 10 < up || up == paths[now_x][now_y][j]))
                                     {
-                                        l = 0;
-                                    }
-                                    else if (11 == left)
-                                    {
-                                        forwardFunc(newSt, now_y - 1, 11, 12, l);
-                                        setOneVal4St(newSt, now_y - 1, l);
-                                    }
-                                    else if (12 == left)
-                                    {
-                                        backwardFunc(newSt, now_y - 1, 12, 11, l);
-                                        setOneVal4St(newSt, now_y - 1, l);
-                                    }
-
-                                    for (size_t j = 0; j < upEnd; j++)
-                                    {
-                                        if (0 == up || 10 < up || up == paths[now_x][now_y][j])
+                                        int l = paths[now_x][now_y][i];
+                                        if (0 == left)
                                         {
-                                            int u = paths[now_x][now_y][j];
-                                            if (0 == up)
+                                            l = 0;
+                                        }
+
+                                        int u = paths[now_x][now_y][j];
+                                        if (0 == up)
+                                        {
+                                            u = 0;
+                                        }
+
+                                        if (l != u)
+                                        {
+                                            unsigned long long newSt = st;
+
+                                            if (11 == left)
                                             {
-                                                u = 0;
+                                                forwardFunc(newSt, now_y - 1, 11, 12, l);
+                                                setOneVal4St(newSt, now_y - 1, l);
+                                            }
+                                            else if (12 == left)
+                                            {
+                                                backwardFunc(newSt, now_y - 1, 12, 11, l);
+                                                setOneVal4St(newSt, now_y - 1, l);
                                             }
 
-                                            if (l != u)
+                                            if (11 == up)
                                             {
-                                                if (11 == up)
-                                                {
-                                                    forwardFunc(newSt, now_y, 11, 12, u);
-                                                    setOneVal4St(newSt, now_y, u);
-                                                }
-                                                else if (12 == up)
-                                                {
-                                                    backwardFunc(newSt, now_y, 12, 11, u);
-                                                    setOneVal4St(newSt, now_y, u);
-                                                }
+                                                forwardFunc(newSt, now_y, 11, 12, u);
+                                                setOneVal4St(newSt, now_y, u);
+                                            }
+                                            else if (12 == up)
+                                            {
+                                                backwardFunc(newSt, now_y, 12, 11, u);
+                                                setOneVal4St(newSt, now_y, u);
+                                            }
 
-                                                vector<int> vs;
+                                            vector<int> vs;
 
-                                                for (size_t ip = 0; ip < paths[now_x][now_y].size(); ip++)
+                                            for (size_t ip = 0; ip < paths[now_x][now_y].size(); ip++)
+                                            {
+                                                if (l != paths[now_x][now_y][ip] && u != paths[now_x][now_y][ip])
                                                 {
-                                                    if (l != paths[now_x][now_y][ip] && u != paths[now_x][now_y][ip])
+                                                    vs.push_back(paths[now_x][now_y][ip]);
+                                                }
+                                            }
+
+                                            if (0 == vs.size())
+                                            {
+                                                setVal4St(newSt, now_y - 1, 0);
+
+                                                addSts(newSt, len + abCnt, cnt, nAct);
+                                            }
+                                            else if (1 == vs.size())
+                                            {
+                                                if (h > now_x && 0 == cells[now_x + 1][now_y])
+                                                {
+                                                    if (CHECK(flags[now_x + 1][now_y], vs[0]))
                                                     {
-                                                        vs.push_back(paths[now_x][now_y][ip]);
+                                                        setVal4St(newSt, now_y - 1, vs[0]);
+
+                                                        addSts(newSt, len + abCnt + 1, cnt, nAct);
                                                     }
                                                 }
 
-                                                if (0 == vs.size())
+                                                if (w > now_y && 0 == cells[now_x][now_y + 1])
                                                 {
-                                                    setVal4St(newSt, now_y - 1, 0);
-
-                                                    addSts(newSt, len + abCnt, cnt, nAct);
-                                                }
-                                                else if (1 == vs.size())
-                                                {
-                                                    if (h > now_x && 0 == cells[now_x + 1][now_y])
+                                                    if (CHECK(flags[now_x][now_y + 1], vs[0]))
                                                     {
-                                                        if (CHECK(flags[now_x + 1][now_y], vs[0]))
-                                                        {
-                                                            setVal4St(newSt, now_y - 1, vs[0]);
+                                                        setVal4St(newSt, now_y - 1, vs[0] << ST_BITS);
 
-                                                            addSts(newSt, len + abCnt + 1, cnt, nAct);
-                                                        }
-                                                    }
-
-                                                    if (w > now_y && 0 == cells[now_x][now_y + 1])
-                                                    {
-                                                        if (CHECK(flags[now_x][now_y + 1], vs[0]))
-                                                        {
-                                                            setVal4St(newSt, now_y - 1, vs[0] << ST_BITS);
-
-                                                            addSts(newSt, len + abCnt + 1, cnt, nAct);
-                                                        }
+                                                        addSts(newSt, len + abCnt + 1, cnt, nAct);
                                                     }
                                                 }
-                                                else if (2 == vs.size())
+                                            }
+                                            else if (2 == vs.size())
+                                            {
+                                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                                                 {
-                                                    if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                                    if (CHECK(flags[now_x + 1][now_y], vs[0]) && CHECK(flags[now_x][now_y + 1], vs[1]))
                                                     {
-                                                        if (CHECK(flags[now_x + 1][now_y], vs[0]) && CHECK(flags[now_x][now_y + 1], vs[1]))
-                                                        {
-                                                            setVal4St(newSt, now_y - 1, vs[0] + (vs[1] << ST_BITS));
+                                                        setVal4St(newSt, now_y - 1, vs[0] + (vs[1] << ST_BITS));
 
-                                                            addSts(newSt, len + abCnt + 2, cnt, nAct);
-                                                        }
+                                                        addSts(newSt, len + abCnt + 2, cnt, nAct);
+                                                    }
 
-                                                        if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
-                                                        {
-                                                            setVal4St(newSt, now_y - 1, vs[1] + (vs[0] << ST_BITS));
+                                                    if (CHECK(flags[now_x + 1][now_y], vs[1]) && CHECK(flags[now_x][now_y + 1], vs[0]))
+                                                    {
+                                                        setVal4St(newSt, now_y - 1, vs[1] + (vs[0] << ST_BITS));
 
-                                                            addSts(newSt, len + abCnt + 2, cnt, nAct);
-                                                        }
+                                                        addSts(newSt, len + abCnt + 2, cnt, nAct);
                                                     }
                                                 }
                                             }

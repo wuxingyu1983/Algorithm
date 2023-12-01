@@ -58,6 +58,11 @@ int now_x, now_y;
     if (VAL)                                                 \
         ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
 
+#define setOneVal4St(ST, POS, VAL)                               \
+    ST &= ~(((unsigned long long)ST_MASK) << ((POS) * ST_BITS)); \
+    if (VAL)                                                     \
+        ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
+
 #define addSts(ST, LEN, CNT, IDX)                                                          \
     {                                                                                      \
         unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX].find(ST); \
@@ -83,6 +88,50 @@ int now_x, now_y;
                 qs[IDX][it->second].cnt %= MOD;                                            \
             }                                                                              \
         }                                                                                  \
+    }
+
+#define forwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                 \
+        int pos = now_y + 1;                          \
+        int s = 1;                                    \
+        while (pos <= w)                              \
+        {                                             \
+            int v = getVal4St(newSt, pos);            \
+            if (plusVal == v)                         \
+                s++;                                  \
+            else if (minusVal == v)                   \
+            {                                         \
+                s--;                                  \
+                if (0 == s)                           \
+                {                                     \
+                    setOneVal4St(newSt, pos, newVal); \
+                    break;                            \
+                }                                     \
+            }                                         \
+            pos++;                                    \
+        }                                             \
+    }
+
+#define backwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                  \
+        int pos = now_y - 2;                           \
+        int s = 1;                                     \
+        while (0 <= pos)                               \
+        {                                              \
+            int v = getVal4St(newSt, pos);             \
+            if (plusVal == v)                          \
+                s++;                                   \
+            else if (minusVal == v)                    \
+            {                                          \
+                s--;                                   \
+                if (0 == s)                            \
+                {                                      \
+                    setOneVal4St(newSt, pos, newVal);  \
+                    break;                             \
+                }                                      \
+            }                                          \
+            pos--;                                     \
+        }                                              \
     }
 
 #define CHECK(FLAG, VAL) \
@@ -409,41 +458,118 @@ int main()
                     // 普通格子
                     if (left && up)
                     {
-                        if (left == up)
+                        if (11 > left && 11 > up)
                         {
+                            // 都是已经确定 path
+                            if (left == up)
                             {
-                                unsigned long long newSt = st;
-                                setVal4St(newSt, now_y - 1, 0);
+                                {
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, 0);
 
-                                addSts(newSt, len + 1, cnt, nAct);
+                                    addSts(newSt, len + 1, cnt, nAct);
+                                }
+
+                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                {
+                                    // 11 << 4 + 12
+                                    unsigned long long newSt = st;
+                                    setVal4St(newSt, now_y - 1, 188);
+
+                                    addSts(newSt, len + 2, cnt, nAct);
+                                }
                             }
-
+                            else
+                            {
+                                if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
+                                {
+                                    // left ==> down, up ==> right
+                                    if (CHECK(flags[now_x + 1][now_y], left) && CHECK(flags[now_x][now_y + 1], up))
+                                    {
+                                        addSts(st, len + 2, cnt, nAct);
+                                    }
+                                }
+                            }
+                        }
+                        else if (10 < left && 10 < up)
+                        {
+                            // 都是未确定的 path
                             if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                             {
-                                for (size_t color = 1; color <= k; color++)
-                                {
-                                    if (color != left)
-                                    {
-                                        if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
-                                        {
-                                            unsigned long long newSt = st;
-                                            setVal4St(newSt, now_y - 1, color + (color << ST_BITS));
+                                // left ==> down, up ==> right
+                                addSts(st, len + 2, cnt, nAct);
+                            }
 
-                                            addSts(newSt, len + 2, cnt, nAct);
-                                        }
-                                    }
+                            if (11 == left && 12 == up)
+                            {
+                                // 只能 left ==> down, up ==> right
+                            }
+                            else
+                            {
+                                unsigned long long newSt = st;
+
+                                if (12 == left && 11 == up)
+                                {
+                                    // do nothing
+                                }
+                                else if (11 == left && 11 == up)
+                                {
+                                    forwardFunc(newSt, 11, 12, 11);
+                                }
+                                else
+                                {
+                                    // 12 == left && 12 == up
+                                    backwardFunc(newSt, 12, 11, 12);
+                                }
+
+                                {
+                                    setVal4St(newSt, now_y - 1, 0);
+                                    addSts(st, len + 1, cnt, nAct);
+                                }
+
+                                {
+                                    // 11 << 4 + 12
+                                    setVal4St(newSt, now_y - 1, 188);
+                                    addSts(newSt, len + 2, cnt, nAct);
                                 }
                             }
                         }
                         else
                         {
+                            // 一个已确定 path、一个未确定 path
                             if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                             {
                                 // left ==> down, up ==> right
-                                if (CHECK(flags[now_x + 1][now_y], left) && CHECK(flags[now_x][now_y + 1], up))
-                                {
-                                    addSts(st, len + 2, cnt, nAct);
-                                }
+                                addSts(st, len + 2, cnt, nAct);
+                            }
+
+                            unsigned long long newSt = st;
+                            int low = left, high = up;
+                            if (10 < left)
+                            {
+                                high = left;
+                                low = up;
+                            }
+
+                            if (11 == high)
+                            {
+                                forwardFunc(newSt, 11, 12, low);
+                            }
+                            else
+                            {
+                                // 12 == high
+                                backwardFunc(newSt, 12, 11, low);
+                            }
+
+                            {
+                                setVal4St(newSt, now_y - 1, 0);
+                                addSts(st, len + 1, cnt, nAct);
+                            }
+
+                            {
+                                // 11 << 4 + 12
+                                setVal4St(newSt, now_y - 1, 188);
+                                addSts(newSt, len + 2, cnt, nAct);
                             }
                         }
                     }
@@ -452,7 +578,7 @@ int main()
                         int val = left + up;
                         if (h > now_x && 0 == cells[now_x + 1][now_y])
                         {
-                            if (CHECK(flags[now_x + 1][now_y], val))
+                            if (10 < val || CHECK(flags[now_x + 1][now_y], val))
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, val);
@@ -463,7 +589,7 @@ int main()
 
                         if (w > now_y && 0 == cells[now_x][now_y + 1])
                         {
-                            if (CHECK(flags[now_x][now_y + 1], val))
+                            if (10 < val || CHECK(flags[now_x][now_y + 1], val))
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, val << ST_BITS);
@@ -482,16 +608,11 @@ int main()
 
                         if (h > now_x && 0 == cells[now_x + 1][now_y] && w > now_y && 0 == cells[now_x][now_y + 1])
                         {
-                            for (size_t color = 1; color <= k; color++)
-                            {
-                                if (CHECK(flags[now_x + 1][now_y], color) && CHECK(flags[now_x][now_y + 1], color))
-                                {
-                                    unsigned long long newSt = st;
-                                    setVal4St(newSt, now_y - 1, color + (color << ST_BITS));
+                            // 11 << 4 + 12
+                            unsigned long long newSt = st;
+                            setVal4St(newSt, now_y - 1, 188);
 
-                                    addSts(newSt, len + 1, cnt, nAct);
-                                }
-                            }
+                            addSts(newSt, len + 1, cnt, nAct);
                         }
                     }
                 }

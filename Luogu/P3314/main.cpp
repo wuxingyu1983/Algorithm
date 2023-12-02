@@ -85,7 +85,8 @@ int now_x, now_y;
             else if (LEN == qs[IDX][it->second].len)                                       \
             {                                                                              \
                 qs[IDX][it->second].cnt += CNT;                                            \
-                qs[IDX][it->second].cnt %= MOD;                                            \
+                if (qs[IDX][it->second].cnt > MOD)                                         \
+                    qs[IDX][it->second].cnt -= MOD;                                        \
             }                                                                              \
         }                                                                                  \
     }
@@ -313,75 +314,83 @@ int main()
                     }
                     else
                     {
-                        if (11 == left && 12 == up)
+                        if ((0 == left || 10 < left || 1 == flags[now_x][now_y][left]) && (0 == up || 10 < up || 1 == flags[now_x][now_y][up]))
                         {
-                            // 非法
-                        }
-                        else
-                        {
-                            int leftEnd = 1, upEnd = 1;
-                            int abCnt = 0;  // left 和 up 中大于 0 的个数
-                            if (0 < left)
+                            if (11 == left && 12 == up)
                             {
-                                leftEnd = paths[now_x][now_y].size();
-                                abCnt ++;
+                                // 非法
                             }
-
-                            if (0 < up)
+                            else
                             {
-                                upEnd = paths[now_x][now_y].size();
-                                abCnt ++;
-                            }
+                                int abCnt = 0; // left 和 up 中大于 0 的个数
 
-                            for (size_t i = 0; i < leftEnd; i++)
-                            {
-                                for (size_t j = 0; j < upEnd; j++)
+                                vector<int> vecLeft;
+                                if (0 == left)
                                 {
-                                    if ((0 == left || 10 < left || left == paths[now_x][now_y][i]) && (0 == up || 10 < up || up == paths[now_x][now_y][j]))
+                                    vecLeft.push_back(left);
+                                }
+                                else if (10 < left)
+                                {
+                                    vecLeft.assign(paths[now_x][now_y].begin(), paths[now_x][now_y].end());
+                                    abCnt++;
+                                }
+                                else
+                                {
+                                    vecLeft.push_back(left);
+                                    abCnt++;
+                                }
+
+                                vector<int> vecUp;
+                                if (0 == up)
+                                {
+                                    vecUp.push_back(up);
+                                }
+                                else if (10 < up)
+                                {
+                                    vecUp.assign(paths[now_x][now_y].begin(), paths[now_x][now_y].end());
+                                    abCnt++;
+                                }
+                                else
+                                {
+                                    vecUp.push_back(up);
+                                    abCnt++;
+                                }
+
+                                for (vector<int>::iterator itLeft = vecLeft.begin(); itLeft != vecLeft.end(); itLeft++)
+                                {
+                                    for (vector<int>::iterator itUp = vecUp.begin(); itUp != vecUp.end(); itUp++)
                                     {
-                                        int l = paths[now_x][now_y][i];
-                                        if (0 == left)
-                                        {
-                                            l = 0;
-                                        }
-
-                                        int u = paths[now_x][now_y][j];
-                                        if (0 == up)
-                                        {
-                                            u = 0;
-                                        }
-
-                                        if (l != u)
+                                        if (*itLeft != *itUp)
                                         {
                                             unsigned long long newSt = st;
 
                                             if (11 == left)
                                             {
-                                                forwardFunc(newSt, now_y - 1, 11, 12, l);
-                                                setOneVal4St(newSt, now_y - 1, l);
+                                                forwardFunc(newSt, now_y - 1, 11, 12, *itLeft);
+                                                setOneVal4St(newSt, now_y - 1, *itLeft);
                                             }
                                             else if (12 == left)
                                             {
-                                                backwardFunc(newSt, now_y - 1, 12, 11, l);
-                                                setOneVal4St(newSt, now_y - 1, l);
+                                                backwardFunc(newSt, now_y - 1, 12, 11, *itLeft);
+                                                setOneVal4St(newSt, now_y - 1, *itLeft);
                                             }
 
                                             if (11 == up)
                                             {
-                                                forwardFunc(newSt, now_y, 11, 12, u);
-                                                setOneVal4St(newSt, now_y, u);
+                                                forwardFunc(newSt, now_y, 11, 12, *itUp);
+                                                setOneVal4St(newSt, now_y, *itUp);
                                             }
                                             else if (12 == up)
                                             {
-                                                backwardFunc(newSt, now_y, 12, 11, u);
-                                                setOneVal4St(newSt, now_y, u);
+                                                backwardFunc(newSt, now_y, 12, 11, *itUp);
+                                                setOneVal4St(newSt, now_y, *itUp);
                                             }
 
                                             vector<int> vs;
 
                                             for (size_t ip = 0; ip < paths[now_x][now_y].size(); ip++)
                                             {
-                                                if (l != paths[now_x][now_y][ip] && u != paths[now_x][now_y][ip])
+                                                if (*itLeft != paths[now_x][now_y][ip] && *itUp != paths[now_x][now_y][ip])
                                                 {
                                                     vs.push_back(paths[now_x][now_y][ip]);
                                                 }
@@ -490,6 +499,7 @@ int main()
                             if (11 == left && 12 == up)
                             {
                                 // 只能 left ==> down, up ==> right
+                                // 否则行程闭环
                             }
                             else
                             {
@@ -534,10 +544,9 @@ int main()
 
                             unsigned long long newSt = st;
                             int low = left, high = up;
-                            if (10 < left)
+                            if (low > high)
                             {
-                                high = left;
-                                low = up;
+                                swap(low, high);
                             }
 
                             if (11 == high)
@@ -566,7 +575,7 @@ int main()
                         int val = left + up;
                         if (h > now_x && 0 == cells[now_x + 1][now_y])
                         {
-                            if (10 < val || CHECK(flags[now_x + 1][now_y], val))
+                            if (CHECK(flags[now_x + 1][now_y], val))
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, val);
@@ -577,7 +586,7 @@ int main()
 
                         if (w > now_y && 0 == cells[now_x][now_y + 1])
                         {
-                            if (10 < val || CHECK(flags[now_x][now_y + 1], val))
+                            if (CHECK(flags[now_x][now_y + 1], val))
                             {
                                 unsigned long long newSt = st;
                                 setVal4St(newSt, now_y - 1, val << ST_BITS);

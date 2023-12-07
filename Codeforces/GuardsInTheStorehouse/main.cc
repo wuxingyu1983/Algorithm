@@ -92,7 +92,7 @@ inline void init()
     now_y = w;
 
     qs[act][0].state1 = 0;
-    qs[act][0].state2 = 0;
+    qs[act][0].state2 = (1 << (w + 1)) - 1;
     qs[act][0].cnt[0] = 1;
 
     qTail[act]++;
@@ -205,11 +205,70 @@ int main()
             }
             else if (left)
             {
+                unsigned int newSt2 = st2;
+                setVal4St(newSt2, now_y, 1);
 
+                // 没有 guard
+                {
+                    unsigned int newSt1 = st1;
+
+                    setVal4St(newSt1, now_y - 1, 0);
+                    if (w > now_y && '.' == cells[now_x][now_y + 1])
+                    {
+                        setVal4St(newSt1, now_y, 1);
+                    }
+
+                    addSts(newSt1, newSt2, cnt0, cnt1, nAct);
+                }
+
+                // 有 guard
+                {
+                    unsigned int newSt1 = st1;
+
+                    if (h == now_x || 'x' == cells[now_x + 1][now_y])
+                    {
+                        setVal4St(newSt1, now_y - 1, 0);
+                    }
+
+                    if (w > now_y && '.' == cells[now_x][now_y + 1])
+                    {
+                        setVal4St(newSt1, now_y, 1);
+                    }
+
+                    addSts(newSt1, newSt2, cnt0, cnt1, nAct);
+                }
             }
             else if (up)
             {
+                // 没有 guard
+                {
+                    unsigned int newSt1 = st1;
 
+                    if (h > now_x && '.' == cells[now_x + 1][now_y])
+                    {
+                        setVal4St(newSt1, now_y - 1, 1);
+                    }
+                    setVal4St(newSt1, now_y, 0);
+
+                    addSts(newSt1, st2, cnt0, cnt1, nAct);
+                }
+
+                // 有 guard
+                {
+                    unsigned int newSt1 = st1;
+
+                    if (h > now_x && '.' == cells[now_x + 1][now_y])
+                    {
+                        setVal4St(newSt1, now_y - 1, 1);
+                    }
+
+                    if (w == now_y || 'x' == cells[now_x][now_y + 1])
+                    {
+                        setVal4St(newSt1, now_y, 0);
+                    }
+
+                    addSts(newSt1, st2, cnt0, cnt1, nAct);
+                }
             }
             else
             {

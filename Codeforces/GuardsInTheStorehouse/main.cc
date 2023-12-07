@@ -127,6 +127,8 @@ int main()
 
     init();
 
+    unsigned int ans = 0;
+
     while (0 < qTail[act])
     {
         int nAct = 1 - act;
@@ -142,6 +144,14 @@ int main()
                 // TBD
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
+                    if (0 == qs[act][iQ].state1)
+                    {
+                        ans += qs[act][iQ].cnt[0];
+                        ans %= MOD;
+
+                        ans += qs[act][iQ].cnt[1];
+                        ans %= MOD;
+                    }
                 }
 
                 break;
@@ -273,7 +283,33 @@ int main()
             else
             {
                 // 0 == left && 0 == up
+                // 没有 guard
+                {
+                    unsigned int newSt2 = st2;
+                    setVal4St(newSt2, now_y, 0);
 
+                    addSts(st1, newSt2, 0, cnt0, nAct);
+                }
+
+                // 有 guard
+                {
+                    unsigned int newSt1 = st1;
+
+                    if (h > now_x && '.' == cells[now_x + 1][now_y])
+                    {
+                        setVal4St(newSt1, now_y - 1, 1);
+                    }
+
+                    if (w > now_y && '.' == cells[now_x][now_y + 1])
+                    {
+                        setVal4St(newSt1, now_y, 1);
+                    }
+
+                    unsigned int newSt2 = st2;
+                    setVal4St(newSt2, now_y, 1);
+
+                    addSts(newSt1, newSt2, cnt0, cnt1, nAct);
+                }
             }
         }
 
@@ -281,6 +317,8 @@ int main()
         cnts[act].clear();
         act = nAct;
     }
+
+    cout << ans << endl;
 
     return 0;
 }

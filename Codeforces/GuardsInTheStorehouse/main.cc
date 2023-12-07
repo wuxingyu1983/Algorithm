@@ -38,36 +38,33 @@ using namespace std;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
-#define addSts(ST1, ST2, CNT0, CNT1, IDX)                                             \
-    {                                                                                 \
-        unsigned int key = (ST1 << (w + 1)) + ST2;                                    \
-        unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(key); \
-        if (it == cnts[IDX].end())                                                    \
-        {                                                                             \
-            int pInQ = qTail[IDX];                                                    \
-            qs[IDX][pInQ].state1 = ST1;                                               \
-            qs[IDX][pInQ].state2 = ST2;                                               \
-            qs[IDX][pInQ].cnt[0] = CNT0;                                              \
-            qs[IDX][pInQ].cnt[1] = CNT1;                                              \
-            cnts[IDX][key] = pInQ;                                                    \
-            qTail[IDX]++;                                                             \
-        }                                                                             \
-        else                                                                          \
-        {                                                                             \
-            qs[IDX][it->second].cnt[0] += CNT0;                                       \
-            if (MOD <= qs[IDX][it->second].cnt[0])                                    \
-                qs[IDX][it->second].cnt[0] %= MOD;                                    \
-            qs[IDX][it->second].cnt[1] += CNT1;                                       \
-            if (MOD <= qs[IDX][it->second].cnt[1])                                    \
-                qs[IDX][it->second].cnt[1] %= MOD;                                    \
-        }                                                                             \
+#define addSts(ST, CNT0, CNT1, IDX)                                                  \
+    {                                                                                \
+        unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(ST); \
+        if (it == cnts[IDX].end())                                                   \
+        {                                                                            \
+            int pInQ = qTail[IDX];                                                   \
+            qs[IDX][pInQ].state = ST;                                                \
+            qs[IDX][pInQ].cnt[0] = CNT0;                                             \
+            qs[IDX][pInQ].cnt[1] = CNT1;                                             \
+            cnts[IDX][ST] = pInQ;                                                    \
+            qTail[IDX]++;                                                            \
+        }                                                                            \
+        else                                                                         \
+        {                                                                            \
+            qs[IDX][it->second].cnt[0] += CNT0;                                      \
+            if (MOD <= qs[IDX][it->second].cnt[0])                                   \
+                qs[IDX][it->second].cnt[0] %= MOD;                                   \
+            qs[IDX][it->second].cnt[1] += CNT1;                                      \
+            if (MOD <= qs[IDX][it->second].cnt[1])                                   \
+                qs[IDX][it->second].cnt[1] %= MOD;                                   \
+        }                                                                            \
     }
 
 class Record
 {
 public:
-    unsigned int state1; // 轮廓线插头状态
-    unsigned int state2; // 轮廓线cell状态
+    unsigned int state; // 轮廓线插头状态
     unsigned int cnt[2]; // missed = 0 / 1 的个数
 
     Record() {}
@@ -91,8 +88,7 @@ inline void init()
     now_x = 0;
     now_y = w;
 
-    qs[act][0].state1 = 0;
-    qs[act][0].state2 = (1 << (w + 1)) - 1;
+    qs[act][0].state = 0;
     qs[act][0].cnt[0] = 1;
 
     qTail[act]++;
@@ -144,7 +140,7 @@ int main()
                 // TBD
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-                    if (0 == qs[act][iQ].state1)
+                    if (0 == qs[act][iQ].state)
                     {
                         ans += qs[act][iQ].cnt[0];
                         ans %= MOD;
@@ -168,15 +164,7 @@ int main()
             {
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-                    qs[act][iQ].state1 <<= ST_BITS;
-                    setVal4St(qs[act][iQ].state2, now_y, 1);
-                }
-            }
-            else
-            {
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                {
-                    setVal4St(qs[act][iQ].state2, now_y, 1);
+                    qs[act][iQ].state <<= ST_BITS;
                 }
             }
 
@@ -185,130 +173,121 @@ int main()
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
-            unsigned int st1 = qs[act][iQ].state1;
-            unsigned int st2 = qs[act][iQ].state2;
+            unsigned int st = qs[act][iQ].state;
             unsigned int cnt0 = qs[act][iQ].cnt[0];
             unsigned int cnt1 = qs[act][iQ].cnt[1];
 
             if (1 == now_y)
             {
-                st1 <<= ST_BITS;
+                st <<= ST_BITS;
             }
 
-            int left = getVal4St(st1, now_y - 1);
-            int up = getVal4St(st1, now_y);
+            int left = getVal4St(st, now_y - 1);
+            int up = getVal4St(st, now_y);
 
             if (left && up)
             {
-                unsigned int newSt1 = st1;
+                unsigned int newSt = st;
                 if (h == now_x || 'x' == cells[now_x + 1][now_y])
                 {
-                    setVal4St(newSt1, now_y - 1, 0);
+                    setVal4St(newSt, now_y - 1, 0);
                 }
 
                 if (w == now_y || 'x' == cells[now_x][now_y + 1])
                 {
-                    setVal4St(newSt1, now_y, 0);
+                    setVal4St(newSt, now_y, 0);
                 }
 
-                addSts(newSt1, st2, (2 * cnt0), (2 * cnt1), nAct);
+                addSts(newSt, (2 * cnt0), (2 * cnt1), nAct);
             }
             else if (left)
             {
-                unsigned int newSt2 = st2;
-                setVal4St(newSt2, now_y, 1);
-
                 // 没有 guard
                 {
-                    unsigned int newSt1 = st1;
+                    unsigned int newSt = st;
 
-                    setVal4St(newSt1, now_y - 1, 0);
+                    setVal4St(newSt, now_y - 1, 0);
                     if (w > now_y && '.' == cells[now_x][now_y + 1])
                     {
-                        setVal4St(newSt1, now_y, 1);
+                        setVal4St(newSt, now_y, 1);
                     }
 
-                    addSts(newSt1, newSt2, cnt0, cnt1, nAct);
+                    addSts(newSt, cnt0, cnt1, nAct);
                 }
 
                 // 有 guard
                 {
-                    unsigned int newSt1 = st1;
+                    unsigned int newSt = st;
 
                     if (h == now_x || 'x' == cells[now_x + 1][now_y])
                     {
-                        setVal4St(newSt1, now_y - 1, 0);
+                        setVal4St(newSt, now_y - 1, 0);
                     }
 
                     if (w > now_y && '.' == cells[now_x][now_y + 1])
                     {
-                        setVal4St(newSt1, now_y, 1);
+                        setVal4St(newSt, now_y, 1);
                     }
 
-                    addSts(newSt1, newSt2, cnt0, cnt1, nAct);
+                    addSts(newSt, cnt0, cnt1, nAct);
                 }
             }
             else if (up)
             {
                 // 没有 guard
                 {
-                    unsigned int newSt1 = st1;
+                    unsigned int newSt = st;
 
                     if (h > now_x && '.' == cells[now_x + 1][now_y])
                     {
-                        setVal4St(newSt1, now_y - 1, 1);
+                        setVal4St(newSt, now_y - 1, 1);
                     }
-                    setVal4St(newSt1, now_y, 0);
+                    setVal4St(newSt, now_y, 0);
 
-                    addSts(newSt1, st2, cnt0, cnt1, nAct);
+                    addSts(newSt, cnt0, cnt1, nAct);
                 }
 
                 // 有 guard
                 {
-                    unsigned int newSt1 = st1;
+                    unsigned int newSt = st;
 
                     if (h > now_x && '.' == cells[now_x + 1][now_y])
                     {
-                        setVal4St(newSt1, now_y - 1, 1);
+                        setVal4St(newSt, now_y - 1, 1);
                     }
 
                     if (w == now_y || 'x' == cells[now_x][now_y + 1])
                     {
-                        setVal4St(newSt1, now_y, 0);
+                        setVal4St(newSt, now_y, 0);
                     }
 
-                    addSts(newSt1, st2, cnt0, cnt1, nAct);
+                    addSts(newSt, cnt0, cnt1, nAct);
                 }
             }
             else
             {
                 // 0 == left && 0 == up
                 // 没有 guard
+                if (0 < cnt0)
                 {
-                    unsigned int newSt2 = st2;
-                    setVal4St(newSt2, now_y, 0);
-
-                    addSts(st1, newSt2, 0, cnt0, nAct);
+                    addSts(st, 0, cnt0, nAct);
                 }
 
                 // 有 guard
                 {
-                    unsigned int newSt1 = st1;
+                    unsigned int newSt = st;
 
                     if (h > now_x && '.' == cells[now_x + 1][now_y])
                     {
-                        setVal4St(newSt1, now_y - 1, 1);
+                        setVal4St(newSt, now_y - 1, 1);
                     }
 
                     if (w > now_y && '.' == cells[now_x][now_y + 1])
                     {
-                        setVal4St(newSt1, now_y, 1);
+                        setVal4St(newSt, now_y, 1);
                     }
 
-                    unsigned int newSt2 = st2;
-                    setVal4St(newSt2, now_y, 1);
-
-                    addSts(newSt1, newSt2, cnt0, cnt1, nAct);
+                    addSts(newSt, cnt0, cnt1, nAct);
                 }
             }
         }

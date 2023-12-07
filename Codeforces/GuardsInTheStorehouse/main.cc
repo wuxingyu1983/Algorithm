@@ -24,11 +24,11 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_W 17
-#define MAX_H 17
+#define MAX_W 251 
+#define MAX_H 251
 #define ST_BITS 1
 #define ST_MASK 1
-#define QS_SIZE 600000
+#define QS_SIZE 100000
 #define MOD 1000000007
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
@@ -198,7 +198,7 @@ int main()
                     setVal4St(newSt, now_y, 0);
                 }
 
-                addSts(newSt, (2 * cnt0), (2 * cnt1), nAct);
+                addSts(newSt, ((2 * cnt0) % MOD), ((2 * cnt1) % MOD), nAct);
             }
             else if (left)
             {

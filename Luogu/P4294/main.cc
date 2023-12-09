@@ -29,7 +29,7 @@ using namespace std;
 #define ST_MASK 15
 #define QS_SIZE 600000
 
-#define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
+#define getVal4St(ST, POS) (((ST) >> ((POS) * ST_BITS)) & ST_MASK)
 
 #define setVal4St(ST, POS, VAL)            \
     ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
@@ -102,7 +102,71 @@ int main()
 
     init();
 
+    while (0 < qTail[act])
+    {
+        int nAct = 1 - act;
 
+        if (w == now_y)
+        {
+            now_x++;
+            now_y = 1;
+
+            if (h < now_x)
+            {
+                // finished
+                // TBD
+
+                break;
+            }
+        }
+        else
+        {
+            now_y++;
+        }
+
+        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        {
+            unsigned int st = qs[act][iQ].state;
+            unsigned int cnt = qs[act][iQ].cnt;
+
+            unsigned int left = getVal4St(st, now_y - 1);
+            unsigned int up = getVal4St(st, now_y);
+
+            if (cells[now_x][now_y])
+            {
+                // 非景点，跳过
+                int upCnt = 0;
+                if (up)
+                {
+                    for (size_t i = 1; i <= w; i++)
+                    {
+                        if (up == getVal4St(st, i))
+                        {
+                            upCnt ++;
+                        }
+                    }
+                }
+
+                if (0 == up || 1 < upCnt)
+                {
+                    // 有效
+                    unsigned int newSt = st;
+                    if (up)
+                    {
+                        setVal4St(newSt, now_y, 0);
+                    }
+
+                    // add st
+                    // TBD
+                    
+                }
+            }
+        }
+
+        qTail[act] = 0;
+        cnts[act].clear();
+        act = nAct;
+    }
 
     return 0;
 }

@@ -27,7 +27,7 @@ using namespace std;
 #define MAX_H 11
 #define ST_BITS 3
 #define ST_MASK 7
-#define QS_SIZE 1000000
+#define QS_SIZE 600000
 
 #define getVal4St(ST, POS) (((ST) >> ((POS) * ST_BITS)) & ST_MASK)
 

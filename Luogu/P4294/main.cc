@@ -23,7 +23,7 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_W 11 
+#define MAX_W 11
 #define MAX_H 11
 #define ST_BITS 3
 #define ST_MASK 15
@@ -57,29 +57,71 @@ int act = 0; // 当前生效的 map
 int now_x, now_y;
 
 // 最小表示法重编码
-#define recode(NEWST, ST, UNUSED)                 \
-    int bb[10];                                   \
-    memset(bb, -1, sizeof(bb));                   \
-    int bn = 1;                                   \
-    bb[0] = 0;                                    \
-    for (int i = 0; i <= w; i++)                  \
-    {                                             \
-        int tmp = getVal4St1(ST, i);              \
-        if (tmp)                                  \
-        {                                         \
-            if (0 > bb[tmp])                      \
-            {                                     \
-                bb[tmp] = bn++;                   \
-            }                                     \
-            setVal4St1(NEWST, NEWST, i, bb[tmp]); \
-        }                                         \
-    }                                             \
+#define recode(ST, UNUSED)             \
+    int bb[10];                        \
+    memset(bb, -1, sizeof(bb));        \
+    int bn = 1;                        \
+    bb[0] = 0;                         \
+    for (int i = 0; i <= w; i++)       \
+    {                                  \
+        int tmp = getVal4St(ST, i);    \
+        if (tmp)                       \
+        {                              \
+            if (0 > bb[tmp])           \
+            {                          \
+                bb[tmp] = bn++;        \
+            }                          \
+            setVal4St(ST, i, bb[tmp]); \
+        }                              \
+    }                                  \
     UNUSED = bn;
+
+#define addSts(ST, CNT, ADD, REC, IDX)                                                  \
+    unsigned char unused;                                                               \
+    unsigned int recodedSt = ST;                                                        \
+    recode(recodedSt, unused);                                                          \
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
+    if (it == cnts[IDX].end())                                                          \
+    {                                                                                   \
+        int pInQ = qTail[IDX];                                                          \
+        qs[IDX][pInQ].state = recodedSt;                                                \
+        qs[IDX][pInQ].cnt = CNT + ADD;                                                  \
+        qs[IDX][pInQ].minUnused = unused;                                               \
+        memcpy(qs[IDX][pInQ].recd, REC.recd, sizeof(REC.recd));                         \
+        if (0 == ADD)                                                                   \
+        {                                                                               \
+            if (cells[now_x][now_y])                                                    \
+                qs[IDX][pInQ].recd[now_x][now_y] = '_';                                 \
+            else                                                                        \
+                qs[IDX][pInQ].recd[now_x][now_y] = 'x';                                 \
+        }                                                                               \
+        else                                                                            \
+            qs[IDX][pInQ].recd[now_x][now_y] = 'o';                                     \
+        cnts[IDX][recodedSt] = pInQ;                                                    \
+        qTail[IDX]++;                                                                   \
+    }                                                                                   \
+    else                                                                                \
+    {                                                                                   \
+        if (qs[IDX][it->second].cnt > (CNT + ADD))                                      \
+        {                                                                               \
+            qs[IDX][it->second].cnt = CNT + ADD;                                        \
+            memcpy(qs[IDX][it->second].recd, REC.recd, sizeof(REC.recd));               \
+            if (0 == ADD)                                                               \
+            {                                                                           \
+                if (cells[now_x][now_y])                                                \
+                    qs[IDX][it->second].recd[now_x][now_y] = '_';                       \
+                else                                                                    \
+                    qs[IDX][it->second].recd[now_x][now_y] = 'x';                       \
+            }                                                                           \
+            else                                                                        \
+                qs[IDX][it->second].recd[now_x][now_y] = 'o';                           \
+        }                                                                               \
+    }
 
 void init()
 {
     act = 0;
-    
+
     now_x = 0;
     now_y = w;
 
@@ -142,7 +184,7 @@ int main()
                     {
                         if (up == getVal4St(st, i))
                         {
-                            upCnt ++;
+                            upCnt++;
                         }
                     }
                 }
@@ -157,8 +199,7 @@ int main()
                     }
 
                     // add st
-                    // TBD
-
+                    addSts(newSt, cnt, cells[now_x][now_y], qs[act][iQ], nAct);
                 }
             }
 
@@ -179,7 +220,7 @@ int main()
                 }
 
                 // add st
-                // TBD
+                addSts(newSt, cnt, cells[now_x][now_y], qs[act][iQ], nAct);
             }
             else if (left || up)
             {
@@ -191,7 +232,7 @@ int main()
                 }
 
                 // add st
-                // TBD
+                addSts(newSt, cnt, cells[now_x][now_y], qs[act][iQ], nAct);
             }
             else
             {
@@ -202,7 +243,7 @@ int main()
                 setVal4St(newSt, now_y, minUnused);
 
                 // add st
-                // TBD
+                addSts(newSt, cnt, cells[now_x][now_y], qs[act][iQ], nAct);
             }
         }
 

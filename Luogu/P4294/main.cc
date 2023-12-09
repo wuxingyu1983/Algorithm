@@ -26,20 +26,20 @@ using namespace std;
 #define MAX_W 11
 #define MAX_H 11
 #define ST_BITS 3
-#define ST_MASK 15
-#define QS_SIZE 600000
+#define ST_MASK 7
+#define QS_SIZE 1000000
 
 #define getVal4St(ST, POS) (((ST) >> ((POS) * ST_BITS)) & ST_MASK)
 
 #define setVal4St(ST, POS, VAL)            \
     ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
     if (VAL)                               \
-        ST |= (VAL) << ((POS) * ST_BITS);
+        ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
 
 class Record
 {
 public:
-    unsigned int state; // 轮廓线cell状态
+    unsigned long long state; // 轮廓线cell状态
     unsigned int cnt;
     char recd[MAX_H][MAX_W];
 
@@ -52,7 +52,7 @@ int cells[MAX_H][MAX_W];
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned int, unsigned int> cnts[2];
+unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 int last_x, last_y; // 最后一个景点的位置
@@ -63,7 +63,7 @@ int last_x, last_y; // 最后一个景点的位置
     memset(bb, -1, sizeof(bb));        \
     int bn = 1;                        \
     bb[0] = 0;                         \
-    for (int i = 0; i <= w; i++)       \
+    for (int i = 1; i <= w; i++)       \
     {                                  \
         int tmp = getVal4St(ST, i);    \
         if (tmp)                       \
@@ -77,46 +77,46 @@ int last_x, last_y; // 最后一个景点的位置
     }                                  \
     UNUSED = bn;
 
-#define addSts(ST, CNT, ADD, REC, IDX)                                                  \
-    unsigned char unused;                                                               \
-    unsigned int recodedSt = ST;                                                        \
-    recode(recodedSt, unused);                                                          \
-    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
-    if (it == cnts[IDX].end())                                                          \
-    {                                                                                   \
-        int pInQ = qTail[IDX];                                                          \
-        qs[IDX][pInQ].state = recodedSt;                                                \
-        qs[IDX][pInQ].cnt = CNT + ADD;                                                  \
-        qs[IDX][pInQ].minUnused = unused;                                               \
-        memcpy(qs[IDX][pInQ].recd, REC.recd, sizeof(REC.recd));                         \
-        if (0 == ADD)                                                                   \
-        {                                                                               \
-            if (cells[now_x][now_y])                                                    \
-                qs[IDX][pInQ].recd[now_x][now_y] = '_';                                 \
-            else                                                                        \
-                qs[IDX][pInQ].recd[now_x][now_y] = 'x';                                 \
-        }                                                                               \
-        else                                                                            \
-            qs[IDX][pInQ].recd[now_x][now_y] = 'o';                                     \
-        cnts[IDX][recodedSt] = pInQ;                                                    \
-        qTail[IDX]++;                                                                   \
-    }                                                                                   \
-    else                                                                                \
-    {                                                                                   \
-        if (qs[IDX][it->second].cnt > (CNT + ADD))                                      \
-        {                                                                               \
-            qs[IDX][it->second].cnt = CNT + ADD;                                        \
-            memcpy(qs[IDX][it->second].recd, REC.recd, sizeof(REC.recd));               \
-            if (0 == ADD)                                                               \
-            {                                                                           \
-                if (cells[now_x][now_y])                                                \
-                    qs[IDX][it->second].recd[now_x][now_y] = '_';                       \
-                else                                                                    \
-                    qs[IDX][it->second].recd[now_x][now_y] = 'x';                       \
-            }                                                                           \
-            else                                                                        \
-                qs[IDX][it->second].recd[now_x][now_y] = 'o';                           \
-        }                                                                               \
+#define addSts(ST, CNT, ADD, REC, IDX)                                                        \
+    unsigned char unused;                                                                     \
+    unsigned long long recodedSt = ST;                                                        \
+    recode(recodedSt, unused);                                                                \
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
+    if (it == cnts[IDX].end())                                                                \
+    {                                                                                         \
+        int pInQ = qTail[IDX];                                                                \
+        qs[IDX][pInQ].state = recodedSt;                                                      \
+        qs[IDX][pInQ].cnt = CNT + ADD;                                                        \
+        qs[IDX][pInQ].minUnused = unused;                                                     \
+        memcpy(qs[IDX][pInQ].recd, REC.recd, sizeof(REC.recd));                               \
+        if (0 == ADD)                                                                         \
+        {                                                                                     \
+            if (cells[now_x][now_y])                                                          \
+                qs[IDX][pInQ].recd[now_x][now_y] = '_';                                       \
+            else                                                                              \
+                qs[IDX][pInQ].recd[now_x][now_y] = 'x';                                       \
+        }                                                                                     \
+        else                                                                                  \
+            qs[IDX][pInQ].recd[now_x][now_y] = 'o';                                           \
+        cnts[IDX][recodedSt] = pInQ;                                                          \
+        qTail[IDX]++;                                                                         \
+    }                                                                                         \
+    else                                                                                      \
+    {                                                                                         \
+        if (qs[IDX][it->second].cnt > (CNT + ADD))                                            \
+        {                                                                                     \
+            qs[IDX][it->second].cnt = CNT + ADD;                                              \
+            memcpy(qs[IDX][it->second].recd, REC.recd, sizeof(REC.recd));                     \
+            if (0 == ADD)                                                                     \
+            {                                                                                 \
+                if (cells[now_x][now_y])                                                      \
+                    qs[IDX][it->second].recd[now_x][now_y] = '_';                             \
+                else                                                                          \
+                    qs[IDX][it->second].recd[now_x][now_y] = 'x';                             \
+            }                                                                                 \
+            else                                                                              \
+                qs[IDX][it->second].recd[now_x][now_y] = 'o';                                 \
+        }                                                                                     \
     }
 
 void init()
@@ -176,14 +176,14 @@ int main()
                     }
                 }
 
-                cout << ans;
+                cout << ans << endl;
                 for (size_t row = 1; row <= h; row++)
                 {
-                    cout << endl;
                     for (size_t col = 1; col <= w; col++)
                     {
-                        cout << cells[row][col];
+                        cout << qs[act][idx].recd[row][col];
                     }
+                    cout << endl;
                 }
 
                 break;
@@ -196,7 +196,7 @@ int main()
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
-            unsigned int st = qs[act][iQ].state;
+            unsigned long long st = qs[act][iQ].state;
             unsigned int cnt = qs[act][iQ].cnt;
             unsigned char minUnused = qs[act][iQ].minUnused;
 
@@ -221,7 +221,7 @@ int main()
                 if (0 == up || 1 < upCnt || (2 == minUnused && (now_x > last_x || (now_x == last_x && now_y > last_y))))
                 {
                     // 有效
-                    unsigned int newSt = st;
+                    unsigned long long newSt = st;
                     if (up)
                     {
                         setVal4St(newSt, now_y, 0);
@@ -234,7 +234,7 @@ int main()
 
             if (left && up)
             {
-                unsigned int newSt = st;
+                unsigned long long newSt = st;
 
                 if (left != up)
                 {
@@ -253,7 +253,7 @@ int main()
             }
             else if (left || up)
             {
-                unsigned int newSt = st;
+                unsigned long long newSt = st;
 
                 if (left)
                 {
@@ -272,8 +272,8 @@ int main()
                 }
                 else
                 {
-                    unsigned int newSt = st;
-                    
+                    unsigned long long newSt = st;
+
                     setVal4St(newSt, now_y, minUnused);
 
                     // add st

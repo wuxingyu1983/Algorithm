@@ -55,6 +55,7 @@ int h, w;
 unordered_map<unsigned int, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
+int last_x, last_y; // 最后一个景点的位置
 
 // 最小表示法重编码
 #define recode(ST, UNUSED)             \
@@ -139,6 +140,11 @@ int main()
         for (size_t col = 1; col <= w; col++)
         {
             cin >> cells[row][col];
+            if (0 == cells[row][col])
+            {
+                last_x = row;
+                last_y = col;
+            }
         }
     }
 
@@ -156,7 +162,29 @@ int main()
             if (h < now_x)
             {
                 // finished
-                // TBD
+                unsigned int ans = INT_MAX;
+                unsigned int idx = 0;
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    if (2 >= qs[act][iQ].minUnused)
+                    {
+                        if (ans > qs[act][iQ].cnt)
+                        {
+                            ans = qs[act][iQ].cnt;
+                            idx = iQ;
+                        }
+                    }
+                }
+
+                cout << ans;
+                for (size_t row = 1; row <= h; row++)
+                {
+                    cout << endl;
+                    for (size_t col = 1; col <= w; col++)
+                    {
+                        cout << cells[row][col];
+                    }
+                }
 
                 break;
             }
@@ -170,6 +198,7 @@ int main()
         {
             unsigned int st = qs[act][iQ].state;
             unsigned int cnt = qs[act][iQ].cnt;
+            unsigned char minUnused = qs[act][iQ].minUnused;
 
             unsigned int left = getVal4St(st, now_y - 1);
             unsigned int up = getVal4St(st, now_y);
@@ -189,7 +218,7 @@ int main()
                     }
                 }
 
-                if (0 == up || 1 < upCnt)
+                if (0 == up || 1 < upCnt || (2 == minUnused && (now_x > last_x || (now_x == last_x && now_y > last_y))))
                 {
                     // 有效
                     unsigned int newSt = st;
@@ -199,7 +228,7 @@ int main()
                     }
 
                     // add st
-                    addSts(newSt, cnt, cells[now_x][now_y], qs[act][iQ], nAct);
+                    addSts(newSt, cnt, 0, qs[act][iQ], nAct);
                 }
             }
 
@@ -237,13 +266,19 @@ int main()
             else
             {
                 // 0 == left && 0 == up
-                unsigned char minUnused = qs[act][iQ].minUnused;
-                unsigned int newSt = st;
+                if (2 >= minUnused && (now_x > last_x || (now_x == last_x && now_y > last_y)))
+                {
+                    // 已经过了最后一个景点，并且轮廓线上都为0或者只有1, 跳过即可
+                }
+                else
+                {
+                    unsigned int newSt = st;
+                    
+                    setVal4St(newSt, now_y, minUnused);
 
-                setVal4St(newSt, now_y, minUnused);
-
-                // add st
-                addSts(newSt, cnt, cells[now_x][now_y], qs[act][iQ], nAct);
+                    // add st
+                    addSts(newSt, cnt, cells[now_x][now_y], qs[act][iQ], nAct);
+                }
             }
         }
 

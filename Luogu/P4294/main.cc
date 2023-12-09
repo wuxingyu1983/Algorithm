@@ -158,8 +158,51 @@ int main()
 
                     // add st
                     // TBD
-                    
+
                 }
+            }
+
+            if (left && up)
+            {
+                unsigned int newSt = st;
+
+                if (left != up)
+                {
+                    // left ==> up
+                    for (size_t i = 1; i <= w; i++)
+                    {
+                        if (left == getVal4St(newSt, i))
+                        {
+                            setVal4St(newSt, i, up);
+                        }
+                    }
+                }
+
+                // add st
+                // TBD
+            }
+            else if (left || up)
+            {
+                unsigned int newSt = st;
+
+                if (left)
+                {
+                    setVal4St(newSt, now_y, left);
+                }
+
+                // add st
+                // TBD
+            }
+            else
+            {
+                // 0 == left && 0 == up
+                unsigned char minUnused = qs[act][iQ].minUnused;
+                unsigned int newSt = st;
+
+                setVal4St(newSt, now_y, minUnused);
+
+                // add st
+                // TBD
             }
         }
 

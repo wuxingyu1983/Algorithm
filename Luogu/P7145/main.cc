@@ -27,9 +27,11 @@ using namespace std;
 #define MAX_N 500
 #define MOD 998244353
 
-unsigned int dp[65536][16][MAX_N];
+unsigned int dp[65536][MAX_N][16];
 unsigned char nums[65536][16];      // 每个 num 每个 s[i]
 unsigned char flags[65536];         // 0 - 无效，1 - 有效
+unsigned char newNum0[16];          // 添加 0 得出的新的 num
+unsigned char newNum1[16];          // 添加 1 得出的新的 num
 
 int n, k;
 
@@ -37,10 +39,10 @@ int main()
 {
     cin >> n >> k;
 
+    unsigned int end = 1 << (1 << k);
+
     // init
     {
-        unsigned int end = 1 << (1 << k);
-        
         for (size_t i = 0; i < end; i++)
         {
             unsigned int num = i;
@@ -74,8 +76,52 @@ int main()
 
                 num >>= 1;
             }
+
+            if (1 == flags[i])
+            {
+                dp[i][1 << k][i & mask] = 1;
+            }
+        }
+
+        for (size_t i = 0; i < (1 << k); i++)
+        {
+            newNum0[i] = (i << 1) & mask;
+            newNum1[i] = ((i << 1) & mask) + 1;
         }
     }
+
+    unsigned int ans = 0;
+
+    for (size_t i = 0; i < end; i++)
+    {
+        if (1 == flags[i])
+        {
+            for (size_t iN = 1 << k; iN < n; iN++)
+            {
+                for (size_t j = 0; j < (1 << k); j++)
+                {
+                    if (dp[i][iN][j])
+                    {
+                        // 新增 0
+                        dp[i][iN + 1][newNum0[j]] += dp[i][iN][j];
+                        dp[i][iN + 1][newNum0[j]] %= MOD;
+
+                        // 新增 1
+                        dp[i][iN + 1][newNum1[j]] += dp[i][iN][j];
+                        dp[i][iN + 1][newNum1[j]] %= MOD;
+
+                        if (n == iN + 1)
+                        {
+                            ans += 2 * dp[i][iN][j];
+                            ans %= MOD;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    cout << ans << endl;
 
     return 0;
 }

@@ -32,7 +32,7 @@ using namespace std;
         ST |= (VAL) << (POS);
 
 int l;
-int dp[MAX_N][4097];
+int dp[MAX_N][8193];
 int roads[MAX_N];
 unsigned char pos[17];
 
@@ -63,35 +63,83 @@ int main()
         }
 
         init();
+        int ans = -1;
 
         for (size_t i = 1; i <= l; i++)
         {
             int idx = pos[roads[i]];
 
-            for (size_t st = 0; st <= 4096; st++)
+            for (size_t st = 0; st <= 8192; st++)
             {
                 if (0 <= dp[i - 1][st])
                 {
-                    int sum = roads[i] + dp[i - 1][st];
-
-                    if (getVal4St(st, idx))
+                    // not dig it
                     {
-
-                    }
-                    else
-                    {
-                        unsigned int newSt = st;
-
-                        setVal4St(newSt, idx, 1);
-
-                        if (sum > dp[i][newSt])
+                        if (dp[i - 1][st] > dp[i][st])
                         {
-                            dp[i][newSt] = sum;
+                            dp[i][st] = dp[i - 1][st];
+                            if (l == i && dp[i][st] > ans)
+                            {
+                                ans = dp[i][st];
+                            }
+                        }
+                    }
+
+                    // dig it
+                    {
+                        int sum = roads[i] + dp[i - 1][st];
+
+                        if (0 == (st & ((1 << idx) - 1)))
+                        {
+                            unsigned int newSt = st;
+                            int bonus = 2 * roads[i];
+
+                            for (size_t p = idx; p <= 12; p++)
+                            {
+                                if (getVal4St(st, p))
+                                {
+                                    sum += bonus;
+
+                                    setVal4St(newSt, p, 0);
+                                    bonus *= 2;
+                                }
+                                else
+                                {
+                                    setVal4St(newSt, p, 1);
+                                    break;
+                                }
+                            }
+
+                            if (sum > dp[i][newSt])
+                            {
+                                dp[i][newSt] = sum;
+
+                                if (l == i && dp[i][newSt] > ans)
+                                {
+                                    ans = dp[i][newSt];
+                                }
+                            }
+                        }
+                        else
+                        {
+                            unsigned int newSt = 1 << idx;
+
+                            if (sum > dp[i][newSt])
+                            {
+                                dp[i][newSt] = sum;
+
+                                if (l == i && dp[i][newSt] > ans)
+                                {
+                                    ans = dp[i][newSt];
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
+        cout << ans << endl;
     }
 
     return 0;

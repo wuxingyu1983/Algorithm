@@ -39,7 +39,6 @@ unsigned char pos[17];
 void init()
 {
     memset(dp, 0xff, sizeof(dp));
-
     dp[0][0] = 0;
 }
 

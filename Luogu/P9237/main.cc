@@ -86,8 +86,62 @@ int main()
     }
 
     init();
-    
-    
+
+    unsigned long long st1Mask = (1 << (ST_BITS * w)) - 1;
+    unsigned short st2Mask = (1 << w) - 1;
+
+    while (0 < qTail[act])
+    {
+        int nAct = 1 - act;
+
+        if (w == now_y)
+        {
+            now_x++;
+            now_y = 1;
+
+            if (h < now_x)
+            {
+                // finished
+                // TBD
+
+                break;
+            }
+        }
+        else
+        {
+            now_y++;
+        }
+
+        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        {
+            unsigned long long st1 = qs[act][iQ].state1;
+            unsigned short st2 = qs[act][iQ].state2;
+
+            if (1 == now_y)
+            {
+                st1 &= st1Mask;
+                st1 <<= ST_BITS;
+
+                st2 &= st2Mask;
+                st2 <<= 1;
+            }
+
+            int leftCnt = getVal4St1(st1, now_y - 1);
+            int leftUpCnt = getVal4St1(st1, now_y);
+            int upCnt = getVal4St1(st1, now_y + 1);
+            int rightUpCnt = getVal4St1(st1, now_y + 2);
+
+            int leftPixel = getVal4St2(st2, now_y - 1);
+            int leftUpPixel = getVal4St2(st2, now_y);
+            int upPixel = getVal4St2(st2, now_y + 1);
+            int rightUpPixel = getVal4St2(st2, now_y + 2);
+
+            
+        }
+
+        qTail[act] = 0;
+        act = nAct;
+    }
 
     return 0;
 }

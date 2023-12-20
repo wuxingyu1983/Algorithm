@@ -1,0 +1,93 @@
+// https://www.luogu.com.cn/problem/P9237
+
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <set>
+#include <unordered_map>
+#include <iostream>
+#include <algorithm>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <numeric>
+#include <queue>
+#include <stack>
+#include <climits>
+#include <cfloat>
+#include <limits>
+#include <bitset>
+
+using namespace std;
+
+#define DEBUG 0
+#define MAX_HW 11
+#define QS_SIZE 60000
+#define ST_BITS 4
+#define ST_MASK 15
+
+#define getVal4St1(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
+
+#define setVal4St1(ST, POS, VAL)                                 \
+    ST &= ~(((unsigned long long)ST_MASK) << ((POS) * ST_BITS)); \
+    if (VAL)                                                     \
+        ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
+
+#define getVal4St2(ST, POS) ((ST) >> (POS)) & 1
+
+#define setVal4St2(ST, POS, VAL) \
+    ST &= ~(1 << (POS));         \
+    if (VAL)                     \
+        ST |= (VAL) << (POS);
+
+class Record
+{
+public:
+    unsigned long long state1; // 轮廓线段上数字（周边还有几个）状态
+    unsigned short state2;     // 轮廓线段上像素（0, 1）状态
+    unsigned short cache[MAX_HW];
+
+    Record() {}
+};
+
+int h, w;
+char cells[MAX_HW][MAX_HW];
+Record qs[2][QS_SIZE];
+int qTail[2];
+unordered_map<unsigned int, unsigned int> cnts[2];
+int act = 0; // 当前生效的 map
+int now_x, now_y;
+
+void init()
+{
+    act = 0;
+
+    qTail[0] = 0;
+    qTail[1] = 0;
+
+    now_x = 0;
+    now_y = w;
+
+    qTail[act]++;
+}
+
+int main()
+{
+    cin >> h >> w;
+
+    for (size_t row = 1; row <= h; row++)
+    {
+        for (size_t col = 1; col <= w; col++)
+        {
+            cin >> cells[row][col];
+        }
+    }
+
+    init();
+    
+    
+
+    return 0;
+}

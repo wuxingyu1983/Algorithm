@@ -120,6 +120,7 @@ int main()
                 // finished
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
+/*
                     int row = 1;
                     for (row = 1; row <= h; row++)
                     {
@@ -130,6 +131,7 @@ int main()
                     }
 
                     if (row > h)
+*/
                     {
                         for (size_t i = 1; i <= h; i++)
                         {
@@ -157,6 +159,27 @@ int main()
         else
         {
             now_y++;
+        }
+
+        int remain = 0;
+        if (h > now_x)
+        {
+            remain++;
+
+            if (1 < now_y)
+            {
+                remain++;
+            }
+
+            if (w > now_y)
+            {
+                remain++;
+            }
+        }
+
+        if (w > now_y)
+        {
+            remain++;
         }
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
@@ -197,26 +220,6 @@ int main()
             {
                 int num = cells[now_x][now_y] - '0';
                 int sum = leftPixel + leftUpPixel + upPixel + rightUpPixel;
-                int remain = 0;
-                if (h > now_x)
-                {
-                    remain++;
-
-                    if (1 < now_y)
-                    {
-                        remain++;
-                    }
-
-                    if (w > now_y)
-                    {
-                        remain++;
-                    }
-                }
-
-                if (w > now_y)
-                {
-                    remain++;
-                }
 
                 // 当前位置 now_x, now_y 没有 pixel
                 if (sum > num)
@@ -395,6 +398,7 @@ int main()
         }
 
         qTail[act] = 0;
+        cnts[act].clear();
         act = nAct;
     }
 

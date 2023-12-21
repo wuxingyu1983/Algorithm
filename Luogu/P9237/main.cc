@@ -52,7 +52,7 @@ using namespace std;
             qs[IDX][pInQ].state1 = ST1;                                                     \
             qs[IDX][pInQ].state2 = ST2;                                                     \
             memcpy(qs[IDX][pInQ].cache, REC.cache, sizeof(REC.cache));                      \
-            setVal4St2(qs[IDX][pInQ].cache[now_x], now_y - 1, VAL);                         \
+            setVal4St2(qs[IDX][pInQ].cache[now_x], now_y, VAL);                             \
             cnts[IDX][key] = pInQ;                                                          \
             qTail[IDX]++;                                                                   \
         }                                                                                   \
@@ -199,7 +199,7 @@ int main()
                     valid = false;
                 }
 
-                if (0 == leftUpPixel && valid)
+                if (0 == leftUpCnt && valid)
                 {
                     // add st
                     unsigned long long newSt1 = st1;
@@ -225,17 +225,70 @@ int main()
 
                 if (valid)
                 {
+                    if (1 < now_y)
+                    {
+                        if ('_' != cells[now_x][now_y - 1] && 0 == leftCnt)
+                        {
+                            valid = false;
+                        }
+
+                        if (1 < now_x)
+                        {
+                            if ('_' != cells[now_x - 1][now_y - 1] && 1 != leftUpCnt)
+                            {
+                                valid = false;
+                            }
+                        }
+                    }
+
+                    if (1 < now_x)
+                    {
+                        if ('_' != cells[now_x - 1][now_y] && 0 == upCnt)
+                        {
+                            valid = false;
+                        }
+
+                        if (w > now_y)
+                        {
+                            if ('_' != cells[now_x - 1][now_y + 1] && 0 == rightUpCnt)
+                            {
+                                valid = false;
+                            }
+                        }
+                    }
+
+                    if (valid)
+                    {
+                        unsigned long long newSt1 = st1;
+                        unsigned short newSt2 = st2;
+
+                        setVal4St1(newSt1, now_y - 1, (num - sum - 1));
+                        setVal4St2(newSt2, now_y - 1, 1);
+
+                        addSts(newSt1, newSt2, qs[act][iQ], 1, nAct);
+                    }
                 }
             }
             else
             {
                 // '_' = cells[now_x][now_y]
                 // 当前位置 now_x, now_y 没有 pixel
-                // 直接 add
+                if (0 == leftUpCnt)
+                {
+                    // 直接 add
+                    unsigned long long newSt1 = st1;
+                    unsigned short newSt2 = st2;
+
+                    setVal4St1(newSt1, now_y - 1, 0);
+                    setVal4St2(newSt2, now_y - 1, 0);
+
+                    addSts(newSt1, newSt2, qs[act][iQ], 0, nAct);
+                }
 
                 // 当前位置 now_x, now_y 有 pixel
                 valid = true;
 
+                
             }
         }
 

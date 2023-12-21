@@ -42,6 +42,22 @@ using namespace std;
     if (VAL)                     \
         ST |= (VAL) << (POS);
 
+#define addSts(ST1, ST2, REC, VAL, IDX)                                                     \
+    {                                                                                       \
+        unsigned long long key = (ST1 << (w + 1)) + ST2;                                    \
+        unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX].find(key); \
+        if (it == cnts[IDX].end())                                                          \
+        {                                                                                   \
+            int pInQ = qTail[IDX];                                                          \
+            qs[IDX][pInQ].state1 = ST1;                                                     \
+            qs[IDX][pInQ].state2 = ST2;                                                     \
+            memcpy(qs[IDX][pInQ].cache, REC.cache, sizeof(REC.cache));                      \
+            setVal4St2(qs[IDX][pInQ].cache[now_x], now_y - 1, VAL);                         \
+            cnts[IDX][key] = pInQ;                                                          \
+            qTail[IDX]++;                                                                   \
+        }                                                                                   \
+    }
+
 class Record
 {
 public:
@@ -56,9 +72,11 @@ int h, w;
 char cells[MAX_HW][MAX_HW];
 Record qs[2][QS_SIZE];
 int qTail[2];
-unordered_map<unsigned int, unsigned int> cnts[2];
+unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
+unsigned long long st1Mask;
+unsigned short st2Mask;
 
 void init()
 {
@@ -87,8 +105,8 @@ int main()
 
     init();
 
-    unsigned long long st1Mask = (1 << (ST_BITS * w)) - 1;
-    unsigned short st2Mask = (1 << w) - 1;
+    st1Mask = (1 << (ST_BITS * (w + 1))) - 1;
+    st2Mask = (1 << (w + 1)) - 1;
 
     while (0 < qTail[act])
     {
@@ -119,24 +137,106 @@ int main()
 
             if (1 == now_y)
             {
-                st1 &= st1Mask;
                 st1 <<= ST_BITS;
+                st1 &= st1Mask;
 
-                st2 &= st2Mask;
                 st2 <<= 1;
+                st2 &= st2Mask;
             }
 
-            int leftCnt = getVal4St1(st1, now_y - 1);
-            int leftUpCnt = getVal4St1(st1, now_y);
-            int upCnt = getVal4St1(st1, now_y + 1);
-            int rightUpCnt = getVal4St1(st1, now_y + 2);
+            int leftCnt = 0;
+            if (1 < now_y)
+            {
+                leftCnt = getVal4St1(st1, now_y - 2);
+            }
+            int leftUpCnt = getVal4St1(st1, now_y - 1);
+            int upCnt = getVal4St1(st1, now_y);
+            int rightUpCnt = getVal4St1(st1, now_y + 1);
 
-            int leftPixel = getVal4St2(st2, now_y - 1);
-            int leftUpPixel = getVal4St2(st2, now_y);
-            int upPixel = getVal4St2(st2, now_y + 1);
-            int rightUpPixel = getVal4St2(st2, now_y + 2);
+            int leftPixel = 0;
+            if (1 < now_y)
+            {
+                leftPixel = getVal4St2(st2, now_y - 2);
+            }
+            int leftUpPixel = getVal4St2(st2, now_y - 1);
+            int upPixel = getVal4St2(st2, now_y);
+            int rightUpPixel = getVal4St2(st2, now_y + 1);
 
-            
+            bool valid = true;
+
+            if ('_' != cells[now_x][now_y])
+            {
+                int num = cells[now_x][now_y] - '0';
+                int sum = leftPixel + leftUpPixel + upPixel + rightUpPixel;
+                int remain = 0;
+                if (h > now_x)
+                {
+                    remain++;
+
+                    if (1 < now_y)
+                    {
+                        remain++;
+                    }
+
+                    if (w > now_y)
+                    {
+                        remain++;
+                    }
+                }
+
+                if (w > now_y)
+                {
+                    remain++;
+                }
+
+                // 当前位置 now_x, now_y 没有 pixel
+                if (sum > num)
+                {
+                    valid = false;
+                }
+                else if (remain + sum < num)
+                {
+                    valid = false;
+                }
+
+                if (0 == leftUpPixel && valid)
+                {
+                    // add st
+                    unsigned long long newSt1 = st1;
+                    unsigned short newSt2 = st2;
+
+                    setVal4St1(newSt1, now_y - 1, (num - sum));
+                    setVal4St2(newSt2, now_y - 1, 0);
+
+                    addSts(newSt1, newSt2, qs[act][iQ], 0, nAct);
+                }
+
+                // 当前位置 now_x, now_y 有 pixel
+                valid = true;
+
+                if (sum + 1 > num)
+                {
+                    valid = false;
+                }
+                else if (remain + sum + 1 < num)
+                {
+                    valid = false;
+                }
+
+                if (valid)
+                {
+                }
+            }
+            else
+            {
+                // '_' = cells[now_x][now_y]
+                // 当前位置 now_x, now_y 没有 pixel
+                // 直接 add
+
+                // 当前位置 now_x, now_y 有 pixel
+                valid = true;
+
+            }
         }
 
         qTail[act] = 0;

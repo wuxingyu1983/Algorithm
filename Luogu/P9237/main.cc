@@ -75,8 +75,6 @@ int qTail[2];
 unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
-unsigned long long st1Mask;
-unsigned short st2Mask;
 
 void init()
 {
@@ -105,8 +103,8 @@ int main()
 
     init();
 
-    st1Mask = (1 << (ST_BITS * (w + 1))) - 1;
-    st2Mask = (1 << (w + 1)) - 1;
+    unsigned long long st1Mask = (1 << (ST_BITS * w)) - 1;
+    unsigned short st2Mask = (1 << w) - 1;
 
     while (0 < qTail[act])
     {
@@ -137,11 +135,11 @@ int main()
 
             if (1 == now_y)
             {
-                st1 <<= ST_BITS;
                 st1 &= st1Mask;
+                st1 <<= ST_BITS;
 
-                st2 <<= 1;
                 st2 &= st2Mask;
+                st2 <<= 1;
             }
 
             int leftCnt = 0;
@@ -262,7 +260,23 @@ int main()
                         unsigned long long newSt1 = st1;
                         unsigned short newSt2 = st2;
 
+                        if (0 < leftCnt)
+                        {
+                            setVal4St1(newSt1, now_y - 2, leftCnt - 1);
+                        }
+
                         setVal4St1(newSt1, now_y - 1, (num - sum - 1));
+
+                        if (0 < upCnt)
+                        {
+                            setVal4St1(newSt1, now_y, upCnt - 1);
+                        }
+
+                        if (0 < rightUpCnt)
+                        {
+                            setVal4St1(newSt1, now_y + 1, rightUpCnt - 1);
+                        }
+
                         setVal4St2(newSt2, now_y - 1, 1);
 
                         addSts(newSt1, newSt2, qs[act][iQ], 1, nAct);
@@ -288,7 +302,64 @@ int main()
                 // 当前位置 now_x, now_y 有 pixel
                 valid = true;
 
-                
+                if (1 < now_y)
+                {
+                    if ('_' != cells[now_x][now_y - 1] && 0 == leftCnt)
+                    {
+                        valid = false;
+                    }
+
+                    if (1 < now_x)
+                    {
+                        if ('_' != cells[now_x - 1][now_y - 1] && 1 != leftUpCnt)
+                        {
+                            valid = false;
+                        }
+                    }
+                }
+
+                if (1 < now_x)
+                {
+                    if ('_' != cells[now_x - 1][now_y] && 0 == upCnt)
+                    {
+                        valid = false;
+                    }
+
+                    if (w > now_y)
+                    {
+                        if ('_' != cells[now_x - 1][now_y + 1] && 0 == rightUpCnt)
+                        {
+                            valid = false;
+                        }
+                    }
+                }
+
+                if (valid)
+                {
+                    unsigned long long newSt1 = st1;
+                    unsigned short newSt2 = st2;
+
+                    if (0 < leftCnt)
+                    {
+                        setVal4St1(newSt1, now_y - 2, leftCnt - 1);
+                    }
+
+                    setVal4St1(newSt1, now_y - 1, 0);
+
+                    if (0 < upCnt)
+                    {
+                        setVal4St1(newSt1, now_y, upCnt - 1);
+                    }
+
+                    if (0 < rightUpCnt)
+                    {
+                        setVal4St1(newSt1, now_y + 1, rightUpCnt - 1);
+                    }
+
+                    setVal4St2(newSt2, now_y - 1, 1);
+
+                    addSts(newSt1, newSt2, qs[act][iQ], 1, nAct);
+                }
             }
         }
 

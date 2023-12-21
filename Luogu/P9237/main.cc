@@ -118,7 +118,38 @@ int main()
             if (h < now_x)
             {
                 // finished
-                // TBD
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    int row = 1;
+                    for (row = 1; row <= h; row++)
+                    {
+                        if (0 < qs[act][iQ].cache[row])
+                        {
+                            break;
+                        }
+                    }
+
+                    if (row > h)
+                    {
+                        for (size_t i = 1; i <= h; i++)
+                        {
+                            for (size_t j = 1; j < w; j++)
+                            {
+                                if (getVal4St2(qs[act][iQ].cache[i], j))
+                                {
+                                    cout << 1;
+                                }
+                                else
+                                {
+                                    cout << 0;
+                                }
+                            }
+                            cout << endl << endl;
+                        }
+
+                        break;
+                    }
+                }
 
                 break;
             }

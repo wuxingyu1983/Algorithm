@@ -24,7 +24,7 @@ using namespace std;
 
 #define DEBUG 0
 #define MAX_HW 11
-#define QS_SIZE 60000
+#define QS_SIZE 600000
 #define ST_BITS 4
 #define ST_MASK 15
 

@@ -24,7 +24,7 @@ using namespace std;
 
 #define DEBUG 0
 #define MAX_HW 11
-#define QS_SIZE 60000
+#define QS_SIZE 600000
 #define ST_BITS 4
 #define ST_MASK 15
 
@@ -89,6 +89,69 @@ void init()
     qTail[act]++;
 }
 
+void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
+{
+#if DEBUG
+    if (bOut)
+    {
+        cout << "To :" << endl;
+
+        for (size_t col = 1; col < now_y; col++)
+        {
+            printf("( ,  )");
+        }
+
+        for (size_t col = now_y; col <= w; col++)
+        {
+            printf("(%d, %llu)", getVal4St2(st2, col), getVal4St1(st1, col));
+        }
+
+        cout << endl;
+
+        for (size_t col = 1; col <= now_y; col++)
+        {
+            printf("(%d, %llu)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
+        }
+
+        cout << endl;
+    }
+    else
+    {
+        cout << "From :" << endl;
+
+        if (1 == now_y)
+        {
+            for (size_t col = 0; col <= w; col++)
+            {
+                printf("(%d, %llu)", getVal4St2(st2, col), getVal4St1(st1, col));
+            }
+            cout << endl;
+        }
+        else
+        {
+            for (size_t col = 1; col < now_y - 1; col++)
+            {
+                printf("( ,  )");
+            }
+
+            for (size_t col = now_y - 1; col <= w; col++)
+            {
+                printf("(%d, %llu)", getVal4St2(st2, col), getVal4St1(st1, col));
+            }
+
+            cout << endl;
+
+            for (size_t col = 1; col < now_y; col++)
+            {
+                printf("(%d, %llu)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
+            }
+
+            cout << endl;
+        }
+    }
+#endif
+}
+
 int main()
 {
     cin >> h >> w;
@@ -103,7 +166,7 @@ int main()
 
     init();
 
-    unsigned long long st1Mask = (1 << (ST_BITS * w)) - 1;
+    unsigned long long st1Mask = (((unsigned long long)1) << (ST_BITS * w)) - 1;
     unsigned short st2Mask = (1 << w) - 1;
 
     while (0 < qTail[act])
@@ -120,18 +183,7 @@ int main()
                 // finished
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-/*
-                    int row = 1;
-                    for (row = 1; row <= h; row++)
-                    {
-                        if (0 < qs[act][iQ].cache[row])
-                        {
-                            break;
-                        }
-                    }
-
-                    if (row > h)
-*/
+                    if (0 == qs[act][iQ].state1)
                     {
                         for (size_t i = 1; i <= h; i++)
                         {
@@ -146,7 +198,7 @@ int main()
                                     cout << 0;
                                 }
                             }
-                            cout << endl << endl;
+                            cout << endl;
                         }
 
                         break;
@@ -182,6 +234,10 @@ int main()
             remain++;
         }
 
+#if DEBUG
+        printf("position is (%d, %d)\n", now_x, now_y);
+#endif
+
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
             unsigned long long st1 = qs[act][iQ].state1;
@@ -195,6 +251,8 @@ int main()
                 st2 &= st2Mask;
                 st2 <<= 1;
             }
+
+            debugPrint(st1, st2, false);
 
             int leftCnt = 0;
             if (1 < now_y)
@@ -231,7 +289,7 @@ int main()
                     valid = false;
                 }
 
-                if (0 == leftUpCnt && valid)
+                if (0 == leftUpCnt && valid && (w > now_y || 0 == upCnt))
                 {
                     // add st
                     unsigned long long newSt1 = st1;
@@ -241,6 +299,8 @@ int main()
                     setVal4St2(newSt2, now_y - 1, 0);
 
                     addSts(newSt1, newSt2, qs[act][iQ], 0, nAct);
+
+                    debugPrint(newSt1, newSt2);
                 }
 
                 // 当前位置 now_x, now_y 有 pixel
@@ -280,6 +340,11 @@ int main()
                             valid = false;
                         }
 
+                        if (w == now_y && '_' != cells[now_x - 1][now_y] && 1 != upCnt)
+                        {
+                            valid = false;
+                        }
+
                         if (w > now_y)
                         {
                             if ('_' != cells[now_x - 1][now_y + 1] && 0 == rightUpCnt)
@@ -314,6 +379,8 @@ int main()
                         setVal4St2(newSt2, now_y - 1, 1);
 
                         addSts(newSt1, newSt2, qs[act][iQ], 1, nAct);
+
+                        debugPrint(newSt1, newSt2);
                     }
                 }
             }
@@ -321,7 +388,7 @@ int main()
             {
                 // '_' = cells[now_x][now_y]
                 // 当前位置 now_x, now_y 没有 pixel
-                if (0 == leftUpCnt)
+                if (0 == leftUpCnt && (w > now_y || 0 == upCnt))
                 {
                     // 直接 add
                     unsigned long long newSt1 = st1;
@@ -331,6 +398,8 @@ int main()
                     setVal4St2(newSt2, now_y - 1, 0);
 
                     addSts(newSt1, newSt2, qs[act][iQ], 0, nAct);
+
+                    debugPrint(newSt1, newSt2);
                 }
 
                 // 当前位置 now_x, now_y 有 pixel
@@ -355,6 +424,11 @@ int main()
                 if (1 < now_x)
                 {
                     if ('_' != cells[now_x - 1][now_y] && 0 == upCnt)
+                    {
+                        valid = false;
+                    }
+
+                    if (w == now_y && '_' != cells[now_x - 1][now_y] && 1 != upCnt)
                     {
                         valid = false;
                     }
@@ -393,6 +467,8 @@ int main()
                     setVal4St2(newSt2, now_y - 1, 1);
 
                     addSts(newSt1, newSt2, qs[act][iQ], 1, nAct);
+
+                    debugPrint(newSt1, newSt2);
                 }
             }
         }

@@ -135,7 +135,7 @@ int main()
                     {
                         for (size_t i = 1; i <= h; i++)
                         {
-                            for (size_t j = 1; j < w; j++)
+                            for (size_t j = 1; j <= w; j++)
                             {
                                 if (getVal4St2(qs[act][iQ].cache[i], j))
                                 {

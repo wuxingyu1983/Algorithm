@@ -103,14 +103,14 @@ void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
 
         for (size_t col = now_y; col <= w; col++)
         {
-            printf("(%d, %d)", getVal4St2(st2, col), getVal4St1(st1, col));
+            printf("(%d, %llu)", getVal4St2(st2, col), getVal4St1(st1, col));
         }
 
         cout << endl;
 
         for (size_t col = 1; col <= now_y; col++)
         {
-            printf("(%d, %d)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
+            printf("(%d, %llu)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
         }
 
         cout << endl;
@@ -123,7 +123,7 @@ void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
         {
             for (size_t col = 0; col <= w; col++)
             {
-                printf("(%d, %d)", getVal4St2(st2, col), getVal4St1(st1, col));
+                printf("(%d, %llu)", getVal4St2(st2, col), getVal4St1(st1, col));
             }
             cout << endl;
         }
@@ -136,14 +136,14 @@ void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
 
             for (size_t col = now_y - 1; col <= w; col++)
             {
-                printf("(%d, %d)", getVal4St2(st2, col), getVal4St1(st1, col));
+                printf("(%d, %llu)", getVal4St2(st2, col), getVal4St1(st1, col));
             }
 
             cout << endl;
 
             for (size_t col = 1; col < now_y; col++)
             {
-                printf("(%d, %d)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
+                printf("(%d, %llu)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
             }
 
             cout << endl;
@@ -183,18 +183,7 @@ int main()
                 // finished
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-                    /*
-                                        int row = 1;
-                                        for (row = 1; row <= h; row++)
-                                        {
-                                            if (0 < qs[act][iQ].cache[row])
-                                            {
-                                                break;
-                                            }
-                                        }
-
-                                        if (row > h)
-                    */
+                    if (0 == qs[act][iQ].state1)
                     {
                         for (size_t i = 1; i <= h; i++)
                         {
@@ -209,8 +198,7 @@ int main()
                                     cout << 0;
                                 }
                             }
-                            cout << endl
-                                 << endl;
+                            cout << endl;
                         }
 
                         break;
@@ -301,7 +289,7 @@ int main()
                     valid = false;
                 }
 
-                if (0 == leftUpCnt && valid)
+                if (0 == leftUpCnt && valid && (w > now_y || 0 == upCnt))
                 {
                     // add st
                     unsigned long long newSt1 = st1;
@@ -352,6 +340,11 @@ int main()
                             valid = false;
                         }
 
+                        if (w == now_y && '_' != cells[now_x - 1][now_y] && 1 != upCnt)
+                        {
+                            valid = false;
+                        }
+
                         if (w > now_y)
                         {
                             if ('_' != cells[now_x - 1][now_y + 1] && 0 == rightUpCnt)
@@ -395,7 +388,7 @@ int main()
             {
                 // '_' = cells[now_x][now_y]
                 // 当前位置 now_x, now_y 没有 pixel
-                if (0 == leftUpCnt)
+                if (0 == leftUpCnt && (w > now_y || 0 == upCnt))
                 {
                     // 直接 add
                     unsigned long long newSt1 = st1;
@@ -431,6 +424,11 @@ int main()
                 if (1 < now_x)
                 {
                     if ('_' != cells[now_x - 1][now_y] && 0 == upCnt)
+                    {
+                        valid = false;
+                    }
+
+                    if (w == now_y && '_' != cells[now_x - 1][now_y] && 1 != upCnt)
                     {
                         valid = false;
                     }

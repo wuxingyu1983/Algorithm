@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#define DEBUG 0
+#define DEBUG 1
 #define MAX_HW 11
 #define QS_SIZE 60000
 #define ST_BITS 4
@@ -89,6 +89,50 @@ void init()
     qTail[act]++;
 }
 
+void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
+{
+#ifdef DEBUG
+    if (bOut)
+    {
+        cout << "To :" << endl;
+
+        for (size_t col = 1; col <= now_y; col++)
+        {
+            printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x, col, getVal4St1(st1, col - 1), now_x, col, getVal4St2(st2, col - 1));
+        }
+
+        for (size_t col = now_y; col <= w; col++)
+        {
+            printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x - 1, col, getVal4St1(st1, col), now_x - 1, col, getVal4St2(st2, col));
+        }
+    }
+    else
+    {
+        cout << "From :" << endl;
+
+        if (1 == now_y)
+        {
+            for (size_t col = 0; col <= w; col++)
+            {
+                printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x - 1, col, getVal4St1(st1, col), now_x - 1, col, getVal4St2(st2, col));
+            }
+        }
+        else
+        {
+            for (size_t col = 1; col < now_y; col++)
+            {
+                printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x, col, getVal4St1(st1, col - 1), now_x, col , getVal4St2(st2, col - 1));
+            }
+            
+            for (size_t col = now_y - 1; col <= w; col++)
+            {
+                printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x - 1, col, getVal4St1(st1, col), now_x - 1, col , getVal4St2(st2, col));
+            }
+        }
+    }
+#endif
+}
+
 int main()
 {
     cin >> h >> w;
@@ -135,7 +179,7 @@ int main()
                     {
                         for (size_t i = 1; i <= h; i++)
                         {
-                            for (size_t j = 1; j < w; j++)
+                            for (size_t j = 1; j <= w; j++)
                             {
                                 if (getVal4St2(qs[act][iQ].cache[i], j))
                                 {
@@ -182,10 +226,16 @@ int main()
             remain++;
         }
 
+#ifdef DEBUG
+        printf("position is (%d, %d)\n", now_x, now_y);
+#endif
+
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
             unsigned long long st1 = qs[act][iQ].state1;
             unsigned short st2 = qs[act][iQ].state2;
+
+            debugPrint(st1, st2, false);
 
             if (1 == now_y)
             {
@@ -241,6 +291,8 @@ int main()
                     setVal4St2(newSt2, now_y - 1, 0);
 
                     addSts(newSt1, newSt2, qs[act][iQ], 0, nAct);
+
+                    debugPrint(newSt1, newSt2);
                 }
 
                 // 当前位置 now_x, now_y 有 pixel
@@ -314,6 +366,8 @@ int main()
                         setVal4St2(newSt2, now_y - 1, 1);
 
                         addSts(newSt1, newSt2, qs[act][iQ], 1, nAct);
+
+                        debugPrint(newSt1, newSt2);
                     }
                 }
             }
@@ -331,6 +385,8 @@ int main()
                     setVal4St2(newSt2, now_y - 1, 0);
 
                     addSts(newSt1, newSt2, qs[act][iQ], 0, nAct);
+
+                    debugPrint(newSt1, newSt2);
                 }
 
                 // 当前位置 now_x, now_y 有 pixel
@@ -393,6 +449,8 @@ int main()
                     setVal4St2(newSt2, now_y - 1, 1);
 
                     addSts(newSt1, newSt2, qs[act][iQ], 1, nAct);
+
+                    debugPrint(newSt1, newSt2);
                 }
             }
         }

@@ -91,7 +91,7 @@ void init()
 
 void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
 {
-#ifdef DEBUG
+#if DEBUG
     if (bOut)
     {
         cout << "To :" << endl;
@@ -234,7 +234,7 @@ int main()
             remain++;
         }
 
-#ifdef DEBUG
+#if DEBUG
         printf("position is (%d, %d)\n", now_x, now_y);
 #endif
 

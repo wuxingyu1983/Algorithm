@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#define DEBUG 1
+#define DEBUG 0
 #define MAX_HW 11
 #define QS_SIZE 60000
 #define ST_BITS 4
@@ -96,15 +96,24 @@ void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
     {
         cout << "To :" << endl;
 
-        for (size_t col = 1; col <= now_y; col++)
+        for (size_t col = 1; col < now_y; col++)
         {
-            printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x, col, getVal4St1(st1, col - 1), now_x, col, getVal4St2(st2, col - 1));
+            printf("( ,  )");
         }
 
         for (size_t col = now_y; col <= w; col++)
         {
-            printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x - 1, col, getVal4St1(st1, col), now_x - 1, col, getVal4St2(st2, col));
+            printf("(%d, %d)", getVal4St2(st2, col), getVal4St1(st1, col));
         }
+
+        cout << endl;
+
+        for (size_t col = 1; col <= now_y; col++)
+        {
+            printf("(%d, %d)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
+        }
+
+        cout << endl;
     }
     else
     {
@@ -114,20 +123,30 @@ void debugPrint(unsigned long long st1, unsigned short st2, bool bOut = true)
         {
             for (size_t col = 0; col <= w; col++)
             {
-                printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x - 1, col, getVal4St1(st1, col), now_x - 1, col, getVal4St2(st2, col));
+                printf("(%d, %d)", getVal4St2(st2, col), getVal4St1(st1, col));
             }
+            cout << endl;
         }
         else
         {
-            for (size_t col = 1; col < now_y; col++)
+            for (size_t col = 1; col < now_y - 1; col++)
             {
-                printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x, col, getVal4St1(st1, col - 1), now_x, col , getVal4St2(st2, col - 1));
+                printf("( ,  )");
             }
-            
+
             for (size_t col = now_y - 1; col <= w; col++)
             {
-                printf("cnt[%d, %d] = %d, pixel[%d, %d] = %d\n", now_x - 1, col, getVal4St1(st1, col), now_x - 1, col , getVal4St2(st2, col));
+                printf("(%d, %d)", getVal4St2(st2, col), getVal4St1(st1, col));
             }
+
+            cout << endl;
+
+            for (size_t col = 1; col < now_y; col++)
+            {
+                printf("(%d, %d)", getVal4St2(st2, col - 1), getVal4St1(st1, col - 1));
+            }
+
+            cout << endl;
         }
     }
 #endif
@@ -147,7 +166,7 @@ int main()
 
     init();
 
-    unsigned long long st1Mask = (1 << (ST_BITS * w)) - 1;
+    unsigned long long st1Mask = (((unsigned long long)1) << (ST_BITS * w)) - 1;
     unsigned short st2Mask = (1 << w) - 1;
 
     while (0 < qTail[act])
@@ -164,18 +183,18 @@ int main()
                 // finished
                 for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-/*
-                    int row = 1;
-                    for (row = 1; row <= h; row++)
-                    {
-                        if (0 < qs[act][iQ].cache[row])
-                        {
-                            break;
-                        }
-                    }
+                    /*
+                                        int row = 1;
+                                        for (row = 1; row <= h; row++)
+                                        {
+                                            if (0 < qs[act][iQ].cache[row])
+                                            {
+                                                break;
+                                            }
+                                        }
 
-                    if (row > h)
-*/
+                                        if (row > h)
+                    */
                     {
                         for (size_t i = 1; i <= h; i++)
                         {
@@ -190,7 +209,8 @@ int main()
                                     cout << 0;
                                 }
                             }
-                            cout << endl << endl;
+                            cout << endl
+                                 << endl;
                         }
 
                         break;
@@ -235,8 +255,6 @@ int main()
             unsigned long long st1 = qs[act][iQ].state1;
             unsigned short st2 = qs[act][iQ].state2;
 
-            debugPrint(st1, st2, false);
-
             if (1 == now_y)
             {
                 st1 &= st1Mask;
@@ -245,6 +263,8 @@ int main()
                 st2 &= st2Mask;
                 st2 <<= 1;
             }
+
+            debugPrint(st1, st2, false);
 
             int leftCnt = 0;
             if (1 < now_y)

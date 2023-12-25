@@ -29,12 +29,31 @@ using namespace std;
 #define ST_MASK 3
 #define MOD 998244353
 
-#define getVal4St1(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
+#define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
-#define setVal4St1(ST, POS, VAL)           \
+#define setVal4St(ST, POS, VAL)            \
     ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
+
+#define addSts(ST, SUM, IDX)                                                         \
+    {                                                                                \
+        unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(ST); \
+        if (it == cnts[IDX].end())                                                   \
+        {                                                                            \
+            int pInQ = qTail[IDX];                                                   \
+            qs[IDX][pInQ].state = ST;                                                \
+            qs[IDX][pInQ].sum = SUM;                                                 \
+            cnts[IDX][ST] = pInQ;                                                    \
+            qTail[IDX]++;                                                            \
+        }                                                                            \
+        else                                                                         \
+        {                                                                            \
+            qs[IDX][it->second].sum += SUM;                                          \
+            if (MOD < qs[IDX][it->second].sum)                                       \
+                qs[IDX][it->second].sum -= MOD;                                      \
+        }                                                                            \
+    }
 
 class Record
 {
@@ -99,8 +118,21 @@ void func()
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
-            
+            unsigned int st = qs[act][iQ].state;
+            unsigned int sum = qs[act][iQ].sum;
 
+                if (0 == cells[now_x][now_y])
+            {
+                // 障碍物
+                setVal4St(st, now_y, 0);
+
+                addSts(st, sum, nAct);
+            }
+            else
+            {
+                unsigned int left = getVal4St(st, now_y - 1);
+                unsigned int up = getVal4St(st, now_y);
+            }
         }
 
         qTail[act] = 0;

@@ -63,7 +63,6 @@ public:
     Record() {}
 };
 
-int raw[MAX_HW][MAX_HW];
 int cells[MAX_HW][MAX_HW];
 int h, w;
 Record qs[2][QS_SIZE];
@@ -72,6 +71,7 @@ short cnts[2][65536];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned int maxSt = 0;
+int backup[MAX_HW];
 
 inline void init()
 {
@@ -79,8 +79,6 @@ inline void init()
 
     qTail[0] = 0;
     qTail[1] = 0;
-
-    memcpy(cells, raw, sizeof(raw));
 
     now_x = 0;
     now_y = w;
@@ -250,7 +248,7 @@ int main()
     {
         for (size_t col = 1; col <= w; col++)
         {
-            scanf("%d", &(raw[row][col]));
+            scanf("%d", &(cells[row][col]));
         }
     }
 
@@ -279,7 +277,12 @@ int main()
             int x, y;
             scanf("%d %d", &x, &y);
 
+            backup[0] = cells[x][y];
             cells[x][y] = 0;
+
+            func();
+
+            cells[x][y] = backup[0];
         }
         break;
         case 2:
@@ -289,7 +292,15 @@ int main()
 
             for (size_t col = 1; col <= w; col++)
             {
+                backup[col] = cells[row][col];
                 cells[row][col] = 0;
+            }
+
+            func();
+
+            for (size_t col = 1; col <= w; col++)
+            {
+                cells[row][col] = backup[col];
             }
         }
         break;
@@ -300,7 +311,15 @@ int main()
 
             for (size_t row = 1; row <= h; row++)
             {
+                backup[row] = cells[row][col];
                 cells[row][col] = 0;
+            }
+
+            func();
+
+            for (size_t row = 1; row <= h; row++)
+            {
+                cells[row][col] = backup[row];
             }
         }
         break;
@@ -311,7 +330,15 @@ int main()
 
             for (size_t i = 0; i <= k; i++)
             {
+                backup[i] = cells[x][y + i];
                 cells[x][y + i] = 0;
+            }
+            
+            func();
+
+            for (size_t i = 0; i <= k; i++)
+            {
+                cells[x][y + i] = backup[i];
             }
         }
         break;
@@ -323,13 +350,19 @@ int main()
 
             for (size_t i = 0; i <= k; i++)
             {
+                backup[i] = cells[x + i][y];
                 cells[x + i][y] = 0;
+            }
+
+            func();
+
+            for (size_t i = 0; i <= k; i++)
+            {
+                cells[x + i][y] = backup[i];
             }
         }
         break;
         }
-
-        func();
     }
 
     return 0;

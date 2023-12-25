@@ -239,18 +239,18 @@ void func()
         }
     }
 
-    cout << ans << endl;
+    printf("%u\n", ans);
 }
 
 int main()
 {
-    cin >> h >> w;
+    scanf("%d %d", &h, &w);
 
     for (size_t row = 1; row <= h; row++)
     {
         for (size_t col = 1; col <= w; col++)
         {
-            cin >> raw[row][col];
+            scanf("%d", &(raw[row][col]));
         }
     }
 
@@ -258,21 +258,21 @@ int main()
     func();
 
     int t;
-    cin >> t;
+    scanf("%d", &t);
 
     for (size_t iT = 0; iT < t; iT++)
     {
         init();
 
         int op;
-        cin >> op;
+        scanf("%d", &op);
 
         switch (op)
         {
         case 1:
         {
             int x, y;
-            cin >> x >> y;
+            scanf("%d %d", &x, &y);
 
             cells[x][y] = 0;
         }
@@ -280,7 +280,7 @@ int main()
         case 2:
         {
             int row;
-            cin >> row;
+            scanf("%d", &row);
 
             for (size_t col = 1; col <= w; col++)
             {
@@ -291,7 +291,7 @@ int main()
         case 3:
         {
             int col;
-            cin >> col;
+            scanf("%d", &col);
 
             for (size_t row = 1; row <= h; row++)
             {
@@ -302,7 +302,7 @@ int main()
         case 4:
         {
             int x, y, k;
-            cin >> x >> y >> k;
+            scanf("%d %d %d", &x, &y, &k);
 
             for (size_t i = 0; i <= k; i++)
             {
@@ -314,7 +314,7 @@ int main()
         default:
         {
             int x, y, k;
-            cin >> x >> y >> k;
+            scanf("%d %d %d", &x, &y, &k);
 
             for (size_t i = 0; i <= k; i++)
             {

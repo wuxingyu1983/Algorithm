@@ -24,7 +24,7 @@ using namespace std;
 
 #define DEBUG 0
 #define MAX_HW 16
-#define QS_SIZE 66000
+#define QS_SIZE 65536
 #define ST_BITS 1
 #define ST_MASK 1
 #define MOD 998244353
@@ -57,7 +57,7 @@ using namespace std;
 class Record
 {
 public:
-    unsigned int state;
+    unsigned short state;
     unsigned int sum;
 
     Record() {}
@@ -68,9 +68,10 @@ int cells[MAX_HW][MAX_HW];
 int h, w;
 Record qs[2][QS_SIZE];
 int qTail[2];
-int cnts[2][66000];
+short cnts[2][65536];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
+unsigned int maxSt = 0;
 
 inline void init()
 {
@@ -78,9 +79,6 @@ inline void init()
 
     qTail[0] = 0;
     qTail[1] = 0;
-
-    memset(cnts[0], -1, sizeof(cnts[0]));
-    memset(cnts[1], -1, sizeof(cnts[1]));
 
     memcpy(cells, raw, sizeof(raw));
 
@@ -112,6 +110,8 @@ inline void func()
                 {
                     ans = qs[act][0].sum;
                 }
+                
+                memset(cnts[act], -1, maxSt * sizeof(short));
 
                 break;
             }
@@ -135,7 +135,7 @@ inline void func()
         {
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                unsigned int st = qs[act][iQ].state;
+                unsigned short st = qs[act][iQ].state;
                 unsigned int sum = qs[act][iQ].sum;
 
                 if (1 == now_y)
@@ -234,7 +234,7 @@ inline void func()
             }
 
             qTail[act] = 0;
-            memset(cnts[act], -1, sizeof(cnts[act]));
+            memset(cnts[act], -1, maxSt * sizeof(short));
             act = nAct;
         }
     }
@@ -253,6 +253,11 @@ int main()
             scanf("%d", &(raw[row][col]));
         }
     }
+
+    memset(cnts[0], -1, sizeof(cnts[0]));
+    memset(cnts[1], -1, sizeof(cnts[1]));
+
+    maxSt = 1 << (w + 1);
 
     init();
     func();

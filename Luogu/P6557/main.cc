@@ -24,9 +24,9 @@ using namespace std;
 
 #define DEBUG 0
 #define MAX_HW 16
-#define QS_SIZE 100000
-#define ST_BITS 2
-#define ST_MASK 3
+#define QS_SIZE 70000
+#define ST_BITS 1
+#define ST_MASK 1
 #define MOD 998244353
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
@@ -36,23 +36,22 @@ using namespace std;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
-#define addSts(ST, SUM, IDX)                                                         \
-    {                                                                                \
-        unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(ST); \
-        if (it == cnts[IDX].end())                                                   \
-        {                                                                            \
-            int pInQ = qTail[IDX];                                                   \
-            qs[IDX][pInQ].state = ST;                                                \
-            qs[IDX][pInQ].sum = SUM;                                                 \
-            cnts[IDX][ST] = pInQ;                                                    \
-            qTail[IDX]++;                                                            \
-        }                                                                            \
-        else                                                                         \
-        {                                                                            \
-            qs[IDX][it->second].sum += SUM;                                          \
-            if (MOD < qs[IDX][it->second].sum)                                       \
-                qs[IDX][it->second].sum -= MOD;                                      \
-        }                                                                            \
+#define addSts(ST, SUM, IDX)                       \
+    {                                              \
+        if (0 > cnts[IDX][ST])                     \
+        {                                          \
+            int pInQ = qTail[IDX];                 \
+            qs[IDX][pInQ].state = ST;              \
+            qs[IDX][pInQ].sum = SUM;               \
+            cnts[IDX][ST] = pInQ;                  \
+            qTail[IDX]++;                          \
+        }                                          \
+        else                                       \
+        {                                          \
+            qs[IDX][cnts[IDX][ST]].sum += SUM;     \
+            if (MOD < qs[IDX][cnts[IDX][ST]].sum)  \
+                qs[IDX][cnts[IDX][ST]].sum -= MOD; \
+        }                                          \
     }
 
 class Record
@@ -69,7 +68,7 @@ int cells[MAX_HW][MAX_HW];
 int h, w;
 Record qs[2][QS_SIZE];
 int qTail[2];
-unordered_map<unsigned int, unsigned int> cnts[2];
+int cnts[2][70000];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 
@@ -79,8 +78,9 @@ void init()
 
     qTail[0] = 0;
     qTail[1] = 0;
-    cnts[0].clear();
-    cnts[1].clear();
+
+    memset(cnts[0], -1, sizeof(cnts[0]));
+    memset(cnts[1], -1, sizeof(cnts[1]));
 
     memcpy(cells, raw, sizeof(raw));
 
@@ -108,13 +108,9 @@ void func()
             if (h < now_x)
             {
                 // finished
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                if (1 == qTail[act] && 0 == qs[act][0].state)
                 {
-                    ans += qs[act][iQ].sum;
-                    if (MOD < ans)
-                    {
-                        ans -= MOD;
-                    }
+                    ans = qs[act][0].sum;
                 }
 
                 break;
@@ -125,202 +121,122 @@ void func()
             now_y++;
         }
 
-        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        if (0 == cells[now_x][now_y])
         {
-            unsigned int st = qs[act][iQ].state;
-            unsigned int sum = qs[act][iQ].sum;
-
-            unsigned int left = getVal4St(st, now_y - 1);
-            unsigned int up = getVal4St(st, now_y);
-
-            if (0 == cells[now_x][now_y])
+            if (1 == now_y)
             {
-                // 障碍物
-                if (1 != up)
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-                    setVal4St(st, now_y, 0);
-
-                    addSts(st, sum, nAct);
+                    qs[act][iQ].state <<= ST_BITS;
                 }
             }
-            else
+        }
+        else
+        {
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                if (1 == up)
+                unsigned int st = qs[act][iQ].state;
+                unsigned int sum = qs[act][iQ].sum;
+
+                if (1 == now_y)
                 {
-                    // 只能3，垂直延伸
-                    if (h == now_x && 1 == left)
-                    {
-                        // 非法
-                    }
-                    else
-                    {
-                        unsigned int newSt = st;
-
-                        setVal4St(newSt, now_y, 3);
-
-                        addSts(newSt, sum, nAct);
-                    }
+                    st <<= ST_BITS;
                 }
-                else if ((0 == left && 0 == up) || (0 == left && 2 == up) || (3 == left && 0 == up) || (3 == left && 2 == up))
+
+                unsigned int left = getVal4St(st, now_y - 1);
+                unsigned int up = getVal4St(st, now_y);
+
+                if (left && up)
                 {
-                    // 不放
+                    // 非法
+                }
+                else if (left)
+                {
+                    // 不再延伸
                     {
                         unsigned int newSt = st;
 
+                        setVal4St(newSt, now_y - 1, 0);
                         setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
 
-                    // 新启一个
-                    if (!(h == now_x && w == now_y))
+                    // 延续
+                    if (w > now_y && 1 == cells[now_x][now_y + 1])
                     {
                         unsigned int newSt = st;
 
+                        setVal4St(newSt, now_y - 1, 0);
                         setVal4St(newSt, now_y, 1);
 
                         addSts(newSt, sum, nAct);
                     }
                 }
-                else if (1 == left)
+                else if (up)
                 {
-                    // 水平延伸
+                    // 不再延伸
                     {
                         unsigned int newSt = st;
 
-                        setVal4St(newSt, now_y - 1, 2);
-                        setVal4St(newSt, now_y, 2);
-
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    // left 垂直延伸
-                    if (h > now_x)
-                    {
-                        if (3 == up)
-                        {
-                            // 延续 up
-                            addSts(st, sum, nAct);
-                        }
-
-                        // 不放
-                        {
-                            unsigned int newSt = st;
-
-                            setVal4St(newSt, now_y, 0);
-
-                            addSts(newSt, sum, nAct);
-                        }
-
-                        // 新启一个
-                        if (!(h == now_x && w == now_y))
-                        {
-                            unsigned int newSt = st;
-
-                            setVal4St(newSt, now_y, 1);
-
-                            addSts(newSt, sum, nAct);
-                        }
-                    }
-                }
-                else if (3 == up && (0 == left || 3 == left))
-                {
-                    {
-                        // 延续 up
-                        addSts(st, sum, nAct);
-                    }
-
-                    // 不放
-                    {
-                        unsigned int newSt = st;
-
+                        setVal4St(newSt, now_y - 1, 0);
                         setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
 
-                    // 新启一个
-                    if (!(h == now_x && w == now_y))
+                    // 延伸
+                    if (h > now_x && 1 == cells[now_x + 1][now_y])
                     {
                         unsigned int newSt = st;
 
-                        setVal4St(newSt, now_y, 1);
-
-                        addSts(newSt, sum, nAct);
-                    }
-                }
-                else if (2 == left && (0 == up || 2 == up))
-                {
-                    // 延续 left
-                    {
-                        unsigned int newSt = st;
-
-                        setVal4St(newSt, now_y, 2);
-
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    // 不放
-                    {
-                        unsigned int newSt = st;
-
+                        setVal4St(newSt, now_y - 1, 1);
                         setVal4St(newSt, now_y, 0);
-
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    // 新启一个
-                    if (!(h == now_x && w == now_y))
-                    {
-                        unsigned int newSt = st;
-
-                        setVal4St(newSt, now_y, 1);
 
                         addSts(newSt, sum, nAct);
                     }
                 }
                 else
                 {
-                    // 2 == left && 3 == up
-                    {
-                        // 延续 up
-                        addSts(st, sum, nAct);
-                    }
-
-                    // 延续 left
+                    // 0 == left && 0 == up
+                    // 不放置
                     {
                         unsigned int newSt = st;
 
-                        setVal4St(newSt, now_y, 2);
-
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    // 不放
-                    {
-                        unsigned int newSt = st;
-
+                        setVal4St(newSt, now_y - 1, 0);
                         setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
 
-                    // 新启一个
-                    if (!(h == now_x && w == now_y))
+                    // 向右延续
+                    if (w > now_y && 1 == cells[now_x][now_y + 1])
                     {
                         unsigned int newSt = st;
 
+                        setVal4St(newSt, now_y - 1, 0);
                         setVal4St(newSt, now_y, 1);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // 向下延伸
+                    if (h > now_x && 1 == cells[now_x + 1][now_y])
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y - 1, 1);
+                        setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
                 }
             }
-        }
 
-        qTail[act] = 0;
-        cnts[act].clear();
-        act = nAct;
+            qTail[act] = 0;
+            memset(cnts[act], -1, sizeof(cnts[act]));
+            act = nAct;
+        }
     }
 
     cout << ans << endl;

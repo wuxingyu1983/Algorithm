@@ -24,7 +24,7 @@ using namespace std;
 
 #define DEBUG 0
 #define MAX_HW 16
-#define QS_SIZE 70000
+#define QS_SIZE 66000
 #define ST_BITS 1
 #define ST_MASK 1
 #define MOD 998244353
@@ -68,11 +68,11 @@ int cells[MAX_HW][MAX_HW];
 int h, w;
 Record qs[2][QS_SIZE];
 int qTail[2];
-int cnts[2][70000];
+int cnts[2][66000];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 
-void init()
+inline void init()
 {
     act = 0;
 
@@ -92,7 +92,7 @@ void init()
     qTail[act]++;
 }
 
-void func()
+inline void func()
 {
     unsigned int ans = 0;
 

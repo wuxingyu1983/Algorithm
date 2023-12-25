@@ -121,17 +121,22 @@ void func()
             unsigned int st = qs[act][iQ].state;
             unsigned int sum = qs[act][iQ].sum;
 
-                if (0 == cells[now_x][now_y])
+            unsigned int left = getVal4St(st, now_y - 1);
+            unsigned int up = getVal4St(st, now_y);
+
+            if (0 == cells[now_x][now_y])
             {
                 // 障碍物
-                setVal4St(st, now_y, 0);
+                if (1 != up)
+                {
+                    setVal4St(st, now_y, 0);
 
-                addSts(st, sum, nAct);
+                    addSts(st, sum, nAct);
+                }
             }
             else
             {
-                unsigned int left = getVal4St(st, now_y - 1);
-                unsigned int up = getVal4St(st, now_y);
+                
             }
         }
 

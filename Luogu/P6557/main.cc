@@ -94,6 +94,8 @@ void init()
 
 void func()
 {
+    unsigned int ans = 0;
+
     while (0 < qTail[act])
     {
         int nAct = 1 - act;
@@ -106,7 +108,14 @@ void func()
             if (h < now_x)
             {
                 // finished
-                // TBD
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    ans += qs[act][iQ].sum;
+                    if (MOD < ans)
+                    {
+                        ans -= MOD;
+                    }
+                }
 
                 break;
             }
@@ -313,12 +322,14 @@ void func()
         cnts[act].clear();
         act = nAct;
     }
+
+    cout << ans << endl;
 }
 
 int main()
 {
     cin >> h >> w;
-    
+
     for (size_t row = 1; row <= h; row++)
     {
         for (size_t col = 1; col <= w; col++)
@@ -349,7 +360,7 @@ int main()
 
             cells[x][y] = 0;
         }
-            break;
+        break;
         case 2:
         {
             int row;
@@ -360,7 +371,7 @@ int main()
                 cells[row][col] = 0;
             }
         }
-            break;
+        break;
         case 3:
         {
             int col;
@@ -371,7 +382,7 @@ int main()
                 cells[row][col] = 0;
             }
         }
-            break;
+        break;
         case 4:
         {
             int x, y, k;
@@ -382,7 +393,7 @@ int main()
                 cells[x][y + i] = 0;
             }
         }
-            break;
+        break;
         case 5:
         default:
         {
@@ -394,7 +405,7 @@ int main()
                 cells[x + i][y] = 0;
             }
         }
-            break;
+        break;
         }
 
         func();

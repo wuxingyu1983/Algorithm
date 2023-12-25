@@ -136,7 +136,176 @@ void func()
             }
             else
             {
-                
+                if (1 == up)
+                {
+                    // 只能3，垂直延伸
+                    if (h == now_x && 1 == left)
+                    {
+                        // 非法
+                    }
+                    else
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 3);
+
+                        addSts(newSt, sum, nAct);
+                    }
+                }
+                else if ((0 == left && 0 == up) || (0 == left && 2 == up) || (3 == left && 0 == up) || (3 == left && 2 == up))
+                {
+                    // 不放
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 0);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // 新启一个
+                    if (!(h == now_x && w == now_y))
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 1);
+
+                        addSts(newSt, sum, nAct);
+                    }
+                }
+                else if (1 == left)
+                {
+                    // 水平延伸
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y - 1, 2);
+                        setVal4St(newSt, now_y, 2);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // left 垂直延伸
+                    if (h > now_x)
+                    {
+                        if (3 == up)
+                        {
+                            // 延续 up
+                            addSts(st, sum, nAct);
+                        }
+
+                        // 不放
+                        {
+                            unsigned int newSt = st;
+
+                            setVal4St(newSt, now_y, 0);
+
+                            addSts(newSt, sum, nAct);
+                        }
+
+                        // 新启一个
+                        if (!(h == now_x && w == now_y))
+                        {
+                            unsigned int newSt = st;
+
+                            setVal4St(newSt, now_y, 1);
+
+                            addSts(newSt, sum, nAct);
+                        }
+                    }
+                }
+                else if (3 == up && (0 == left || 3 == left))
+                {
+                    {
+                        // 延续 up
+                        addSts(st, sum, nAct);
+                    }
+
+                    // 不放
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 0);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // 新启一个
+                    if (!(h == now_x && w == now_y))
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 1);
+
+                        addSts(newSt, sum, nAct);
+                    }
+                }
+                else if (2 == left && (0 == up || 2 == up))
+                {
+                    // 延续 left
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 2);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // 不放
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 0);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // 新启一个
+                    if (!(h == now_x && w == now_y))
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 1);
+
+                        addSts(newSt, sum, nAct);
+                    }
+                }
+                else
+                {
+                    // 2 == left && 3 == up
+                    {
+                        // 延续 up
+                        addSts(st, sum, nAct);
+                    }
+
+                    // 延续 left
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 2);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // 不放
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 0);
+
+                        addSts(newSt, sum, nAct);
+                    }
+
+                    // 新启一个
+                    if (!(h == now_x && w == now_y))
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y, 1);
+
+                        addSts(newSt, sum, nAct);
+                    }
+                }
             }
         }
 

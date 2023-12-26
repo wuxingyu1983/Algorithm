@@ -31,9 +31,10 @@ using namespace std;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
-#define setVal4St(ST, POS, VAL)            \
-    ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
-    if (VAL)                               \
+// 2 bits 合一 set
+#define setVal4St(ST, POS, VAL)      \
+    ST &= ~(3 << ((POS) * ST_BITS)); \
+    if (VAL)                         \
         ST |= (VAL) << ((POS) * ST_BITS);
 
 #define addSts(ST, SUM, IDX)                                                         \
@@ -72,6 +73,7 @@ int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned int maxSt = 0;
 int backup[MAX_HW];
+unsigned int ver[MAX_HW], hor[MAX_HW];
 
 inline void init()
 {
@@ -88,7 +90,7 @@ inline void init()
     qTail[act]++;
 }
 
-inline void func()
+inline unsigned int func()
 {
     unsigned int ans = 0;
 
@@ -153,7 +155,6 @@ inline void func()
                         unsigned int newSt = st;
 
                         setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
@@ -161,12 +162,15 @@ inline void func()
                     // 延续
                     if (w > now_y && 1 == cells[now_x][now_y + 1])
                     {
-                        unsigned int newSt = st;
+                        unsigned int rightUp = getVal4St(st, now_y + 1);
+                        if (0 == rightUp)
+                        {
+                            unsigned int newSt = st;
 
-                        setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 1);
+                            setVal4St(newSt, now_y - 1, 2);
 
-                        addSts(newSt, sum, nAct);
+                            addSts(newSt, sum, nAct);
+                        }
                     }
                 }
                 else if (up)
@@ -176,7 +180,6 @@ inline void func()
                         unsigned int newSt = st;
 
                         setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
@@ -187,7 +190,6 @@ inline void func()
                         unsigned int newSt = st;
 
                         setVal4St(newSt, now_y - 1, 1);
-                        setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
@@ -200,7 +202,6 @@ inline void func()
                         unsigned int newSt = st;
 
                         setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
@@ -210,8 +211,7 @@ inline void func()
                     {
                         unsigned int newSt = st;
 
-                        setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 1);
+                        setVal4St(newSt, now_y - 1, 2);
 
                         addSts(newSt, sum, nAct);
                     }
@@ -222,7 +222,6 @@ inline void func()
                         unsigned int newSt = st;
 
                         setVal4St(newSt, now_y - 1, 1);
-                        setVal4St(newSt, now_y, 0);
 
                         addSts(newSt, sum, nAct);
                     }
@@ -235,6 +234,8 @@ inline void func()
     }
 
     printf("%u\n", ans);
+
+    return ans;
 }
 
 int main()
@@ -284,17 +285,24 @@ int main()
             int row;
             scanf("%d", &row);
 
-            for (size_t col = 1; col <= w; col++)
+            if (hor[row])
             {
-                backup[col] = cells[row][col];
-                cells[row][col] = 0;
+                printf("%d\n", hor[row]);
             }
-
-            func();
-
-            for (size_t col = 1; col <= w; col++)
+            else
             {
-                cells[row][col] = backup[col];
+                for (size_t col = 1; col <= w; col++)
+                {
+                    backup[col] = cells[row][col];
+                    cells[row][col] = 0;
+                }
+
+                hor[row] = func();
+
+                for (size_t col = 1; col <= w; col++)
+                {
+                    cells[row][col] = backup[col];
+                }
             }
         }
         break;
@@ -303,17 +311,24 @@ int main()
             int col;
             scanf("%d", &col);
 
-            for (size_t row = 1; row <= h; row++)
+            if (ver[col])
             {
-                backup[row] = cells[row][col];
-                cells[row][col] = 0;
+                printf("%d\n", ver[col]);
             }
-
-            func();
-
-            for (size_t row = 1; row <= h; row++)
+            else
             {
-                cells[row][col] = backup[row];
+                for (size_t row = 1; row <= h; row++)
+                {
+                    backup[row] = cells[row][col];
+                    cells[row][col] = 0;
+                }
+
+                ver[col] = func();
+
+                for (size_t row = 1; row <= h; row++)
+                {
+                    cells[row][col] = backup[row];
+                }
             }
         }
         break;

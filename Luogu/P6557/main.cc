@@ -36,22 +36,22 @@ using namespace std;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
-#define addSts(ST, SUM, IDX)                       \
-    {                                              \
-        if (0 > cnts[IDX][ST])                     \
-        {                                          \
-            int pInQ = qTail[IDX];                 \
-            qs[IDX][pInQ].state = ST;              \
-            qs[IDX][pInQ].sum = SUM;               \
-            cnts[IDX][ST] = pInQ;                  \
-            qTail[IDX]++;                          \
-        }                                          \
-        else                                       \
-        {                                          \
-            qs[IDX][cnts[IDX][ST]].sum += SUM;     \
-            if (MOD < qs[IDX][cnts[IDX][ST]].sum)  \
-                qs[IDX][cnts[IDX][ST]].sum -= MOD; \
-        }                                          \
+#define addSts(ST, SUM, IDX)                                                         \
+    {                                                                                \
+        if (0 > cnts[ST] || cnts[ST] >= qTail[IDX] || qs[IDX][cnts[ST]].state != ST) \
+        {                                                                            \
+            int pInQ = qTail[IDX];                                                   \
+            qs[IDX][pInQ].state = ST;                                                \
+            qs[IDX][pInQ].sum = SUM;                                                 \
+            cnts[ST] = pInQ;                                                         \
+            qTail[IDX]++;                                                            \
+        }                                                                            \
+        else                                                                         \
+        {                                                                            \
+            qs[IDX][cnts[ST]].sum += SUM;                                            \
+            if (MOD < qs[IDX][cnts[ST]].sum)                                         \
+                qs[IDX][cnts[ST]].sum -= MOD;                                        \
+        }                                                                            \
     }
 
 class Record
@@ -67,7 +67,7 @@ int cells[MAX_HW][MAX_HW];
 int h, w;
 Record qs[2][QS_SIZE];
 int qTail[2];
-short cnts[2][65536];
+short cnts[65536];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned int maxSt = 0;
@@ -108,8 +108,6 @@ inline void func()
                 {
                     ans = qs[act][0].sum;
                 }
-
-                memset(cnts[act], -1, maxSt * sizeof(short));
 
                 break;
             }
@@ -232,7 +230,6 @@ inline void func()
             }
 
             qTail[act] = 0;
-            memset(cnts[act], -1, maxSt * sizeof(short));
             act = nAct;
         }
     }
@@ -251,9 +248,6 @@ int main()
             scanf("%d", &(cells[row][col]));
         }
     }
-
-    memset(cnts[0], -1, sizeof(cnts[0]));
-    memset(cnts[1], -1, sizeof(cnts[1]));
 
     maxSt = 1 << (w + 1);
 

@@ -108,7 +108,7 @@ inline void func()
                 {
                     ans = qs[act][0].sum;
                 }
-                
+
                 memset(cnts[act], -1, maxSt * sizeof(short));
 
                 break;
@@ -333,7 +333,7 @@ int main()
                 backup[i] = cells[x][y + i];
                 cells[x][y + i] = 0;
             }
-            
+
             func();
 
             for (size_t i = 0; i <= k; i++)

@@ -50,7 +50,8 @@ public:
 char cells[MAX_HW][MAX_HW];
 Record qs[2][QS_SIZE];
 int qTail[2];
-int h, w, c, op;
+int h, w, op;
+unsigned long long c;
 unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
@@ -61,7 +62,7 @@ int now_x, now_y;
     memset(bb, -1, sizeof(bb));        \
     int bn = 1;                        \
     bb[0] = 0;                         \
-    for (int i = 1; i <= w; i++)       \
+    for (int i = 0; i <= w; i++)       \
     {                                  \
         int tmp = getVal4St(ST, i);    \
         if (tmp)                       \
@@ -74,6 +75,27 @@ int now_x, now_y;
         }                              \
     }                                  \
     UNUSED = bn;
+
+#define addSts(ST, SUM, IDX)                                                                  \
+    unsigned char unused;                                                                     \
+    unsigned long long recodedSt = ST;                                                        \
+    recode(recodedSt, unused);                                                                \
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
+    if (it == cnts[IDX].end())                                                                \
+    {                                                                                         \
+        int pInQ = qTail[IDX];                                                                \
+        qs[IDX][pInQ].state = recodedSt;                                                      \
+        qs[IDX][pInQ].sum = SUM;                                                              \
+        qs[IDX][pInQ].minUnused = unused;                                                     \
+        cnts[IDX][recodedSt] = pInQ;                                                          \
+        qTail[IDX]++;                                                                         \
+    }                                                                                         \
+    else                                                                                      \
+    {                                                                                         \
+        qs[IDX][it->second].sum += SUM;                                                       \
+        if (MOD < qs[IDX][it->second].sum)                                                    \
+            qs[IDX][it->second].sum -= MOD;                                                   \
+    }
 
 int main()
 {
@@ -94,6 +116,7 @@ int main()
         now_x = 0;
         now_y = w;
 
+        qs[act][0].sum = 1;
         qs[act][0].minUnused = 1;
 
         qTail[act]++;
@@ -101,7 +124,8 @@ int main()
 
     if (op)
     {
-
+        // TBD
+        cout << 0 << endl;
     }
     else
     {
@@ -117,7 +141,10 @@ int main()
                 if (h < now_x)
                 {
                     // finished
-                    // TBD
+                    if (1 == qTail[act])
+                    {
+                        cout << qs[act][0].sum << endl;
+                    }
 
                     break;
                 }
@@ -150,7 +177,166 @@ int main()
                         st <<= ST_BITS;
                     }
 
+                    unsigned int left = getVal4St(st, now_y - 1);
+                    unsigned int up = getVal4St(st, now_y);
+                    unsigned long long newSt = st;
 
+                    if (left && up)
+                    {
+                        if (left == up)
+                        {
+                            // 再 穿透
+                            if (h > now_x && '#' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1])
+                            {
+                                addSts(newSt, sum, nAct);
+                            }
+
+                            // 打住
+                            {
+                                unsigned long long newSum = sum;
+
+                                setVal4St(newSt, now_y - 1, 0);
+                                setVal4St(newSt, now_y, 0);
+
+                                int i = 0;
+                                for (i = 0; i <= w; i++)
+                                {
+                                    if (left == getVal4St(newSt, i))
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                if (i > w)
+                                {
+                                    newSum = (sum * c) % MOD;
+                                }
+
+                                addSts(newSt, newSum, nAct);
+                            }
+                        }
+                        else
+                        {
+                            if (h > now_x && '#' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1])
+                            {
+                                setVal4St(newSt, now_y - 1, up);
+                                setVal4St(newSt, now_y, left);
+
+                                addSts(newSt, sum, nAct);
+                            }
+
+                            // 打住
+                            {
+                                // up ==> left
+                                unsigned long long newSum = sum;
+
+                                setVal4St(newSt, now_y - 1, 0);
+                                setVal4St(newSt, now_y, 0);
+
+                                int i = 0;
+                                for (i = 0; i <= w; i++)
+                                {
+                                    if (up == getVal4St(newSt, i))
+                                    {
+                                        setVal4St(newSt, i, left);
+                                    }
+                                }
+
+                                for (i = 0; i <= w; i++)
+                                {
+                                    if (left == getVal4St(newSt, i))
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                if (i > w)
+                                {
+                                    newSum = (sum * c) % MOD;
+                                }
+
+                                addSts(newSt, newSum, nAct);
+                            }
+                        }
+                    }
+                    else if (left || up)
+                    {
+                        unsigned int val = left + up;
+
+                        // 打住
+                        {
+                            unsigned long long newSum = sum;
+
+                            setVal4St(newSt, now_y - 1, 0);
+                            setVal4St(newSt, now_y, 0);
+
+                            int i = 0;
+                            for (i = 0; i <= w; i++)
+                            {
+                                if (val == getVal4St(newSt, i))
+                                {
+                                    break;
+                                }
+                            }
+
+                            if (i > w)
+                            {
+                                newSt = (sum * c) % MOD;
+                            }
+
+                            addSts(newSt, newSum, nAct);
+                        }
+
+                        if (h > now_x && '#' != cells[now_x + 1][now_y])
+                        {
+                            setVal4St(newSt, now_y - 1, val);
+
+                            addSts(newSt, sum, nAct);
+                        }
+
+                        if (w > now_y && '#' != cells[now_x][now_y + 1])
+                        {
+                            newSt = st;
+
+                            setVal4St(newSt, now_y - 1, 0);
+                            setVal4St(newSt, now_y, val);
+
+                            addSts(newSt, sum, nAct);
+                        }
+                    }
+                    else
+                    {
+                        // 跳过
+                        {
+                            addSts(newSt, sum, nAct);
+                        }
+
+                        if (h > now_x && '#' != cells[now_x + 1][now_y])
+                        {
+                            setVal4St(newSt, now_y - 1, minUnused);
+                            
+                            addSts(newSt, sum, nAct);
+                        }
+
+                        if (w > now_y && '#' != cells[now_x][now_y + 1])
+                        {
+                            newSt = st;
+
+                            setVal4St(newSt, now_y, minUnused);
+
+                            addSts(newSt, sum, nAct);
+                        }
+
+                        if (h > now_x && '#' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1])
+                        {
+                            newSt = st;
+
+                            setVal4St(newSt, now_y, minUnused);
+                            setVal4St(newSt, now_y - 1, minUnused);
+
+                            addSts(newSt, sum, nAct);
+                        }
+                    }
                 }
 
                 qTail[act] = 0;

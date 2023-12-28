@@ -31,9 +31,9 @@ using namespace std;
 
 #define getVal4St(ST, POS) (((ST) >> ((POS) * ST_BITS)) & ST_MASK)
 
-#define setVal4St(ST, POS, VAL)            \
-    ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
-    if (VAL)                               \
+#define setVal4St(ST, POS, VAL)                                  \
+    ST &= ~(((unsigned long long)ST_MASK) << ((POS) * ST_BITS)); \
+    if (VAL)                                                     \
         ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
 
 class Record
@@ -281,7 +281,7 @@ int main()
 
                             if (i > w)
                             {
-                                newSt = (sum * c) % MOD;
+                                newSum = (sum * c) % MOD;
                             }
 
                             addSts(newSt, newSum, nAct);
@@ -314,7 +314,7 @@ int main()
                         if (h > now_x && '#' != cells[now_x + 1][now_y])
                         {
                             setVal4St(newSt, now_y - 1, minUnused);
-                            
+
                             addSts(newSt, sum, nAct);
                         }
 

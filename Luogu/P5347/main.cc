@@ -124,26 +124,26 @@ bool check1(int x, int y)
 unsigned long long func(bool (*check)(int x, int y))
 {
     unsigned long long ret = 0;
+    bool finish = false;
 
     while (0 < qTail[act])
     {
+        if (finish)
+        {
+            if (1 == qTail[act])
+            {
+                ret = qs[act][0].sum;
+            }
+
+            break;
+        }
+
         int nAct = 1 - act;
 
         if (w == now_y)
         {
             now_x++;
             now_y = 1;
-
-            if (h < now_x)
-            {
-                // finished
-                if (1 == qTail[act])
-                {
-                    ret = qs[act][0].sum;
-                }
-
-                break;
-            }
         }
         else
         {
@@ -338,6 +338,11 @@ unsigned long long func(bool (*check)(int x, int y))
             qTail[act] = 0;
             cnts[act].clear();
             act = nAct;
+        }
+
+        if (h == now_x && w == now_y)
+        {
+            finish = true;
         }
     }
 

@@ -97,7 +97,31 @@ int now_x, now_y;
             qs[IDX][it->second].sum -= MOD;                                                   \
     }
 
-unsigned long long func0()
+bool check0(int x, int y)
+{
+    bool bRet = false;
+
+    if ('#' != cells[x][y])
+    {
+        bRet = true;
+    }
+
+    return bRet;
+}
+
+bool check1(int x, int y)
+{
+    bool bRet = false;
+
+    if ('#' != cells[x][y] && '#' != cells[h + 1 - x][w + 1 - y])
+    {
+        bRet = true;
+    }
+
+    return bRet;
+}
+
+unsigned long long func(bool (*check)(int x, int y))
 {
     unsigned long long ret = 0;
 
@@ -158,7 +182,7 @@ unsigned long long func0()
                     if (left == up)
                     {
                         // 再 穿透
-                        if (h > now_x && '#' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1])
+                        if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
                         {
                             addSts(newSt, sum, nAct);
                         }
@@ -189,7 +213,7 @@ unsigned long long func0()
                     }
                     else
                     {
-                        if (h > now_x && '#' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1])
+                        if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
                         {
                             setVal4St(newSt, now_y - 1, up);
                             setVal4St(newSt, now_y, left);
@@ -259,14 +283,14 @@ unsigned long long func0()
                         addSts(newSt, newSum, nAct);
                     }
 
-                    if (h > now_x && '#' != cells[now_x + 1][now_y])
+                    if (h > now_x && check(now_x + 1, now_y))
                     {
                         setVal4St(newSt, now_y - 1, val);
 
                         addSts(newSt, sum, nAct);
                     }
 
-                    if (w > now_y && '#' != cells[now_x][now_y + 1])
+                    if (w > now_y && check(now_x, now_y + 1))
                     {
                         newSt = st;
 
@@ -283,14 +307,14 @@ unsigned long long func0()
                         addSts(newSt, sum, nAct);
                     }
 
-                    if (h > now_x && '#' != cells[now_x + 1][now_y])
+                    if (h > now_x && check(now_x + 1, now_y))
                     {
                         setVal4St(newSt, now_y - 1, minUnused);
 
                         addSts(newSt, sum, nAct);
                     }
 
-                    if (w > now_y && '#' != cells[now_x][now_y + 1])
+                    if (w > now_y && check(now_x, now_y + 1))
                     {
                         newSt = st;
 
@@ -299,7 +323,7 @@ unsigned long long func0()
                         addSts(newSt, sum, nAct);
                     }
 
-                    if (h > now_x && '#' != cells[now_x + 1][now_y] && w > now_y && '#' != cells[now_x][now_y + 1])
+                    if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
                     {
                         newSt = st;
 
@@ -320,6 +344,22 @@ unsigned long long func0()
     return ret;
 }
 
+inline void init()
+{
+    act = 0;
+
+    now_x = 0;
+    now_y = w;
+
+    cnts[0].clear();
+    cnts[1].clear();
+
+    qs[act][0].sum = 1;
+    qs[act][0].minUnused = 1;
+
+    qTail[act]++;
+}
+
 int main()
 {
     cin >> h >> w >> c >> op;
@@ -332,27 +372,22 @@ int main()
         }
     }
 
-    // init
-    {
-        act = 0;
-
-        now_x = 0;
-        now_y = w;
-
-        qs[act][0].sum = 1;
-        qs[act][0].minUnused = 1;
-
-        qTail[act]++;
-    }
+    init();
 
     if (op)
     {
         // TBD
-        cout << 0 << endl;
+        unsigned long long ans = func(check0);
+
+        init();
+
+        unsigned long long sum23 = func(check1);
+
+        cout << ans << endl;
     }
     else
     {
-        cout << func0() << endl;
+        cout << func(check0) << endl;
     }
 
     return 0;

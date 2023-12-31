@@ -562,6 +562,146 @@ unsigned long long funcSymOdd(bool (*check)(int x, int y))
     return ret;
 }
 
+unsigned long long funcSymEven(bool (*check)(int x, int y))
+{
+    unsigned long long ret = 0;
+    bool finish = false;
+
+    int iEnd = w / 2;
+    if (w & 1)
+    {
+        iEnd++;
+    }
+
+    while (0 < qTail[act])
+    {
+        if (finish)
+        {
+            if (1 == qTail[act])
+            {
+                ret = qs[act][0].sum;
+            }
+
+            break;
+        }
+
+        int nAct = 1 - act;
+
+        if (w == now_y)
+        {
+            now_x++;
+            now_y = 1;
+        }
+        else
+        {
+            now_y++;
+        }
+
+        if (false == check(now_x, now_y))
+        {
+            if (1 == now_y)
+            {
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    qs[act][iQ].state <<= ST_BITS;
+                }
+            }
+        }
+        else
+        {
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned long long st = qs[act][iQ].state;
+                unsigned long long sum = qs[act][iQ].sum;
+                unsigned char minUnused = qs[act][iQ].minUnused;
+
+                if (h / 2 >= now_x)
+                {
+                    funcCell(st, sum, minUnused, check, nAct);
+                }
+                else
+                {
+                    // h / 2 < now_x
+                    if (1 == now_y)
+                    {
+                        st <<= ST_BITS;
+                    }
+
+                    int i = 0;
+
+                    for (i = 1; i <= iEnd; i++)
+                    {
+                        unsigned int up = getVal4St(st, i);
+                        unsigned int bottom = getVal4St(st, w + 1 - i);
+
+                        if (!up && bottom)
+                        {
+                            break;
+                        }
+                        else if (up && !bottom)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (i > iEnd)
+                    {
+                        // 合法
+                        unsigned long long newSt = st;
+                        unsigned long long newSum = sum;
+
+                        for (i = 1; i <= iEnd; i++)
+                        {
+                            unsigned int up = getVal4St(newSt, i);
+                            unsigned int bottom = getVal4St(newSt, w + 1 - i);
+
+                            if (up)
+                            {
+                                setVal4St(newSt, i, 0);
+                                setVal4St(newSt, w + 1 - i, 0);
+
+                                bool flag = true;
+                                // bottom ==> up
+                                for (size_t j = 0; j <= w; j++)
+                                {
+                                    unsigned int tmp = getVal4St(newSt, j);
+                                    if (bottom == tmp)
+                                    {
+                                        flag = false;
+                                        setVal4St(newSt, j, up);
+                                    }
+                                    else if (up == tmp)
+                                    {
+                                        flag = false;
+                                    }
+                                }
+
+                                if (flag)
+                                {
+                                    newSum = (newSum * c) % MOD;
+                                }
+                            }
+                        }
+
+                        addSts(0, newSum, nAct);
+                    }
+                }
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
+
+        if (h / 2 < now_x)
+        {
+            finish = true;
+        }
+    }
+
+    return ret;
+}
+
 unsigned long long func(bool (*check)(int x, int y))
 {
     unsigned long long ret = 0;
@@ -674,10 +814,10 @@ int main()
         }
         else
         {
-
+            sym = funcSymEven(check1);
         }
 
-//        printf("ans = %llu, sum23 = %llu, sym = %llu\n", ans, sum23, sym);
+        //        printf("ans = %llu, sum23 = %llu, sym = %llu\n", ans, sum23, sym);
 
         ans += MOD;
         ans -= inv((sum23 + MOD - sym), 2);

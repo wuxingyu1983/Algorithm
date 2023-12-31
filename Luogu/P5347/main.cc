@@ -24,10 +24,11 @@ using namespace std;
 
 #define DEBUG 0
 #define MAX_HW 10
-#define ST_BITS 4
-#define ST_MASK 15
-#define QS_SIZE 600000
-#define MOD 998244353
+#define QS_SIZE 1000000
+
+const unsigned int ST_BITS = 4;
+const unsigned long long ST_MASK = 15;
+const unsigned long long MOD = 998244353;
 
 #define getVal4St(ST, POS) (((ST) >> ((POS) * ST_BITS)) & ST_MASK)
 
@@ -111,8 +112,7 @@ int now_x, now_y;
     else                                                                                      \
     {                                                                                         \
         qs[IDX][it->second].sum += SUM;                                                       \
-        if (MOD < qs[IDX][it->second].sum)                                                    \
-            qs[IDX][it->second].sum -= MOD;                                                   \
+        qs[IDX][it->second].sum %= MOD;                                                       \
     }
 
 bool check0(int x, int y)
@@ -597,7 +597,7 @@ unsigned long long funcSymEven(bool (*check)(int x, int y))
             now_y++;
         }
 
-        if (false == check(now_x, now_y))
+        if (false == check(now_x, now_y) && h / 2 >= now_x)
         {
             if (1 == now_y)
             {
@@ -628,7 +628,6 @@ unsigned long long funcSymEven(bool (*check)(int x, int y))
                     }
 
                     int i = 0;
-
                     for (i = 1; i <= iEnd; i++)
                     {
                         unsigned int up = getVal4St(st, i);
@@ -797,10 +796,10 @@ int main()
 
     init();
 
+    unsigned long long ans = func(check0);
+
     if (op)
     {
-        unsigned long long ans = func(check0);
-
         init();
 
         unsigned long long sum23 = func(check1);
@@ -822,13 +821,9 @@ int main()
         ans += MOD;
         ans -= inv((sum23 + MOD - sym), 2);
         ans %= MOD;
+    }
 
-        cout << ans << endl;
-    }
-    else
-    {
-        cout << func(check0) << endl;
-    }
+    cout << ans << endl;
 
     return 0;
 }

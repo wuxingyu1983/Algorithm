@@ -194,7 +194,7 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
 
             if (left)
             {
-                if (check(now_x + 1, now_y))
+                if (check(now_x, now_y + 1))
                 {
                     // 贯穿
                     setVal4St(newSt, now_y, left);
@@ -210,7 +210,16 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
         {
             int val = up + bottom;
 
-            // 只能打住
+            if (0 == left && check(now_x, now_y + 1))
+            {
+                //向右延伸
+                setVal4St(newSt, now_y, val);
+                addSts(newSt, sum, nAct);
+            }
+
+
+            // 打住
+            newSt = st;
             if (left)
             {
                 // left ==> val
@@ -250,7 +259,7 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
                 addSts(newSt, sum, nAct);
 
                 // 新启
-                if (check(now_x + 1, now_y))
+                if (check(now_x, now_y + 1))
                 {
                     setVal4St(newSt, now_y, minUnused);
                     addSts(newSt, sum, nAct);
@@ -278,7 +287,7 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
                 addSts(newSt, newSum, nAct);
 
                 // 贯穿
-                if (check(now_x + 1, now_y))
+                if (check(now_x, now_y + 1))
                 {
                     setVal4St(newSt, now_y, left);
                     addSts(newSt, sum, nAct);

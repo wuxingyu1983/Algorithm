@@ -36,6 +36,24 @@ using namespace std;
     if (VAL)                                                     \
         ST |= ((unsigned long long)(VAL)) << ((POS) * ST_BITS);
 
+unsigned long long quick_pow(unsigned long long a, unsigned long long b)
+{
+    unsigned long long ans = 1;
+    while (b)
+    {
+        if (b & 1)
+            ans = (ans * a) % MOD;
+        b >>= 1;
+        a = (a * a) % MOD;
+    }
+    return ans;
+}
+
+unsigned long long inv(unsigned long long a, unsigned long long b)
+{
+    return (a * quick_pow(b, MOD - 2)) % MOD;
+}
+
 class Record
 {
 public:
@@ -135,11 +153,17 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
         unsigned int bottom = getVal4St(st, w + 1 - now_y);
         unsigned long long newSt = st;
 
-        if (up && bottom)
-        {
+        if (left)
+            setVal4St(newSt, now_y - 1, 0);
+
+        if (up)
             setVal4St(newSt, now_y, 0);
+
+        if (bottom)
             setVal4St(newSt, w + 1 - now_y, 0);
 
+        if (up && bottom)
+        {
             unsigned long long newSum = sum;
 
             if (up != bottom)
@@ -173,7 +197,6 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
                 if (check(now_x + 1, now_y))
                 {
                     // 贯穿
-                    setVal4St(newSt, now_y - 1, 0);
                     setVal4St(newSt, now_y, left);
                     addSts(newSt, newSum, nAct);
                 }
@@ -187,20 +210,9 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
         {
             int val = up + bottom;
 
-            if (up)
-            {
-                setVal4St(newSt, now_y, 0);
-            }
-            else
-            {
-                setVal4St(newSt, w + 1 - now_y, 0);
-            }
-
             // 只能打住
             if (left)
             {
-                setVal4St(newSt, now_y - 1, 0);
-
                 // left ==> val
                 for (int i = 0; i <= w; i++)
                 {
@@ -246,7 +258,6 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
             }
             else
             {
-                setVal4St(newSt, now_y - 1, 0);
                 // 打住
                 unsigned long long newSum = sum;
 
@@ -527,7 +538,7 @@ unsigned long long funcSymOdd(bool (*check)(int x, int y))
                 unsigned long long sum = qs[act][iQ].sum;
                 unsigned char minUnused = qs[act][iQ].minUnused;
 
-                if ((h + 1) == (now_x * 2))
+                if ((h + 1) / 2 == now_x)
                 {
                     funcSymOddCell(st, sum, minUnused, check, nAct);
                 }
@@ -542,8 +553,7 @@ unsigned long long funcSymOdd(bool (*check)(int x, int y))
             act = nAct;
         }
 
-        // TBD
-        if ((h + 1) == (now_x * 2) && now_y > (w / 2))
+        if ((h + 1) / 2 == now_x && now_y > (w / 2))
         {
             finish = true;
         }
@@ -629,7 +639,8 @@ inline void init()
     qs[act][0].sum = 1;
     qs[act][0].minUnused = 1;
 
-    qTail[act]++;
+    qTail[0] = 1;
+    qTail[1] = 0;
 }
 
 int main()
@@ -648,12 +659,29 @@ int main()
 
     if (op)
     {
-        // TBD
         unsigned long long ans = func(check0);
 
         init();
 
         unsigned long long sum23 = func(check1);
+
+        init();
+
+        unsigned long long sym = 0;
+        if (h & 1)
+        {
+            sym = funcSymOdd(check1);
+        }
+        else
+        {
+
+        }
+
+//        printf("ans = %llu, sum23 = %llu, sym = %llu\n", ans, sum23, sym);
+
+        ans += MOD;
+        ans -= inv((sum23 + MOD - sym), 2);
+        ans %= MOD;
 
         cout << ans << endl;
     }

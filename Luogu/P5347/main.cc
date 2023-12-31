@@ -121,6 +121,335 @@ bool check1(int x, int y)
     return bRet;
 }
 
+inline void funcCell(unsigned long long st, unsigned long long sum, unsigned char minUnused, bool (*check)(int x, int y), int nAct)
+{
+    if (1 == now_y)
+    {
+        st <<= ST_BITS;
+    }
+
+    unsigned int left = getVal4St(st, now_y - 1);
+    unsigned int up = getVal4St(st, now_y);
+    unsigned long long newSt = st;
+
+    if (left && up)
+    {
+        if (left == up)
+        {
+            // 再 穿透
+            if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
+            {
+                addSts(newSt, sum, nAct);
+            }
+
+            // 打住
+            {
+                unsigned long long newSum = sum;
+
+                setVal4St(newSt, now_y - 1, 0);
+                setVal4St(newSt, now_y, 0);
+
+                int i = 0;
+                for (i = 0; i <= w; i++)
+                {
+                    if (left == getVal4St(newSt, i))
+                    {
+                        break;
+                    }
+                }
+
+                if (i > w)
+                {
+                    newSum = (sum * c) % MOD;
+                }
+
+                addSts(newSt, newSum, nAct);
+            }
+        }
+        else
+        {
+            if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
+            {
+                setVal4St(newSt, now_y - 1, up);
+                setVal4St(newSt, now_y, left);
+
+                addSts(newSt, sum, nAct);
+            }
+
+            // 打住
+            {
+                // up ==> left
+                unsigned long long newSum = sum;
+
+                setVal4St(newSt, now_y - 1, 0);
+                setVal4St(newSt, now_y, 0);
+
+                int i = 0;
+                for (i = 0; i <= w; i++)
+                {
+                    if (up == getVal4St(newSt, i))
+                    {
+                        setVal4St(newSt, i, left);
+                    }
+                }
+
+                for (i = 0; i <= w; i++)
+                {
+                    if (left == getVal4St(newSt, i))
+                    {
+                        break;
+                    }
+                }
+
+                if (i > w)
+                {
+                    newSum = (sum * c) % MOD;
+                }
+
+                addSts(newSt, newSum, nAct);
+            }
+        }
+    }
+    else if (left || up)
+    {
+        unsigned int val = left + up;
+
+        // 打住
+        {
+            unsigned long long newSum = sum;
+
+            setVal4St(newSt, now_y - 1, 0);
+            setVal4St(newSt, now_y, 0);
+
+            int i = 0;
+            for (i = 0; i <= w; i++)
+            {
+                if (val == getVal4St(newSt, i))
+                {
+                    break;
+                }
+            }
+
+            if (i > w)
+            {
+                newSum = (sum * c) % MOD;
+            }
+
+            addSts(newSt, newSum, nAct);
+        }
+
+        if (h > now_x && check(now_x + 1, now_y))
+        {
+            setVal4St(newSt, now_y - 1, val);
+
+            addSts(newSt, sum, nAct);
+        }
+
+        if (w > now_y && check(now_x, now_y + 1))
+        {
+            newSt = st;
+
+            setVal4St(newSt, now_y - 1, 0);
+            setVal4St(newSt, now_y, val);
+
+            addSts(newSt, sum, nAct);
+        }
+    }
+    else
+    {
+        // 跳过
+        {
+            addSts(newSt, sum, nAct);
+        }
+
+        if (h > now_x && check(now_x + 1, now_y))
+        {
+            setVal4St(newSt, now_y - 1, minUnused);
+
+            addSts(newSt, sum, nAct);
+        }
+
+        if (w > now_y && check(now_x, now_y + 1))
+        {
+            newSt = st;
+
+            setVal4St(newSt, now_y, minUnused);
+
+            addSts(newSt, sum, nAct);
+        }
+
+        if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
+        {
+            newSt = st;
+
+            setVal4St(newSt, now_y, minUnused);
+            setVal4St(newSt, now_y - 1, minUnused);
+
+            addSts(newSt, sum, nAct);
+        }
+    }
+}
+
+unsigned long long funcSymOdd(bool (*check)(int x, int y))
+{
+    unsigned long long ret = 0;
+    bool finish = false;
+
+    while (0 < qTail[act])
+    {
+        if (finish)
+        {
+            if (1 == qTail[act])
+            {
+                ret = qs[act][0].sum;
+            }
+
+            break;
+        }
+
+        int nAct = 1 - act;
+
+        if (w == now_y)
+        {
+            now_x++;
+            now_y = 1;
+        }
+        else
+        {
+            now_y++;
+        }
+
+        if (false == check(now_x, now_y))
+        {
+            if (1 == now_y)
+            {
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    qs[act][iQ].state <<= ST_BITS;
+                }
+            }
+        }
+        else
+        {
+            if ((h + 1) == (now_x * 2))
+            {
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    unsigned long long st = qs[act][iQ].state;
+                    unsigned long long sum = qs[act][iQ].sum;
+                    unsigned char minUnused = qs[act][iQ].minUnused;
+
+                    if (1 == now_y)
+                    {
+                        st <<= ST_BITS;
+                    }
+
+                    unsigned int left = getVal4St(st, now_y - 1);
+                    unsigned int up = getVal4St(st, now_y);
+                    unsigned int bottom = getVal4St(st, w + 1 - now_y);
+                    unsigned long long newSt = st;
+
+                    if (up && bottom) 
+                    {
+                        setVal4St(newSt, now_y, 0);
+                        setVal4St(newSt, w + 1 - now_y, 0);
+
+                        unsigned long long newSum = sum;
+
+                        if (up != bottom)
+                        {
+                            // bottom ==> up
+                            for (int i = 0; i <= w; i++)
+                            {
+                                if (bottom == getVal4St(newSt, i))
+                                {
+                                    setVal4St(newSt, i, up);
+                                }
+                            }
+                        }
+
+                        int i;
+                        for (i = 0; i <= w; i++)
+                        {
+                            if (up == getVal4St(newSt, i))
+                            {
+                                break;
+                            }
+                        }
+
+                        if (i > w)
+                        {
+                            newSum = (sum * c) % MOD;
+                        }
+
+                        if (left)
+                        {
+                            // 贯穿
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    else if (up || bottom) 
+                    {
+                        // 打住
+                        if (left)
+                        {
+                            
+                        }
+                        else
+                        {
+
+                        }
+                    }                   
+                    else
+                    {
+                        // 0 == up && 0 == bottom
+                        if (0 == left)
+                        {
+                            // 跳过
+
+                            // 新启
+
+                        }
+                        else
+                        {
+                            // 打住
+
+                            // 贯穿
+
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    unsigned long long st = qs[act][iQ].state;
+                    unsigned long long sum = qs[act][iQ].sum;
+                    unsigned char minUnused = qs[act][iQ].minUnused;
+
+                    funcCell(st, sum, minUnused, check, nAct);
+                }
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
+
+        // TBD
+        if (h == now_x && w == now_y)
+        {
+            finish = true;
+        }
+    }
+
+    return ret;
+}
+
 unsigned long long func(bool (*check)(int x, int y))
 {
     unsigned long long ret = 0;
@@ -168,171 +497,7 @@ unsigned long long func(bool (*check)(int x, int y))
                 unsigned long long sum = qs[act][iQ].sum;
                 unsigned char minUnused = qs[act][iQ].minUnused;
 
-                if (1 == now_y)
-                {
-                    st <<= ST_BITS;
-                }
-
-                unsigned int left = getVal4St(st, now_y - 1);
-                unsigned int up = getVal4St(st, now_y);
-                unsigned long long newSt = st;
-
-                if (left && up)
-                {
-                    if (left == up)
-                    {
-                        // 再 穿透
-                        if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
-                        {
-                            addSts(newSt, sum, nAct);
-                        }
-
-                        // 打住
-                        {
-                            unsigned long long newSum = sum;
-
-                            setVal4St(newSt, now_y - 1, 0);
-                            setVal4St(newSt, now_y, 0);
-
-                            int i = 0;
-                            for (i = 0; i <= w; i++)
-                            {
-                                if (left == getVal4St(newSt, i))
-                                {
-                                    break;
-                                }
-                            }
-
-                            if (i > w)
-                            {
-                                newSum = (sum * c) % MOD;
-                            }
-
-                            addSts(newSt, newSum, nAct);
-                        }
-                    }
-                    else
-                    {
-                        if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
-                        {
-                            setVal4St(newSt, now_y - 1, up);
-                            setVal4St(newSt, now_y, left);
-
-                            addSts(newSt, sum, nAct);
-                        }
-
-                        // 打住
-                        {
-                            // up ==> left
-                            unsigned long long newSum = sum;
-
-                            setVal4St(newSt, now_y - 1, 0);
-                            setVal4St(newSt, now_y, 0);
-
-                            int i = 0;
-                            for (i = 0; i <= w; i++)
-                            {
-                                if (up == getVal4St(newSt, i))
-                                {
-                                    setVal4St(newSt, i, left);
-                                }
-                            }
-
-                            for (i = 0; i <= w; i++)
-                            {
-                                if (left == getVal4St(newSt, i))
-                                {
-                                    break;
-                                }
-                            }
-
-                            if (i > w)
-                            {
-                                newSum = (sum * c) % MOD;
-                            }
-
-                            addSts(newSt, newSum, nAct);
-                        }
-                    }
-                }
-                else if (left || up)
-                {
-                    unsigned int val = left + up;
-
-                    // 打住
-                    {
-                        unsigned long long newSum = sum;
-
-                        setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 0);
-
-                        int i = 0;
-                        for (i = 0; i <= w; i++)
-                        {
-                            if (val == getVal4St(newSt, i))
-                            {
-                                break;
-                            }
-                        }
-
-                        if (i > w)
-                        {
-                            newSum = (sum * c) % MOD;
-                        }
-
-                        addSts(newSt, newSum, nAct);
-                    }
-
-                    if (h > now_x && check(now_x + 1, now_y))
-                    {
-                        setVal4St(newSt, now_y - 1, val);
-
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    if (w > now_y && check(now_x, now_y + 1))
-                    {
-                        newSt = st;
-
-                        setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, val);
-
-                        addSts(newSt, sum, nAct);
-                    }
-                }
-                else
-                {
-                    // 跳过
-                    {
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    if (h > now_x && check(now_x + 1, now_y))
-                    {
-                        setVal4St(newSt, now_y - 1, minUnused);
-
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    if (w > now_y && check(now_x, now_y + 1))
-                    {
-                        newSt = st;
-
-                        setVal4St(newSt, now_y, minUnused);
-
-                        addSts(newSt, sum, nAct);
-                    }
-
-                    if (h > now_x && check(now_x + 1, now_y) && w > now_y && check(now_x, now_y + 1))
-                    {
-                        newSt = st;
-
-                        setVal4St(newSt, now_y, minUnused);
-                        setVal4St(newSt, now_y - 1, minUnused);
-
-                        addSts(newSt, sum, nAct);
-                    }
-                }
+                funcCell(st, sum, minUnused, check, nAct);
             }
 
             qTail[act] = 0;

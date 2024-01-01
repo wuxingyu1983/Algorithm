@@ -112,7 +112,8 @@ int now_x, now_y;
     else                                                                                      \
     {                                                                                         \
         qs[IDX][it->second].sum += SUM;                                                       \
-        qs[IDX][it->second].sum %= MOD;                                                       \
+        if (qs[IDX][it->second].sum > MOD)                                                    \
+            qs[IDX][it->second].sum -= MOD;                                                   \
     }
 
 bool check0(int x, int y)
@@ -825,8 +826,6 @@ int main()
         {
             sym = funcSymEven(check1);
         }
-
-        //        printf("ans = %llu, sum23 = %llu, sym = %llu\n", ans, sum23, sym);
 
         ans += MOD;
         ans -= inv((sum23 + MOD - sym), 2);

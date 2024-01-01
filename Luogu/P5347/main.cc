@@ -151,20 +151,34 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
         unsigned int left = getVal4St(st, now_y - 1);
         unsigned int up = getVal4St(st, now_y);
         unsigned int bottom = getVal4St(st, w + 1 - now_y);
-        unsigned long long newSt = st;
 
         if (left)
-            setVal4St(newSt, now_y - 1, 0);
+            setVal4St(st, now_y - 1, 0);
 
         if (up)
-            setVal4St(newSt, now_y, 0);
+            setVal4St(st, now_y, 0);
 
         if (bottom)
-            setVal4St(newSt, w + 1 - now_y, 0);
+            setVal4St(st, w + 1 - now_y, 0);
+
+        unsigned long long newSt = st;
 
         if (up && bottom)
         {
             unsigned long long newSum = sum;
+
+            if (left)
+            {
+                // 必须贯穿
+                if (check(now_x, now_y + 1))
+                {
+                    setVal4St(newSt, now_y, left);
+                }
+                else
+                {
+                    return;
+                }
+            }
 
             if (up != bottom)
             {
@@ -192,19 +206,7 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
                 newSum = (sum * c) % MOD;
             }
 
-            if (left)
-            {
-                if (check(now_x, now_y + 1))
-                {
-                    // 贯穿
-                    setVal4St(newSt, now_y, left);
-                    addSts(newSt, newSum, nAct);
-                }
-            }
-            else
-            {
-                addSts(newSt, newSum, nAct);
-            }
+            addSts(newSt, newSum, nAct);
         }
         else if (up || bottom)
         {
@@ -212,11 +214,10 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
 
             if (0 == left && check(now_x, now_y + 1))
             {
-                //向右延伸
+                // 向右延伸
                 setVal4St(newSt, now_y, val);
                 addSts(newSt, sum, nAct);
             }
-
 
             // 打住
             newSt = st;

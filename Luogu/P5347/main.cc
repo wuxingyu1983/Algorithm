@@ -222,30 +222,40 @@ inline void funcSymOddCell(unsigned long long st, unsigned long long sum, unsign
 
             // 打住
             newSt = st;
+            bool flag = true;
             if (left)
             {
                 // left ==> val
                 for (int i = 0; i <= w; i++)
                 {
-                    if (left == getVal4St(newSt, i))
+                    unsigned int tmp = getVal4St(newSt, i);
+                    if (left == tmp)
                     {
+                        flag = false;
                         setVal4St(newSt, i, val);
+                    }
+                    else if (val == tmp)
+                    {
+                        flag = false;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i <= w; i++)
+                {
+                    unsigned int tmp = getVal4St(newSt, i);
+                    if (val == tmp)
+                    {
+                        flag = false;
+                        break;
                     }
                 }
             }
 
             unsigned long long newSum = sum;
 
-            int i;
-            for (i = 0; i <= w; i++)
-            {
-                if (val == getVal4St(newSt, i))
-                {
-                    break;
-                }
-            }
-
-            if (i > w)
+            if (flag)
             {
                 newSum = (sum * c) % MOD;
             }
@@ -396,24 +406,22 @@ inline void funcCell(unsigned long long st, unsigned long long sum, unsigned cha
                 setVal4St(newSt, now_y - 1, 0);
                 setVal4St(newSt, now_y, 0);
 
-                int i = 0;
-                for (i = 0; i <= w; i++)
+                bool flag = true;
+                for (int i = 0; i <= w; i++)
                 {
-                    if (up == getVal4St(newSt, i))
+                    unsigned int tmp = getVal4St(newSt, i);
+                    if (up == tmp)
                     {
+                        flag = false;
                         setVal4St(newSt, i, left);
                     }
-                }
-
-                for (i = 0; i <= w; i++)
-                {
-                    if (left == getVal4St(newSt, i))
+                    else if (left == tmp)
                     {
-                        break;
+                        flag = false;
                     }
                 }
 
-                if (i > w)
+                if (flag)
                 {
                     newSum = (sum * c) % MOD;
                 }

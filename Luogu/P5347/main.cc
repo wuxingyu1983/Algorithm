@@ -71,7 +71,7 @@ Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w, op;
 unsigned long long c;
-unordered_map<unsigned long long, unsigned int> cnts[2];
+unordered_map<unsigned long long, unsigned int> cnts;
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 
@@ -95,25 +95,25 @@ int now_x, now_y;
     }                                  \
     UNUSED = bn;
 
-#define addSts(ST, SUM, IDX)                                                                  \
-    unsigned char unused;                                                                     \
-    unsigned long long recodedSt = ST;                                                        \
-    recode(recodedSt, unused);                                                                \
-    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
-    if (it == cnts[IDX].end())                                                                \
-    {                                                                                         \
-        int pInQ = qTail[IDX];                                                                \
-        qs[IDX][pInQ].state = recodedSt;                                                      \
-        qs[IDX][pInQ].sum = SUM;                                                              \
-        qs[IDX][pInQ].minUnused = unused;                                                     \
-        cnts[IDX][recodedSt] = pInQ;                                                          \
-        qTail[IDX]++;                                                                         \
-    }                                                                                         \
-    else                                                                                      \
-    {                                                                                         \
-        qs[IDX][it->second].sum += SUM;                                                       \
-        if (qs[IDX][it->second].sum > MOD)                                                    \
-            qs[IDX][it->second].sum -= MOD;                                                   \
+#define addSts(ST, SUM, IDX)                                                                    \
+    unsigned char unused;                                                                       \
+    unsigned long long recodedSt = ST;                                                          \
+    recode(recodedSt, unused);                                                                  \
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts.find(recodedSt);        \
+    if (it == cnts.end() || it->second >= qTail[IDX] || recodedSt != qs[IDX][it->second].state) \
+    {                                                                                           \
+        int pInQ = qTail[IDX];                                                                  \
+        qs[IDX][pInQ].state = recodedSt;                                                        \
+        qs[IDX][pInQ].sum = SUM;                                                                \
+        qs[IDX][pInQ].minUnused = unused;                                                       \
+        cnts[recodedSt] = pInQ;                                                                 \
+        qTail[IDX]++;                                                                           \
+    }                                                                                           \
+    else                                                                                        \
+    {                                                                                           \
+        qs[IDX][it->second].sum += SUM;                                                         \
+        if (qs[IDX][it->second].sum > MOD)                                                      \
+            qs[IDX][it->second].sum -= MOD;                                                     \
     }
 
 bool check0(int x, int y)
@@ -568,7 +568,6 @@ unsigned long long funcSymOdd(bool (*check)(int x, int y))
             }
 
             qTail[act] = 0;
-            cnts[act].clear();
             act = nAct;
         }
 
@@ -707,7 +706,6 @@ unsigned long long funcSymEven(bool (*check)(int x, int y))
             }
 
             qTail[act] = 0;
-            cnts[act].clear();
             act = nAct;
         }
 
@@ -771,7 +769,6 @@ unsigned long long func(bool (*check)(int x, int y))
             }
 
             qTail[act] = 0;
-            cnts[act].clear();
             act = nAct;
         }
 
@@ -791,8 +788,7 @@ inline void init()
     now_x = 0;
     now_y = w;
 
-    cnts[0].clear();
-    cnts[1].clear();
+    cnts.clear();
 
     qs[act][0].sum = 1;
     qs[act][0].minUnused = 1;

@@ -65,6 +65,7 @@ int h, w;
 unordered_map<unsigned int, unsigned int> cnts;
 int act = 0; // 当前生效的 queue 
 int now_x, now_y;
+unsigned short st2Mask;
 
 inline void init()
 {
@@ -72,6 +73,8 @@ inline void init()
 
     now_x = 0;
     now_y = w;
+
+    st2Mask = (1 << w) - 1;
 
     cnts.clear();
 
@@ -101,7 +104,7 @@ int main()
 
         init();
 
-        
+
     }
 
     return 0;

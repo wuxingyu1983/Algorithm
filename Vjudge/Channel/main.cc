@@ -66,7 +66,7 @@ unordered_map<unsigned int, unsigned int> cnts;
 int act = 0; // 当前生效的 queue 
 int now_x, now_y;
 
-void init()
+inline void init()
 {
     act = 0;
 
@@ -87,6 +87,22 @@ void init()
 
 int main()
 {
+    scanf("%d %d", &h, &w);
+
+    if (0 < h && 0 < w)
+    {
+        for (size_t row = 1; row <= h; row++)
+        {
+            for (size_t col = 1; col <= w; col++)
+            {
+                scanf("%c", &(cells[row][col]));
+            }
+        }
+
+        init();
+
+        
+    }
 
     return 0;
 }

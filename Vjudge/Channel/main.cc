@@ -295,7 +295,37 @@ int main()
                     }
                     else if (leftPlug)
                     {
+                        if (0 == upCell)
+                        {
+                            unsigned int newSt1 = st1;
 
+                            unsigned short newSt2 = st2;
+                            setVal4St2(newSt2, now_y - 1, 1);
+
+                            if (h == now_x && w == now_y)
+                            {
+                                setVal4St1(newSt1, now_y - 1, 0);
+
+                                addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                            }
+                            else
+                            {
+                                if (h > now_x && '.' == cells[now_x + 1][now_y] && 0 == rightUpCell)
+                                {
+                                    // |
+                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                }
+
+                                if (w > now_y && '.' == cells[now_x][now_y + 1])
+                                {
+                                    // -
+                                    setVal4St1(newSt1, now_y - 1, 0);
+                                    setVal4St1(newSt1, now_y, leftPlug);
+                                    
+                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                }
+                            }
+                        }
                     }
                     else if (upPlug)
                     {

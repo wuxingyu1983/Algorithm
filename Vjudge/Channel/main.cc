@@ -104,7 +104,93 @@ int main()
 
         init();
 
+        while (0 < qTail[act])
+        {
+            int nAct = 1 - act;
 
+            if (w == now_y)
+            {
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
+                {
+                    // finished
+                    // TBD
+
+                    break;
+                }
+            }
+            else
+            {
+                now_y++;
+            }
+
+            if ('#' == cells[now_x][now_y])
+            {
+                if (1 == now_y)
+                {
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        qs[act][iQ].state1 <<= ST1_BITS;
+                        qs[act][iQ].state2 <<= 1;
+                        qs[act][iQ].state2 &= st2Mask;
+                        qs[act][iQ].key = (qs[act][iQ].state1 << (w + 1)) + qs[act][iQ].state2;
+
+                        qs[act][iQ].cache[now_x][now_y] = '#';
+                    }
+                }
+                else
+                {
+                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                    {
+                        qs[act][iQ].cache[now_x][now_y] = '#';
+                    }
+                }
+            }
+            else
+            {
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                {
+                    unsigned int st1 = qs[act][iQ].state1;
+                    unsigned short st2 = qs[act][iQ].state2;
+                    unsigned short len = qs[act][iQ].len;
+
+                    unsigned int leftPlug = getVal4St1(st1, now_y - 1);
+                    unsigned int upPlug = getVal4St1(st1, now_y);
+
+                    unsigned short leftCell = 0;
+                    if (1 < now_y)
+                        leftCell = getVal4St2(st2, now_y - 2);
+                    unsigned short leftUpCell = getVal4St2(st2, now_y - 1);
+                    unsigned short upCell = getVal4St2(st2, now_y);
+                    unsigned short rightUpCell = 0;
+                    if (w > now_y)
+                        rightUpCell = getVal4St2(st2, now_y + 1);
+
+                    if (leftPlug && upPlug)
+                    {
+
+                    }
+                    else if (leftPlug)
+                    {
+
+                    }
+                    else if (upPlug)
+                    {
+
+                    }
+                    else
+                    {
+                        // 0 == leftPlug && 0 == upPlug
+                        
+                    }
+                }
+
+                qTail[act] = 0;
+                act = nAct;
+            }
+        }
     }
 
     return 0;

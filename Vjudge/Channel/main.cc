@@ -67,6 +67,31 @@ int act = 0; // 当前生效的 queue
 int now_x, now_y;
 unsigned short st2Mask;
 
+#define addSts(ST1, ST2, LEN, CH, REC, IDX)                                                  \
+    unsigned int key = (ST1 << (w + 1)) + ST2;                                               \
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts.find(key);                 \
+    if (it == cnts.end() || it->second >= qTail[IDX] || key != qs[IDX][it->second].key)      \
+    {                                                                                        \
+        int pInQ = qTail[IDX];                                                               \
+        qs[IDX][pInQ].key = key;                                                             \
+        qs[IDX][pInQ].state1 = ST1;                                                          \
+        qs[IDX][pInQ].state2 = ST2;                                                          \
+        qs[IDX][pInQ].len = LEN;                                                             \
+        memcpy(qs[IDX][pInQ].cache, REC.cache, sizeof(qs[IDX][pInQ].cache));                 \
+        qs[IDX][pInQ].cache[now_x][now_y] = CH;                                              \
+        cnts[key] = pInQ;                                                                    \
+        qTail[IDX]++;                                                                        \
+    }                                                                                        \
+    else                                                                                     \
+    {                                                                                        \
+        if (LEN > qs[IDX][it->second].len)                                                   \
+        {                                                                                    \
+            memcpy(qs[IDX][it->second].cache, REC.cache, sizeof(qs[IDX][it->second].cache)); \
+            qs[IDX][it->second].cache[now_x][now_y] = CH;                                    \
+            qs[IDX][it->second].len = LEN;                                                   \
+        }                                                                                    \
+    }
+
 inline void init()
 {
     act = 0;
@@ -183,7 +208,13 @@ int main()
                     else
                     {
                         // 0 == leftPlug && 0 == upPlug
-                        
+                        {
+                            // 跳过
+                            unsigned short newSt2 = st2;
+                            setVal4St2(newSt2, now_y - 1, 0);
+
+                            addSts(st1, newSt2, len, '.', qs[act][iQ], nAct);
+                        }
                     }
                 }
 

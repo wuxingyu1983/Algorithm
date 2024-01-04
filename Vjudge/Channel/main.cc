@@ -29,7 +29,7 @@ using namespace std;
 #define QS_SIZE 1000000
 
 const unsigned int ST1_BITS = 2;
-const unsigned long long ST1_MASK = 3;
+const unsigned int ST1_MASK = 3;
 
 #define getVal4St1(ST, POS) (((ST) >> ((POS) * ST1_BITS)) & ST1_MASK)
 
@@ -68,7 +68,7 @@ int now_x, now_y;
 unsigned short st2Mask;
 
 #define addSts(ST1, ST2, LEN, CH, REC, IDX)                                                  \
-    unsigned int key = (ST1 << (w + 1)) + ST2;                                               \
+    unsigned int key = (ST1 << (w + 1)) + ((unsigned int)ST2);                               \
     unordered_map<unsigned int, unsigned int>::iterator it = cnts.find(key);                 \
     if (it == cnts.end() || it->second >= qTail[IDX] || key != qs[IDX][it->second].key)      \
     {                                                                                        \
@@ -204,7 +204,7 @@ int main()
                         qs[act][iQ].state1 <<= ST1_BITS;
                         qs[act][iQ].state2 &= st2Mask;
                         qs[act][iQ].state2 <<= 1;
-                        qs[act][iQ].key = (qs[act][iQ].state1 << (w + 1)) + qs[act][iQ].state2;
+                        qs[act][iQ].key = (qs[act][iQ].state1 << (w + 1)) + ((unsigned int)qs[act][iQ].state2);
 
                         qs[act][iQ].cache[now_x][now_y] = '#';
                     }
@@ -366,13 +366,13 @@ int main()
                         // 0 == leftPlug && 0 == upPlug
                         if (1 == now_x && 1 == now_y)
                         {
+                            unsigned short newSt2 = st2;
+                            setVal4St2(newSt2, now_y - 1, 1);
+
                             if (h > now_x && '.' == cells[now_x + 1][now_y])
                             {
                                 unsigned int newSt1 = st1;
                                 setVal4St1(newSt1, now_y - 1, 3);
-
-                                unsigned short newSt2 = st2;
-                                setVal4St2(newSt2, now_y - 1, 1);
                             
                                 addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
                             }
@@ -381,9 +381,6 @@ int main()
                             {
                                 unsigned int newSt1 = st1;
                                 setVal4St1(newSt1, now_y, 3);
-
-                                unsigned short newSt2 = st2;
-                                setVal4St2(newSt2, now_y - 1, 1);
                             
                                 addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
                             }
@@ -396,25 +393,27 @@ int main()
                         else
                         {
                             // 跳过
-                            unsigned short newSt2 = st2;
-                            setVal4St2(newSt2, now_y - 1, 0);
-
-                            addSts(st1, newSt2, len, '.', qs[act][iQ], nAct);
-                        }
-
-                        if (0 == leftCell && 0 == leftUpCell && 0 == upCell)
-                        {
-                            // 合法
-                            if (h > now_x && '.' == cells[now_x + 1][now_y] && w > now_y && '.' == cells[now_x][now_y + 1])
                             {
-                                unsigned int newSt1 = st1;
-                                setVal4St1(newSt1, now_y - 1, 1);
-                                setVal4St1(newSt1, now_y, 2);
-
                                 unsigned short newSt2 = st2;
-                                setVal4St2(newSt2, now_y - 1, 1);
-                            
-                                addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                setVal4St2(newSt2, now_y - 1, 0);
+
+                                addSts(st1, newSt2, len, '.', qs[act][iQ], nAct);
+                            }
+
+                            if (0 == leftCell && 0 == leftUpCell && 0 == upCell)
+                            {
+                                // 合法
+                                if (h > now_x && '.' == cells[now_x + 1][now_y] && w > now_y && '.' == cells[now_x][now_y + 1])
+                                {
+                                    unsigned int newSt1 = st1;
+                                    setVal4St1(newSt1, now_y - 1, 1);
+                                    setVal4St1(newSt1, now_y, 2);
+
+                                    unsigned short newSt2 = st2;
+                                    setVal4St2(newSt2, now_y - 1, 1);
+
+                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                }
                             }
                         }
                     }

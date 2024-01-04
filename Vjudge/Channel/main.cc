@@ -195,22 +195,29 @@ int main()
                     if (h < now_x)
                     {
                         // finished
+                        Record *ptr = NULL;
                         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                         {
                             if (0 == qs[act][iQ].state1)
                             {
-                                printf("Case %d:\n", iCase);
-
-                                for (size_t row = 1; row <= h; row++)
+                                if (NULL == ptr || ptr->len < qs[act][iQ].len)
                                 {
-                                    for (size_t col = 1; col <= w; col++)
-                                    {
-                                        printf("%c", qs[act][iQ].cache[row][col]);
-                                    }
-                                    printf("\n");
+                                    ptr = &(qs[act][iQ]);
                                 }
+                            }
+                        }
 
-                                break;
+                        if (ptr)
+                        {
+                            printf("Case %d:\n", iCase);
+
+                            for (size_t row = 1; row <= h; row++)
+                            {
+                                for (size_t col = 1; col <= w; col++)
+                                {
+                                    printf("%c", ptr->cache[row][col]);
+                                }
+                                printf("\n");
                             }
                         }
                         printf("\n");

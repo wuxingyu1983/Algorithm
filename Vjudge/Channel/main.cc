@@ -202,8 +202,8 @@ int main()
                     for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                     {
                         qs[act][iQ].state1 <<= ST1_BITS;
-                        qs[act][iQ].state2 <<= 1;
                         qs[act][iQ].state2 &= st2Mask;
+                        qs[act][iQ].state2 <<= 1;
                         qs[act][iQ].key = (qs[act][iQ].state1 << (w + 1)) + qs[act][iQ].state2;
 
                         qs[act][iQ].cache[now_x][now_y] = '#';
@@ -224,6 +224,13 @@ int main()
                     unsigned int st1 = qs[act][iQ].state1;
                     unsigned short st2 = qs[act][iQ].state2;
                     unsigned short len = qs[act][iQ].len;
+
+                    if (1 == now_y)
+                    {
+                        st1 <<= ST1_BITS;
+                        st2 &= st2Mask;
+                        st2 <<= 1;
+                    }
 
                     unsigned int leftPlug = getVal4St1(st1, now_y - 1);
                     unsigned int upPlug = getVal4St1(st1, now_y);

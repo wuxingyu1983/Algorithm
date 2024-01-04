@@ -51,7 +51,7 @@ public:
     unsigned int key;
     unsigned int state1;
     unsigned short state2;
-    unsigned short len; 
+    unsigned short len;
 
     char cache[MAX_H][MAX_W];
 
@@ -63,7 +63,7 @@ Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
 unordered_map<unsigned int, unsigned int> cnts;
-int act = 0; // 当前生效的 queue 
+int act = 0; // 当前生效的 queue
 int now_x, now_y;
 unsigned short st2Mask;
 
@@ -159,268 +159,299 @@ inline void init()
 
 int main()
 {
-    scanf("%d %d", &h, &w);
+    int iCase = 0;
 
-    if (0 < h && 0 < w)
+    while (true)
     {
-        for (size_t row = 1; row <= h; row++)
+        cin >> h >> w;
+
+        if (0 == h && 0 == w)
         {
-            for (size_t col = 1; col <= w; col++)
-            {
-                scanf("%c", &(cells[row][col]));
-            }
+            break;
         }
-
-        init();
-
-        while (0 < qTail[act])
+        else
         {
-            int nAct = 1 - act;
+            iCase++;
 
-            if (w == now_y)
+            for (size_t row = 1; row <= h; row++)
             {
-                now_x++;
-                now_y = 1;
-
-                if (h < now_x)
+                for (size_t col = 1; col <= w; col++)
                 {
-                    // finished
-                    // TBD
-
-                    break;
+                    cin >> cells[row][col];
                 }
             }
-            else
-            {
-                now_y++;
-            }
 
-            if ('#' == cells[now_x][now_y])
+            init();
+
+            while (0 < qTail[act])
             {
-                if (1 == now_y)
+                int nAct = 1 - act;
+
+                if (w == now_y)
                 {
-                    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                    {
-                        qs[act][iQ].state1 <<= ST1_BITS;
-                        qs[act][iQ].state2 &= st2Mask;
-                        qs[act][iQ].state2 <<= 1;
-                        qs[act][iQ].key = (qs[act][iQ].state1 << (w + 1)) + ((unsigned int)qs[act][iQ].state2);
+                    now_x++;
+                    now_y = 1;
 
-                        qs[act][iQ].cache[now_x][now_y] = '#';
+                    if (h < now_x)
+                    {
+                        // finished
+                        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                        {
+                            if (0 == qs[act][iQ].state1)
+                            {
+                                printf("Case %d:\n", iCase);
+
+                                for (size_t row = 1; row <= h; row++)
+                                {
+                                    for (size_t col = 1; col <= w; col++)
+                                    {
+                                        printf("%c", qs[act][iQ].cache[row][col]);
+                                    }
+                                    printf("\n");
+                                }
+
+                                break;
+                            }
+                        }
+                        printf("\n");
+
+                        break;
+                    }
+                }
+                else
+                {
+                    now_y++;
+                }
+
+                if ('#' == cells[now_x][now_y])
+                {
+                    if (1 == now_y)
+                    {
+                        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                        {
+                            qs[act][iQ].state1 <<= ST1_BITS;
+                            qs[act][iQ].state2 &= st2Mask;
+                            qs[act][iQ].state2 <<= 1;
+                            setVal4St2(qs[act][iQ].state2, now_y - 1, 0);
+                            qs[act][iQ].key = (qs[act][iQ].state1 << (w + 1)) + ((unsigned int)qs[act][iQ].state2);
+
+                            qs[act][iQ].cache[now_x][now_y] = '#';
+                        }
+                    }
+                    else
+                    {
+                        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                        {
+                            setVal4St2(qs[act][iQ].state2, now_y - 1, 0);
+                            qs[act][iQ].cache[now_x][now_y] = '#';
+                        }
                     }
                 }
                 else
                 {
                     for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                     {
-                        qs[act][iQ].cache[now_x][now_y] = '#';
-                    }
-                }
-            }
-            else
-            {
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
-                {
-                    unsigned int st1 = qs[act][iQ].state1;
-                    unsigned short st2 = qs[act][iQ].state2;
-                    unsigned short len = qs[act][iQ].len;
+                        unsigned int st1 = qs[act][iQ].state1;
+                        unsigned short st2 = qs[act][iQ].state2;
+                        unsigned short len = qs[act][iQ].len;
 
-                    if (1 == now_y)
-                    {
-                        st1 <<= ST1_BITS;
-                        st2 &= st2Mask;
-                        st2 <<= 1;
-                    }
-
-                    unsigned int leftPlug = getVal4St1(st1, now_y - 1);
-                    unsigned int upPlug = getVal4St1(st1, now_y);
-
-                    unsigned short leftCell = 0;
-                    if (1 < now_y)
-                        leftCell = getVal4St2(st2, now_y - 2);
-                    unsigned short leftUpCell = getVal4St2(st2, now_y - 1);
-                    unsigned short upCell = getVal4St2(st2, now_y);
-                    unsigned short rightUpCell = 0;
-                    if (w > now_y)
-                        rightUpCell = getVal4St2(st2, now_y + 1);
-
-                    if (leftPlug && upPlug)
-                    {
-                        if (1 == leftUpCell || (h == now_x && w == now_y))
+                        if (1 == now_y)
                         {
-                            // 非法
-                            continue;
+                            st1 <<= ST1_BITS;
+                            st2 &= st2Mask;
+                            st2 <<= 1;
                         }
-                        else
+
+                        unsigned int leftPlug = getVal4St1(st1, now_y - 1);
+                        unsigned int upPlug = getVal4St1(st1, now_y);
+
+                        unsigned short leftCell = 0;
+                        if (1 < now_y)
+                            leftCell = getVal4St2(st2, now_y - 2);
+                        unsigned short leftUpCell = getVal4St2(st2, now_y - 1);
+                        unsigned short upCell = getVal4St2(st2, now_y);
+                        unsigned short rightUpCell = 0;
+                        if (w > now_y)
+                            rightUpCell = getVal4St2(st2, now_y + 1);
+
+                        if (leftPlug && upPlug)
                         {
-                            unsigned int newSt1 = st1;
-                            setVal4St1(newSt1, now_y - 1, 0);
-                            setVal4St1(newSt1, now_y, 0);
-
-                            unsigned short newSt2 = st2;
-                            setVal4St2(newSt2, now_y - 1, 1);
-
-                            if ((2 == leftPlug && 1 == upPlug) || (3 == leftPlug && 3 == upPlug))
-                            {
-                                // do nothing
-                            }
-                            else if (3 == leftPlug || 3 == upPlug)
-                            {
-                                if (1 == leftPlug || 1 == upPlug)
-                                {
-                                    forwardFunc(newSt1, 1, 2, 3);
-                                }
-                                else
-                                {
-                                    // 2 == leftPlug || 2 == upPlug
-                                    backwardFunc(newSt1, 2, 1, 3);
-                                }
-                            }
-                            else if (1 == leftPlug && 1 == upPlug)
-                            {
-                                forwardFunc(newSt1, 1, 2, 1);
-                            }
-                            else if (2 == leftPlug && 2 == upPlug)
-                            {
-                                backwardFunc(newSt1, 2, 1, 2);
-                            }
-                            else if (1 == leftPlug && 2 == upPlug)
+                            if (1 == leftUpCell || (h == now_x && w == now_y))
                             {
                                 // 非法
                                 continue;
                             }
-                            
-                            addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
-                        }
-                    }
-                    else if (leftPlug)
-                    {
-                        if (0 == upCell)
-                        {
-                            unsigned int newSt1 = st1;
-
-                            unsigned short newSt2 = st2;
-                            setVal4St2(newSt2, now_y - 1, 1);
-
-                            if (h == now_x && w == now_y)
+                            else
                             {
+                                unsigned int newSt1 = st1;
                                 setVal4St1(newSt1, now_y - 1, 0);
+                                setVal4St1(newSt1, now_y, 0);
+
+                                unsigned short newSt2 = st2;
+                                setVal4St2(newSt2, now_y - 1, 1);
+
+                                if ((2 == leftPlug && 1 == upPlug) || (3 == leftPlug && 3 == upPlug))
+                                {
+                                    // do nothing
+                                }
+                                else if (3 == leftPlug || 3 == upPlug)
+                                {
+                                    if (1 == leftPlug || 1 == upPlug)
+                                    {
+                                        forwardFunc(newSt1, 1, 2, 3);
+                                    }
+                                    else
+                                    {
+                                        // 2 == leftPlug || 2 == upPlug
+                                        backwardFunc(newSt1, 2, 1, 3);
+                                    }
+                                }
+                                else if (1 == leftPlug && 1 == upPlug)
+                                {
+                                    forwardFunc(newSt1, 1, 2, 1);
+                                }
+                                else if (2 == leftPlug && 2 == upPlug)
+                                {
+                                    backwardFunc(newSt1, 2, 1, 2);
+                                }
+                                else if (1 == leftPlug && 2 == upPlug)
+                                {
+                                    // 非法
+                                    continue;
+                                }
 
                                 addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
                             }
-                            else
+                        }
+                        else if (leftPlug)
+                        {
+                            if (0 == upCell)
                             {
-                                if (h > now_x && '.' == cells[now_x + 1][now_y] && 0 == rightUpCell)
+                                unsigned int newSt1 = st1;
+
+                                unsigned short newSt2 = st2;
+                                setVal4St2(newSt2, now_y - 1, 1);
+
+                                if (h == now_x && w == now_y)
                                 {
-                                    // |
+                                    setVal4St1(newSt1, now_y - 1, 0);
+
+                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                }
+                                else
+                                {
+                                    if (h > now_x && '.' == cells[now_x + 1][now_y] && 0 == rightUpCell)
+                                    {
+                                        // |
+                                        addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                    }
+
+                                    if (w > now_y && '.' == cells[now_x][now_y + 1])
+                                    {
+                                        // -
+                                        setVal4St1(newSt1, now_y - 1, 0);
+                                        setVal4St1(newSt1, now_y, leftPlug);
+
+                                        addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                    }
+                                }
+                            }
+                        }
+                        else if (upPlug)
+                        {
+                            if (0 == leftCell)
+                            {
+                                unsigned int newSt1 = st1;
+
+                                unsigned short newSt2 = st2;
+                                setVal4St2(newSt2, now_y - 1, 1);
+
+                                if (h == now_x && w == now_y)
+                                {
+                                    setVal4St1(newSt1, now_y, 0);
+
+                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                }
+                                else
+                                {
+                                    if (w > now_y && '.' == cells[now_x][now_y + 1] && 0 == rightUpCell)
+                                    {
+                                        // -
+                                        addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                    }
+
+                                    if (h > now_x && '.' == cells[now_x + 1][now_y])
+                                    {
+                                        // |
+                                        setVal4St1(newSt1, now_y - 1, upPlug);
+                                        setVal4St1(newSt1, now_y, 0);
+
+                                        addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // 0 == leftPlug && 0 == upPlug
+                            if (1 == now_x && 1 == now_y)
+                            {
+                                unsigned short newSt2 = st2;
+                                setVal4St2(newSt2, now_y - 1, 1);
+
+                                if (h > now_x && '.' == cells[now_x + 1][now_y])
+                                {
+                                    unsigned int newSt1 = st1;
+                                    setVal4St1(newSt1, now_y - 1, 3);
+
                                     addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
                                 }
 
                                 if (w > now_y && '.' == cells[now_x][now_y + 1])
                                 {
-                                    // -
-                                    setVal4St1(newSt1, now_y - 1, 0);
-                                    setVal4St1(newSt1, now_y, leftPlug);
+                                    unsigned int newSt1 = st1;
+                                    setVal4St1(newSt1, now_y, 3);
 
                                     addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
                                 }
                             }
-                        }
-                    }
-                    else if (upPlug)
-                    {
-                        if (0 == leftCell)
-                        {
-                            unsigned int newSt1 = st1;
-
-                            unsigned short newSt2 = st2;
-                            setVal4St2(newSt2, now_y - 1, 1);
-
-                            if (h == now_x && w == now_y)
+                            else if (h == now_x && w == now_y)
                             {
-                                setVal4St1(newSt1, now_y, 0);
-
-                                addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                // 非法
+                                continue;
                             }
                             else
                             {
-                                if (w > now_y && '.' == cells[now_x][now_y + 1] && 0 == rightUpCell)
+                                // 跳过
                                 {
-                                    // -
-                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
-                                }
-
-                                if (h > now_x && '.' == cells[now_x + 1][now_y])
-                                {
-                                    // |
-                                    setVal4St1(newSt1, now_y - 1, upPlug);
-                                    setVal4St1(newSt1, now_y, 0);
-
-                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // 0 == leftPlug && 0 == upPlug
-                        if (1 == now_x && 1 == now_y)
-                        {
-                            unsigned short newSt2 = st2;
-                            setVal4St2(newSt2, now_y - 1, 1);
-
-                            if (h > now_x && '.' == cells[now_x + 1][now_y])
-                            {
-                                unsigned int newSt1 = st1;
-                                setVal4St1(newSt1, now_y - 1, 3);
-                            
-                                addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
-                            }
-
-                            if (w > now_y && '.' == cells[now_x][now_y + 1])
-                            {
-                                unsigned int newSt1 = st1;
-                                setVal4St1(newSt1, now_y, 3);
-                            
-                                addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
-                            }
-                        }
-                        else if (h == now_x && w == now_y)
-                        {
-                            // 非法
-                            continue;
-                        }
-                        else
-                        {
-                            // 跳过
-                            {
-                                unsigned short newSt2 = st2;
-                                setVal4St2(newSt2, now_y - 1, 0);
-
-                                addSts(st1, newSt2, len, '.', qs[act][iQ], nAct);
-                            }
-
-                            if (0 == leftCell && 0 == leftUpCell && 0 == upCell)
-                            {
-                                // 合法
-                                if (h > now_x && '.' == cells[now_x + 1][now_y] && w > now_y && '.' == cells[now_x][now_y + 1])
-                                {
-                                    unsigned int newSt1 = st1;
-                                    setVal4St1(newSt1, now_y - 1, 1);
-                                    setVal4St1(newSt1, now_y, 2);
-
                                     unsigned short newSt2 = st2;
-                                    setVal4St2(newSt2, now_y - 1, 1);
+                                    setVal4St2(newSt2, now_y - 1, 0);
 
-                                    addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                    addSts(st1, newSt2, len, '.', qs[act][iQ], nAct);
+                                }
+
+                                if (0 == leftCell && 0 == leftUpCell && 0 == upCell)
+                                {
+                                    // 合法
+                                    if (h > now_x && '.' == cells[now_x + 1][now_y] && w > now_y && '.' == cells[now_x][now_y + 1])
+                                    {
+                                        unsigned int newSt1 = st1;
+                                        setVal4St1(newSt1, now_y - 1, 1);
+                                        setVal4St1(newSt1, now_y, 2);
+
+                                        unsigned short newSt2 = st2;
+                                        setVal4St2(newSt2, now_y - 1, 1);
+
+                                        addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                qTail[act] = 0;
-                act = nAct;
+                    qTail[act] = 0;
+                    act = nAct;
+                }
             }
         }
     }

@@ -92,6 +92,50 @@ unsigned short st2Mask;
         }                                                                                    \
     }
 
+#define forwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                 \
+        int pos = now_y + 1;                          \
+        int s = 1;                                    \
+        while (pos <= w)                              \
+        {                                             \
+            int v = getVal4St1(newSt, pos);           \
+            if (plusVal == v)                         \
+                s++;                                  \
+            else if (minusVal == v)                   \
+            {                                         \
+                s--;                                  \
+                if (0 == s)                           \
+                {                                     \
+                    setVal4St1(newSt, pos, newVal);   \
+                    break;                            \
+                }                                     \
+            }                                         \
+            pos++;                                    \
+        }                                             \
+    }
+
+#define backwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                  \
+        int pos = now_y - 2;                           \
+        int s = 1;                                     \
+        while (0 <= pos)                               \
+        {                                              \
+            int v = getVal4St1(newSt, pos);            \
+            if (plusVal == v)                          \
+                s++;                                   \
+            else if (minusVal == v)                    \
+            {                                          \
+                s--;                                   \
+                if (0 == s)                            \
+                {                                      \
+                    setVal4St1(newSt, pos, newVal);    \
+                    break;                             \
+                }                                      \
+            }                                          \
+            pos--;                                     \
+        }                                              \
+    }
+
 inline void init()
 {
     act = 0;
@@ -202,30 +246,44 @@ int main()
                         }
                         else
                         {
-                            if (1 == leftPlug && 1 == upPlug)
-                            {
+                            unsigned int newSt1 = st1;
+                            setVal4St1(newSt1, now_y - 1, 0);
+                            setVal4St1(newSt1, now_y, 0);
 
+                            unsigned short newSt2 = st2;
+                            setVal4St2(newSt2, now_y - 1, 1);
+
+                            if ((2 == leftPlug && 1 == upPlug) || (3 == leftPlug && 3 == upPlug))
+                            {
+                                // do nothing
+                            }
+                            else if (3 == leftPlug || 3 == upPlug)
+                            {
+                                if (1 == leftPlug || 1 == upPlug)
+                                {
+                                    forwardFunc(newSt1, 1, 2, 3);
+                                }
+                                else
+                                {
+                                    // 2 == leftPlug || 2 == upPlug
+                                    backwardFunc(newSt1, 2, 1, 3);
+                                }
+                            }
+                            else if (1 == leftPlug && 1 == upPlug)
+                            {
+                                forwardFunc(newSt1, 1, 2, 1);
                             }
                             else if (2 == leftPlug && 2 == upPlug)
                             {
-
-                            }
-                            else if ((2 == leftPlug && 1 == upPlug) || (3 == leftPlug && 3 == upPlug))
-                            {
-                                unsigned int newSt1 = st1;
-                                setVal4St1(newSt1, now_y - 1, 0);
-                                setVal4St1(newSt1, now_y, 0);
-
-                                unsigned short newSt2 = st2;
-                                setVal4St2(newSt2, now_y - 1, 1);
-                            
-                                addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                                backwardFunc(newSt1, 2, 1, 2);
                             }
                             else if (1 == leftPlug && 2 == upPlug)
                             {
                                 // 非法
                                 continue;
                             }
+                            
+                            addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
                         }
                     }
                     else if (leftPlug)

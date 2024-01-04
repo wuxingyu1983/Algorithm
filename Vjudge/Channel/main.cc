@@ -215,6 +215,22 @@ int main()
 
                             addSts(st1, newSt2, len, '.', qs[act][iQ], nAct);
                         }
+
+                        if (0 == leftCell && 0 == leftUpCell && 0 == upCell)
+                        {
+                            // 合法
+                            if (h > now_x && '.' == cells[now_x + 1][now_y] && w > now_y && '.' == cells[now_x][now_y + 1])
+                            {
+                                unsigned int newSt1 = st1;
+                                setVal4St1(newSt1, now_y - 1, 1);
+                                setVal4St1(newSt1, now_y, 2);
+
+                                unsigned short newSt2 = st2;
+                                setVal4St2(newSt2, now_y - 1, 1);
+                            
+                                addSts(newSt1, newSt2, (len + 1), 'C', qs[act][iQ], nAct);
+                            }
+                        }
                     }
                 }
 

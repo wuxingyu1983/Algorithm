@@ -76,6 +76,8 @@ bool comp(colMax &a, colMax &b)
 
 int main()
 {
+    init();
+
     int t;
     scanf("%d", &t);
 
@@ -112,8 +114,8 @@ int main()
 
         // sort
         sort(colmax.begin(), colmax.begin() + w, comp);
-        
-        for (size_t col = 0; col < (h > w) ? w : h; col++)
+
+        for (size_t col = 0; col < ((h > w) ? w : h); col++)
         {
             for (size_t row = 0; row < h; row++)
             {
@@ -142,8 +144,8 @@ int main()
                 dp[0][i] = max;
             }
         }
-        
-        for (size_t col = 1; col < (h > w) ? w : h; col++)
+
+        for (size_t col = 1; col < ((h > w) ? w : h); col++)
         {
             for (size_t i = 1; i < (1 << h); i++)
             {
@@ -161,7 +163,7 @@ int main()
                             tmp += cells[((*itP) + round) % h][col];
                         }
 
-                        if (max < tmp) 
+                        if (max < tmp)
                         {
                             max = tmp;
                         }
@@ -174,7 +176,7 @@ int main()
                 }
             }
         }
-        
+
         printf("%d\n", dp[(h > w) ? w - 1 : h - 1][(1 << h) - 1]);
     }
 

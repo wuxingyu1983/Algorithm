@@ -1,4 +1,5 @@
 // https://codeforces.com/problemset/problem/1209/E1
+// https://codeforces.com/contest/1209/problem/E2
 
 #include <cmath>
 #include <cstdio>
@@ -31,6 +32,7 @@ int dp[MAX_H][4096];
 int h, w;
 vector<int> subsets[4096];
 vector<int> bits[4096];
+int cached[4096];
 
 void init()
 {
@@ -106,12 +108,6 @@ int main()
             }
         }
 
-        // init
-        if (0 < iT)
-        {
-            memset(dp, 0, sizeof(dp));
-        }
-
         // sort
         sort(colmax.begin(), colmax.begin() + w, comp);
 
@@ -149,29 +145,35 @@ int main()
         {
             for (size_t i = 1; i < (1 << h); i++)
             {
+                int max = 0;
+
+                for (size_t round = 0; round < h; round++)
+                {
+                    int tmp = 0;
+                    for (vector<int>::iterator itP = bits[i].begin(); itP != bits[i].end(); itP++)
+                    {
+                        tmp += cells[((*itP) + round) % h][col];
+                    }
+
+                    if (max < tmp)
+                    {
+                        max = tmp;
+                    }
+                }
+
+                cached[i] = max;
+            }
+
+            for (size_t i = 1; i < (1 << h); i++)
+            {
                 // dp[col][i]
                 dp[col][i] = dp[col - 1][i];
 
                 for (vector<int>::iterator it = subsets[i].begin(); it != subsets[i].end(); it++)
                 {
-                    int max = 0;
-                    for (size_t round = 0; round < h; round++)
+                    if (dp[col][i] < (cached[*it] + dp[col - 1][i - *it]))
                     {
-                        int tmp = 0;
-                        for (vector<int>::iterator itP = bits[*it].begin(); itP != bits[*it].end(); itP++)
-                        {
-                            tmp += cells[((*itP) + round) % h][col];
-                        }
-
-                        if (max < tmp)
-                        {
-                            max = tmp;
-                        }
-                    }
-
-                    if (dp[col][i] < (max + dp[col - 1][i - *it]))
-                    {
-                        dp[col][i] = (max + dp[col - 1][i - *it]);
+                        dp[col][i] = (cached[*it] + dp[col - 1][i - *it]);
                     }
                 }
             }

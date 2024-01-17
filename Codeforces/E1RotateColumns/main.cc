@@ -30,6 +30,7 @@ int cells[MAX_H][MAX_H];
 int dp[MAX_H][4096];
 int h, w;
 vector<int> subsets[4096];
+vector<int> bits[4096];
 
 void init()
 {
@@ -40,6 +41,18 @@ void init()
             if ((i & j) == j)
             {
                 subsets[i].push_back(j);
+            }
+        }
+
+        for (size_t j = 0; j < 12; j++)
+        {
+            if (i < (1 << j))
+            {
+                break;
+            }
+            else if ((i & (1 << j)))
+            {
+                bits[i].push_back(j);
             }
         }
     }

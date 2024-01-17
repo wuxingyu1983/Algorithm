@@ -22,12 +22,44 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_H 4
-#define MAX_W 100
+#define MAX_H 12
+#define MAX_W 2000
 
-int cells[MAX_H][MAX_W];
-int dp[MAX_H][MAX_H][MAX_W];
+int raw[MAX_H][MAX_W];
+int cells[MAX_H][MAX_H];
+int dp[MAX_H][4096];
 int h, w;
+vector<int> subsets[4096];
+
+void init()
+{
+    for (size_t i = 0; i < 4096; i++)
+    {
+        for (size_t j = 0; j <= i; j++)
+        {
+            if ((i & j) == j)
+            {
+                subsets[i].push_back(j);
+            }
+        }
+    }
+}
+
+class colMax
+{
+public:
+    int max;
+    int col;
+
+    colMax() {}
+};
+
+vector<colMax> colmax(4096);
+
+bool comp(colMax &a, colMax &b)
+{
+    return (a.max > b.max);
+}
 
 int main()
 {
@@ -42,7 +74,20 @@ int main()
         {
             for (size_t col = 0; col < w; col++)
             {
-                scanf("%d", &(cells[row][col]));
+                scanf("%d", &(raw[row][col]));
+
+                if (0 == row)
+                {
+                    colmax[col].max = raw[row][col];
+                    colmax[col].col = col;
+                }
+                else
+                {
+                    if (colmax[col].max < raw[row][col])
+                    {
+                        colmax[col].max = raw[row][col];
+                    }
+                }
             }
         }
 
@@ -52,47 +97,19 @@ int main()
             memset(dp, 0, sizeof(dp));
         }
 
-        for (size_t i = 0; i < h; i++)
+        // sort
+        sort(colmax.begin(), colmax.begin() + w, comp);
+        
+        for (size_t col = 0; col < (h > w) ? w : h; col++)
         {
-            for (size_t j = 0; j < h; j++)
+            for (size_t row = 0; row < h; row++)
             {
-                dp[i][j][0] = cells[(j + i) % h][0];
+                cells[row][col] = raw[row][colmax[col].col];
             }
         }
+        
 
-        for (size_t col = 1; col < w; col++)
-        {
-            for (size_t i = 0; i < h; i++)
-            {
-                for (size_t j = 0; j < h; j++)
-                {
-                    dp[i][j][col] = cells[j][col];
-                    for (size_t k = 0; k < h; k++)
-                    {
-                        if (dp[i][j][col] < dp[k][j][col - 1])
-                        {
-                            dp[i][j][col] = dp[k][j][col - 1];
-                        }
-                    }
-                }
-            }
-        }
-
-        int ans = 0;
-        for (size_t i = 0; i < h; i++)
-        {
-            int tmp = 0;
-            for (size_t j = 0; j < h; j++)
-            {
-                tmp += dp[i][j][w - 1];
-            }
-            if (tmp > ans)
-            {
-                ans = tmp;
-            }
-        }
-
-        printf("%d\n", ans);
+//        printf("%d\n", ans);
     }
 
     return 0;

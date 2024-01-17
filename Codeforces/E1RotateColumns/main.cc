@@ -120,9 +120,62 @@ int main()
                 cells[row][col] = raw[row][colmax[col].col];
             }
         }
-        
 
-//        printf("%d\n", ans);
+        // col = 0
+        {
+            for (size_t i = 1; i < (1 << h); i++)
+            {
+                int max = 0;
+                for (size_t round = 0; round < h; round++)
+                {
+                    int tmp = 0;
+                    for (vector<int>::iterator itP = bits[i].begin(); itP != bits[i].end(); itP++)
+                    {
+                        tmp += cells[((*itP) + round) % h][0];
+                    }
+
+                    if (max < tmp)
+                    {
+                        max = tmp;
+                    }
+                }
+                dp[0][i] = max;
+            }
+        }
+        
+        for (size_t col = 1; col < (h > w) ? w : h; col++)
+        {
+            for (size_t i = 1; i < (1 << h); i++)
+            {
+                // dp[col][i]
+                dp[col][i] = dp[col - 1][i];
+
+                for (vector<int>::iterator it = subsets[i].begin(); it != subsets[i].end(); it++)
+                {
+                    int max = 0;
+                    for (size_t round = 0; round < h; round++)
+                    {
+                        int tmp = 0;
+                        for (vector<int>::iterator itP = bits[*it].begin(); itP != bits[*it].end(); itP++)
+                        {
+                            tmp += cells[((*itP) + round) % h][col];
+                        }
+
+                        if (max < tmp) 
+                        {
+                            max = tmp;
+                        }
+                    }
+
+                    if (dp[col][i] < (max + dp[col - 1][i - *it]))
+                    {
+                        dp[col][i] = (max + dp[col - 1][i - *it]);
+                    }
+                }
+            }
+        }
+        
+        printf("%d\n", dp[(h > w) ? w - 1 : h - 1][(1 << h) - 1]);
     }
 
     return 0;

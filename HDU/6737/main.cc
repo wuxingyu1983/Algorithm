@@ -57,6 +57,8 @@ int qHead, qTail;
 
 int main()
 {
+    int ans = -1;
+
     cin >> n;
 
     h = w = n;
@@ -91,74 +93,133 @@ int main()
         }
     }
 
-    qs[qTail].state = st;
-    qTail ++;
-
-    while (false == IS_EMPTY)
+    if (0 == st)
     {
-        // get head
-        st = qs[qHead].state;
-        unsigned int min = qs[qHead].min;
+        ans = 0;
+    }
+    else
+    {
+        qs[qTail].state = st;
+        qTail++;
 
-        // 取出 head 后赋予一个不可能出现的状态 0xffff
-        qs[qHead].state = 0xffff;
-        qHead = (qHead + 1) % QS_SIZE;
+        while (false == IS_EMPTY)
+        {
+            // get head
+            st = qs[qHead].state;
+            unsigned int min = qs[qHead].min;
 
-        int row[MAX_HW];
-        for (size_t i = 0; i <= w; i++)
-        {
-            row[i] = getVal4St(st, i);
-        }
-        
-        int top[MAX_HW];
-        top[0] = 0;
-        for (size_t i = 1; i <= w; i++)
-        {
-            if (row[i] > top[i - 1])
+            // 取出 head 后赋予一个不可能出现的状态 0xffff
+            qs[qHead].state = 0xffff;
+            qHead = (qHead + 1) % QS_SIZE;
+
+            int row[MAX_HW];
+            for (size_t i = 0; i <= w; i++)
             {
-                top[i] = row[i];
+                row[i] = getVal4St(st, i);
             }
-            else
-            {
-                top[i] = top[i - 1];
-            }
-        }
 
-        bool flag = true;
-        for (size_t left = 1; left < w; left++)
-        {
-            for (size_t right = left + 1; right <= w; right++)
+            int top[MAX_HW];
+            top[0] = 0;
+            for (size_t i = 1; i <= w; i++)
             {
-                if (0 < row[left] && row[left] < row[right] && top[left - 1] < row[left] && top[right - 1] < row[right])
+                if (row[i] > top[i - 1])
                 {
-                    if (board[row[left]][left] != board[row[right]][right])
-                    {
-                        flag = false;
+                    top[i] = row[i];
+                }
+                else
+                {
+                    top[i] = top[i - 1];
+                }
+            }
 
+            bool flag = true;
+            for (size_t left = 1; left < w; left++)
+            {
+                for (size_t right = left + 1; right <= w; right++)
+                {
+                    if (0 < row[left] && row[left] < row[right] && top[left - 1] < row[left] && top[right - 1] < row[right])
+                    {
+                        if (board[row[left]][left] != board[row[right]][right])
+                        {
+                            flag = false;
+
+                            unsigned long long newSt = st;
+                            // find new left row
+                            int newRow;
+                            for (newRow = row[left] - 1; newRow >= 1; newRow--)
+                            {
+                                if ('.' != board[newRow][left])
+                                {
+                                    break;
+                                }
+                            }
+                            setVal4St(newSt, left, newRow);
+
+                            // find new right row
+                            for (newRow = row[right] - 1; newRow >= 1; newRow--)
+                            {
+                                if ('.' != board[newRow][right])
+                                {
+                                    break;
+                                }
+                            }
+                            setVal4St(newSt, right, newRow);
+
+                            int tmp = min + abs(cost[row[left]][left] - cost[row[right]][right]);
+                            // add newSt, abs(cost[row[left]][left] - cost[row[right]][right])
+                            unordered_map<unsigned long long, unsigned int>::iterator it = cnts.find(newSt);
+                            if (cnts.end() == it || newSt != qs[it->second].state)
+                            {
+                                // 重新插入
+
+                                assert(false == IS_FULL);
+
+                                qs[qTail].state = newSt;
+                                qs[qTail].min = tmp;
+                                cnts[newSt] = qTail;
+                                qTail = (qTail + 1) % QS_SIZE;
+                            }
+                            else
+                            {
+                                if (tmp < qs[it->second].min)
+                                {
+                                    qs[it->second].min = tmp;
+                                }
+                            }
+
+                            if (0 == newSt)
+                            {
+                                if (0 > ans || ans > tmp)
+                                {
+                                    ans = tmp;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (flag)
+            {
+                // 没有合适的一对B和W，只能选一个
+                for (size_t idx = 1; idx <= w; idx++)
+                {
+                    if (0 < row[idx] && top[idx - 1] < row[idx])
+                    {
                         unsigned long long newSt = st;
                         // find new left row
                         int newRow;
-                        for (newRow = row[left] - 1; newRow >= 1; newRow--)
+                        for (newRow = row[idx] - 1; newRow >= 1; newRow--)
                         {
-                            if ('.' != board[newRow][left])
+                            if ('.' != board[newRow][idx])
                             {
                                 break;
                             }
                         }
-                        setVal4St(newSt, left, newRow);
+                        setVal4St(newSt, idx, newRow);
 
-                        // find new right row
-                        for (newRow = row[right] - 1; newRow >= 1; newRow--)
-                        {
-                            if ('.' != board[newRow][right])
-                            {
-                                break;
-                            }
-                        }
-                        setVal4St(newSt, right, newRow);
+                        int tmp = min + cost[row[idx]][idx];
 
-                        int tmp = min + abs(cost[row[left]][left] - cost[row[right]][right]);
-                        // add newSt, abs(cost[row[left]][left] - cost[row[right]][right])
                         unordered_map<unsigned long long, unsigned int>::iterator it = cnts.find(newSt);
                         if (cnts.end() == it || newSt != qs[it->second].state)
                         {
@@ -178,17 +239,21 @@ int main()
                                 qs[it->second].min = tmp;
                             }
                         }
+
+                        if (0 == newSt)
+                        {
+                            if (0 > ans || ans > tmp)
+                            {
+                                ans = tmp;
+                            }
+                        }
                     }
                 }
             }
         }
-        
-        if (flag)
-        {
-            // 没有合适的一对B和W
-
-        }
     }
+
+    cout << ans << endl;
 
     return 0;
 }

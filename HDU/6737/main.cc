@@ -25,7 +25,7 @@ using namespace std;
 #define MAX_HW 13
 #define ST_BITS 4
 #define ST_MASK 15
-#define QS_SIZE 600000
+#define QS_SIZE 6000000
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
@@ -52,8 +52,8 @@ unordered_map<unsigned long long, unsigned int> cnts;
 Record qs[QS_SIZE];
 int qHead, qTail;
 
-#define IS_EMPTY    (qHead == qTail)
-#define IS_FULL     (qHead == ((qTail + 1) % QS_SIZE))
+#define IS_EMPTY (qHead == qTail)
+#define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
 int main()
 {
@@ -132,7 +132,56 @@ int main()
                 }
             }
 
-            bool flag = true;
+            {
+                for (size_t idx = 1; idx <= w; idx++)
+                {
+                    if (0 < row[idx] && top[idx - 1] < row[idx])
+                    {
+                        unsigned long long newSt = st;
+                        // find new left row
+                        int newRow;
+                        for (newRow = row[idx] - 1; newRow >= 1; newRow--)
+                        {
+                            if ('.' != board[newRow][idx])
+                            {
+                                break;
+                            }
+                        }
+                        setVal4St(newSt, idx, newRow);
+
+                        int tmp = min + cost[row[idx]][idx];
+
+                        unordered_map<unsigned long long, unsigned int>::iterator it = cnts.find(newSt);
+                        if (cnts.end() == it || newSt != qs[it->second].state)
+                        {
+                            // 重新插入
+
+                            assert(false == IS_FULL);
+
+                            qs[qTail].state = newSt;
+                            qs[qTail].min = tmp;
+                            cnts[newSt] = qTail;
+                            qTail = (qTail + 1) % QS_SIZE;
+                        }
+                        else
+                        {
+                            if (tmp < qs[it->second].min)
+                            {
+                                qs[it->second].min = tmp;
+                            }
+                        }
+
+                        if (0 == newSt)
+                        {
+                            if (0 > ans || ans > tmp)
+                            {
+                                ans = tmp;
+                            }
+                        }
+                    }
+                }
+            }
+
             for (size_t left = 1; left < w; left++)
             {
                 for (size_t right = left + 1; right <= w; right++)
@@ -141,8 +190,6 @@ int main()
                     {
                         if (board[row[left]][left] != board[row[right]][right])
                         {
-                            flag = false;
-
                             unsigned long long newSt = st;
                             // find new left row
                             int newRow;
@@ -193,58 +240,6 @@ int main()
                                 {
                                     ans = tmp;
                                 }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (flag)
-            {
-                // 没有合适的一对B和W，只能选一个
-                for (size_t idx = 1; idx <= w; idx++)
-                {
-                    if (0 < row[idx] && top[idx - 1] < row[idx])
-                    {
-                        unsigned long long newSt = st;
-                        // find new left row
-                        int newRow;
-                        for (newRow = row[idx] - 1; newRow >= 1; newRow--)
-                        {
-                            if ('.' != board[newRow][idx])
-                            {
-                                break;
-                            }
-                        }
-                        setVal4St(newSt, idx, newRow);
-
-                        int tmp = min + cost[row[idx]][idx];
-
-                        unordered_map<unsigned long long, unsigned int>::iterator it = cnts.find(newSt);
-                        if (cnts.end() == it || newSt != qs[it->second].state)
-                        {
-                            // 重新插入
-
-                            assert(false == IS_FULL);
-
-                            qs[qTail].state = newSt;
-                            qs[qTail].min = tmp;
-                            cnts[newSt] = qTail;
-                            qTail = (qTail + 1) % QS_SIZE;
-                        }
-                        else
-                        {
-                            if (tmp < qs[it->second].min)
-                            {
-                                qs[it->second].min = tmp;
-                            }
-                        }
-
-                        if (0 == newSt)
-                        {
-                            if (0 > ans || ans > tmp)
-                            {
-                                ans = tmp;
                             }
                         }
                     }

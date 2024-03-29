@@ -240,10 +240,41 @@ int main()
 
                         // do nothing
                         {
+                            int valCnt = 0;
+
+                            for (int i = 0; i <= n; i++)
+                            {
+                                int tmp = getVal4St(newSt, i);
+                                if (tmp == val)
+                                {
+                                    valCnt ++;
+                                }
+                            }
+
+                            if (0 < valCnt)
+                            {
+                                // add
+                                addSts(newSt, count, reds, nAct);
+                            }
                         }
 
                         // white ==> red
                         {
+                            reds++;
+
+                            if (n > now_x && '.' == cells[now_x + 1][now_y])
+                            {
+                                setVal4St(newSt, now_y - 1, minUnused);
+                            }
+
+                            if (n > now_y && '.' == cells[now_x][now_y + 1])
+                            {
+                                setVal4St(newSt, now_y, minUnused);
+                            }
+
+                            // add
+                            setVal4St(newSt, (n + 1), reds);
+                            addSts(newSt, count, reds, nAct);
                         }
                     }
                     else

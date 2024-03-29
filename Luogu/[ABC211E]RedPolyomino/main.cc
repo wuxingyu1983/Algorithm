@@ -30,9 +30,10 @@ using namespace std;
 class Record
 {
 public:
-    unsigned int state; // 轮廓线段状态
+    unsigned int state;     // 轮廓线段状态
 
-    unsigned int minUnused;
+    unsigned int count;
+    unsigned char minUnused;
 
     Record() {}
 };
@@ -72,6 +73,25 @@ int now_x, now_y;
     }                                  \
     UNUSED = bn;
 
+#define addSts(ST, CNT, IDX)                                                            \
+    unsigned char unused;                                                               \
+    unsigned int recodedSt = ST;                                                        \
+    recode(recodedSt, unused);                                                          \
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
+    if (it == cnts[IDX].end())                                                          \
+    {                                                                                   \
+        int pInQ = qTail[IDX];                                                          \
+        qs[IDX][pInQ].state = recodedSt;                                                \
+        qs[IDX][pInQ].count = CNT;                                                      \
+        qs[IDX][pInQ].minUnused = unused;                                               \
+        cnts[IDX][recodedSt] = pInQ;                                                    \
+        qTail[IDX]++;                                                                   \
+    }                                                                                   \
+    else                                                                                \
+    {                                                                                   \
+        qs[IDX][it->second].count += CNT;                                               \
+    }
+
 int main()
 {
     cin >> n;
@@ -84,6 +104,108 @@ int main()
             cin >> cells[row][col];
         }
     }
+
+    // init
+    unsigned int ans = 0;
+
+    act = 0;
+
+    now_x = 0;
+    now_y = n;
+
+    qs[act][0].state = 0;
+    qs[act][0].count = 1;
+    qs[act][0].minUnused = 1;
+
+    qTail[act]++;
+
+    while (0 < qTail[act])
+    {
+        int nAct = 1 - act;
+
+        if (n == now_y)
+        {
+            now_x++;
+            now_y = 1;
+        }
+        else
+        {
+            now_y++;
+        }
+
+        if ('#' == cells[now_x][now_y])
+        {
+            // black
+            // do nothing
+        }
+        else
+        {
+            // white
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int st = qs[act][iQ].state;
+                unsigned int count = qs[act][iQ].count;
+                unsigned char minUnused = qs[act][iQ].minUnused;
+
+                unsigned int reds = getVal4St(st, n + 1);
+                unsigned int left = getVal4St(st, now_y - 1);
+                unsigned int up = getVal4St(st, now_y);
+
+                if (left && up)
+                {
+
+                }
+                else if (left || up)
+                {
+
+                }
+                else
+                {
+                    // 0 == left && 0 == up
+                    // do nothing, add directly
+
+                    // white ==> red
+                    {
+                        reds ++;
+                        unsigned int newSt = st;
+
+                        if (n > now_x && '.' == cells[now_x + 1][now_y])
+                        {
+                            setVal4St(newSt, now_y - 1, minUnused);
+                        }
+
+                        if (n > now_y && '.' == cells[now_x][now_y + 1])
+                        {
+                            setVal4St(newSt, now_y, minUnused);
+                        }
+
+                        if (newSt == st)
+                        {
+                            // 右，下 没有新的联通可能了
+                            if (1 == k && k == reds && 1 == minUnused)
+                            {
+                                ans += count;
+                            }
+                        }
+                        else
+                        {
+                            if (k > reds)
+                            {
+                                // add
+                                setVal4St(newSt, (n + 1), reds);
+                            }
+                        }
+                    }
+                }
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
+    }
+
+    cout << ans << endl;
 
     return 0;
 }

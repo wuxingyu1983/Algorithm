@@ -25,12 +25,12 @@ using namespace std;
 #define MAX_NK 9
 #define ST_BITS 3
 #define ST_MASK 7
-#define QS_SIZE 60000
+#define QS_SIZE 6000000
 
 class Record
 {
 public:
-    unsigned int state;     // 轮廓线段状态
+    unsigned int state; // 轮廓线段状态
 
     unsigned int count;
     unsigned char minUnused;
@@ -83,7 +83,7 @@ unsigned int ans;
         if (3 > unused)                                                                     \
             ans += CNT;                                                                     \
     }                                                                                       \
-    else if (1 != unused)                                                                   \
+    else                                                                                    \
     {                                                                                       \
         unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
         if (it == cnts[IDX].end())                                                          \
@@ -108,6 +108,8 @@ int main()
     cin >> n;
     cin >> k;
 
+    unsigned int stMask = (1 << ((n + 1) * ST_BITS)) - 1;
+
     for (size_t row = 1; row <= n; row++)
     {
         for (size_t col = 1; col <= n; col++)
@@ -123,6 +125,8 @@ int main()
     if (1 < k)
     {
         // init
+        ans = 0;
+
         act = 0;
 
         now_x = 0;
@@ -142,6 +146,11 @@ int main()
             {
                 now_x++;
                 now_y = 1;
+
+                if (n < now_x)
+                {
+                    break;
+                }
             }
             else
             {
@@ -162,12 +171,14 @@ int main()
                     unsigned int count = qs[act][iQ].count;
                     unsigned char minUnused = qs[act][iQ].minUnused;
 
+                    unsigned int reds = getVal4St(st, n + 1);
                     if (1 == now_y)
                     {
                         st <<= ST_BITS;
+                        st &= stMask;
+                        setVal4St(st, (n + 1), reds)
                     }
 
-                    unsigned int reds = getVal4St(st, n + 1);
                     unsigned int left = getVal4St(st, now_y - 1);
                     unsigned int up = getVal4St(st, now_y);
 
@@ -187,15 +198,15 @@ int main()
                                 int tmp = getVal4St(newSt, i);
                                 if (tmp == left)
                                 {
-                                    leftCnt ++;
+                                    leftCnt++;
                                 }
                                 else if (tmp == up)
                                 {
-                                    upCnt ++;
+                                    upCnt++;
                                 }
                             }
 
-                            if (0 < leftCnt && 0 == upCnt)
+                            if (0 < leftCnt && 0 < upCnt)
                             {
                                 // add
                                 addSts(newSt, count, reds, nAct);
@@ -218,12 +229,31 @@ int main()
 
                             if (n > now_x && '.' == cells[now_x + 1][now_y])
                             {
-                                setVal4St(newSt, now_y - 1, minUnused);
+                                setVal4St(newSt, now_y - 1, left);
                             }
 
                             if (n > now_y && '.' == cells[now_x][now_y + 1])
                             {
-                                setVal4St(newSt, now_y, minUnused);
+                                setVal4St(newSt, now_y, left);
+                            }
+
+                            if (reds < k)
+                            {
+                                int leftCnt = 0;
+                                for (int i = 0; i <= n; i++)
+                                {
+                                    int tmp = getVal4St(newSt, i);
+                                    if (tmp == left)
+                                    {
+                                        leftCnt++;
+                                        break;
+                                    }
+                                }
+
+                                if (0 == leftCnt)
+                                {
+                                    continue;
+                                }
                             }
 
                             // add
@@ -247,7 +277,7 @@ int main()
                                 int tmp = getVal4St(newSt, i);
                                 if (tmp == val)
                                 {
-                                    valCnt ++;
+                                    valCnt++;
                                 }
                             }
 
@@ -264,12 +294,31 @@ int main()
 
                             if (n > now_x && '.' == cells[now_x + 1][now_y])
                             {
-                                setVal4St(newSt, now_y - 1, minUnused);
+                                setVal4St(newSt, now_y - 1, val);
                             }
 
                             if (n > now_y && '.' == cells[now_x][now_y + 1])
                             {
-                                setVal4St(newSt, now_y, minUnused);
+                                setVal4St(newSt, now_y, val);
+                            }
+
+                            if (reds < k)
+                            {
+                                int valCnt = 0;
+                                for (int i = 0; i <= n; i++)
+                                {
+                                    int tmp = getVal4St(newSt, i);
+                                    if (tmp == val)
+                                    {
+                                        valCnt++;
+                                        break;
+                                    }
+                                }
+
+                                if (0 == valCnt)
+                                {
+                                    continue;
+                                }
                             }
 
                             // add
@@ -298,6 +347,25 @@ int main()
                             if (n > now_y && '.' == cells[now_x][now_y + 1])
                             {
                                 setVal4St(newSt, now_y, minUnused);
+                            }
+
+                            if (reds < k)
+                            {
+                                int cnt = 0;
+                                for (int i = 0; i <= n; i++)
+                                {
+                                    int tmp = getVal4St(newSt, i);
+                                    if (tmp == minUnused)
+                                    {
+                                        cnt++;
+                                        break;
+                                    }
+                                }
+
+                                if (0 == cnt)
+                                {
+                                    continue;
+                                }
                             }
 
                             // add

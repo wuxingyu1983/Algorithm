@@ -157,228 +157,169 @@ int main()
                 now_y++;
             }
 
-            if ('#' == cells[now_x][now_y])
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                // black
-                // do nothing
-            }
-            else
-            {
-                // white
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                unsigned int st = qs[act][iQ].state;
+                unsigned int count = qs[act][iQ].count;
+                unsigned char minUnused = qs[act][iQ].minUnused;
+
+                unsigned int reds = getVal4St(st, n + 1);
+                if (1 == now_y)
                 {
-                    unsigned int st = qs[act][iQ].state;
-                    unsigned int count = qs[act][iQ].count;
-                    unsigned char minUnused = qs[act][iQ].minUnused;
-
-                    unsigned int reds = getVal4St(st, n + 1);
-                    if (1 == now_y)
-                    {
-                        st <<= ST_BITS;
-                        st &= stMask;
-                        setVal4St(st, (n + 1), reds)
-                    }
-
-                    unsigned int left = getVal4St(st, now_y - 1);
-                    unsigned int up = getVal4St(st, now_y);
-
-                    if (left && up)
-                    {
-                        unsigned int newSt = st;
-                        setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 0);
-
-                        // do nothing
-                        {
-                            int leftCnt = 0;
-                            int upCnt = 0;
-
-                            for (int i = 0; i <= n; i++)
-                            {
-                                int tmp = getVal4St(newSt, i);
-                                if (tmp == left)
-                                {
-                                    leftCnt++;
-                                }
-                                else if (tmp == up)
-                                {
-                                    upCnt++;
-                                }
-                            }
-
-                            if (0 < leftCnt && 0 < upCnt)
-                            {
-                                // add
-                                addSts(newSt, count, reds, nAct);
-                            }
-                        }
-
-                        // white ==> red
-                        {
-                            reds++;
-
-                            // up ==> left
-                            for (int i = 0; i <= n; i++)
-                            {
-                                int tmp = getVal4St(newSt, i);
-                                if (tmp == up)
-                                {
-                                    setVal4St(newSt, i, left);
-                                }
-                            }
-
-                            if (n > now_x && '.' == cells[now_x + 1][now_y])
-                            {
-                                setVal4St(newSt, now_y - 1, left);
-                            }
-
-                            if (n > now_y && '.' == cells[now_x][now_y + 1])
-                            {
-                                setVal4St(newSt, now_y, left);
-                            }
-
-                            if (reds < k)
-                            {
-                                int leftCnt = 0;
-                                for (int i = 0; i <= n; i++)
-                                {
-                                    int tmp = getVal4St(newSt, i);
-                                    if (tmp == left)
-                                    {
-                                        leftCnt++;
-                                        break;
-                                    }
-                                }
-
-                                if (0 == leftCnt)
-                                {
-                                    continue;
-                                }
-                            }
-
-                            // add
-                            setVal4St(newSt, (n + 1), reds);
-                            addSts(newSt, count, reds, nAct);
-                        }
-                    }
-                    else if (left || up)
-                    {
-                        unsigned int val = left + up;
-                        unsigned int newSt = st;
-                        setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 0);
-
-                        // do nothing
-                        {
-                            int valCnt = 0;
-
-                            for (int i = 0; i <= n; i++)
-                            {
-                                int tmp = getVal4St(newSt, i);
-                                if (tmp == val)
-                                {
-                                    valCnt++;
-                                }
-                            }
-
-                            if (0 < valCnt)
-                            {
-                                // add
-                                addSts(newSt, count, reds, nAct);
-                            }
-                        }
-
-                        // white ==> red
-                        {
-                            reds++;
-
-                            if (n > now_x && '.' == cells[now_x + 1][now_y])
-                            {
-                                setVal4St(newSt, now_y - 1, val);
-                            }
-
-                            if (n > now_y && '.' == cells[now_x][now_y + 1])
-                            {
-                                setVal4St(newSt, now_y, val);
-                            }
-
-                            if (reds < k)
-                            {
-                                int valCnt = 0;
-                                for (int i = 0; i <= n; i++)
-                                {
-                                    int tmp = getVal4St(newSt, i);
-                                    if (tmp == val)
-                                    {
-                                        valCnt++;
-                                        break;
-                                    }
-                                }
-
-                                if (0 == valCnt)
-                                {
-                                    continue;
-                                }
-                            }
-
-                            // add
-                            setVal4St(newSt, (n + 1), reds);
-                            addSts(newSt, count, reds, nAct);
-                        }
-                    }
-                    else
-                    {
-                        // 0 == left && 0 == up
-                        // do nothing, add directly
-                        {
-                            addSts(st, count, reds, nAct);
-                        }
-
-                        // white ==> red
-                        {
-                            reds++;
-                            unsigned int newSt = st;
-
-                            if (n > now_x && '.' == cells[now_x + 1][now_y])
-                            {
-                                setVal4St(newSt, now_y - 1, minUnused);
-                            }
-
-                            if (n > now_y && '.' == cells[now_x][now_y + 1])
-                            {
-                                setVal4St(newSt, now_y, minUnused);
-                            }
-
-                            if (reds < k)
-                            {
-                                int cnt = 0;
-                                for (int i = 0; i <= n; i++)
-                                {
-                                    int tmp = getVal4St(newSt, i);
-                                    if (tmp == minUnused)
-                                    {
-                                        cnt++;
-                                        break;
-                                    }
-                                }
-
-                                if (0 == cnt)
-                                {
-                                    continue;
-                                }
-                            }
-
-                            // add
-                            setVal4St(newSt, (n + 1), reds);
-                            addSts(newSt, count, reds, nAct);
-                        }
-                    }
+                    st <<= ST_BITS;
+                    st &= stMask;
+                    setVal4St(st, (n + 1), reds)
                 }
 
-                qTail[act] = 0;
-                cnts[act].clear();
-                act = nAct;
+                unsigned int left = getVal4St(st, now_y - 1);
+                unsigned int up = getVal4St(st, now_y);
+
+                if (left && up)
+                {
+                    unsigned int newSt = st;
+                    setVal4St(newSt, now_y - 1, 0);
+                    setVal4St(newSt, now_y, 0);
+
+                    // do nothing
+                    {
+                        int leftCnt = 0;
+                        int upCnt = 0;
+
+                        for (int i = 0; i <= n; i++)
+                        {
+                            int tmp = getVal4St(newSt, i);
+                            if (tmp == left)
+                            {
+                                leftCnt++;
+                            }
+                            else if (tmp == up)
+                            {
+                                upCnt++;
+                            }
+                        }
+
+                        if (0 < leftCnt && 0 < upCnt)
+                        {
+                            // add
+                            addSts(newSt, count, reds, nAct);
+                        }
+                    }
+
+                    // white ==> red
+                    if ('.' == cells[now_x][now_y])
+                    {
+                        reds++;
+
+                        // up ==> left
+                        for (int i = 0; i <= n; i++)
+                        {
+                            int tmp = getVal4St(newSt, i);
+                            if (tmp == up)
+                            {
+                                setVal4St(newSt, i, left);
+                            }
+                        }
+
+                        if (n > now_x)
+                        {
+                            setVal4St(newSt, now_y - 1, left);
+                        }
+
+                        if (n > now_y)
+                        {
+                            setVal4St(newSt, now_y, left);
+                        }
+
+                        // add
+                        setVal4St(newSt, (n + 1), reds);
+                        addSts(newSt, count, reds, nAct);
+                    }
+                }
+                else if (left || up)
+                {
+                    unsigned int val = left + up;
+                    unsigned int newSt = st;
+                    setVal4St(newSt, now_y - 1, 0);
+                    setVal4St(newSt, now_y, 0);
+
+                    // do nothing
+                    {
+                        int valCnt = 0;
+
+                        for (int i = 0; i <= n; i++)
+                        {
+                            int tmp = getVal4St(newSt, i);
+                            if (tmp == val)
+                            {
+                                valCnt++;
+                            }
+                        }
+
+                        if (0 < valCnt)
+                        {
+                            // add
+                            addSts(newSt, count, reds, nAct);
+                        }
+                    }
+
+                    // white ==> red
+                    if ('.' == cells[now_x][now_y])
+                    {
+                        reds++;
+
+                        if (n > now_x)
+                        {
+                            setVal4St(newSt, now_y - 1, val);
+                        }
+
+                        if (n > now_y)
+                        {
+                            setVal4St(newSt, now_y, val);
+                        }
+
+                        // add
+                        setVal4St(newSt, (n + 1), reds);
+                        addSts(newSt, count, reds, nAct);
+                    }
+                }
+                else
+                {
+                    unsigned int newSt = st;
+                    setVal4St(newSt, now_y - 1, 0);
+                    setVal4St(newSt, now_y, 0);
+
+                    // 0 == left && 0 == up
+                    // do nothing, add directly
+                    {
+                        addSts(newSt, count, reds, nAct);
+                    }
+
+                    // white ==> red
+                    if ('.' == cells[now_x][now_y])
+                    {
+                        reds++;
+                        unsigned int newSt = st;
+
+                        if (n > now_x)
+                        {
+                            setVal4St(newSt, now_y - 1, minUnused);
+                        }
+
+                        if (n > now_y)
+                        {
+                            setVal4St(newSt, now_y, minUnused);
+                        }
+
+                        // add
+                        setVal4St(newSt, (n + 1), reds);
+                        addSts(newSt, count, reds, nAct);
+                    }
+                }
             }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
         }
     }
 

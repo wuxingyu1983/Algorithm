@@ -73,23 +73,31 @@ int now_x, now_y;
     }                                  \
     UNUSED = bn;
 
-#define addSts(ST, CNT, IDX)                                                            \
-    unsigned char unused;                                                               \
-    unsigned int recodedSt = ST;                                                        \
-    recode(recodedSt, unused);                                                          \
-    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
-    if (it == cnts[IDX].end())                                                          \
-    {                                                                                   \
-        int pInQ = qTail[IDX];                                                          \
-        qs[IDX][pInQ].state = recodedSt;                                                \
-        qs[IDX][pInQ].count = CNT;                                                      \
-        qs[IDX][pInQ].minUnused = unused;                                               \
-        cnts[IDX][recodedSt] = pInQ;                                                    \
-        qTail[IDX]++;                                                                   \
-    }                                                                                   \
-    else                                                                                \
-    {                                                                                   \
-        qs[IDX][it->second].count += CNT;                                               \
+#define addSts(ST, CNT, REDS, IDX)                                                          \
+    unsigned char unused;                                                                   \
+    unsigned int recodedSt = ST;                                                            \
+    recode(recodedSt, unused);                                                              \
+    if (REDS == k)                                                                          \
+    {                                                                                       \
+        if (1 == unused || 2 == unused)                                                     \
+            ans += CNT;                                                                     \
+    }                                                                                       \
+    else                                                                                    \
+    {                                                                                       \
+        unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
+        if (it == cnts[IDX].end())                                                          \
+        {                                                                                   \
+            int pInQ = qTail[IDX];                                                          \
+            qs[IDX][pInQ].state = recodedSt;                                                \
+            qs[IDX][pInQ].count = CNT;                                                      \
+            qs[IDX][pInQ].minUnused = unused;                                               \
+            cnts[IDX][recodedSt] = pInQ;                                                    \
+            qTail[IDX]++;                                                                   \
+        }                                                                                   \
+        else                                                                                \
+        {                                                                                   \
+            qs[IDX][it->second].count += CNT;                                               \
+        }                                                                                   \
     }
 
 int main()
@@ -147,22 +155,59 @@ int main()
                 unsigned int count = qs[act][iQ].count;
                 unsigned char minUnused = qs[act][iQ].minUnused;
 
+                if (1 == now_y)
+                {
+                    st <<= ST_BITS;
+                }
+
                 unsigned int reds = getVal4St(st, n + 1);
                 unsigned int left = getVal4St(st, now_y - 1);
                 unsigned int up = getVal4St(st, now_y);
 
                 if (left && up)
                 {
+                    // do nothing
+                    {
 
+                    }
+
+                    // white ==> red
+                    {
+                        reds ++;
+                        unsigned int newSt = st;
+
+                        // up ==> left
+                        for (int i = 0; i <= n; i++)
+                        {
+                            int tmp = getVal4St(newSt, i);
+                            if (tmp == up)
+                            {
+                                setVal4St(newSt, i, left);
+                            }
+                        }
+
+
+                    }
                 }
                 else if (left || up)
                 {
+                    // do nothing
+                    {
 
+                    }
+                    
+                    // white ==> red
+                    {
+
+                    }
                 }
                 else
                 {
                     // 0 == left && 0 == up
                     // do nothing, add directly
+                    {
+                        addSts(st, count, reds, nAct);
+                    }
 
                     // white ==> red
                     {
@@ -193,6 +238,7 @@ int main()
                             {
                                 // add
                                 setVal4St(newSt, (n + 1), reds);
+                                addSts(newSt, count, reds, nAct);
                             }
                         }
                     }

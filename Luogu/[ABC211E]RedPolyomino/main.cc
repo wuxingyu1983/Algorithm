@@ -45,6 +45,7 @@ int n, k;
 unordered_map<unsigned int, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
+unsigned int ans;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
@@ -79,10 +80,10 @@ int now_x, now_y;
     recode(recodedSt, unused);                                                              \
     if (REDS == k)                                                                          \
     {                                                                                       \
-        if (1 == unused || 2 == unused)                                                     \
+        if (3 > unused)                                                                     \
             ans += CNT;                                                                     \
     }                                                                                       \
-    else                                                                                    \
+    else if (1 != unused)                                                                   \
     {                                                                                       \
         unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
         if (it == cnts[IDX].end())                                                          \
@@ -102,6 +103,8 @@ int now_x, now_y;
 
 int main()
 {
+    ans = 0;
+
     cin >> n;
     cin >> k;
 
@@ -110,144 +113,173 @@ int main()
         for (size_t col = 1; col <= n; col++)
         {
             cin >> cells[row][col];
+            if (1 == k && '.' == cells[row][col])
+            {
+                ans++;
+            }
         }
     }
 
-    // init
-    unsigned int ans = 0;
-
-    act = 0;
-
-    now_x = 0;
-    now_y = n;
-
-    qs[act][0].state = 0;
-    qs[act][0].count = 1;
-    qs[act][0].minUnused = 1;
-
-    qTail[act]++;
-
-    while (0 < qTail[act])
+    if (1 < k)
     {
-        int nAct = 1 - act;
+        // init
+        act = 0;
 
-        if (n == now_y)
-        {
-            now_x++;
-            now_y = 1;
-        }
-        else
-        {
-            now_y++;
-        }
+        now_x = 0;
+        now_y = n;
 
-        if ('#' == cells[now_x][now_y])
+        qs[act][0].state = 0;
+        qs[act][0].count = 1;
+        qs[act][0].minUnused = 1;
+
+        qTail[act]++;
+
+        while (0 < qTail[act])
         {
-            // black
-            // do nothing
-        }
-        else
-        {
-            // white
-            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            int nAct = 1 - act;
+
+            if (n == now_y)
             {
-                unsigned int st = qs[act][iQ].state;
-                unsigned int count = qs[act][iQ].count;
-                unsigned char minUnused = qs[act][iQ].minUnused;
+                now_x++;
+                now_y = 1;
+            }
+            else
+            {
+                now_y++;
+            }
 
-                if (1 == now_y)
+            if ('#' == cells[now_x][now_y])
+            {
+                // black
+                // do nothing
+            }
+            else
+            {
+                // white
+                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
                 {
-                    st <<= ST_BITS;
-                }
+                    unsigned int st = qs[act][iQ].state;
+                    unsigned int count = qs[act][iQ].count;
+                    unsigned char minUnused = qs[act][iQ].minUnused;
 
-                unsigned int reds = getVal4St(st, n + 1);
-                unsigned int left = getVal4St(st, now_y - 1);
-                unsigned int up = getVal4St(st, now_y);
-
-                if (left && up)
-                {
-                    // do nothing
+                    if (1 == now_y)
                     {
-
+                        st <<= ST_BITS;
                     }
 
-                    // white ==> red
+                    unsigned int reds = getVal4St(st, n + 1);
+                    unsigned int left = getVal4St(st, now_y - 1);
+                    unsigned int up = getVal4St(st, now_y);
+
+                    if (left && up)
                     {
-                        reds ++;
                         unsigned int newSt = st;
+                        setVal4St(newSt, now_y - 1, 0);
+                        setVal4St(newSt, now_y, 0);
 
-                        // up ==> left
-                        for (int i = 0; i <= n; i++)
+                        // do nothing
                         {
-                            int tmp = getVal4St(newSt, i);
-                            if (tmp == up)
+                            int leftCnt = 0;
+                            int upCnt = 0;
+
+                            for (int i = 0; i <= n; i++)
                             {
-                                setVal4St(newSt, i, left);
+                                int tmp = getVal4St(newSt, i);
+                                if (tmp == left)
+                                {
+                                    leftCnt ++;
+                                }
+                                else if (tmp == up)
+                                {
+                                    upCnt ++;
+                                }
                             }
-                        }
 
-
-                    }
-                }
-                else if (left || up)
-                {
-                    // do nothing
-                    {
-
-                    }
-                    
-                    // white ==> red
-                    {
-
-                    }
-                }
-                else
-                {
-                    // 0 == left && 0 == up
-                    // do nothing, add directly
-                    {
-                        addSts(st, count, reds, nAct);
-                    }
-
-                    // white ==> red
-                    {
-                        reds ++;
-                        unsigned int newSt = st;
-
-                        if (n > now_x && '.' == cells[now_x + 1][now_y])
-                        {
-                            setVal4St(newSt, now_y - 1, minUnused);
-                        }
-
-                        if (n > now_y && '.' == cells[now_x][now_y + 1])
-                        {
-                            setVal4St(newSt, now_y, minUnused);
-                        }
-
-                        if (newSt == st)
-                        {
-                            // 右，下 没有新的联通可能了
-                            if (1 == k && k == reds && 1 == minUnused)
-                            {
-                                ans += count;
-                            }
-                        }
-                        else
-                        {
-                            if (k > reds)
+                            if (0 < leftCnt && 0 == upCnt)
                             {
                                 // add
-                                setVal4St(newSt, (n + 1), reds);
                                 addSts(newSt, count, reds, nAct);
                             }
                         }
+
+                        // white ==> red
+                        {
+                            reds++;
+
+                            // up ==> left
+                            for (int i = 0; i <= n; i++)
+                            {
+                                int tmp = getVal4St(newSt, i);
+                                if (tmp == up)
+                                {
+                                    setVal4St(newSt, i, left);
+                                }
+                            }
+
+                            if (n > now_x && '.' == cells[now_x + 1][now_y])
+                            {
+                                setVal4St(newSt, now_y - 1, minUnused);
+                            }
+
+                            if (n > now_y && '.' == cells[now_x][now_y + 1])
+                            {
+                                setVal4St(newSt, now_y, minUnused);
+                            }
+
+                            // add
+                            setVal4St(newSt, (n + 1), reds);
+                            addSts(newSt, count, reds, nAct);
+                        }
+                    }
+                    else if (left || up)
+                    {
+                        unsigned int val = left + up;
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y - 1, 0);
+                        setVal4St(newSt, now_y, 0);
+
+                        // do nothing
+                        {
+                        }
+
+                        // white ==> red
+                        {
+                        }
+                    }
+                    else
+                    {
+                        // 0 == left && 0 == up
+                        // do nothing, add directly
+                        {
+                            addSts(st, count, reds, nAct);
+                        }
+
+                        // white ==> red
+                        {
+                            reds++;
+                            unsigned int newSt = st;
+
+                            if (n > now_x && '.' == cells[now_x + 1][now_y])
+                            {
+                                setVal4St(newSt, now_y - 1, minUnused);
+                            }
+
+                            if (n > now_y && '.' == cells[now_x][now_y + 1])
+                            {
+                                setVal4St(newSt, now_y, minUnused);
+                            }
+
+                            // add
+                            setVal4St(newSt, (n + 1), reds);
+                            addSts(newSt, count, reds, nAct);
+                        }
                     }
                 }
-            }
 
-            qTail[act] = 0;
-            cnts[act].clear();
-            act = nAct;
+                qTail[act] = 0;
+                cnts[act].clear();
+                act = nAct;
+            }
         }
     }
 

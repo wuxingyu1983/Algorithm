@@ -1,4 +1,5 @@
 // https://www.luogu.com.cn/problem/AT_abc211_e
+// https://atcoder.jp/contests/abc211/tasks/abc211_e
 
 #include <cmath>
 #include <cstdio>
@@ -25,14 +26,14 @@ using namespace std;
 #define MAX_NK 9
 #define ST_BITS 3
 #define ST_MASK 7
-#define QS_SIZE 6000000
+#define QS_SIZE 600000
 
 class Record
 {
 public:
     unsigned int state; // 轮廓线段状态
 
-    unsigned int count;
+    unsigned long long count;
     unsigned char minUnused;
 
     Record() {}
@@ -45,7 +46,7 @@ int n, k;
 unordered_map<unsigned int, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
-unsigned int ans;
+unsigned long long ans;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
@@ -160,7 +161,7 @@ int main()
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
                 unsigned int st = qs[act][iQ].state;
-                unsigned int count = qs[act][iQ].count;
+                unsigned long long count = qs[act][iQ].count;
                 unsigned char minUnused = qs[act][iQ].minUnused;
 
                 unsigned int reds = getVal4St(st, n + 1);
@@ -192,7 +193,7 @@ int main()
                             {
                                 leftCnt++;
                             }
-                            else if (tmp == up)
+                            if (tmp == up)
                             {
                                 upCnt++;
                             }

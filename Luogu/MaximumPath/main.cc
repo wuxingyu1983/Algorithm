@@ -26,7 +26,7 @@ using namespace std;
 #define MAX_N 100001
 #define ST_BITS 2
 #define ST_MASK 3
-#define QS_SIZE 6000
+#define QS_SIZE 266 
 
 class Record
 {

@@ -179,11 +179,42 @@ int main()
                 }
                 else if (left || up)
                 {
+                    unsigned int val = left + up;
 
+                    if (n > now_x)
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y - 1, val);
+                        setVal4St(newSt, now_y, 0);
+
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
+
+                    if (3 > now_y)
+                    {
+                        unsigned int newSt = st;
+
+                        setVal4St(newSt, now_y - 1, 0);
+                        setVal4St(newSt, now_y, val);
+
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
                 }
                 else
                 {
-                    
+                    // 0 == left && 0 == up
+                    // do nothing
+                    addSts(st, sum, nAct);
+
+                    if (n > now_x && 3 > now_y)
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y - 1, 1);
+                        setVal4St(newSt, now_y, 2);
+
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
                 }
             }
         }

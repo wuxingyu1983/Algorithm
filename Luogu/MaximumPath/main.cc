@@ -53,6 +53,22 @@ long long ans;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
+#define addSts(ST, SUM, IDX)                                                     \
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(ST); \
+    if (it == cnts[IDX].end())                                                   \
+    {                                                                            \
+        int pInQ = qTail[IDX];                                                   \
+        qs[IDX][pInQ].state = ST;                                                \
+        qs[IDX][pInQ].sum = SUM;                                                 \
+        cnts[IDX][ST] = pInQ;                                                    \
+        qTail[IDX]++;                                                            \
+    }                                                                            \
+    else                                                                         \
+    {                                                                            \
+        if (qs[IDX][it->second].sum < SUM)                                       \
+            qs[IDX][it->second].sum = SUM;                                       \
+    }
+
 int main()
 {
     cin >> n;
@@ -114,15 +130,61 @@ int main()
             if (1 == now_x && 1 == now_y)
             {
                 // 起点
-                
+                if (n > now_x)
+                {
+                    unsigned int newSt = st;
+
+                    setVal4St(newSt, 0, 3);
+
+                    addSts(newSt, cells[now_x][now_y], nAct);
+                }
+
+                {
+                    unsigned int newSt = st;
+
+                    setVal4St(newSt, 1, 3);
+
+                    addSts(newSt, cells[now_x][now_y], nAct);
+                }
             }
             else if (n == now_x && 3 == now_y)
             {
                 // 终点
+                if (left && up)
+                {
+                    // invalid
+                }
+                else if (left || up)
+                {
+                    unsigned int newSt = st;
+                    setVal4St(newSt, now_y - 1, 0);
+                    setVal4St(newSt, now_y, 0);
+
+                    if (0 == newSt)
+                    {
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
+                }
+                else
+                {
+                    // 0 == left && 0 == up
+                    // invalid
+                }
             }
             else
             {
+                if (left && up)
+                {
 
+                }
+                else if (left || up)
+                {
+
+                }
+                else
+                {
+                    
+                }
             }
         }
 

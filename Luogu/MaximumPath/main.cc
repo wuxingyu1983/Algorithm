@@ -126,8 +126,6 @@ int main()
     }
 
     // init
-    ans = 0;
-
     act = 0;
 
     now_x = 0;
@@ -150,6 +148,13 @@ int main()
             if (n < now_x)
             {
                 // TBD
+                if (1 == qTail[act])
+                {
+                    if (0 == qs[act][0].state)
+                    {
+                        ans = qs[act][0].sum;
+                    }
+                }
                 break;
             }
         }
@@ -219,31 +224,27 @@ int main()
             {
                 if (left && up)
                 {
+                    unsigned int newSt = st;
+
+                    setVal4St(newSt, now_y - 1, 0);
+                    setVal4St(newSt, now_y, 0);
+
                     if (1 == left && 2 == up)
                     {
                         // invalid
                     }
                     else if (2 == left && 1 == up)
                     {
-                        unsigned int newSt = st;
-
-                        setVal4St(newSt, now_y - 1, 0);
-                        setVal4St(newSt, now_y, 0);
-
                         addSts(newSt, (sum + cells[now_x][now_y]), nAct);
                     }
                     else if (1 == left && 1 == up)
                     {
-                        unsigned int newSt = st;
-
                         forwardFunc(newSt, 1, 2, 1);
 
                         addSts(newSt, (sum + cells[now_x][now_y]), nAct);
                     }
                     else if (2 == left && 2 == up)
                     {
-                        unsigned int newSt = st;
-
                         backwardFunc(newSt, 2, 1, 2);
 
                         addSts(newSt, (sum + cells[now_x][now_y]), nAct);
@@ -251,8 +252,6 @@ int main()
                     else if (4 == (left + up))
                     {
                         // 1, 3
-                        unsigned int newSt = st;
-
                         forwardFunc(newSt, 1, 2, 3);
 
                         addSts(newSt, (sum + cells[now_x][now_y]), nAct);
@@ -260,8 +259,6 @@ int main()
                     else if (5 == (left + up))
                     {
                         // 2, 3
-                        unsigned int newSt = st;
-
                         backwardFunc(newSt, 2, 1, 3);
                         
                         addSts(newSt, (sum + cells[now_x][now_y]), nAct);
@@ -313,6 +310,8 @@ int main()
         cnts[act].clear();
         act = nAct;
     }
+
+    cout << ans << endl;
 
     return 0;
 }

@@ -69,6 +69,50 @@ long long ans;
             qs[IDX][it->second].sum = SUM;                                       \
     }
 
+#define forwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                 \
+        int pos = now_y + 1;                          \
+        int s = 1;                                    \
+        while (pos <= 3)                              \
+        {                                             \
+            int v = getVal4St(newSt, pos);            \
+            if (plusVal == v)                         \
+                s++;                                  \
+            else if (minusVal == v)                   \
+            {                                         \
+                s--;                                  \
+                if (0 == s)                           \
+                {                                     \
+                    setVal4St(newSt, pos, newVal);    \
+                    break;                            \
+                }                                     \
+            }                                         \
+            pos++;                                    \
+        }                                             \
+    }
+
+#define backwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                  \
+        int pos = now_y - 2;                           \
+        int s = 1;                                     \
+        while (0 <= pos)                               \
+        {                                              \
+            int v = getVal4St(newSt, pos);             \
+            if (plusVal == v)                          \
+                s++;                                   \
+            else if (minusVal == v)                    \
+            {                                          \
+                s--;                                   \
+                if (0 == s)                            \
+                {                                      \
+                    setVal4St(newSt, pos, newVal);     \
+                    break;                             \
+                }                                      \
+            }                                          \
+            pos--;                                     \
+        }                                              \
+    }
+
 int main()
 {
     cin >> n;
@@ -175,7 +219,53 @@ int main()
             {
                 if (left && up)
                 {
+                    if (1 == left && 2 == up)
+                    {
+                        // invalid
+                    }
+                    else if (2 == left && 1 == up)
+                    {
+                        unsigned int newSt = st;
 
+                        setVal4St(newSt, now_y - 1, 0);
+                        setVal4St(newSt, now_y, 0);
+
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
+                    else if (1 == left && 1 == up)
+                    {
+                        unsigned int newSt = st;
+
+                        forwardFunc(newSt, 1, 2, 1);
+
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
+                    else if (2 == left && 2 == up)
+                    {
+                        unsigned int newSt = st;
+
+                        backwardFunc(newSt, 2, 1, 2);
+
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
+                    else if (4 == (left + up))
+                    {
+                        // 1, 3
+                        unsigned int newSt = st;
+
+                        forwardFunc(newSt, 1, 2, 3);
+
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
+                    else if (5 == (left + up))
+                    {
+                        // 2, 3
+                        unsigned int newSt = st;
+
+                        backwardFunc(newSt, 2, 1, 3);
+                        
+                        addSts(newSt, (sum + cells[now_x][now_y]), nAct);
+                    }
                 }
                 else if (left || up)
                 {

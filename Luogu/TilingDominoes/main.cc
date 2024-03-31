@@ -46,6 +46,28 @@ int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned long long ans;
 
+#define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
+
+#define setVal4St(ST, POS, VAL)            \
+    ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
+    if (VAL)                               \
+        ST |= (VAL) << ((POS) * ST_BITS);
+
+#define addSts(ST, CNT, IDX)                                                       \
+    unordered_map<unsigned short, unsigned int>::iterator it = cnts[IDX].find(ST); \
+    if (it == cnts[IDX].end())                                                     \
+    {                                                                              \
+        int pInQ = qTail[IDX];                                                     \
+        qs[IDX][pInQ].state = ST;                                                  \
+        qs[IDX][pInQ].count = CNT;                                                 \
+        cnts[IDX][ST] = pInQ;                                                      \
+        qTail[IDX]++;                                                              \
+    }                                                                              \
+    else                                                                           \
+    {                                                                              \
+        qs[IDX][it->second].count += CNT;                                          \
+    }
+
 int main()
 {
     while (cin >> h >> w)
@@ -53,6 +75,12 @@ int main()
         if (h < w)
         {
             swap(h, w);
+        }
+
+        if ((h & 1) && (w & 1))
+        {
+            cout << 0 << endl;
+            continue;
         }
 
         // init
@@ -67,7 +95,87 @@ int main()
         qTail[0] = 1;
         qTail[1] = 0;
 
-        
+        while (0 < qTail[act])
+        {
+            int nAct = 1 - act;
+
+            if (w == now_y)
+            {
+                now_x++;
+                now_y = 1;
+
+                if (h < now_x)
+                {
+                    if (1 == qTail[act])
+                    {
+                        if (0 == qs[act][0].state)
+                        {
+                            ans = qs[act][0].count;
+                        }
+                    }
+                    break;
+                }
+            }
+            else
+            {
+                now_y++;
+            }
+
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned short st = qs[act][iQ].state;
+                unsigned long long cnt = qs[act][iQ].count;
+
+                if (1 == now_y)
+                {
+                    st <<= ST_BITS;
+                }
+
+                unsigned short left = getVal4St(st, now_y - 1);
+                unsigned short up = getVal4St(st, now_y);
+
+                if (left && up)
+                {
+                    // invalid
+                }
+                else if (left || up)
+                {
+                    unsigned short newSt = st;
+                    
+                    setVal4St(newSt, now_y - 1, 0);
+                    setVal4St(newSt, now_y, 0);
+
+                    addSts(newSt, cnt, nAct);
+                }
+                else
+                {
+                    // 0 == left && 0 == up
+                    if (h > now_x)
+                    {
+                        unsigned short newSt = st;
+
+                        setVal4St(newSt, now_y - 1, 1);
+
+                        addSts(newSt, cnt, nAct);
+                    }
+
+                    if (w > now_y)
+                    {
+                        unsigned short newSt = st;
+
+                        setVal4St(newSt, now_y, 1);
+
+                        addSts(newSt, cnt, nAct);
+                    }
+                }
+            }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+        }
+
+        cout << ans << endl;
     }
 
     return 0;

@@ -41,7 +41,7 @@ long long cells[MAX_MN][MAX_MN];
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned short, unsigned int> cnts[2];
+int cnts[2][2050];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 unsigned long long ans;
@@ -53,19 +53,18 @@ unsigned long long ans;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
-#define addSts(ST, CNT, IDX)                                                       \
-    unordered_map<unsigned short, unsigned int>::iterator it = cnts[IDX].find(ST); \
-    if (it == cnts[IDX].end())                                                     \
-    {                                                                              \
-        int pInQ = qTail[IDX];                                                     \
-        qs[IDX][pInQ].state = ST;                                                  \
-        qs[IDX][pInQ].count = CNT;                                                 \
-        cnts[IDX][ST] = pInQ;                                                      \
-        qTail[IDX]++;                                                              \
-    }                                                                              \
-    else                                                                           \
-    {                                                                              \
-        qs[IDX][it->second].count += CNT;                                          \
+#define addSts(ST, CNT, IDX)                 \
+    if (0 > cnts[IDX][ST])                   \
+    {                                        \
+        int pInQ = qTail[IDX];               \
+        qs[IDX][pInQ].state = ST;            \
+        qs[IDX][pInQ].count = CNT;           \
+        cnts[IDX][ST] = pInQ;                \
+        qTail[IDX]++;                        \
+    }                                        \
+    else                                     \
+    {                                        \
+        qs[IDX][cnts[IDX][ST]].count += CNT; \
     }
 
 int main()
@@ -94,6 +93,9 @@ int main()
 
         qTail[0] = 1;
         qTail[1] = 0;
+
+        memset(cnts[0], -1, sizeof(int) * 2050);
+        memset(cnts[1], -1, sizeof(int) * 2050);
 
         while (0 < qTail[act])
         {
@@ -171,7 +173,7 @@ int main()
             }
 
             qTail[act] = 0;
-            cnts[act].clear();
+            memset(cnts[act], -1, sizeof(int) * 2050);
             act = nAct;
         }
 

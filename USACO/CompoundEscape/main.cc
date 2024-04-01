@@ -64,7 +64,7 @@ unsigned long long ans;
     memset(bb, -1, sizeof(bb));        \
     int bn = 1;                        \
     bb[0] = 0;                         \
-    for (int i = 0; i <= n; i++)       \
+    for (int i = 0; i <= w; i++)       \
     {                                  \
         int tmp = getVal4St(ST, i);    \
         if (tmp)                       \
@@ -77,6 +77,26 @@ unsigned long long ans;
         }                              \
     }                                  \
     UNUSED = bn;
+
+#define addSts(ST, SUM, IDX)                                                            \
+    unsigned char unused;                                                               \
+    unsigned int recodedSt = ST;                                                        \
+    recode(recodedSt, unused);                                                          \
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
+    if (it == cnts[IDX].end())                                                          \
+    {                                                                                   \
+        int pInQ = qTail[IDX];                                                          \
+        qs[IDX][pInQ].state = recodedSt;                                                \
+        qs[IDX][pInQ].sum = SUM;                                                        \
+        qs[IDX][pInQ].minUnused = unused;                                               \
+        cnts[IDX][recodedSt] = pInQ;                                                    \
+        qTail[IDX]++;                                                                   \
+    }                                                                                   \
+    else                                                                                \
+    {                                                                                   \
+        if (qs[IDX][it->second].sum > SUM)                                              \
+            qs[IDX][it->second].sum = SUM;                                              \
+    }
 
 int main()
 {
@@ -97,9 +117,115 @@ int main()
             cin >> colGate[col][row];
         }
     }
-    
 
-    
+    // init
+    ans = 0;
+
+    act = 0;
+
+    now_x = 0;
+    now_y = w;
+
+    qs[act][0].state = 0;
+    qs[act][0].sum = 0;
+    qs[act][0].minUnused = 1;
+
+    qTail[act]++;
+
+    while (0 < qTail[act])
+    {
+        int nAct = 1 - act;
+
+        if (w == now_y)
+        {
+            now_x++;
+            now_y = 1;
+
+            if (h < now_x)
+            {
+                // TBD
+                break;
+            }
+        }
+        else
+        {
+            now_y++;
+        }
+
+        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+        {
+            unsigned int st = qs[act][iQ].state;
+            unsigned long long sum = qs[act][iQ].sum;
+            unsigned char newVal = qs[act][iQ].minUnused;
+
+            if (1 == now_y)
+            {
+                st <<= ST_BITS;
+            }
+
+            unsigned int left = getVal4St(st, now_y - 1);
+            unsigned int up = getVal4St(st, now_y);
+
+            if (left && up)
+            {
+                // up ==> left
+                for (int i = 0; i <= w; i++)
+                {
+                    int tmp = getVal4St(st, i);
+                    if (tmp == up)
+                    {
+                        setVal4St(st, i, left);
+                    }
+                }
+
+                setVal4St(st, now_y - 1, 0);
+                setVal4St(st, now_y, 0);
+
+                bool flag = false;
+                if (h == now_x && w == now_y)
+                {
+                    // last cell
+                    flag = true;
+                }
+                else
+                {
+                    for (int i = 0; i <= w; i++)
+                    {
+                        int tmp = getVal4St(st, i);
+                        if (tmp == left)
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (flag)
+                {
+                    addSts(st, sum, nAct);
+                }
+
+                newVal = left;
+            }
+            else if (left || up)
+            {
+                unsigned int val = left + up;
+
+
+
+                newVal = val;
+            }
+            else
+            {
+                // 0 == left && 0 == up
+
+            }
+        }
+
+        qTail[act] = 0;
+        cnts[act].clear();
+        act = nAct;
+    }
 
     return 0;
 }

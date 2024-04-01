@@ -36,6 +36,7 @@ public:
     unsigned int state; // 轮廓线段状态
 
     unsigned long long sum;
+    unsigned long long count;
     unsigned char minUnused;
 
     Record() {}
@@ -78,7 +79,7 @@ unsigned long long ans;
     }                                  \
     UNUSED = bn;
 
-#define addSts(ST, SUM, IDX)                                                            \
+#define addSts(ST, SUM, CNT, IDX)                                                       \
     unsigned char unused;                                                               \
     unsigned int recodedSt = ST;                                                        \
     recode(recodedSt, unused);                                                          \
@@ -88,6 +89,7 @@ unsigned long long ans;
         int pInQ = qTail[IDX];                                                          \
         qs[IDX][pInQ].state = recodedSt;                                                \
         qs[IDX][pInQ].sum = SUM;                                                        \
+        qs[IDX][pInQ].count = CNT;                                                      \
         qs[IDX][pInQ].minUnused = unused;                                               \
         cnts[IDX][recodedSt] = pInQ;                                                    \
         qTail[IDX]++;                                                                   \
@@ -95,7 +97,15 @@ unsigned long long ans;
     else                                                                                \
     {                                                                                   \
         if (qs[IDX][it->second].sum > SUM)                                              \
+        {                                                                               \
             qs[IDX][it->second].sum = SUM;                                              \
+            qs[IDX][it->second].count = CNT;                                            \
+        }                                                                               \
+        else if (qs[IDX][it->second].sum == SUM)                                        \
+        {                                                                               \
+            qs[IDX][it->second].count += CNT;                                           \
+            qs[IDX][it->second].count %= MOD;                                           \
+        }                                                                               \
     }
 
 int main()
@@ -128,6 +138,7 @@ int main()
 
     qs[act][0].state = 0;
     qs[act][0].sum = 0;
+    qs[act][0].count = 1;
     qs[act][0].minUnused = 1;
 
     qTail[act]++;
@@ -156,6 +167,7 @@ int main()
         {
             unsigned int st = qs[act][iQ].state;
             unsigned long long sum = qs[act][iQ].sum;
+            unsigned long long cnt = qs[act][iQ].count;
             unsigned char newVal = qs[act][iQ].minUnused;
 
             if (1 == now_y)
@@ -168,6 +180,7 @@ int main()
 
             if (left && up)
             {
+                // 就此打住
                 // up ==> left
                 for (int i = 0; i <= w; i++)
                 {
@@ -202,23 +215,78 @@ int main()
 
                 if (flag)
                 {
-                    addSts(st, sum, nAct);
+                    addSts(st, sum, cnt, nAct);
                 }
 
                 newVal = left;
             }
             else if (left || up)
             {
+                // 就此打住
                 unsigned int val = left + up;
 
+                setVal4St(st, now_y - 1, 0);
+                setVal4St(st, now_y, 0);
 
+                bool flag = false;
+                if (h == now_x && w == now_y)
+                {
+                    // last cell
+                    flag = true;
+                }
+                else
+                {
+                    for (int i = 0; i <= w; i++)
+                    {
+                        int tmp = getVal4St(st, i);
+                        if (tmp == val)
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (flag)
+                {
+                    addSts(st, sum, cnt, nAct);
+                }
 
                 newVal = val;
             }
             else
             {
                 // 0 == left && 0 == up
+                // 不能就此打住
+            }
 
+            // 扩展到其他 cell
+            if (h > now_x)
+            {
+                unsigned int newSt = st;
+
+                setVal4St(newSt, now_y - 1, newVal);
+
+                addSts(st, (sum + colGate[now_y][now_x]), cnt, nAct);
+            }
+
+            if (w > now_y)
+            {
+                unsigned int newSt = st;
+
+                setVal4St(newSt, now_y, newVal);
+
+                addSts(st, (sum + rowGate[now_x][now_y]), cnt, nAct);
+            }
+
+            if (h > now_x && w > now_y)
+            {
+                unsigned int newSt = st;
+
+                setVal4St(newSt, now_y - 1, newVal);
+                setVal4St(newSt, now_y, newVal);
+
+                addSts(st, (sum + colGate[now_y][now_x] + rowGate[now_x][now_y]), cnt, nAct);
             }
         }
 

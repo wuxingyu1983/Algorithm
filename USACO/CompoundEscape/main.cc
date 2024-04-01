@@ -115,7 +115,8 @@ int main()
     {
         for (size_t col = 1; col < w; col++)
         {
-            cin >> rowGate[row][col];
+            scanf("%llu", &(rowGate[row][col]));
+//            cin >> rowGate[row][col];
         }
     }
 
@@ -123,7 +124,8 @@ int main()
     {
         for (size_t row = 1; row < h; row++)
         {
-            cin >> colGate[col][row];
+            scanf("%llu", &(colGate[col][row]));
+//            cin >> colGate[col][row];
         }
     }
 
@@ -189,6 +191,11 @@ int main()
                 }
 
                 // 就此打住
+                setVal4St(st, now_y - 1, 0);
+                setVal4St(st, now_y, 0);
+
+                bool flag = false;
+
                 // up ==> left
                 for (int i = 0; i <= w; i++)
                 {
@@ -196,29 +203,18 @@ int main()
                     if (tmp == up)
                     {
                         setVal4St(st, i, left);
+                        flag = true;
+                    }
+                    else if (tmp == left)
+                    {
+                        flag = true;
                     }
                 }
 
-                setVal4St(st, now_y - 1, 0);
-                setVal4St(st, now_y, 0);
-
-                bool flag = false;
                 if (h == now_x && w == now_y)
                 {
                     // last cell
                     flag = true;
-                }
-                else
-                {
-                    for (int i = 0; i <= w; i++)
-                    {
-                        int tmp = getVal4St(st, i);
-                        if (tmp == left)
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
                 }
 
                 if (flag)

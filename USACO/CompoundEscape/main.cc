@@ -102,7 +102,8 @@ int now_x, now_y;
         else if (qs[IDX][cnts[recodedSt]].sum == SUM)                                                        \
         {                                                                                                    \
             qs[IDX][cnts[recodedSt]].count += CNT;                                                           \
-            qs[IDX][cnts[recodedSt]].count %= MOD;                                                           \
+            if (MOD <= qs[IDX][cnts[recodedSt]].count)                                                       \
+                qs[IDX][cnts[recodedSt]].count -= MOD;                                                       \
         }                                                                                                    \
     }
 

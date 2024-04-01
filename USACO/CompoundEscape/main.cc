@@ -47,7 +47,7 @@ unsigned long long colGate[MAX_W][MAX_H];
 Record qs[2][QS_SIZE];
 int qTail[2];
 int h, w;
-unordered_map<unsigned int, unsigned int> cnts[2];
+int cnts[2][2097200];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 
@@ -78,33 +78,32 @@ int now_x, now_y;
     }                                  \
     UNUSED = bn;
 
-#define addSts(ST, SUM, CNT, IDX)                                                       \
-    unsigned char unused;                                                               \
-    unsigned int recodedSt = ST;                                                        \
-    recode(recodedSt, unused);                                                          \
-    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
-    if (it == cnts[IDX].end())                                                          \
-    {                                                                                   \
-        int pInQ = qTail[IDX];                                                          \
-        qs[IDX][pInQ].state = recodedSt;                                                \
-        qs[IDX][pInQ].sum = SUM;                                                        \
-        qs[IDX][pInQ].count = CNT;                                                      \
-        qs[IDX][pInQ].minUnused = unused;                                               \
-        cnts[IDX][recodedSt] = pInQ;                                                    \
-        qTail[IDX]++;                                                                   \
-    }                                                                                   \
-    else                                                                                \
-    {                                                                                   \
-        if (qs[IDX][it->second].sum > SUM)                                              \
-        {                                                                               \
-            qs[IDX][it->second].sum = SUM;                                              \
-            qs[IDX][it->second].count = CNT;                                            \
-        }                                                                               \
-        else if (qs[IDX][it->second].sum == SUM)                                        \
-        {                                                                               \
-            qs[IDX][it->second].count += CNT;                                           \
-            qs[IDX][it->second].count %= MOD;                                           \
-        }                                                                               \
+#define addSts(ST, SUM, CNT, IDX)                          \
+    unsigned char unused;                                  \
+    unsigned int recodedSt = ST;                           \
+    recode(recodedSt, unused);                             \
+    if (0 > cnts[IDX][recodedSt])                          \
+    {                                                      \
+        int pInQ = qTail[IDX];                             \
+        qs[IDX][pInQ].state = recodedSt;                   \
+        qs[IDX][pInQ].sum = SUM;                           \
+        qs[IDX][pInQ].count = CNT;                         \
+        qs[IDX][pInQ].minUnused = unused;                  \
+        cnts[IDX][recodedSt] = pInQ;                       \
+        qTail[IDX]++;                                      \
+    }                                                      \
+    else                                                   \
+    {                                                      \
+        if (qs[IDX][cnts[IDX][recodedSt]].sum > SUM)       \
+        {                                                  \
+            qs[IDX][cnts[IDX][recodedSt]].sum = SUM;       \
+            qs[IDX][cnts[IDX][recodedSt]].count = CNT;     \
+        }                                                  \
+        else if (qs[IDX][cnts[IDX][recodedSt]].sum == SUM) \
+        {                                                  \
+            qs[IDX][cnts[IDX][recodedSt]].count += CNT;    \
+            qs[IDX][cnts[IDX][recodedSt]].count %= MOD;    \
+        }                                                  \
     }
 
 int main()
@@ -137,6 +136,9 @@ int main()
     qs[act][0].sum = 0;
     qs[act][0].count = 1;
     qs[act][0].minUnused = 1;
+
+    memset(cnts[0], -1, sizeof(cnts[0]));
+    memset(cnts[1], -1, sizeof(cnts[1]));
 
     qTail[act]++;
 
@@ -181,6 +183,11 @@ int main()
 
             if (left && up)
             {
+                if (left == up)
+                {
+                    continue;
+                }
+
                 // 就此打住
                 // up ==> left
                 for (int i = 0; i <= w; i++)
@@ -292,7 +299,7 @@ int main()
         }
 
         qTail[act] = 0;
-        cnts[act].clear();
+        memset(cnts[act], -1, sizeof(cnts[act]));
         act = nAct;
     }
 

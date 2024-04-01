@@ -50,7 +50,6 @@ int h, w;
 unordered_map<unsigned int, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
-unsigned long long ans;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
@@ -129,8 +128,6 @@ int main()
     }
 
     // init
-    ans = 0;
-
     act = 0;
 
     now_x = 0;
@@ -271,7 +268,7 @@ int main()
 
                 setVal4St(newSt, now_y - 1, newVal);
 
-                addSts(st, (sum + colGate[now_y][now_x]), cnt, nAct);
+                addSts(newSt, (sum + colGate[now_y][now_x]), cnt, nAct);
             }
 
             if (w > now_y)
@@ -280,7 +277,7 @@ int main()
 
                 setVal4St(newSt, now_y, newVal);
 
-                addSts(st, (sum + rowGate[now_x][now_y]), cnt, nAct);
+                addSts(newSt, (sum + rowGate[now_x][now_y]), cnt, nAct);
             }
 
             if (h > now_x && w > now_y)
@@ -290,7 +287,7 @@ int main()
                 setVal4St(newSt, now_y - 1, newVal);
                 setVal4St(newSt, now_y, newVal);
 
-                addSts(st, (sum + colGate[now_y][now_x] + rowGate[now_x][now_y]), cnt, nAct);
+                addSts(newSt, (sum + colGate[now_y][now_x] + rowGate[now_x][now_y]), cnt, nAct);
             }
         }
 

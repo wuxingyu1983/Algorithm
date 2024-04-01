@@ -27,7 +27,7 @@ using namespace std;
 #define MAX_W   7
 #define ST_BITS 3
 #define ST_MASK 7
-#define QS_SIZE 600000
+#define QS_SIZE 6000000
 #define MOD 1000000007
 
 class Record
@@ -155,6 +155,10 @@ int main()
             if (h < now_x)
             {
                 // TBD
+                if (1 == qTail[act] && 0 == qs[act][0].state)
+                {
+                    cout << qs[act][0].count << endl;
+                }
                 break;
             }
         }

@@ -82,6 +82,23 @@ int main()
 {
     cin >> h >> w;
 
+    for (size_t row = 1; row <= h; row++)
+    {
+        for (size_t col = 1; col < w; col++)
+        {
+            cin >> rowGate[row][col];
+        }
+    }
+
+    for (size_t col = 1; col <= w; col++)
+    {
+        for (size_t row = 1; row < h; row++)
+        {
+            cin >> colGate[col][row];
+        }
+    }
+    
+
     
 
     return 0;

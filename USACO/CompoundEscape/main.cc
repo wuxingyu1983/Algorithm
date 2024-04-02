@@ -23,12 +23,13 @@
 using namespace std;
 
 #define DEBUG 0
-#define MAX_H   30001
-#define MAX_W   7
+#define MAX_H 30001
+#define MAX_W 7
 #define ST_BITS 3
 #define ST_MASK 7
 #define QS_SIZE 6000000
 #define MOD 1000000007
+#define MIN_START 2
 
 class Record
 {
@@ -61,22 +62,33 @@ int now_x, now_y;
 // 最小表示法重编码
 #define recode(ST, UNUSED)             \
     int bb[10];                        \
+    int occ[10];                       \
     memset(bb, -1, sizeof(bb));        \
-    int bn = 1;                        \
+    memset(occ, 0, sizeof(occ));       \
+    int bn = MIN_START;                \
     bb[0] = 0;                         \
     for (int i = 0; i <= w; i++)       \
     {                                  \
         int tmp = getVal4St(ST, i);    \
-        if (tmp)                       \
+        if (1 < tmp)                   \
         {                              \
             if (0 > bb[tmp])           \
             {                          \
                 bb[tmp] = bn++;        \
             }                          \
             setVal4St(ST, i, bb[tmp]); \
+            occ[bb[tmp]]++;            \
         }                              \
     }                                  \
-    UNUSED = bn;
+    UNUSED = bn;                       \
+    for (int i = 0; i <= w; i++)       \
+    {                                  \
+        int tmp = getVal4St(ST, i);    \
+        if (1 < tmp && 1 == occ[tmp])  \
+        {                              \
+            setVal4St(ST, i, 1);       \
+        }                              \
+    }
 
 #define addSts(ST, SUM, CNT, IDX)                                                                            \
     unsigned char unused;                                                                                    \
@@ -116,7 +128,7 @@ int main()
         for (size_t col = 1; col < w; col++)
         {
             scanf("%llu", &(rowGate[row][col]));
-//            cin >> rowGate[row][col];
+            //            cin >> rowGate[row][col];
         }
     }
 
@@ -125,7 +137,7 @@ int main()
         for (size_t row = 1; row < h; row++)
         {
             scanf("%llu", &(colGate[col][row]));
-//            cin >> colGate[col][row];
+            //            cin >> colGate[col][row];
         }
     }
 
@@ -138,7 +150,7 @@ int main()
     qs[act][0].state = 0;
     qs[act][0].sum = 0;
     qs[act][0].count = 1;
-    qs[act][0].minUnused = 1;
+    qs[act][0].minUnused = MIN_START;
 
     memset(cnts, -1, sizeof(cnts));
 
@@ -173,7 +185,7 @@ int main()
             unsigned int st = qs[act][iQ].state;
             unsigned long long sum = qs[act][iQ].sum;
             unsigned long long cnt = qs[act][iQ].count;
-            unsigned char newVal = qs[act][iQ].minUnused;
+            unsigned char newVal = qs[act][iQ].minUnused; // 延伸的值
 
             if (1 == now_y)
             {
@@ -183,46 +195,57 @@ int main()
             unsigned int left = getVal4St(st, now_y - 1);
             unsigned int up = getVal4St(st, now_y);
 
+            bool flag = true;
             if (left && up)
             {
-                if (left == up)
-                {
-                    continue;
-                }
-
                 // 就此打住
                 setVal4St(st, now_y - 1, 0);
                 setVal4St(st, now_y, 0);
 
-                bool flag = false;
-
-                // up ==> left
-                for (int i = 0; i <= w; i++)
+                if (1 == left && 1 == up)
                 {
-                    int tmp = getVal4St(st, i);
-                    if (tmp == up)
+                    // 不延伸，只在最后一个 cell 有效
+                    if (h == now_x && w == now_y)
                     {
-                        setVal4St(st, i, left);
-                        flag = true;
                     }
-                    else if (tmp == left)
+                    else
                     {
-                        flag = true;
+                        // 非法，必须延伸
+                        flag = false;
                     }
                 }
-
-                if (h == now_x && w == now_y)
+                else if (1 == left || 1 == up)
                 {
-                    // last cell
-                    flag = true;
+                    // 不延伸，不做任何操作
+                    newVal = left + up - 1;
+                }
+                else
+                {
+                    // left 和 up 都不为 1
+                    // 不延伸
+                    if (left == up)
+                    {
+                        // 形成环了，延伸也不行
+                        continue;
+                    }
+
+                    // up ==> left
+                    for (int i = 0; i <= w; i++)
+                    {
+                        int tmp = getVal4St(st, i);
+                        if (tmp == up)
+                        {
+                            setVal4St(st, i, left);
+                        }
+                    }
+
+                    newVal = left;
                 }
 
                 if (flag)
                 {
                     addSts(st, sum, cnt, nAct);
                 }
-
-                newVal = left;
             }
             else if (left || up)
             {
@@ -232,31 +255,26 @@ int main()
                 setVal4St(st, now_y - 1, 0);
                 setVal4St(st, now_y, 0);
 
-                bool flag = false;
-                if (h == now_x && w == now_y)
+                if (1 == val)
                 {
-                    // last cell
-                    flag = true;
+                    // 只在最后一个 cell 有效
+                    if (h == now_x && w == now_y)
+                    {
+                    }
+                    else
+                    {
+                        flag = false;
+                    }
                 }
                 else
                 {
-                    for (int i = 0; i <= w; i++)
-                    {
-                        int tmp = getVal4St(st, i);
-                        if (tmp == val)
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
+                    newVal = val;
                 }
 
                 if (flag)
                 {
                     addSts(st, sum, cnt, nAct);
                 }
-
-                newVal = val;
             }
             else
             {

@@ -143,14 +143,13 @@ StMap stMap[2097200];
 
 int main()
 {
-    cin >> h >> w;
+    scanf("%d %d", &h, &w);
 
     for (size_t row = 1; row <= h; row++)
     {
         for (size_t col = 1; col < w; col++)
         {
             scanf("%llu", &(rowGate[row][col]));
-            //            cin >> rowGate[row][col];
         }
     }
 
@@ -159,7 +158,6 @@ int main()
         for (size_t row = 1; row < h; row++)
         {
             scanf("%llu", &(colGate[col][row]));
-            //            cin >> colGate[col][row];
         }
     }
 
@@ -189,10 +187,9 @@ int main()
 
             if (h < now_x)
             {
-                // TBD
                 if (1 == qTail[act] && 0 == qs[act][0].state)
                 {
-                    cout << qs[act][0].count << endl;
+                    printf("%llu\n", qs[act][0].count);
                 }
                 break;
             }

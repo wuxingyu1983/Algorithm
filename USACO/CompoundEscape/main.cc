@@ -52,6 +52,17 @@ int cnts[2097200];
 int act = 0; // 当前生效的 map
 int now_x, now_y;
 
+class StMap
+{
+public:
+    unsigned int recode;
+    unsigned char minUnused;
+
+    StMap() {}
+};
+
+StMap stMap[2097200];
+
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
 
 #define setVal4St(ST, POS, VAL)            \
@@ -60,34 +71,45 @@ int now_x, now_y;
         ST |= (VAL) << ((POS) * ST_BITS);
 
 // 最小表示法重编码
-#define recode(ST, UNUSED)             \
-    int bb[10];                        \
-    int occ[10];                       \
-    memset(bb, -1, sizeof(bb));        \
-    memset(occ, 0, sizeof(occ));       \
-    int bn = MIN_START;                \
-    bb[0] = 0;                         \
-    for (int i = 0; i <= w; i++)       \
-    {                                  \
-        int tmp = getVal4St(ST, i);    \
-        if (1 < tmp)                   \
-        {                              \
-            if (0 > bb[tmp])           \
-            {                          \
-                bb[tmp] = bn++;        \
-            }                          \
-            setVal4St(ST, i, bb[tmp]); \
-            occ[bb[tmp]]++;            \
-        }                              \
-    }                                  \
-    UNUSED = bn;                       \
-    for (int i = 0; i <= w; i++)       \
-    {                                  \
-        int tmp = getVal4St(ST, i);    \
-        if (1 < tmp && 1 == occ[tmp])  \
-        {                              \
-            setVal4St(ST, i, 1);       \
-        }                              \
+#define recode(ST, UNUSED)                 \
+    if (0 == stMap[ST].minUnused)          \
+    {                                      \
+        int tmpSt = ST;                    \
+        int bb[10];                        \
+        int occ[10];                       \
+        memset(bb, -1, sizeof(bb));        \
+        memset(occ, 0, sizeof(occ));       \
+        int bn = MIN_START;                \
+        bb[0] = 0;                         \
+        for (int i = 0; i <= w; i++)       \
+        {                                  \
+            int tmp = getVal4St(ST, i);    \
+            if (1 < tmp)                   \
+            {                              \
+                if (0 > bb[tmp])           \
+                {                          \
+                    bb[tmp] = bn++;        \
+                }                          \
+                setVal4St(ST, i, bb[tmp]); \
+                occ[bb[tmp]]++;            \
+            }                              \
+        }                                  \
+        UNUSED = bn;                       \
+        for (int i = 0; i <= w; i++)       \
+        {                                  \
+            int tmp = getVal4St(ST, i);    \
+            if (1 < tmp && 1 == occ[tmp])  \
+            {                              \
+                setVal4St(ST, i, 1);       \
+            }                              \
+        }                                  \
+        stMap[tmpSt].recode = ST;          \
+        stMap[tmpSt].minUnused = UNUSED;   \
+    }                                      \
+    else                                   \
+    {                                      \
+        UNUSED = stMap[ST].minUnused;      \
+        ST = stMap[ST].recode;             \
     }
 
 #define addSts(ST, SUM, CNT, IDX)                                                                            \

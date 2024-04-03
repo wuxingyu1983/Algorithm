@@ -71,45 +71,53 @@ StMap stMap[2097200];
         ST |= (VAL) << ((POS) * ST_BITS);
 
 // 最小表示法重编码
-#define recode(ST, UNUSED)                 \
-    if (0 == stMap[ST].minUnused)          \
-    {                                      \
-        int tmpSt = ST;                    \
-        int bb[10];                        \
-        int occ[10];                       \
-        memset(bb, -1, sizeof(bb));        \
-        memset(occ, 0, sizeof(occ));       \
-        int bn = MIN_START;                \
-        bb[0] = 0;                         \
-        for (int i = 0; i <= w; i++)       \
-        {                                  \
-            int tmp = getVal4St(ST, i);    \
-            if (1 < tmp)                   \
-            {                              \
-                if (0 > bb[tmp])           \
-                {                          \
-                    bb[tmp] = bn++;        \
-                }                          \
-                setVal4St(ST, i, bb[tmp]); \
-                occ[bb[tmp]]++;            \
-            }                              \
-        }                                  \
-        UNUSED = bn;                       \
-        for (int i = 0; i <= w; i++)       \
-        {                                  \
-            int tmp = getVal4St(ST, i);    \
-            if (1 < tmp && 1 == occ[tmp])  \
-            {                              \
-                setVal4St(ST, i, 1);       \
-            }                              \
-        }                                  \
-        stMap[tmpSt].recode = ST;          \
-        stMap[tmpSt].minUnused = UNUSED;   \
-    }                                      \
-    else                                   \
-    {                                      \
-        UNUSED = stMap[ST].minUnused;      \
-        ST = stMap[ST].recode;             \
+#define recode(ST, UNUSED)                    \
+    if (0 == stMap[ST].minUnused)             \
+    {                                         \
+        int tmpSt = ST;                       \
+        int bb[10];                           \
+        int occ[10];                          \
+        memset(bb, -1, sizeof(bb));           \
+        memset(occ, 0, sizeof(occ));          \
+        int bn = MIN_START;                   \
+        bb[0] = 0;                            \
+        int oneCnt = 0;                       \
+        for (int i = 0; i <= w; i++)          \
+        {                                     \
+            int tmp = getVal4St(ST, i);       \
+            if (1 < tmp)                      \
+            {                                 \
+                if (0 > bb[tmp])              \
+                {                             \
+                    bb[tmp] = bn++;           \
+                }                             \
+                setVal4St(ST, i, bb[tmp]);    \
+                occ[bb[tmp]]++;               \
+                if (1 == occ[bb[tmp]])        \
+                    oneCnt++;                 \
+                else if (2 == occ[bb[tmp]])   \
+                    oneCnt--;                 \
+            }                                 \
+        }                                     \
+        UNUSED = bn;                          \
+        if (0 < oneCnt)                       \
+        {                                     \
+            for (int i = 0; i <= w; i++)      \
+            {                                 \
+                int tmp = getVal4St(ST, i);   \
+                if (1 < tmp && 1 == occ[tmp]) \
+                {                             \
+                    setVal4St(ST, i, 1);      \
+                }                             \
+            }                                 \
+        }                                     \
+        stMap[tmpSt].recode = ST;             \
+        stMap[tmpSt].minUnused = UNUSED;      \
+    }                                         \
+    else                                      \
+    {                                         \
+        UNUSED = stMap[ST].minUnused;         \
+        ST = stMap[ST].recode;                \
     }
 
 #define addSts(ST, SUM, CNT, IDX)                                                                            \

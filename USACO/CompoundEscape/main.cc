@@ -1,5 +1,6 @@
 // https://usaco.org/index.php?page=viewproblem2&cpid=949&lang=zh
 // https://hydro.ac/d/loj/p/P3769
+// https://www.luogu.com.cn/problem/P5422
 
 #include <cmath>
 #include <cstdio>
@@ -29,7 +30,7 @@ using namespace std;
 #define ST_MASK 7
 #define QS_SIZE 6000000
 #define MOD 1000000007
-#define MIN_START 2
+#define MIN_START 1
 
 class Record
 {
@@ -71,53 +72,34 @@ StMap stMap[2097200];
         ST |= (VAL) << ((POS) * ST_BITS);
 
 // 最小表示法重编码
-#define recode(ST, UNUSED)                    \
-    if (0 == stMap[ST].minUnused)             \
-    {                                         \
-        int tmpSt = ST;                       \
-        int bb[10];                           \
-        int occ[10];                          \
-        memset(bb, -1, sizeof(bb));           \
-        memset(occ, 0, sizeof(occ));          \
-        int bn = MIN_START;                   \
-        bb[0] = 0;                            \
-        int oneCnt = 0;                       \
-        for (int i = 0; i <= w; i++)          \
-        {                                     \
-            int tmp = getVal4St(ST, i);       \
-            if (1 < tmp)                      \
-            {                                 \
-                if (0 > bb[tmp])              \
-                {                             \
-                    bb[tmp] = bn++;           \
-                }                             \
-                setVal4St(ST, i, bb[tmp]);    \
-                occ[bb[tmp]]++;               \
-                if (1 == occ[bb[tmp]])        \
-                    oneCnt++;                 \
-                else if (2 == occ[bb[tmp]])   \
-                    oneCnt--;                 \
-            }                                 \
-        }                                     \
-        UNUSED = bn;                          \
-        if (0 < oneCnt)                       \
-        {                                     \
-            for (int i = 0; i <= w; i++)      \
-            {                                 \
-                int tmp = getVal4St(ST, i);   \
-                if (1 < tmp && 1 == occ[tmp]) \
-                {                             \
-                    setVal4St(ST, i, 1);      \
-                }                             \
-            }                                 \
-        }                                     \
-        stMap[tmpSt].recode = ST;             \
-        stMap[tmpSt].minUnused = UNUSED;      \
-    }                                         \
-    else                                      \
-    {                                         \
-        UNUSED = stMap[ST].minUnused;         \
-        ST = stMap[ST].recode;                \
+#define recode(ST, UNUSED)                 \
+    if (0 == stMap[ST].minUnused)          \
+    {                                      \
+        int tmpSt = ST;                    \
+        int bb[10];                        \
+        memset(bb, -1, sizeof(bb));        \
+        int bn = MIN_START;                \
+        bb[0] = 0;                         \
+        for (int i = 1; i <= w; i++)       \
+        {                                  \
+            int tmp = getVal4St(ST, i);    \
+            if (tmp)                       \
+            {                              \
+                if (0 > bb[tmp])           \
+                {                          \
+                    bb[tmp] = bn++;        \
+                }                          \
+                setVal4St(ST, i, bb[tmp]); \
+            }                              \
+        }                                  \
+        UNUSED = bn;                       \
+        stMap[tmpSt].recode = ST;          \
+        stMap[tmpSt].minUnused = UNUSED;   \
+    }                                      \
+    else                                   \
+    {                                      \
+        UNUSED = stMap[ST].minUnused;      \
+        ST = stMap[ST].recode;             \
     }
 
 #define addSts(ST, SUM, CNT, IDX)                                                                            \
@@ -195,10 +177,13 @@ int main()
 
             if (h < now_x)
             {
-                if (1 == qTail[act] && 0 == qs[act][0].state)
+                unsigned int finalSt = 0;
+                for (size_t i = 1; i <= w; i++)
                 {
-                    printf("%llu\n", qs[act][0].count);
+                    setVal4St(finalSt, i, 1);
                 }
+
+                printf("%llu\n", qs[act][cnts[finalSt]].count);
                 break;
             }
         }
@@ -214,128 +199,118 @@ int main()
             unsigned long long cnt = qs[act][iQ].count;
             unsigned char newVal = qs[act][iQ].minUnused; // 延伸的值
 
-            if (1 == now_y)
-            {
-                st <<= ST_BITS;
-            }
-
             unsigned int left = getVal4St(st, now_y - 1);
             unsigned int up = getVal4St(st, now_y);
 
-            bool flag = true;
             if (left && up)
             {
-                // 就此打住
-                setVal4St(st, now_y - 1, 0);
-                setVal4St(st, now_y, 0);
-
-                if (1 == left && 1 == up)
+                // up 的延伸
                 {
-                    // 不延伸，只在最后一个 cell 有效
-                    if (h == now_x && w == now_y)
+                    unsigned int newSt = st;
+                    addSts(newSt, (sum + colGate[now_y][now_x]), cnt, nAct);
+                }
+
+                int upCnt = 0;
+                for (int i = 1; i <= w; i++)
+                {
+                    int tmp = getVal4St(st, i);
+                    if (tmp == up)
                     {
-                    }
-                    else
-                    {
-                        // 非法，必须延伸
-                        flag = false;
+                        upCnt++;
+                        if (1 < upCnt)
+                            break;
                     }
                 }
-                else if (1 == left || 1 == up)
-                {
-                    // 不延伸，不做任何操作
-                    newVal = left + up - 1;
-                }
-                else
-                {
-                    // left 和 up 都不为 1
-                    // 不延伸
-                    if (left == up)
-                    {
-                        // 形成环了，延伸也不行
-                        continue;
-                    }
 
+                // left 的延伸
+                {
+                    if (1 < upCnt)
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y, left);
+                        addSts(newSt, (sum + rowGate[now_x][now_y]), cnt, nAct);
+                    }
+                }
+
+                // 联通 left 和 up
+                {
                     // up ==> left
-                    for (int i = 0; i <= w; i++)
+                    unsigned int newSt = st;
+                    for (int i = 1; i <= w; i++)
                     {
-                        int tmp = getVal4St(st, i);
+                        int tmp = getVal4St(newSt, i);
                         if (tmp == up)
                         {
-                            setVal4St(st, i, left);
+                            setVal4St(newSt, i, left);
                         }
                     }
-
-                    newVal = left;
+                    addSts(newSt, (sum + rowGate[now_x][now_y] + colGate[now_y][now_x]), cnt, nAct);
                 }
 
-                if (flag)
+                // 新的联通
                 {
-                    addSts(st, sum, cnt, nAct);
+                    if (1 < upCnt)
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y, newVal);
+                        addSts(newSt, sum, cnt, nAct);
+                    }
                 }
             }
             else if (left || up)
             {
-                // 就此打住
-                unsigned int val = left + up;
-
-                setVal4St(st, now_y - 1, 0);
-                setVal4St(st, now_y, 0);
-
-                if (1 == val)
+                if (left)
                 {
-                    // 只在最后一个 cell 有效
-                    if (h == now_x && w == now_y)
                     {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y, left);
+                        addSts(newSt, (sum + rowGate[now_x][now_y]), cnt, nAct);
                     }
-                    else
+
+                    // 新的联通块
                     {
-                        flag = false;
+                        unsigned int newSt = st;
+                        setVal4St(newSt, now_y, newVal);
+                        addSts(newSt, sum, cnt, nAct);
                     }
                 }
                 else
                 {
-                    newVal = val;
-                }
+                    {
+                        unsigned int newSt = st;
+                        addSts(newSt, (sum + colGate[now_y][now_x]), cnt, nAct);
+                    }
 
-                if (flag)
-                {
-                    addSts(st, sum, cnt, nAct);
+                    // 新的联通块
+                    {
+                        int upCnt = 0;
+                        for (int i = 1; i <= w; i++)
+                        {
+                            int tmp = getVal4St(st, i);
+                            if (tmp == up)
+                            {
+                                upCnt++;
+                                if (1 < upCnt)
+                                    break;
+                            }
+                        }
+
+                        if (1 < upCnt)
+                        {
+                            unsigned int newSt = st;
+                            setVal4St(newSt, now_y, newVal);
+                            addSts(newSt, sum, cnt, nAct);
+                        }
+                    }
                 }
             }
             else
             {
                 // 0 == left && 0 == up
-                // 不能就此打住
-            }
-
-            // 扩展到其他 cell
-            if (h > now_x)
-            {
+                // 第一个 cell，新的联通块
                 unsigned int newSt = st;
-
-                setVal4St(newSt, now_y - 1, newVal);
-
-                addSts(newSt, (sum + colGate[now_y][now_x]), cnt, nAct);
-            }
-
-            if (w > now_y)
-            {
-                unsigned int newSt = st;
-
                 setVal4St(newSt, now_y, newVal);
-
-                addSts(newSt, (sum + rowGate[now_x][now_y]), cnt, nAct);
-            }
-
-            if (h > now_x && w > now_y)
-            {
-                unsigned int newSt = st;
-
-                setVal4St(newSt, now_y - 1, newVal);
-                setVal4St(newSt, now_y, newVal);
-
-                addSts(newSt, (sum + colGate[now_y][now_x] + rowGate[now_x][now_y]), cnt, nAct);
+                addSts(newSt, sum, cnt, nAct);
             }
         }
 

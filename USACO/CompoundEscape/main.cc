@@ -1,3 +1,4 @@
+
 // https://usaco.org/index.php?page=viewproblem2&cpid=949&lang=zh
 // https://hydro.ac/d/loj/p/P3769
 // https://www.luogu.com.cn/problem/P5422
@@ -207,7 +208,7 @@ int main()
                 // up 的延伸
                 {
                     unsigned int newSt = st;
-                    addSts(newSt, (sum + colGate[now_y][now_x]), cnt, nAct);
+                    addSts(newSt, (sum + colGate[now_y][now_x - 1]), cnt, nAct);
                 }
 
                 int upCnt = 0;
@@ -228,7 +229,7 @@ int main()
                     {
                         unsigned int newSt = st;
                         setVal4St(newSt, now_y, left);
-                        addSts(newSt, (sum + rowGate[now_x][now_y]), cnt, nAct);
+                        addSts(newSt, (sum + rowGate[now_x][now_y - 1]), cnt, nAct);
                     }
                 }
 
@@ -244,7 +245,7 @@ int main()
                             setVal4St(newSt, i, left);
                         }
                     }
-                    addSts(newSt, (sum + rowGate[now_x][now_y] + colGate[now_y][now_x]), cnt, nAct);
+                    addSts(newSt, (sum + rowGate[now_x][now_y - 1] + colGate[now_y][now_x - 1]), cnt, nAct);
                 }
 
                 // 新的联通
@@ -264,7 +265,7 @@ int main()
                     {
                         unsigned int newSt = st;
                         setVal4St(newSt, now_y, left);
-                        addSts(newSt, (sum + rowGate[now_x][now_y]), cnt, nAct);
+                        addSts(newSt, (sum + rowGate[now_x][now_y - 1]), cnt, nAct);
                     }
 
                     // 新的联通块
@@ -278,7 +279,7 @@ int main()
                 {
                     {
                         unsigned int newSt = st;
-                        addSts(newSt, (sum + colGate[now_y][now_x]), cnt, nAct);
+                        addSts(newSt, (sum + colGate[now_y][now_x - 1]), cnt, nAct);
                     }
 
                     // 新的联通块

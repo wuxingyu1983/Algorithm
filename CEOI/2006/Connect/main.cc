@@ -209,7 +209,32 @@ int main()
 
             if (h < now_x)
             {
-                // TBD
+                if (1 == qTail[act] && 0 == qs[act][0].state)
+                {
+                    cout << qs[act][0].score;
+                    if (bSwitch)
+                    {
+                        for (size_t col = 1; col <= w; col++)
+                        {
+                            for (size_t row = 1; row <= h; row++)
+                            {
+                                cout << cells[row][col];
+                            }
+                            cout << endl;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t row = 1; row <= h; row++)
+                        {
+                            for (size_t col = 1; col <= w; col++)
+                            {
+                                cout << cells[row][col];
+                            }
+                            cout << endl;
+                        }
+                    }
+                }
                 break;
             }
         }

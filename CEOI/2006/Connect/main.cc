@@ -18,15 +18,15 @@
 #include <cfloat>
 #include <limits>
 #include <bitset>
+#include <cstring>
 
 using namespace std;
 
-#define DEBUG 0
 #define MAX_H 80
 #define MAX_W 26
 #define ST_BITS 2
 #define ST_MASK 3
-#define QS_SIZE 600000
+#define QS_SIZE 60000
 
 enum AddType
 {
@@ -160,37 +160,41 @@ int main()
 {
     bool bSwitch = false;
 
-    cin >> h >> w;
+    scanf("%d %d\n", &h, &w);
 
     if (h < w)
     {
-        swap(h, w);
         bSwitch = true;
+    }
 
-        for (size_t col = 1; col <= w; col++)
+    for (int i = 1; i <= h; i++)
+    {
+        string s;
+        getline(cin, s);
+
+        for (int j = 1; j <= w; j++)
         {
-            for (size_t row = 1; row <= h; row++)
+            if (bSwitch)
             {
-                cin >> cells[row][col];
+                cells[j][i] = s.at(j - 1);
+            }
+            else
+            {
+                cells[i][j] = s.at(j - 1);
             }
         }
     }
-    else
+
+    if (bSwitch)
     {
-        for (size_t row = 1; row <= h; row++)
-        {
-            for (size_t col = 1; col <= w; col++)
-            {
-                cin >> cells[row][col];
-            }
-        }
+        swap(h, w);
     }
 
     // init
     act = 0;
 
-    now_x = 2;
-    now_y = 2;
+    now_x = 0;
+    now_y = w - 1;
 
     qs[act][0].state = 0;
     qs[act][0].score = 0;

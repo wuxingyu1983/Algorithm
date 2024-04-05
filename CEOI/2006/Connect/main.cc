@@ -69,21 +69,18 @@ int now_x, now_y;
         qs[IDX][pInQ].state = ST;                                                \
         qs[IDX][pInQ].score = SCORE;                                             \
         memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                          \
+        if ('X' != qs[IDX][pInQ].record[now_x][now_y])                           \
+            qs[IDX][pInQ].record[now_x][now_y] = '.';                            \
         if (TYPE == addDown)                                                     \
         {                                                                        \
-            if ('X' != qs[IDX][pInQ].record[now_x][now_y])                       \
-                qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
             qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                        \
         }                                                                        \
         else if (TYPE == addRight)                                               \
         {                                                                        \
-            if ('X' != qs[IDX][pInQ].record[now_x][now_y])                       \
-                qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
             qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                        \
         }                                                                        \
         else if (TYPE == addDownAndRight)                                        \
         {                                                                        \
-            qs[IDX][pInQ].record[now_x][now_y] = '.';                            \
             qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                        \
             qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                        \
         }                                                                        \
@@ -97,21 +94,18 @@ int now_x, now_y;
         {                                                                        \
             qs[IDX][pInQ].score = SCORE;                                         \
             memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                      \
+            if ('X' != qs[IDX][pInQ].record[now_x][now_y])                       \
+                qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
             if (TYPE == addDown)                                                 \
             {                                                                    \
-                if ('X' != qs[IDX][pInQ].record[now_x][now_y])                   \
-                    qs[IDX][pInQ].record[now_x][now_y] = '.';                    \
                 qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                    \
             }                                                                    \
             else if (TYPE == addRight)                                           \
             {                                                                    \
-                if ('X' != qs[IDX][pInQ].record[now_x][now_y])                   \
-                    qs[IDX][pInQ].record[now_x][now_y] = '.';                    \
                 qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                    \
             }                                                                    \
             else if (TYPE == addDownAndRight)                                    \
             {                                                                    \
-                qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
                 qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                    \
                 qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                    \
             }                                                                    \
@@ -242,10 +236,53 @@ int main()
                 if ('X' == cells[now_x][now_y])
                 {
                     // invalid
+                    continue;
                 }
                 else
                 {
+                    unsigned int newSt = st;
 
+                    setVal4St(newSt, (now_y >> 1) - 1, 0);
+                    setVal4St(newSt, (now_y >> 1), 0);
+
+                    if (3 == left || 3 == up)
+                    {
+                        if (1 == left || 1 == up)
+                        {
+                            // 1, 3
+                            forwardFunc(newSt, 1, 2, 3);
+                        }
+                        else if (2 == left || 2 == up)
+                        {
+                            // 2, 3
+                            backwardFunc(newSt, 2, 1, 3);
+                        }
+                        else
+                        {
+                            // 3, 3
+                            // do nothing
+                        }
+                    }
+                    else if (1 == left && 1 == up)
+                    {
+                        forwardFunc(newSt, 1, 2, 1);
+                    }
+                    else if (1 == left && 2 == up)
+                    {
+                        // invalid
+                        continue;
+                    }
+                    else if (2 == left && 1 == up)
+                    {
+                        // do nothin
+                    }
+                    else
+                    {
+                        // 2 == left && 2 == up
+                        backwardFunc(newSt, 2, 1, 2);
+                    }
+
+                    addSts(newSt, addNothing, (score + 2), qs[act][iQ].record, nAct);
                 }
             }
             else if (left || up)

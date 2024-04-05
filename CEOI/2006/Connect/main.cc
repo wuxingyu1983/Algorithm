@@ -218,13 +218,36 @@ int main()
                 // 0 == left && 0 == up
                 if ('X' == cells[now_x][now_y])
                 {
+                    if ('-' != cells[now_x + 1][now_y])
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, (now_y >> 1) - 1, 3);
+
+                        addSts(newSt, addDown, (score + 1), qs[act][iQ].record, nAct);
+                    }
+
+                    if ('|' != cells[now_x][now_y])
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, (now_y >> 1), 3);
+
+                        addSts(newSt, addRight, (score + 1), qs[act][iQ].record, nAct);
+                    }
                 }
                 else
                 {
+                    unsigned int newSt = st;
+
                     // do nonthing
-                    addSts(st, addNothing, score, qs[act][iQ].record, nAct);
+                    addSts(newSt, addNothing, score, qs[act][iQ].record, nAct);
 
+                    if ('-' != cells[now_x + 1][now_y] && '|' != cells[now_x][now_y])
+                    {
+                        setVal4St(newSt, (now_y >> 1) - 1, 1);
+                        setVal4St(newSt, (now_y >> 1), 2);
 
+                        addSts(newSt, addDownAndRight, (score + 2), qs[act][iQ].record, nAct);
+                    }
                 }
             }
         }

@@ -118,6 +118,50 @@ int now_x, now_y;
         }                                                                        \
     }
 
+#define forwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                 \
+        int pos = now_y + 1;                          \
+        int s = 1;                                    \
+        while (pos <= (w >> 1))                       \
+        {                                             \
+            int v = getVal4St(newSt, pos);            \
+            if (plusVal == v)                         \
+                s++;                                  \
+            else if (minusVal == v)                   \
+            {                                         \
+                s--;                                  \
+                if (0 == s)                           \
+                {                                     \
+                    setVal4St(newSt, pos, newVal);    \
+                    break;                            \
+                }                                     \
+            }                                         \
+            pos++;                                    \
+        }                                             \
+    }
+
+#define backwardFunc(newSt, plusVal, minusVal, newVal) \
+    {                                                  \
+        int pos = now_y - 2;                           \
+        int s = 1;                                     \
+        while (0 <= pos)                               \
+        {                                              \
+            int v = getVal4St(newSt, pos);             \
+            if (plusVal == v)                          \
+                s++;                                   \
+            else if (minusVal == v)                    \
+            {                                          \
+                s--;                                   \
+                if (0 == s)                            \
+                {                                      \
+                    setVal4St(newSt, pos, newVal);     \
+                    break;                             \
+                }                                      \
+            }                                          \
+            pos--;                                     \
+        }                                              \
+    }
+
 int main()
 {
     bool bSwitch = false;
@@ -206,11 +250,48 @@ int main()
             }
             else if (left || up)
             {
+                unsigned int val = left + up;
                 if ('X' == cells[now_x][now_y])
                 {
+                    unsigned int newSt = st;
+
+                    setVal4St(newSt, (now_y >> 1) - 1, 0);
+                    setVal4St(newSt, (now_y >> 1), 0);
+
+                    if (3 == val)
+                    {
+                    }
+                    else if (1 == val)
+                    {
+                        forwardFunc(newSt, 1, 2, 3);
+                    }
+                    else
+                    {
+                        // 2 == val
+                        backwardFunc(newSt, 2, 1, 3);
+                    }
+
+                    addSts(newSt, addNothing, (score + 1), qs[act][iQ].record, nAct);
                 }
                 else
                 {
+                    if ('-' != cells[now_x + 1][now_y])
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, (now_y >> 1) - 1, val);
+                        setVal4St(newSt, (now_y >> 1), 0);
+
+                        addSts(newSt, addDown, (score + 2), qs[act][iQ].record, nAct);
+                    }
+
+                    if ('|' != cells[now_x][now_y])
+                    {
+                        unsigned int newSt = st;
+                        setVal4St(newSt, (now_y >> 1) - 1, 0);
+                        setVal4St(newSt, (now_y >> 1), val);
+
+                        addSts(newSt, addRight, (score + 2), qs[act][iQ].record, nAct);
+                    }
                 }
             }
             else

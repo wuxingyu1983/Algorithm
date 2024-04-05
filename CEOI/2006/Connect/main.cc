@@ -30,10 +30,9 @@ using namespace std;
 
 enum AddType
 {
-    addSkip,
-    addEnd,
-    addDown,
-    addRight,
+    addEnd = 0,
+    addDown = 1,
+    addRight = 2,
     addDownAndRight
 };
 
@@ -42,7 +41,7 @@ class Record
 public:
     unsigned int state;
     unsigned short score;
-    char record[MAX_H][MAX_W];
+    unsigned int record[40];
 
     Record() {}
 };
@@ -70,24 +69,8 @@ int now_x, now_y;
         qs[IDX][pInQ].state = ST;                                           \
         qs[IDX][pInQ].score = SCORE;                                        \
         memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                     \
-        if (addSkip != TYPE)                                                \
-        {                                                                   \
-            if ('X' != qs[IDX][pInQ].record[now_x][now_y])                  \
-                qs[IDX][pInQ].record[now_x][now_y] = '.';                   \
-            if (TYPE == addDown)                                            \
-            {                                                               \
-                qs[IDX][pInQ].record[now_x + 1][now_y] = '.';               \
-            }                                                               \
-            else if (TYPE == addRight)                                      \
-            {                                                               \
-                qs[IDX][pInQ].record[now_x][now_y + 1] = '.';               \
-            }                                                               \
-            else if (TYPE == addDownAndRight)                               \
-            {                                                               \
-                qs[IDX][pInQ].record[now_x + 1][now_y] = '.';               \
-                qs[IDX][pInQ].record[now_x][now_y + 1] = '.';               \
-            }                                                               \
-        }                                                                   \
+        qs[IDX][pInQ].record[now_x >> 1] &= ~(3 << now_y);                  \
+        qs[IDX][pInQ].record[now_x >> 1] |= TYPE << now_y;                  \
         cnts[ST] = pInQ;                                                    \
         qTail[IDX]++;                                                       \
     }                                                                       \
@@ -98,24 +81,8 @@ int now_x, now_y;
         {                                                                   \
             qs[IDX][pInQ].score = SCORE;                                    \
             memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                 \
-            if (addSkip != TYPE)                                            \
-            {                                                               \
-                if ('X' != qs[IDX][pInQ].record[now_x][now_y])              \
-                    qs[IDX][pInQ].record[now_x][now_y] = '.';               \
-                if (TYPE == addDown)                                        \
-                {                                                           \
-                    qs[IDX][pInQ].record[now_x + 1][now_y] = '.';           \
-                }                                                           \
-                else if (TYPE == addRight)                                  \
-                {                                                           \
-                    qs[IDX][pInQ].record[now_x][now_y + 1] = '.';           \
-                }                                                           \
-                else if (TYPE == addDownAndRight)                           \
-                {                                                           \
-                    qs[IDX][pInQ].record[now_x + 1][now_y] = '.';           \
-                    qs[IDX][pInQ].record[now_x][now_y + 1] = '.';           \
-                }                                                           \
-            }                                                               \
+            qs[IDX][pInQ].record[now_x >> 1] &= ~(3 << now_y);              \
+            qs[IDX][pInQ].record[now_x >> 1] |= TYPE << now_y;              \
         }                                                                   \
     }
 
@@ -223,13 +190,54 @@ int main()
                 if (1 == qTail[act] && 0 == qs[act][0].state)
                 {
                     cout << qs[act][0].score << endl;
+
+                    for (size_t row = 1; row <= (h >> 1); row++)
+                    {
+                        for (size_t col = 1; col <= (w >> 1); col++)
+                        {
+                            int tmp = (qs[act][0].record[row] >> (2 * col)) & 3;
+                            if (addEnd == tmp)
+                            {
+                                if ('X' != cells[row << 1][col << 1])
+                                {
+                                    if ('.' == cells[(row << 1) - 1][col << 1] || '.' == cells[row << 1][(col << 1) - 1])
+                                    {
+                                        cells[row << 1][col << 1] = '.';
+                                    }
+                                }
+                            }
+                            else if (addDown == tmp)
+                            {
+                                if ('X' != cells[row << 1][col << 1])
+                                {
+                                    cells[row << 1][col << 1] = '.';
+                                }
+                                cells[(row << 1) + 1][col << 1] = '.';
+                            }
+                            else if (addRight == tmp)
+                            {
+                                if ('X' != cells[row << 1][col << 1])
+                                {
+                                    cells[row << 1][col << 1] = '.';
+                                }
+                                cells[row << 1][(col << 1) + 1] = '.';
+                            }
+                            else
+                            {
+                                cells[row << 1][col << 1] = '.';
+                                cells[(row << 1) + 1][col << 1] = '.';
+                                cells[row << 1][(col << 1) + 1] = '.';
+                            }
+                        }
+                    }
+
                     if (bSwitch)
                     {
                         for (size_t col = 1; col <= w; col++)
                         {
                             for (size_t row = 1; row <= h; row++)
                             {
-                                cout << qs[act][0].record[row][col];
+                                cout << cells[row][col];
                             }
                             cout << endl;
                         }
@@ -240,7 +248,7 @@ int main()
                         {
                             for (size_t col = 1; col <= w; col++)
                             {
-                                cout << qs[act][0].record[row][col];
+                                cout << cells[row][col];
                             }
                             cout << endl;
                         }
@@ -393,7 +401,7 @@ int main()
                     unsigned int newSt = st;
 
                     // do nonthing
-                    addSts(newSt, addSkip, score, qs[act][iQ].record, nAct);
+                    addSts(newSt, addEnd, score, qs[act][iQ].record, nAct);
 
                     if (' ' == cells[now_x + 1][now_y] && ' ' == cells[now_x][now_y + 1])
                     {

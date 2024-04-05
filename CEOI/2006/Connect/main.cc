@@ -30,7 +30,8 @@ using namespace std;
 
 enum AddType
 {
-    addNothing,
+    addSkip,
+    addEnd,
     addDown,
     addRight,
     addDownAndRight
@@ -69,31 +70,8 @@ int now_x, now_y;
         qs[IDX][pInQ].state = ST;                                                \
         qs[IDX][pInQ].score = SCORE;                                             \
         memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                          \
-        if ('X' != qs[IDX][pInQ].record[now_x][now_y])                           \
-            qs[IDX][pInQ].record[now_x][now_y] = '.';                            \
-        if (TYPE == addDown)                                                     \
+        if (addSkip != TYPE)                                                     \
         {                                                                        \
-            qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                        \
-        }                                                                        \
-        else if (TYPE == addRight)                                               \
-        {                                                                        \
-            qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                        \
-        }                                                                        \
-        else if (TYPE == addDownAndRight)                                        \
-        {                                                                        \
-            qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                        \
-            qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                        \
-        }                                                                        \
-        cnts[IDX][ST] = pInQ;                                                    \
-        qTail[IDX]++;                                                            \
-    }                                                                            \
-    else                                                                         \
-    {                                                                            \
-        int pInQ = it->second;                                                   \
-        if (qs[IDX][pInQ].score > SCORE)                                         \
-        {                                                                        \
-            qs[IDX][pInQ].score = SCORE;                                         \
-            memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                      \
             if ('X' != qs[IDX][pInQ].record[now_x][now_y])                       \
                 qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
             if (TYPE == addDown)                                                 \
@@ -108,6 +86,35 @@ int now_x, now_y;
             {                                                                    \
                 qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                    \
                 qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                    \
+            }                                                                    \
+        }                                                                        \
+        cnts[IDX][ST] = pInQ;                                                    \
+        qTail[IDX]++;                                                            \
+    }                                                                            \
+    else                                                                         \
+    {                                                                            \
+        int pInQ = it->second;                                                   \
+        if (qs[IDX][pInQ].score > SCORE)                                         \
+        {                                                                        \
+            qs[IDX][pInQ].score = SCORE;                                         \
+            memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                      \
+            if (addSkip != TYPE)                                                 \
+            {                                                                    \
+                if ('X' != qs[IDX][pInQ].record[now_x][now_y])                   \
+                    qs[IDX][pInQ].record[now_x][now_y] = '.';                    \
+                if (TYPE == addDown)                                             \
+                {                                                                \
+                    qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                \
+                }                                                                \
+                else if (TYPE == addRight)                                       \
+                {                                                                \
+                    qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                \
+                }                                                                \
+                else if (TYPE == addDownAndRight)                                \
+                {                                                                \
+                    qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                \
+                    qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                \
+                }                                                                \
             }                                                                    \
         }                                                                        \
     }
@@ -215,14 +222,14 @@ int main()
             {
                 if (1 == qTail[act] && 0 == qs[act][0].state)
                 {
-                    cout << qs[act][0].score;
+                    cout << qs[act][0].score << endl;
                     if (bSwitch)
                     {
                         for (size_t col = 1; col <= w; col++)
                         {
                             for (size_t row = 1; row <= h; row++)
                             {
-                                cout << cells[row][col];
+                                cout << qs[act][0].record[row][col];
                             }
                             cout << endl;
                         }
@@ -233,7 +240,7 @@ int main()
                         {
                             for (size_t col = 1; col <= w; col++)
                             {
-                                cout << cells[row][col];
+                                cout << qs[act][0].record[row][col];
                             }
                             cout << endl;
                         }
@@ -311,7 +318,7 @@ int main()
                         backwardFunc(newSt, 2, 1, 2);
                     }
 
-                    addSts(newSt, addNothing, (score + 2), qs[act][iQ].record, nAct);
+                    addSts(newSt, addEnd, (score + 2), qs[act][iQ].record, nAct);
                 }
             }
             else if (left || up)
@@ -337,11 +344,11 @@ int main()
                         backwardFunc(newSt, 2, 1, 3);
                     }
 
-                    addSts(newSt, addNothing, (score + 1), qs[act][iQ].record, nAct);
+                    addSts(newSt, addEnd, (score + 1), qs[act][iQ].record, nAct);
                 }
                 else
                 {
-                    if ('-' != cells[now_x + 1][now_y])
+                    if (' ' == cells[now_x + 1][now_y])
                     {
                         unsigned int newSt = st;
                         setVal4St(newSt, (now_y >> 1) - 1, val);
@@ -350,7 +357,7 @@ int main()
                         addSts(newSt, addDown, (score + 2), qs[act][iQ].record, nAct);
                     }
 
-                    if ('|' != cells[now_x][now_y])
+                    if (' ' == cells[now_x][now_y + 1])
                     {
                         unsigned int newSt = st;
                         setVal4St(newSt, (now_y >> 1) - 1, 0);
@@ -365,7 +372,7 @@ int main()
                 // 0 == left && 0 == up
                 if ('X' == cells[now_x][now_y])
                 {
-                    if ('-' != cells[now_x + 1][now_y])
+                    if (' ' == cells[now_x + 1][now_y])
                     {
                         unsigned int newSt = st;
                         setVal4St(newSt, (now_y >> 1) - 1, 3);
@@ -373,7 +380,7 @@ int main()
                         addSts(newSt, addDown, (score + 1), qs[act][iQ].record, nAct);
                     }
 
-                    if ('|' != cells[now_x][now_y])
+                    if (' ' == cells[now_x][now_y + 1])
                     {
                         unsigned int newSt = st;
                         setVal4St(newSt, (now_y >> 1), 3);
@@ -386,9 +393,9 @@ int main()
                     unsigned int newSt = st;
 
                     // do nonthing
-                    addSts(newSt, addNothing, score, qs[act][iQ].record, nAct);
+                    addSts(newSt, addSkip, score, qs[act][iQ].record, nAct);
 
-                    if ('-' != cells[now_x + 1][now_y] && '|' != cells[now_x][now_y])
+                    if (' ' == cells[now_x + 1][now_y] && ' ' == cells[now_x][now_y + 1])
                     {
                         setVal4St(newSt, (now_y >> 1) - 1, 1);
                         setVal4St(newSt, (now_y >> 1), 2);

@@ -28,12 +28,20 @@ using namespace std;
 #define ST_MASK 3
 #define QS_SIZE 600000
 
+enum AddType
+{
+    addNothing,
+    addDown,
+    addRight,
+    addDownAndRight
+};
+
 class Record
 {
 public:
     unsigned int state;
     unsigned int score;
-    char cached[MAX_H][MAX_W];
+    char record[MAX_H][MAX_W];
 
     Record() {}
 };
@@ -53,33 +61,61 @@ int now_x, now_y;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
-#define addSts(ST, CNT, REDS, IDX)                                                          \
-    unsigned char unused;                                                                   \
-    unsigned int recodedSt = ST;                                                            \
-    recode(recodedSt, unused);                                                              \
-    if (REDS == k)                                                                          \
-    {                                                                                       \
-        if (3 > unused)                                                                     \
-            ans += CNT;                                                                     \
-    }                                                                                       \
-    else                                                                                    \
-    {                                                                                       \
-        unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(recodedSt); \
-        if (it == cnts[IDX].end())                                                          \
-        {                                                                                   \
-            int pInQ = qTail[IDX];                                                          \
-            qs[IDX][pInQ].state = recodedSt;                                                \
-            qs[IDX][pInQ].count = CNT;                                                      \
-            qs[IDX][pInQ].minUnused = unused;                                               \
-            cnts[IDX][recodedSt] = pInQ;                                                    \
-            qTail[IDX]++;                                                                   \
-        }                                                                                   \
-        else                                                                                \
-        {                                                                                   \
-            qs[IDX][it->second].count += CNT;                                               \
-        }                                                                                   \
+#define addSts(ST, TYPE, SCORE, REC, IDX)                                        \
+    unordered_map<unsigned int, unsigned int>::iterator it = cnts[IDX].find(ST); \
+    if (it == cnts[IDX].end())                                                   \
+    {                                                                            \
+        int pInQ = qTail[IDX];                                                   \
+        qs[IDX][pInQ].state = ST;                                                \
+        qs[IDX][pInQ].score = SCORE;                                             \
+        memccpy(qs[IDX][pInQ].record, REC, sizeof(REC));                         \
+        if (TYPE == addDown)                                                     \
+        {                                                                        \
+            if ('X' != qs[IDX][pInQ].record[now_x][now_y])                       \
+                qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
+            qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                        \
+        }                                                                        \
+        else if (TYPE == addRight)                                               \
+        {                                                                        \
+            if ('X' != qs[IDX][pInQ].record[now_x][now_y])                       \
+                qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
+            qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                        \
+        }                                                                        \
+        else if (TYPE == addDownAndRight)                                        \
+        {                                                                        \
+            qs[IDX][pInQ].record[now_x][now_y] = '.';                            \
+            qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                        \
+            qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                        \
+        }                                                                        \
+        cnts[IDX][recodedSt] = pInQ;                                             \
+        qTail[IDX]++;                                                            \
+    }                                                                            \
+    else                                                                         \
+    {                                                                            \
+        if (qs[IDX][it->second].score > SCORE)                                   \
+        {                                                                        \
+            qs[IDX][pInQ].score = SCORE;                                         \
+            memccpy(qs[IDX][pInQ].record, REC, sizeof(REC));                     \
+            if (TYPE == addDown)                                                 \
+            {                                                                    \
+                if ('X' != qs[IDX][pInQ].record[now_x][now_y])                   \
+                    qs[IDX][pInQ].record[now_x][now_y] = '.';                    \
+                qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                    \
+            }                                                                    \
+            else if (TYPE == addRight)                                           \
+            {                                                                    \
+                if ('X' != qs[IDX][pInQ].record[now_x][now_y])                   \
+                    qs[IDX][pInQ].record[now_x][now_y] = '.';                    \
+                qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                    \
+            }                                                                    \
+            else if (TYPE == addDownAndRight)                                    \
+            {                                                                    \
+                qs[IDX][pInQ].record[now_x][now_y] = '.';                        \
+                qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                    \
+                qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                    \
+            }                                                                    \
+        }                                                                        \
     }
-
 
 int main()
 {
@@ -119,7 +155,7 @@ int main()
 
     qs[act][0].state = 0;
     qs[act][0].score = 0;
-    memcpy(qs[act]->cached, cells, sizeof(cells));
+    memcpy(qs[act]->record, cells, sizeof(cells));
 
     qTail[act]++;
 

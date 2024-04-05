@@ -68,7 +68,7 @@ int now_x, now_y;
         int pInQ = qTail[IDX];                                                   \
         qs[IDX][pInQ].state = ST;                                                \
         qs[IDX][pInQ].score = SCORE;                                             \
-        memccpy(qs[IDX][pInQ].record, REC, sizeof(REC));                         \
+        memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                          \
         if (TYPE == addDown)                                                     \
         {                                                                        \
             if ('X' != qs[IDX][pInQ].record[now_x][now_y])                       \
@@ -87,15 +87,16 @@ int now_x, now_y;
             qs[IDX][pInQ].record[now_x + 1][now_y] = '.';                        \
             qs[IDX][pInQ].record[now_x][now_y + 1] = '.';                        \
         }                                                                        \
-        cnts[IDX][recodedSt] = pInQ;                                             \
+        cnts[IDX][ST] = pInQ;                                                    \
         qTail[IDX]++;                                                            \
     }                                                                            \
     else                                                                         \
     {                                                                            \
-        if (qs[IDX][it->second].score > SCORE)                                   \
+        int pInQ = it->second;                                                   \
+        if (qs[IDX][pInQ].score > SCORE)                                         \
         {                                                                        \
             qs[IDX][pInQ].score = SCORE;                                         \
-            memccpy(qs[IDX][pInQ].record, REC, sizeof(REC));                     \
+            memcpy(qs[IDX][pInQ].record, REC, sizeof(REC));                      \
             if (TYPE == addDown)                                                 \
             {                                                                    \
                 if ('X' != qs[IDX][pInQ].record[now_x][now_y])                   \
@@ -221,6 +222,8 @@ int main()
                 else
                 {
                     // do nonthing
+                    addSts(st, addNothing, score, qs[act][iQ].record, nAct);
+
 
                 }
             }

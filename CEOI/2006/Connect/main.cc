@@ -88,7 +88,7 @@ int now_x, now_y;
 
 #define forwardFunc(newSt, plusVal, minusVal, newVal) \
     {                                                 \
-        int pos = now_y + 1;                          \
+        int pos = (now_y >> 1) + 1;                   \
         int s = 1;                                    \
         while (pos <= (w >> 1))                       \
         {                                             \
@@ -110,7 +110,7 @@ int now_x, now_y;
 
 #define backwardFunc(newSt, plusVal, minusVal, newVal) \
     {                                                  \
-        int pos = now_y - 2;                           \
+        int pos = (now_y >> 1) - 2;                    \
         int s = 1;                                     \
         while (0 <= pos)                               \
         {                                              \
@@ -267,7 +267,7 @@ int main()
             unsigned int st = qs[act][iQ].state;
             unsigned short score = qs[act][iQ].score;
 
-            if (1 == (now_y >> 1))
+            if (2 == now_y)
             {
                 st <<= ST_BITS;
             }

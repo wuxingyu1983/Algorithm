@@ -56,7 +56,7 @@ int qHead, qTail;
 #define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
 int h, w;
-unordered_map<unsigned int, unsigned int> cnts;
+unsigned short cnts[QS_SIZE];
 int now_x, now_y;
 
 #define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
@@ -66,65 +66,64 @@ int now_x, now_y;
     if (VAL)                               \
         ST |= (VAL) << ((POS) * ST_BITS);
 
-#define addSts(ST, TYPE, SCORE, REC, X, Y)                                                                \
-    unordered_map<unsigned int, unsigned int>::iterator it = cnts.find(ST);                               \
-    if (it != cnts.end() && ST == qs[it->second].state && X == qs[it->second].x && Y == qs[it->second].y) \
-    {                                                                                                     \
-        int pInQ = it->second;                                                                            \
-        if (qs[pInQ].score > SCORE)                                                                       \
-        {                                                                                                 \
-            qs[pInQ].score = SCORE;                                                                       \
-            memcpy(qs[pInQ].record, REC, sizeof(REC));                                                    \
-            if (addSkip != TYPE)                                                                          \
-            {                                                                                             \
-                if ('X' != qs[pInQ].record[now_x][now_y])                                                 \
-                    qs[pInQ].record[now_x][now_y] = '.';                                                  \
-                if (TYPE == addDown)                                                                      \
-                {                                                                                         \
-                    qs[pInQ].record[now_x + 1][now_y] = '.';                                              \
-                }                                                                                         \
-                else if (TYPE == addRight)                                                                \
-                {                                                                                         \
-                    qs[pInQ].record[now_x][now_y + 1] = '.';                                              \
-                }                                                                                         \
-                else if (TYPE == addDownAndRight)                                                         \
-                {                                                                                         \
-                    qs[pInQ].record[now_x + 1][now_y] = '.';                                              \
-                    qs[pInQ].record[now_x][now_y + 1] = '.';                                              \
-                }                                                                                         \
-            }                                                                                             \
-        }                                                                                                 \
-    }                                                                                                     \
-    else                                                                                                  \
-    {                                                                                                     \
-        int pInQ = qTail;                                                                                 \
-        qs[pInQ].state = ST;                                                                              \
-        qs[pInQ].score = SCORE;                                                                           \
-        qs[pInQ].x = X;                                                                                   \
-        qs[pInQ].y = Y;                                                                                   \
-        memcpy(qs[pInQ].record, REC, sizeof(REC));                                                        \
-        if (addSkip != TYPE)                                                                              \
-        {                                                                                                 \
-            if ('X' != qs[pInQ].record[now_x][now_y])                                                     \
-                qs[pInQ].record[now_x][now_y] = '.';                                                      \
-            if (TYPE == addDown)                                                                          \
-            {                                                                                             \
-                qs[pInQ].record[now_x + 1][now_y] = '.';                                                  \
-            }                                                                                             \
-            else if (TYPE == addRight)                                                                    \
-            {                                                                                             \
-                qs[pInQ].record[now_x][now_y + 1] = '.';                                                  \
-            }                                                                                             \
-            else if (TYPE == addDownAndRight)                                                             \
-            {                                                                                             \
-                qs[pInQ].record[now_x + 1][now_y] = '.';                                                  \
-                qs[pInQ].record[now_x][now_y + 1] = '.';                                                  \
-            }                                                                                             \
-        }                                                                                                 \
-        cnts[ST] = pInQ;                                                                                  \
-        qTail++;                                                                                          \
-        if (QS_SIZE <= qTail)                                                                             \
-            qTail -= QS_SIZE;                                                                             \
+#define addSts(ST, TYPE, SCORE, REC, X, Y)                          \
+    unsigned short pInQ = cnts[ST];                                 \
+    if (ST == qs[pInQ].state && X == qs[pInQ].x && Y == qs[pInQ].y) \
+    {                                                               \
+        if (qs[pInQ].score > SCORE)                                 \
+        {                                                           \
+            qs[pInQ].score = SCORE;                                 \
+            memcpy(qs[pInQ].record, REC, sizeof(REC));              \
+            if (addSkip != TYPE)                                    \
+            {                                                       \
+                if ('X' != qs[pInQ].record[now_x][now_y])           \
+                    qs[pInQ].record[now_x][now_y] = '.';            \
+                if (TYPE == addDown)                                \
+                {                                                   \
+                    qs[pInQ].record[now_x + 1][now_y] = '.';        \
+                }                                                   \
+                else if (TYPE == addRight)                          \
+                {                                                   \
+                    qs[pInQ].record[now_x][now_y + 1] = '.';        \
+                }                                                   \
+                else if (TYPE == addDownAndRight)                   \
+                {                                                   \
+                    qs[pInQ].record[now_x + 1][now_y] = '.';        \
+                    qs[pInQ].record[now_x][now_y + 1] = '.';        \
+                }                                                   \
+            }                                                       \
+        }                                                           \
+    }                                                               \
+    else                                                            \
+    {                                                               \
+        pInQ = qTail;                                               \
+        qs[pInQ].state = ST;                                        \
+        qs[pInQ].score = SCORE;                                     \
+        qs[pInQ].x = X;                                             \
+        qs[pInQ].y = Y;                                             \
+        memcpy(qs[pInQ].record, REC, sizeof(REC));                  \
+        if (addSkip != TYPE)                                        \
+        {                                                           \
+            if ('X' != qs[pInQ].record[now_x][now_y])               \
+                qs[pInQ].record[now_x][now_y] = '.';                \
+            if (TYPE == addDown)                                    \
+            {                                                       \
+                qs[pInQ].record[now_x + 1][now_y] = '.';            \
+            }                                                       \
+            else if (TYPE == addRight)                              \
+            {                                                       \
+                qs[pInQ].record[now_x][now_y + 1] = '.';            \
+            }                                                       \
+            else if (TYPE == addDownAndRight)                       \
+            {                                                       \
+                qs[pInQ].record[now_x + 1][now_y] = '.';            \
+                qs[pInQ].record[now_x][now_y + 1] = '.';            \
+            }                                                       \
+        }                                                           \
+        cnts[ST] = pInQ;                                            \
+        qTail++;                                                    \
+        if (QS_SIZE <= qTail)                                       \
+            qTail -= QS_SIZE;                                       \
     }
 
 int main()

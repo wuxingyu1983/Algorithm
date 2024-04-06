@@ -26,7 +26,7 @@ using namespace std;
 #define MAX_W 26
 #define ST_BITS 2
 #define ST_MASK 3
-#define QS_SIZE 100000
+#define QS_SIZE 90000
 
 enum AddType
 {
@@ -75,7 +75,8 @@ int now_x, now_y;
             qs[pInQ].score = SCORE;                                                                       \
             memcpy(qs[pInQ].record, REC, sizeof(REC));                                                    \
             qs[pInQ].record[now_x >> 1] &= ~(3 << now_y);                                                 \
-            qs[pInQ].record[now_x >> 1] |= TYPE << now_y;                                                 \
+            if (TYPE)                                                                                     \
+                qs[pInQ].record[now_x >> 1] |= TYPE << now_y;                                             \
         }                                                                                                 \
     }                                                                                                     \
     else                                                                                                  \
@@ -87,7 +88,8 @@ int now_x, now_y;
         qs[pInQ].y = Y;                                                                                   \
         memcpy(qs[pInQ].record, REC, sizeof(REC));                                                        \
         qs[pInQ].record[now_x >> 1] &= ~(3 << now_y);                                                     \
-        qs[pInQ].record[now_x >> 1] |= TYPE << now_y;                                                     \
+        if (TYPE)                                                                                         \
+            qs[pInQ].record[now_x >> 1] |= TYPE << now_y;                                                 \
         cnts[ST] = pInQ;                                                                                  \
         qTail++;                                                                                          \
         if (QS_SIZE <= qTail)                                                                             \

@@ -24,24 +24,25 @@ using namespace std;
 
 #define MAX_H 80
 #define MAX_W 26
-#define ST_BITS 2
-#define ST_MASK 3
-#define QS_SIZE 90000
+#define ST_BITS 1
+#define ST_MASK 1
+#define QS_SIZE 8200 
 
 enum AddType
 {
-    addEnd = 0,
-    addDown = 1,
-    addRight = 2,
+    addSkip,
+    addEnd,
+    addDown,
+    addRight,
     addDownAndRight
 };
 
 class Record
 {
 public:
-    unsigned int state;
+    unsigned short state;
     unsigned short score;
-    unsigned int record[40];
+    char record[MAX_H][MAX_W];
     unsigned char x, y;
 
     Record() {}
@@ -74,9 +75,24 @@ int now_x, now_y;
         {                                                                                                 \
             qs[pInQ].score = SCORE;                                                                       \
             memcpy(qs[pInQ].record, REC, sizeof(REC));                                                    \
-            qs[pInQ].record[now_x >> 1] &= ~(3 << now_y);                                                 \
-            if (TYPE)                                                                                     \
-                qs[pInQ].record[now_x >> 1] |= TYPE << now_y;                                             \
+            if (addSkip != TYPE)                                                                          \
+            {                                                                                             \
+                if ('X' != qs[pInQ].record[now_x][now_y])                                                 \
+                    qs[pInQ].record[now_x][now_y] = '.';                                                  \
+                if (TYPE == addDown)                                                                      \
+                {                                                                                         \
+                    qs[pInQ].record[now_x + 1][now_y] = '.';                                              \
+                }                                                                                         \
+                else if (TYPE == addRight)                                                                \
+                {                                                                                         \
+                    qs[pInQ].record[now_x][now_y + 1] = '.';                                              \
+                }                                                                                         \
+                else if (TYPE == addDownAndRight)                                                         \
+                {                                                                                         \
+                    qs[pInQ].record[now_x + 1][now_y] = '.';                                              \
+                    qs[pInQ].record[now_x][now_y + 1] = '.';                                              \
+                }                                                                                         \
+            }                                                                                             \
         }                                                                                                 \
     }                                                                                                     \
     else                                                                                                  \
@@ -87,57 +103,28 @@ int now_x, now_y;
         qs[pInQ].x = X;                                                                                   \
         qs[pInQ].y = Y;                                                                                   \
         memcpy(qs[pInQ].record, REC, sizeof(REC));                                                        \
-        qs[pInQ].record[now_x >> 1] &= ~(3 << now_y);                                                     \
-        if (TYPE)                                                                                         \
-            qs[pInQ].record[now_x >> 1] |= TYPE << now_y;                                                 \
+        if (addSkip != TYPE)                                                                              \
+        {                                                                                                 \
+            if ('X' != qs[pInQ].record[now_x][now_y])                                                     \
+                qs[pInQ].record[now_x][now_y] = '.';                                                      \
+            if (TYPE == addDown)                                                                          \
+            {                                                                                             \
+                qs[pInQ].record[now_x + 1][now_y] = '.';                                                  \
+            }                                                                                             \
+            else if (TYPE == addRight)                                                                    \
+            {                                                                                             \
+                qs[pInQ].record[now_x][now_y + 1] = '.';                                                  \
+            }                                                                                             \
+            else if (TYPE == addDownAndRight)                                                             \
+            {                                                                                             \
+                qs[pInQ].record[now_x + 1][now_y] = '.';                                                  \
+                qs[pInQ].record[now_x][now_y + 1] = '.';                                                  \
+            }                                                                                             \
+        }                                                                                                 \
         cnts[ST] = pInQ;                                                                                  \
         qTail++;                                                                                          \
         if (QS_SIZE <= qTail)                                                                             \
             qTail -= QS_SIZE;                                                                             \
-    }
-
-#define forwardFunc(newSt, plusVal, minusVal, newVal) \
-    {                                                 \
-        int pos = (now_y >> 1) + 1;                   \
-        int s = 1;                                    \
-        while (pos <= (w >> 1))                       \
-        {                                             \
-            int v = getVal4St(newSt, pos);            \
-            if (plusVal == v)                         \
-                s++;                                  \
-            else if (minusVal == v)                   \
-            {                                         \
-                s--;                                  \
-                if (0 == s)                           \
-                {                                     \
-                    setVal4St(newSt, pos, newVal);    \
-                    break;                            \
-                }                                     \
-            }                                         \
-            pos++;                                    \
-        }                                             \
-    }
-
-#define backwardFunc(newSt, plusVal, minusVal, newVal) \
-    {                                                  \
-        int pos = (now_y >> 1) - 2;                    \
-        int s = 1;                                     \
-        while (0 <= pos)                               \
-        {                                              \
-            int v = getVal4St(newSt, pos);             \
-            if (plusVal == v)                          \
-                s++;                                   \
-            else if (minusVal == v)                    \
-            {                                          \
-                s--;                                   \
-                if (0 == s)                            \
-                {                                      \
-                    setVal4St(newSt, pos, newVal);     \
-                    break;                             \
-                }                                      \
-            }                                          \
-            pos--;                                     \
-        }                                              \
     }
 
 int main()
@@ -182,12 +169,13 @@ int main()
     qs[qTail].score = 0;
     qs[qTail].x = now_x;
     qs[qTail].y = now_y;
+    memcpy(qs[qTail].record, cells, sizeof(cells));
 
     qTail++;
 
     while (false == IS_EMPTY)
     {
-        unsigned int st = qs[qHead].state;
+        unsigned short st = qs[qHead].state;
         unsigned short score = qs[qHead].score;
         now_x = qs[qHead].x;
         now_y = qs[qHead].y;
@@ -203,53 +191,13 @@ int main()
                 {
                     cout << qs[qHead].score << endl;
 
-                    for (size_t row = 1; row <= (h >> 1); row++)
-                    {
-                        for (size_t col = 1; col <= (w >> 1); col++)
-                        {
-                            int tmp = (qs[qHead].record[row] >> (2 * col)) & 3;
-                            if (addEnd == tmp)
-                            {
-                                if ('X' != cells[row << 1][col << 1])
-                                {
-                                    if ('.' == cells[(row << 1) - 1][col << 1] || '.' == cells[row << 1][(col << 1) - 1])
-                                    {
-                                        cells[row << 1][col << 1] = '.';
-                                    }
-                                }
-                            }
-                            else if (addDown == tmp)
-                            {
-                                if ('X' != cells[row << 1][col << 1])
-                                {
-                                    cells[row << 1][col << 1] = '.';
-                                }
-                                cells[(row << 1) + 1][col << 1] = '.';
-                            }
-                            else if (addRight == tmp)
-                            {
-                                if ('X' != cells[row << 1][col << 1])
-                                {
-                                    cells[row << 1][col << 1] = '.';
-                                }
-                                cells[row << 1][(col << 1) + 1] = '.';
-                            }
-                            else
-                            {
-                                cells[row << 1][col << 1] = '.';
-                                cells[(row << 1) + 1][col << 1] = '.';
-                                cells[row << 1][(col << 1) + 1] = '.';
-                            }
-                        }
-                    }
-
                     if (bSwitch)
                     {
                         for (size_t col = 1; col <= w; col++)
                         {
                             for (size_t row = 1; row <= h; row++)
                             {
-                                cout << cells[row][col];
+                                cout << qs[qHead].record[row][col];
                             }
                             cout << endl;
                         }
@@ -260,7 +208,7 @@ int main()
                         {
                             for (size_t col = 1; col <= w; col++)
                             {
-                                cout << cells[row][col];
+                                cout << qs[qHead].record[row][col];
                             }
                             cout << endl;
                         }
@@ -299,71 +247,17 @@ int main()
                 setVal4St(newSt, (now_y >> 1) - 1, 0);
                 setVal4St(newSt, (now_y >> 1), 0);
 
-                if (3 == left || 3 == up)
-                {
-                    if (1 == left || 1 == up)
-                    {
-                        // 1, 3
-                        forwardFunc(newSt, 1, 2, 3);
-                    }
-                    else if (2 == left || 2 == up)
-                    {
-                        // 2, 3
-                        backwardFunc(newSt, 2, 1, 3);
-                    }
-                    else
-                    {
-                        // 3, 3
-                        // do nothing
-                    }
-                }
-                else if (1 == left && 1 == up)
-                {
-                    forwardFunc(newSt, 1, 2, 1);
-                }
-                else if (1 == left && 2 == up)
-                {
-                    // invalid
-                    qHead++;
-                    if (QS_SIZE <= qHead)
-                        qHead -= QS_SIZE;
-                    continue;
-                }
-                else if (2 == left && 1 == up)
-                {
-                    // do nothin
-                }
-                else
-                {
-                    // 2 == left && 2 == up
-                    backwardFunc(newSt, 2, 1, 2);
-                }
-
                 addSts(newSt, addEnd, (score + 2), qs[qHead].record, now_x, now_y);
             }
         }
         else if (left || up)
         {
-            unsigned int val = left + up;
             if ('X' == cells[now_x][now_y])
             {
                 unsigned int newSt = st;
 
                 setVal4St(newSt, (now_y >> 1) - 1, 0);
                 setVal4St(newSt, (now_y >> 1), 0);
-
-                if (3 == val)
-                {
-                }
-                else if (1 == val)
-                {
-                    forwardFunc(newSt, 1, 2, 3);
-                }
-                else
-                {
-                    // 2 == val
-                    backwardFunc(newSt, 2, 1, 3);
-                }
 
                 addSts(newSt, addEnd, (score + 1), qs[qHead].record, now_x, now_y);
             }
@@ -372,7 +266,7 @@ int main()
                 if (' ' == cells[now_x + 1][now_y])
                 {
                     unsigned int newSt = st;
-                    setVal4St(newSt, (now_y >> 1) - 1, val);
+                    setVal4St(newSt, (now_y >> 1) - 1, 1);
                     setVal4St(newSt, (now_y >> 1), 0);
 
                     addSts(newSt, addDown, (score + 2), qs[qHead].record, now_x, now_y);
@@ -382,7 +276,7 @@ int main()
                 {
                     unsigned int newSt = st;
                     setVal4St(newSt, (now_y >> 1) - 1, 0);
-                    setVal4St(newSt, (now_y >> 1), val);
+                    setVal4St(newSt, (now_y >> 1), 1);
 
                     addSts(newSt, addRight, (score + 2), qs[qHead].record, now_x, now_y);
                 }
@@ -396,7 +290,7 @@ int main()
                 if (' ' == cells[now_x + 1][now_y])
                 {
                     unsigned int newSt = st;
-                    setVal4St(newSt, (now_y >> 1) - 1, 3);
+                    setVal4St(newSt, (now_y >> 1) - 1, 1);
 
                     addSts(newSt, addDown, (score + 1), qs[qHead].record, now_x, now_y);
                 }
@@ -404,7 +298,7 @@ int main()
                 if (' ' == cells[now_x][now_y + 1])
                 {
                     unsigned int newSt = st;
-                    setVal4St(newSt, (now_y >> 1), 3);
+                    setVal4St(newSt, (now_y >> 1), 1);
 
                     addSts(newSt, addRight, (score + 1), qs[qHead].record, now_x, now_y);
                 }
@@ -414,12 +308,12 @@ int main()
                 unsigned int newSt = st;
 
                 // do nonthing
-                addSts(newSt, addEnd, score, qs[qHead].record, now_x, now_y);
+                addSts(newSt, addSkip, score, qs[qHead].record, now_x, now_y);
 
                 if (' ' == cells[now_x + 1][now_y] && ' ' == cells[now_x][now_y + 1])
                 {
                     setVal4St(newSt, (now_y >> 1) - 1, 1);
-                    setVal4St(newSt, (now_y >> 1), 2);
+                    setVal4St(newSt, (now_y >> 1), 1);
 
                     addSts(newSt, addDownAndRight, (score + 2), qs[qHead].record, now_x, now_y);
                 }

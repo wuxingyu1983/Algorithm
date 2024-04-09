@@ -69,7 +69,7 @@ int main()
     {
         if (0 == dp[group])
         {
-            for (size_t subGroup = 1; subGroup <= group; subGroup++)
+            for (size_t subGroup = 1; subGroup <= (group >> 1); subGroup++)
             {
                 if (subGroup == (subGroup & group))
                 {

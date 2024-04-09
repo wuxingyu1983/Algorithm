@@ -58,19 +58,24 @@ int main()
                 }
             }
         }
+
+        if (w >= weight4Group[group])
+        {
+            dp[group] = time4Group[group];
+        }
     }
 
     for (size_t group = 1; group <= maxGroup; group++)
     {
-        for (size_t subGroup = 1; subGroup <= group; subGroup++)
+        if (0 == dp[group])
         {
-            if (subGroup == (subGroup & group))
+            for (size_t subGroup = 1; subGroup <= group; subGroup++)
             {
-                if (w >= weight4Group[subGroup])
+                if (subGroup == (subGroup & group))
                 {
-                    if (0 == dp[group] || dp[group] > (time4Group[subGroup] + dp[group - subGroup]))
+                    if (0 == dp[group] || dp[group] > (dp[subGroup] + dp[group - subGroup]))
                     {
-                        dp[group] = time4Group[subGroup] + dp[group - subGroup];
+                        dp[group] = dp[subGroup] + dp[group - subGroup];
                     }
                 }
             }

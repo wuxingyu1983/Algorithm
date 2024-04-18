@@ -22,12 +22,14 @@
 
 using namespace std;
 
-#define MAX_N   20
-#define MAX_K   20 
-#define MAX_NK  1048576
+#define MAX_N 20
+#define MAX_K 20
+#define MAX_NK 1048576
 
-unsigned int n, k;
-unsigned int cost[MAX_N][MAX_N];
+int n, k;
+int cost[MAX_N][MAX_N];
+int dp[MAX_NK];
+char bits[MAX_NK];
 
 int main()
 {
@@ -41,7 +43,31 @@ int main()
         }
     }
 
-    
+    // init
+    for (size_t i = 0; i < (1 << n); i++)
+    {
+        for (size_t j = 1; j <= i; j <<= 1)
+        {
+            if (j & i)
+            {
+                bits[i]++;
+            }
+        }
+    }
+    memset(dp, -1, sizeof(dp));
+    dp[(1 << n) - 1] = 0;
+
+    int ans = -1;
+
+    if (k == n)
+    {
+        ans = 0;
+    }
+    else
+    {
+    }
+
+    cout << ans << endl;
 
     return 0;
 }

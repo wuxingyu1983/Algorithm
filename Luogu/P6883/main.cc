@@ -28,6 +28,7 @@ using namespace std;
 
 int n, k;
 int cost[MAX_N][MAX_N];
+int minCost[MAX_N];
 int dp[MAX_NK];
 char bits[MAX_NK];
 
@@ -37,16 +38,24 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
+        minCost[i] = -1;
         for (size_t j = 0; j < n; j++)
         {
             cin >> cost[i][j];
+            if (i != j)
+            {
+                if (0 > minCost[i] || minCost[i] > cost[i][j])
+                {
+                    minCost[i] = cost[i][j];
+                }
+            }
         }
     }
 
     // init
-    for (size_t i = 0; i < (1 << n); i++)
+    for (int i = 0; i < (1 << n); i++)
     {
-        for (size_t j = 1; j <= i; j <<= 1)
+        for (int j = 1; j <= i; j <<= 1)
         {
             if (j & i)
             {
@@ -65,6 +74,32 @@ int main()
     }
     else
     {
+        for (int i = 0; i < n; i++)
+        {
+            int mask = ~(1 << i);
+            for (int j = (1 << n) - 1; j >= 0; j--)
+            {
+                if (0 <= dp[j] && (j & (1 << i)))
+                {
+                    int tmp = dp[j] + minCost[i];
+                    if (0 > dp[j & mask] || tmp < dp[j & mask])
+                    {
+                        dp[j & mask] = tmp;
+                    }
+                }
+            }
+        }
+
+        for (int j = (1 << n) - 1; j >= 0; j--)
+        {
+            if (bits[j] == k)
+            {
+                if (0 > ans || ans > dp[j])
+                {
+                    ans = dp[j];
+                }
+            }
+        }
     }
 
     cout << ans << endl;

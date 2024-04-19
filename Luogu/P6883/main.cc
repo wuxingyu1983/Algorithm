@@ -28,8 +28,9 @@ using namespace std;
 
 int n, k;
 int cost[MAX_N][MAX_N];
-int dp[MAX_NK];
+int dp[2][MAX_NK];
 char bits[MAX_NK];
+int act;
 
 int main()
 {
@@ -55,7 +56,8 @@ int main()
         }
     }
     memset(dp, -1, sizeof(dp));
-    dp[(1 << n) - 1] = 0;
+    act = 0;
+    dp[act][(1 << n) - 1] = 0;
 
     int ans = -1;
 
@@ -70,7 +72,13 @@ int main()
             int mask = ~(1 << i);
             for (int j = 0; j < (1 << n); j++)
             {
-                if (0 <= dp[j] && (j & (1 << i)))
+                // do nothing
+                if (0 > dp[1 - act][j] || dp[act][j] < dp[1 - act][j])
+                {
+                    dp[1 - act][j] = dp[act][j];
+                }
+
+                if (0 <= dp[act][j] && (j & (1 << i)))
                 {
                     int tmp = -1;
 
@@ -82,14 +90,17 @@ int main()
                         }
                     }
 
-                    tmp += dp[j];
+                    tmp += dp[act][j];
 
-                    if (0 > dp[j & mask] || tmp < dp[j & mask])
+                    if (0 > dp[1 - act][j & mask] || tmp < dp[1 - act][j & mask])
                     {
-                        dp[j & mask] = tmp;
+                        dp[1 - act][j & mask] = tmp;
                     }
                 }
             }
+
+            memset(dp[act], -1, sizeof(dp[act]));
+            act = 1 - act;
         }
 
         for (int i = 0; i < n - 1; i++)
@@ -97,27 +108,39 @@ int main()
             int mask = ~(1 << i);
             for (int j = 0; j < (1 << n); j++)
             {
-                if (0 <= dp[j] && (j & (1 << i)))
+                // do nothing
+                if (0 > dp[1 - act][j] || dp[act][j] < dp[1 - act][j])
+                {
+                    dp[1 - act][j] = dp[act][j];
+                }
+
+                if (0 <= dp[act][j] && (j & (1 << i)))
                 {
                     for (int k = i + 1; k < n; k++)
                     {
-                        int tmp = dp[j] + cost[i][k];
-                        if (0 > dp[(j & mask) | (1 << k)] || tmp < dp[(j & mask) | (1 << k)])
+                        int tmp = dp[act][j] + cost[i][k];
+                        if (0 > dp[1 - act][(j & mask) | (1 << k)] || tmp < dp[1 - act][(j & mask) | (1 << k)])
                         {
-                            dp[(j & mask) | (1 << k)] = tmp;
+                            dp[1 - act][(j & mask) | (1 << k)] = tmp;
                         }
                     }
                 }
             }
+
+            memset(dp[act], -1, sizeof(dp[act]));
+            act = 1 - act;
         }
 
         for (int j = (1 << n) - 1; j >= 0; j--)
         {
             if (bits[j] == k)
             {
-                if (0 > ans || ans > dp[j])
+                if (0 <= dp[act][j])
                 {
-                    ans = dp[j];
+                    if (0 > ans || ans > dp[act][j])
+                    {
+                        ans = dp[act][j];
+                    }
                 }
             }
         }

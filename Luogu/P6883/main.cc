@@ -28,7 +28,8 @@ using namespace std;
 
 int n, k;
 int cost[MAX_N][MAX_N];
-int dp[2][MAX_NK];
+int dp[MAX_NK];
+vector<int> vec[MAX_N + 1];
 char bits[MAX_NK];
 int act;
 
@@ -54,10 +55,13 @@ int main()
                 bits[i]++;
             }
         }
+
+        vec[bits[i]].push_back(i);
     }
+
     memset(dp, -1, sizeof(dp));
     act = 0;
-    dp[act][(1 << n) - 1] = 0;
+    dp[(1 << n) - 1] = 0;
 
     int ans = -1;
 
@@ -67,80 +71,46 @@ int main()
     }
     else
     {
-        for (int i = n - 1; i > 0; i--)
+        for (size_t digit = n; digit > k; digit--)
         {
-            int mask = ~(1 << i);
-            for (int j = 0; j < (1 << n); j++)
+            for (vector<int>::iterator it = vec[digit].begin(); it != vec[digit].end(); it++)
             {
-                // do nothing
-                if (0 > dp[1 - act][j] || dp[act][j] < dp[1 - act][j])
-                {
-                    dp[1 - act][j] = dp[act][j];
-                }
+                int num = *it;
 
-                if (0 <= dp[act][j] && (j & (1 << i)))
+                for (size_t i = 0, fi = 1; fi <= num; i++, fi <<= 1)
                 {
-                    int tmp = -1;
-
-                    for (int k = 0; k < i; k++)
+                    if (fi & num)
                     {
-                        if (0 > tmp || tmp > cost[i][k])
+                        int mask = ~(1 << i);
+                        int tmp = -1;
+                        
+                        for (size_t j = 0, fj = 1; fj <= num; j++, fj <<= 1)
                         {
-                            tmp = cost[i][k];
+                            if ((i != j) && (fj & num))
+                            {
+                                if (0 > tmp || tmp > cost[i][j])
+                                {
+                                    tmp = cost[i][j];
+                                }
+                            }
                         }
-                    }
 
-                    tmp += dp[act][j];
-
-                    if (0 > dp[1 - act][j & mask] || tmp < dp[1 - act][j & mask])
-                    {
-                        dp[1 - act][j & mask] = tmp;
-                    }
-                }
-            }
-
-            memset(dp[act], -1, sizeof(dp[act]));
-            act = 1 - act;
-        }
-
-        for (int i = 0; i < n - 1; i++)
-        {
-            int mask = ~(1 << i);
-            for (int j = 0; j < (1 << n); j++)
-            {
-                // do nothing
-                if (0 > dp[1 - act][j] || dp[act][j] < dp[1 - act][j])
-                {
-                    dp[1 - act][j] = dp[act][j];
-                }
-
-                if (0 <= dp[act][j] && (j & (1 << i)))
-                {
-                    for (int k = i + 1; k < n; k++)
-                    {
-                        int tmp = dp[act][j] + cost[i][k];
-                        if (0 > dp[1 - act][(j & mask) | (1 << k)] || tmp < dp[1 - act][(j & mask) | (1 << k)])
+                        if (0 > dp[num & mask] || dp[num & mask] > (dp[num] + tmp))
                         {
-                            dp[1 - act][(j & mask) | (1 << k)] = tmp;
+                            dp[num & mask] = dp[num] + tmp;
                         }
                     }
                 }
             }
-
-            memset(dp[act], -1, sizeof(dp[act]));
-            act = 1 - act;
         }
 
-        for (int j = (1 << n) - 1; j >= 0; j--)
+        for (vector<int>::iterator it = vec[k].begin(); it != vec[k].end(); it++)
         {
-            if (bits[j] == k)
+            if (0 <= dp[*it])
             {
-                if (0 <= dp[act][j])
+                if (0 > ans || ans > dp[*it])
                 {
-                    if (0 > ans || ans > dp[act][j])
-                    {
-                        ans = dp[act][j];
-                    }
+                    ans = dp[*it];
                 }
             }
         }

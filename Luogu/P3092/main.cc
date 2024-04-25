@@ -139,5 +139,35 @@ int main()
         }
     }
 
+    // final 计算
+    int ans = -1;
+
+    for (int bits = k; bits > 0; bits--)
+    {
+        if (head[bits])
+        {
+            for (Item *it = head[bits]; it != NULL; it = it->next)
+            {
+                unsigned short st = it->state;
+                int tmp = 0;
+
+                for (size_t p = 0; p < k; p++)
+                {
+                    if (0 == (st & (1 << p)))
+                    {
+                        tmp += coins[p];
+                    }
+                }
+
+                if (ans < tmp)
+                {
+                    ans = tmp;
+                }
+            }
+        }
+    }
+
+    cout << ans << endl;
+
     return 0;
 }

@@ -57,7 +57,55 @@ int main()
         cin >> costs[i];
     }
 
+    // init
+    for (size_t i = 1; i < (1 << k); i++)
+    {
+        dp[i].state = i;
+    }
 
+    head[0] = &(dp[0]);
+
+    for (size_t iC = 0; iC < n; iC++)
+    {
+        for (int bits = k; bits >= 0; bits--)
+        {
+            if (head[bits])
+            {
+                for (Item * it = head[bits]; it != NULL; it = it->next)
+                {
+                    if (it->remain >= costs[iC])
+                    {
+                        // 还够用
+                        it->remain -= costs[iC];
+                    }
+                    else
+                    {
+                        // 需要使用新的 coin
+
+
+                        // 删除该 item
+                        if (NULL == it->prev)
+                        {
+                            // first
+                            head[bits] = it->next;
+                            if (head[bits])
+                            {
+                                head[bits]->prev = NULL;
+                            }
+                        }
+                        else
+                        {
+                            it->prev->next = it->next;
+                            if (it->next)
+                            {
+                                it->next->prev = it->prev;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     return 0;
 }

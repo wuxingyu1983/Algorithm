@@ -37,7 +37,7 @@ public:
     int remain;
     Item * prev, * next;
 
-    Item() {}
+    Item() { remain = -1; }
 };
 
 Item dp[MAX_2K];
@@ -63,6 +63,7 @@ int main()
         dp[i].state = i;
     }
 
+    dp[0].remain = 0;
     head[0] = &(dp[0]);
 
     for (size_t iC = 0; iC < n; iC++)
@@ -81,7 +82,38 @@ int main()
                     else
                     {
                         // 需要使用新的 coin
+                        {
+                            unsigned short st = it->state;
 
+                            for (size_t p = 0; p < k; p++)
+                            {
+                                if (0 == (st & (1 << p)) && coins[p] >= costs[iC])
+                                {
+                                    unsigned short newSt = st;
+                                    newSt |= (1 << p);
+
+                                    if (0 > dp[newSt].remain)
+                                    {
+                                        // 还未入队列
+                                        if (head[bits + 1])
+                                        {
+                                            dp[newSt].next = head[bits + 1];
+                                            head[bits + 1]->prev = &(dp[newSt]);
+                                        }
+                                        head[bits + 1] = &(dp[newSt]);
+
+                                        dp[newSt].remain = coins[p] - costs[iC];
+                                    }
+                                    else
+                                    {
+                                        if (dp[newSt].remain < coins[p] - costs[iC])
+                                        {
+                                            dp[newSt].remain = coins[p] - costs[iC];
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                         // 删除该 item
                         if (NULL == it->prev)

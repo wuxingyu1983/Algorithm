@@ -140,7 +140,7 @@ int main()
     }
 
     // final 计算
-    int ans = -1;
+    long long ans = -1;
 
     for (int bits = k; bits > 0; bits--)
     {

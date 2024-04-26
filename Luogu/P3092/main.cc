@@ -29,6 +29,7 @@ using namespace std;
 unsigned int k, n;
 int coins[MAX_K];
 int costs[MAX_N];
+long long sum[MAX_N];
 
 class Item
 {
@@ -58,6 +59,11 @@ int main()
     for (size_t i = 0; i < n; i++)
     {
         scanf("%d", &(costs[i]));
+        sum[i] = costs[i];
+        if (0 < i)
+        {
+            sum[i] += sum[i - 1];
+        }
     }
 
     // init
@@ -89,16 +95,17 @@ int main()
                                 unsigned short newSt = st;
                                 newSt |= (1 << p);
 
-                                int tmp = costs[iC];
-                                int idx = iC + 1;
-
-                                for (idx = iC + 1; idx < n; idx++)
+                                int tmp = coins[p];
+                                if (0 < iC)
                                 {
-                                    tmp += costs[idx];
-                                    if (coins[p] < tmp)
-                                    {
-                                        break;
-                                    }
+                                    tmp += sum[iC - 1];
+                                }
+
+                                int idx = n;
+
+                                if (tmp < sum[n - 1])
+                                {
+                                    idx = upper_bound(sum, sum + n, tmp) - sum;
                                 }
 
                                 if (0 > dp[newSt].idx)
@@ -142,15 +149,6 @@ int main()
                             }
                         }
                     }
-
-                    // 删除该 item
-/*
-                    it->prev->next = it->next;
-                    if (it->next)
-                    {
-                        it->next->prev = it->prev;
-                    }
-*/
                 }
             }
         }

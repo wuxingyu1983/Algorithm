@@ -35,13 +35,18 @@ class Item
 public:
     unsigned short state;
     int remain;
-    Item * prev, * next;
+    int idx; // item in the [idx]th queue
+    Item *prev, *next;
 
-    Item() { remain = -1; }
+    Item()
+    {
+        idx = -1;
+        remain = -1;
+    }
 };
 
 Item dp[MAX_2K];
-Item head[MAX_K + 1];
+Item head[MAX_N + 1][MAX_K + 1];
 
 int main()
 {
@@ -63,17 +68,18 @@ int main()
         dp[i].state = i;
     }
 
+    dp[0].idx = 0;
     dp[0].remain = 0;
-    head[0].next = &(dp[0]);
-    dp[0].prev = &(head[0]);
+    head[0][0].next = &(dp[0]);
+    dp[0].prev = &(head[0][0]);
 
     for (size_t iC = 0; iC < n; iC++)
     {
         for (int bits = k; bits >= 0; bits--)
         {
-            if (head[bits].next)
+            if (head[iC][bits].next)
             {
-                for (Item * it = head[bits].next; it != NULL; it = it->next)
+                for (Item * it = head[iC][bits].next; it != NULL; it = it->next)
                 {
                     if (it->remain >= costs[iC])
                     {
@@ -93,25 +99,56 @@ int main()
                                     unsigned short newSt = st;
                                     newSt |= (1 << p);
 
-                                    if (0 > dp[newSt].remain)
-                                    {
-                                        // 还未入队列
-                                        if (head[bits + 1].next)
-                                        {
-                                            dp[newSt].next = head[bits + 1].next;
-                                            head[bits + 1].next->prev = &(dp[newSt]);
-                                        }
-                                        head[bits + 1].next = &(dp[newSt]);
-                                        dp[newSt].prev = &(head[bits + 1]);
+                                    int tmp = costs[iC];
+                                    int idx = iC + 1;
 
-                                        dp[newSt].remain = coins[p] - costs[iC];
+                                    for (idx = iC + 1; idx < n; idx++)
+                                    {
+                                        tmp += costs[idx];
+                                        if (coins[p] < tmp)
+                                        {
+                                            break;
+                                        }
+                                    }
+
+                                    if (0 > dp[newSt].idx)
+                                    {
+                                        // 还从未入队列
+                                        dp[newSt].next = head[idx][bits + 1].next;
+                                        if (head[idx][bits + 1].next)
+                                        {
+                                            head[idx][bits + 1].next->prev = &(dp[newSt]);
+                                        }
+                                        head[idx][bits + 1].next = &(dp[newSt]);
+                                        dp[newSt].prev = &(head[idx][bits + 1]);
+
+                                        dp[newSt].remain = 0;
+                                        dp[newSt].idx = idx;
+                                    }
+                                    else if (dp[newSt].idx < idx)
+                                    {
+                                        // remove from old queue
+                                        dp[newSt].prev->next = dp[newSt].next;
+                                        if (dp[newSt].next)
+                                        {
+                                            dp[newSt].next->prev = dp[newSt].prev;
+                                        }
+
+                                        // add to new queue
+                                        dp[newSt].next = head[idx][bits + 1].next;
+                                        if (head[idx][bits + 1].next)
+                                        {
+                                            head[idx][bits + 1].next->prev = &(dp[newSt]);
+                                        }
+                                        head[idx][bits + 1].next = &(dp[newSt]);
+                                        dp[newSt].prev = &(head[idx][bits + 1]);
+
+                                        dp[newSt].idx = idx;
                                     }
                                     else
                                     {
-                                        if (dp[newSt].remain < coins[p] - costs[iC])
-                                        {
-                                            dp[newSt].remain = coins[p] - costs[iC];
-                                        }
+                                        // dp[newSt].idx >= idx
+                                        // do nothing
                                     }
                                 }
                             }
@@ -134,9 +171,9 @@ int main()
 
     for (int bits = k; bits > 0; bits--)
     {
-        if (head[bits].next)
+        if (head[n][bits].next)
         {
-            for (Item *it = head[bits].next; it != NULL; it = it->next)
+            for (Item *it = head[n][bits].next; it != NULL; it = it->next)
             {
                 unsigned short st = it->state;
                 int tmp = 0;

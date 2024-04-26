@@ -41,7 +41,7 @@ public:
 };
 
 Item dp[MAX_2K];
-Item * head[MAX_K + 1];
+Item head[MAX_K + 1];
 
 int main()
 {
@@ -49,12 +49,12 @@ int main()
 
     for (size_t i = 0; i < k; i++)
     {
-        cin >> coins[i];
+        scanf("%d", &(coins[i]));
     }
 
     for (size_t i = 0; i < n; i++)
     {
-        cin >> costs[i];
+        scanf("%d", &(costs[i]));
     }
 
     // init
@@ -64,15 +64,16 @@ int main()
     }
 
     dp[0].remain = 0;
-    head[0] = &(dp[0]);
+    head[0].next = &(dp[0]);
+    dp[0].prev = &(head[0]);
 
     for (size_t iC = 0; iC < n; iC++)
     {
         for (int bits = k; bits >= 0; bits--)
         {
-            if (head[bits])
+            if (head[bits].next)
             {
-                for (Item * it = head[bits]; it != NULL; it = it->next)
+                for (Item * it = head[bits].next; it != NULL; it = it->next)
                 {
                     if (it->remain >= costs[iC])
                     {
@@ -95,12 +96,13 @@ int main()
                                     if (0 > dp[newSt].remain)
                                     {
                                         // 还未入队列
-                                        if (head[bits + 1])
+                                        if (head[bits + 1].next)
                                         {
-                                            dp[newSt].next = head[bits + 1];
-                                            head[bits + 1]->prev = &(dp[newSt]);
+                                            dp[newSt].next = head[bits + 1].next;
+                                            head[bits + 1].next->prev = &(dp[newSt]);
                                         }
-                                        head[bits + 1] = &(dp[newSt]);
+                                        head[bits + 1].next = &(dp[newSt]);
+                                        dp[newSt].prev = &(head[bits + 1]);
 
                                         dp[newSt].remain = coins[p] - costs[iC];
                                     }
@@ -116,22 +118,10 @@ int main()
                         }
 
                         // 删除该 item
-                        if (NULL == it->prev)
+                        it->prev->next = it->next;
+                        if (it->next)
                         {
-                            // first
-                            head[bits] = it->next;
-                            if (head[bits])
-                            {
-                                head[bits]->prev = NULL;
-                            }
-                        }
-                        else
-                        {
-                            it->prev->next = it->next;
-                            if (it->next)
-                            {
-                                it->next->prev = it->prev;
-                            }
+                            it->next->prev = it->prev;
                         }
                     }
                 }
@@ -144,9 +134,9 @@ int main()
 
     for (int bits = k; bits > 0; bits--)
     {
-        if (head[bits])
+        if (head[bits].next)
         {
-            for (Item *it = head[bits]; it != NULL; it = it->next)
+            for (Item *it = head[bits].next; it != NULL; it = it->next)
             {
                 unsigned short st = it->state;
                 int tmp = 0;

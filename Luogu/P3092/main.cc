@@ -34,14 +34,12 @@ class Item
 {
 public:
     unsigned short state;
-    int remain;
     int idx; // item in the [idx]th queue
     Item *prev, *next;
 
     Item()
     {
         idx = -1;
-        remain = -1;
     }
 };
 
@@ -69,7 +67,6 @@ int main()
     }
 
     dp[0].idx = 0;
-    dp[0].remain = 0;
     head[0][0].next = &(dp[0]);
     dp[0].prev = &(head[0][0]);
 
@@ -81,86 +78,79 @@ int main()
             {
                 for (Item * it = head[iC][bits].next; it != NULL; it = it->next)
                 {
-                    if (it->remain >= costs[iC])
+                    // 需要使用新的 coin
                     {
-                        // 还够用
-                        it->remain -= costs[iC];
-                    }
-                    else
-                    {
-                        // 需要使用新的 coin
+                        unsigned short st = it->state;
+
+                        for (size_t p = 0; p < k; p++)
                         {
-                            unsigned short st = it->state;
-
-                            for (size_t p = 0; p < k; p++)
+                            if (0 == (st & (1 << p)) && coins[p] >= costs[iC])
                             {
-                                if (0 == (st & (1 << p)) && coins[p] >= costs[iC])
+                                unsigned short newSt = st;
+                                newSt |= (1 << p);
+
+                                int tmp = costs[iC];
+                                int idx = iC + 1;
+
+                                for (idx = iC + 1; idx < n; idx++)
                                 {
-                                    unsigned short newSt = st;
-                                    newSt |= (1 << p);
-
-                                    int tmp = costs[iC];
-                                    int idx = iC + 1;
-
-                                    for (idx = iC + 1; idx < n; idx++)
+                                    tmp += costs[idx];
+                                    if (coins[p] < tmp)
                                     {
-                                        tmp += costs[idx];
-                                        if (coins[p] < tmp)
-                                        {
-                                            break;
-                                        }
+                                        break;
+                                    }
+                                }
+
+                                if (0 > dp[newSt].idx)
+                                {
+                                    // 还从未入队列
+                                    dp[newSt].next = head[idx][bits + 1].next;
+                                    if (head[idx][bits + 1].next)
+                                    {
+                                        head[idx][bits + 1].next->prev = &(dp[newSt]);
+                                    }
+                                    head[idx][bits + 1].next = &(dp[newSt]);
+                                    dp[newSt].prev = &(head[idx][bits + 1]);
+
+                                    dp[newSt].idx = idx;
+                                }
+                                else if (dp[newSt].idx < idx)
+                                {
+                                    // remove from old queue
+                                    dp[newSt].prev->next = dp[newSt].next;
+                                    if (dp[newSt].next)
+                                    {
+                                        dp[newSt].next->prev = dp[newSt].prev;
                                     }
 
-                                    if (0 > dp[newSt].idx)
+                                    // add to new queue
+                                    dp[newSt].next = head[idx][bits + 1].next;
+                                    if (head[idx][bits + 1].next)
                                     {
-                                        // 还从未入队列
-                                        dp[newSt].next = head[idx][bits + 1].next;
-                                        if (head[idx][bits + 1].next)
-                                        {
-                                            head[idx][bits + 1].next->prev = &(dp[newSt]);
-                                        }
-                                        head[idx][bits + 1].next = &(dp[newSt]);
-                                        dp[newSt].prev = &(head[idx][bits + 1]);
-
-                                        dp[newSt].remain = 0;
-                                        dp[newSt].idx = idx;
+                                        head[idx][bits + 1].next->prev = &(dp[newSt]);
                                     }
-                                    else if (dp[newSt].idx < idx)
-                                    {
-                                        // remove from old queue
-                                        dp[newSt].prev->next = dp[newSt].next;
-                                        if (dp[newSt].next)
-                                        {
-                                            dp[newSt].next->prev = dp[newSt].prev;
-                                        }
+                                    head[idx][bits + 1].next = &(dp[newSt]);
+                                    dp[newSt].prev = &(head[idx][bits + 1]);
 
-                                        // add to new queue
-                                        dp[newSt].next = head[idx][bits + 1].next;
-                                        if (head[idx][bits + 1].next)
-                                        {
-                                            head[idx][bits + 1].next->prev = &(dp[newSt]);
-                                        }
-                                        head[idx][bits + 1].next = &(dp[newSt]);
-                                        dp[newSt].prev = &(head[idx][bits + 1]);
-
-                                        dp[newSt].idx = idx;
-                                    }
-                                    else
-                                    {
-                                        // dp[newSt].idx >= idx
-                                        // do nothing
-                                    }
+                                    dp[newSt].idx = idx;
+                                }
+                                else
+                                {
+                                    // dp[newSt].idx >= idx
+                                    // do nothing
                                 }
                             }
                         }
-
-                        // 删除该 item
-                        it->prev->next = it->next;
-                        if (it->next)
-                        {
-                            it->next->prev = it->prev;
-                        }
                     }
+
+                    // 删除该 item
+/*
+                    it->prev->next = it->next;
+                    if (it->next)
+                    {
+                        it->next->prev = it->prev;
+                    }
+*/
                 }
             }
         }

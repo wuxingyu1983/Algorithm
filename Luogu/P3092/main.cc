@@ -78,7 +78,7 @@ int main()
 
     for (size_t iC = 0; iC < n; iC++)
     {
-        for (int bits = k; bits >= 0; bits--)
+        for (int bits = 0; bits <= k; bits++)
         {
             if (head[iC][bits].next)
             {

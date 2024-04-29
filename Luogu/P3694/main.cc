@@ -1,4 +1,5 @@
 // https://www.luogu.com.cn/problem/P3694
+// https://www.luogu.com.cn/article/8dbgzfzf
 
 #include <cmath>
 #include <cstdio>
@@ -29,6 +30,8 @@ using namespace std;
 unsigned int n, m;
 unsigned char idols[MAX_N];
 int dp[MAX_2M];
+int total[MAX_M];
+int prefixSum[MAX_M][MAX_N];
 
 int main()
 {
@@ -37,6 +40,17 @@ int main()
     for (size_t i = 0; i < n; i++)
     {
         cin >> idols[i];
+        total[idols[i]] ++;
+
+        if (0 < i)
+        {
+            for (size_t j = 1; j <= m; j++)
+            {
+                prefixSum[j][i] = prefixSum[j][i - 1];
+            }
+        }
+
+        prefixSum[idols[i]][i] ++;
     }
 
 

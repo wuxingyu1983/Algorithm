@@ -32,7 +32,7 @@ unsigned char idols[MAX_N];
 int dp[MAX_2M];
 int total[MAX_M];
 int prefixSum[MAX_M][MAX_N];
-int length[1048577];
+int length[MAX_2M];
 
 int main()
 {
@@ -41,7 +41,8 @@ int main()
     for (size_t i = 0; i < n; i++)
     {
         cin >> idols[i];
-        total[idols[i]] ++;
+        idols[i] -= '0';
+        total[idols[i]]++;
 
         if (0 < i)
         {
@@ -67,12 +68,32 @@ int main()
             }
         }
     }
-    
 
     for (size_t st = 1; st < (1 << m); st++)
     {
-
+        for (size_t pos = 1, j = 1; j <= st; pos++, j <<= 1)
+        {
+            if (st & j)
+            {
+                int subSt = st & (~j);
+                int tmp = dp[subSt] + total[pos];
+                if (0 < length[st])
+                {
+                    tmp -= prefixSum[pos][length[st] - 1];
+                }
+                if (0 < length[subSt])
+                {
+                    tmp += prefixSum[pos][length[subSt] - 1];
+                }
+                if (0 > dp[st] || dp[st] > tmp)
+                {
+                    dp[st] = tmp;
+                }
+            }
+        }
     }
+
+    cout << dp[(1 << m) - 1] << endl;
 
     return 0;
 }

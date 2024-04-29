@@ -23,12 +23,12 @@
 
 using namespace std;
 
-#define MAX_N 100001
+#define MAX_N 100010
 #define MAX_M 21
 #define MAX_2M 1048577
 
 unsigned int n, m;
-unsigned char idols[MAX_N];
+short idols[MAX_N];
 int dp[MAX_2M];
 int total[MAX_M];
 int prefixSum[MAX_M][MAX_N];
@@ -38,21 +38,17 @@ int main()
 {
     cin >> n >> m;
 
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 1; i <= n; i++)
     {
         cin >> idols[i];
-        idols[i] -= '0';
         total[idols[i]]++;
 
-        if (0 < i)
+        for (size_t j = 1; j <= m; j++)
         {
-            for (size_t j = 1; j <= m; j++)
-            {
-                prefixSum[j][i] = prefixSum[j][i - 1];
-            }
+            prefixSum[j][i] = prefixSum[j][i - 1];
         }
 
-        prefixSum[idols[i]][i] ++;
+        prefixSum[idols[i]][i]++;
     }
 
     // init
@@ -76,15 +72,7 @@ int main()
             if (st & j)
             {
                 int subSt = st & (~j);
-                int tmp = dp[subSt] + total[pos];
-                if (0 < length[st])
-                {
-                    tmp -= prefixSum[pos][length[st] - 1];
-                }
-                if (0 < length[subSt])
-                {
-                    tmp += prefixSum[pos][length[subSt] - 1];
-                }
+                int tmp = dp[subSt] + total[pos] - (prefixSum[pos][length[st]] - prefixSum[pos][length[subSt]]);
                 if (0 > dp[st] || dp[st] > tmp)
                 {
                     dp[st] = tmp;

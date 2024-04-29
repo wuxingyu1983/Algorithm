@@ -32,6 +32,7 @@ unsigned char idols[MAX_N];
 int dp[MAX_2M];
 int total[MAX_M];
 int prefixSum[MAX_M][MAX_N];
+int length[1048577];
 
 int main()
 {
@@ -53,7 +54,25 @@ int main()
         prefixSum[idols[i]][i] ++;
     }
 
+    // init
+    memset(dp, -1, sizeof(dp));
+    dp[0] = 0;
+    for (size_t st = 1; st < (1 << m); st++)
+    {
+        for (size_t pos = 1, j = 1; j <= st; pos++, j <<= 1)
+        {
+            if (j & st)
+            {
+                length[st] += total[pos];
+            }
+        }
+    }
+    
 
+    for (size_t st = 1; st < (1 << m); st++)
+    {
+
+    }
 
     return 0;
 }

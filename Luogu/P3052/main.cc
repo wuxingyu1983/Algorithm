@@ -23,7 +23,7 @@
 
 using namespace std;
 
-#define MAX_N   18
+#define MAX_N 18
 
 int n, w;
 int c[MAX_N];
@@ -47,8 +47,41 @@ int main()
     {
         cin >> c[i];
     }
-    
-    
+
+    for (size_t st = 1; st < (1 << n); st++)
+    {
+        for (size_t pos = 0, j = 1; j <= st; pos++, j <<= 1)
+        {
+            if (st & j)
+            {
+                int subSt = st & (~j);
+                int tmpEle = dp[subSt].elevator;
+                int tmpRem = dp[subSt].remain;
+
+                if (c[pos] > tmpRem)
+                {
+                    tmpEle++;
+                    tmpRem = w - c[pos];
+                }
+                else
+                {
+                    tmpRem -= c[pos];
+                }
+
+                if (0 == dp[st].elevator || dp[st].elevator > tmpEle)
+                {
+                    dp[st].elevator = tmpEle;
+                    dp[st].remain = tmpRem;
+                }
+                else if (dp[st].elevator == tmpEle && dp[st].remain < tmpRem)
+                {
+                    dp[st].remain = tmpRem;
+                }
+            }
+        }
+    }
+
+    cout << dp[(1 << n) - 1].elevator << endl;
 
     return 0;
 }

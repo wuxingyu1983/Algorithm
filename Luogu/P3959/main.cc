@@ -29,10 +29,10 @@ using namespace std;
 class Line
 {
 public:
-    int point;
-    int road;
+    int connect;
+    int length;
 
-    Line(int _point, int _road) : point(_point), road(_road) {}
+    Line(int _connect, int _length) : connect(_connect), length(_length) {}
 };
 
 vector<Line> lines[MAX_N + 1];
@@ -41,6 +41,16 @@ int n, m;
 
 int main()
 {
+    cin >> n >> m;
+
+    for (size_t i = 0; i < m; i++)
+    {
+        int src, dst, len;
+        cin >> src >> dst >> len;
+
+        lines[src].push_back(Line(dst, len));
+        lines[dst].push_back(Line(src, len));
+    }
 
     return 0;
 }

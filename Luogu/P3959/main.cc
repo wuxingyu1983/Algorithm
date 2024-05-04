@@ -26,7 +26,7 @@ using namespace std;
 #define MAX_N 12
 #define MAX_2N 4096
 #define MAX_M 1000
-#define QS_SIZE 100000
+#define QS_SIZE 1000000
 
 class Line
 {
@@ -55,7 +55,7 @@ int qHead, qTail;
 #define IS_EMPTY (qHead == qTail)
 #define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
-unordered_map<int, int> mps[MAX_N];
+unordered_map<int, int> mps;
 
 int n, m;
 int ans;
@@ -101,15 +101,19 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                     // add to queue
                     {
                         int key = ((layer + 1) << (2 * n)) | (st1 << n) | newSt;
-                        unordered_map<int, int>::iterator it = mps[layer + 1].find(key);
+                        unordered_map<int, int>::iterator it = mps.find(key);
 
-                        if (it == mps[layer + 1].end() || qs[it->second].state != key)
+                        if (it == mps.end() || qs[it->second].state != key)
                         {
                             int pInQ = qTail;
                             qs[pInQ].state = key;
                             qs[pInQ].cost = cost;
 
+                            mps[key] = pInQ;
+
                             qTail++;
+                            if (QS_SIZE <= qTail)
+                                qTail -= QS_SIZE;
                         }
                         else
                         {
@@ -165,11 +169,6 @@ int main()
         int st2 = qs[qHead].state & ((1 << n) - 1);
         int cost = qs[qHead].cost;
 
-        if (0 < layer && 0 > mps[layer - 1].size())
-        {
-            mps[layer - 1].clear();
-        }
-
         // 递归处理
         procRecursively(layer, st1, st2, cost, 0, 0);
 
@@ -177,6 +176,9 @@ int main()
         if (QS_SIZE <= qHead)
             qHead -= QS_SIZE;
     }
+
+    if (0 > ans)
+        ans = 0;
 
     cout << ans << endl;
 

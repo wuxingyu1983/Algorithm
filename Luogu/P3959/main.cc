@@ -37,7 +37,8 @@ public:
     Line(int _connect, int _length) : connect(_connect), length(_length) {}
 };
 
-short lines[MAX_N];
+int linesMask[MAX_N];
+vector<Line> lines[MAX_N];
 
 class Record
 {
@@ -60,9 +61,13 @@ int n, m;
 
 void porcRecursively(int layer, int st1, int st2, int newSt, int startPos)
 {
-    if (startPos < n)
+    for (size_t pos = startPos; pos < n; pos++)
     {
-
+        if (0 == (st1 & (1 << pos)) && (st2 & linesMask[pos]))
+        {
+            // 在该 layer 可以发展该 pos
+            
+        }
     }
 }
 
@@ -79,8 +84,11 @@ int main()
         src --;
         dst --;
 
-        lines[src] |= 1 << dst;
-        lines[dst] |= 1 << src;
+        linesMask[src] |= 1 << dst;
+        linesMask[dst] |= 1 << src;
+
+        lines[src].push_back(Line(dst, len));
+        lines[dst].push_back(Line(src, len));
     }
 
     // init

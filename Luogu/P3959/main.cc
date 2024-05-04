@@ -55,7 +55,7 @@ int qHead, qTail;
 #define IS_EMPTY (qHead == qTail)
 #define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
-unordered_map<int, int> mps;
+unordered_map<int, int> mps[MAX_N];
 
 int n, m;
 int ans;
@@ -101,15 +101,15 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                     // add to queue
                     {
                         int key = ((layer + 1) << (2 * n)) | (st1 << n) | newSt;
-                        unordered_map<int, int>::iterator it = mps.find(key);
+                        unordered_map<int, int>::iterator it = mps[layer + 1].find(key);
 
-                        if (it == mps.end() || qs[it->second].state != key)
+                        if (it == mps[layer + 1].end() || qs[it->second].state != key)
                         {
                             int pInQ = qTail;
                             qs[pInQ].state = key;
                             qs[pInQ].cost = cost;
 
-                            mps[key] = pInQ;
+                            mps[layer + 1][key] = pInQ;
 
                             qTail++;
                             if (QS_SIZE <= qTail)
@@ -168,6 +168,11 @@ int main()
         int st1 = (qs[qHead].state >> n) & ((1 << n) - 1);
         int st2 = qs[qHead].state & ((1 << n) - 1);
         int cost = qs[qHead].cost;
+
+        if (0 < mps[layer].size())
+        {
+            mps[layer].clear();
+        }
 
         // 递归处理
         procRecursively(layer, st1, st2, cost, 0, 0);

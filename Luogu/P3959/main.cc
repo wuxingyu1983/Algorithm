@@ -37,7 +37,7 @@ public:
     Line(int _connect, int _length) : connect(_connect), length(_length) {}
 };
 
-vector<Line> lines[MAX_N + 1];
+short lines[MAX_N];
 
 class Record
 {
@@ -58,9 +58,12 @@ unordered_map<int, int> mps[MAX_N];
 
 int n, m;
 
-void porcRecursively(int layer, int st1, int st2, int newSt)
+void porcRecursively(int layer, int st1, int st2, int newSt, int startPos)
 {
+    if (startPos < n)
+    {
 
+    }
 }
 
 int main()
@@ -72,8 +75,12 @@ int main()
         int src, dst, len;
         cin >> src >> dst >> len;
 
-        lines[src].push_back(Line(dst, len));
-        lines[dst].push_back(Line(src, len));
+        // start from 0
+        src --;
+        dst --;
+
+        lines[src] |= 1 << dst;
+        lines[dst] |= 1 << src;
     }
 
     // init
@@ -95,7 +102,7 @@ int main()
         }
 
         // 递归处理
-        porcRecursively(layer, st1, st2, 0);
+        porcRecursively(layer, st1, st2, 0, 0);
 
         qHead++;
         if (QS_SIZE <= qHead)

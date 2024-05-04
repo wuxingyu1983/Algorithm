@@ -43,9 +43,9 @@ vector<Line> lines[MAX_N];
 class Record
 {
 public:
-    int state;  // layer + st1 + st2;
+    int state; // layer + st1 + st2;
     int cost;
-    
+
     Record() {}
 };
 
@@ -58,6 +58,8 @@ int qHead, qTail;
 unordered_map<int, int> mps[MAX_N];
 
 int n, m;
+int ans;
+int finalSt;
 
 void procRecursively(int layer, int st1, int st2, int cost, int newSt, int startPos)
 {
@@ -82,11 +84,44 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                         }
                     }
                 }
-                
-                // add to queue
-                // TBD
 
-                procRecursively(layer, (st1 | (1 << pos)), st2, cost + (layer + 1) * v, newSt | (1 << pos), pos + 1);
+                st1 |= 1 << pos;
+                newSt |= 1 << pos;
+                cost += (layer + 1) * v;
+
+                if (st1 == finalSt)
+                {
+                    if (0 > ans || ans > cost)
+                    {
+                        ans = cost;
+                    }
+                }
+                else
+                {
+                    // add to queue
+                    {
+                        int key = ((layer + 1) << (2 * n)) | (st1 << n) | newSt;
+                        unordered_map<int, int>::iterator it = mps[layer + 1].find(key);
+
+                        if (it == mps[layer + 1].end() || qs[it->second].state != key)
+                        {
+                            int pInQ = qTail;
+                            qs[pInQ].state = key;
+                            qs[pInQ].cost = cost;
+
+                            qTail++;
+                        }
+                        else
+                        {
+                            if (qs[it->second].cost > cost)
+                            {
+                                qs[it->second].cost = cost;
+                            }
+                        }
+                    }
+
+                    procRecursively(layer, st1, st2, cost, newSt, pos + 1);
+                }
             }
 
             break;
@@ -104,8 +139,8 @@ int main()
         cin >> src >> dst >> len;
 
         // start from 0
-        src --;
-        dst --;
+        src--;
+        dst--;
 
         linesMask[src] |= 1 << dst;
         linesMask[dst] |= 1 << src;
@@ -120,6 +155,8 @@ int main()
         qs[qTail].state = st | (st << n);
         qTail++;
     }
+    ans = -1;
+    finalSt = (1 << n) - 1;
 
     while (false == IS_EMPTY)
     {
@@ -140,8 +177,6 @@ int main()
         if (QS_SIZE <= qHead)
             qHead -= QS_SIZE;
     }
-
-    int ans = -1;
 
     cout << ans << endl;
 

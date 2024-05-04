@@ -59,14 +59,37 @@ unordered_map<int, int> mps[MAX_N];
 
 int n, m;
 
-void porcRecursively(int layer, int st1, int st2, int newSt, int startPos)
+void procRecursively(int layer, int st1, int st2, int cost, int newSt, int startPos)
 {
     for (size_t pos = startPos; pos < n; pos++)
     {
         if (0 == (st1 & (1 << pos)) && (st2 & linesMask[pos]))
         {
-            // 在该 layer 可以发展该 pos
-            
+            // 在该 layer 可以挖掘该 pos
+            // 不挖掘，留在以后
+            procRecursively(layer, st1, st2, cost, newSt, pos + 1);
+
+            // 挖掘
+            {
+                int v = -1;
+                for (vector<Line>::iterator it = lines[pos].begin(); it != lines[pos].end(); it++)
+                {
+                    if (st2 & (1 << it->connect))
+                    {
+                        if (0 > v || v > it->length)
+                        {
+                            v = it->length;
+                        }
+                    }
+                }
+                
+                // add to queue
+                // TBD
+
+                procRecursively(layer, (st1 | (1 << pos)), st2, cost + (layer + 1) * v, newSt | (1 << pos), pos + 1);
+            }
+
+            break;
         }
     }
 }
@@ -103,6 +126,7 @@ int main()
         int layer = (qs[qHead].state >> (2 * n)) & 0xf;
         int st1 = (qs[qHead].state >> n) & ((1 << n) - 1);
         int st2 = qs[qHead].state & ((1 << n) - 1);
+        int cost = qs[qHead].cost;
 
         if (0 < layer && 0 > mps[layer - 1].size())
         {
@@ -110,7 +134,7 @@ int main()
         }
 
         // 递归处理
-        porcRecursively(layer, st1, st2, 0, 0);
+        procRecursively(layer, st1, st2, cost, 0, 0);
 
         qHead++;
         if (QS_SIZE <= qHead)

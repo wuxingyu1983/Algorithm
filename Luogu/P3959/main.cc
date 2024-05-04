@@ -58,6 +58,11 @@ unordered_map<int, int> mps[MAX_N];
 
 int n, m;
 
+void porcRecursively(int layer, int st1, int st2, int newSt)
+{
+
+}
+
 int main()
 {
     cin >> n >> m;
@@ -76,6 +81,25 @@ int main()
     {
         qs[qTail].state = st | (st << n);
         qTail++;
+    }
+
+    while (false == IS_EMPTY)
+    {
+        int layer = (qs[qHead].state >> (2 * n)) & 0xf;
+        int st1 = (qs[qHead].state >> n) & ((1 << n) - 1);
+        int st2 = qs[qHead].state & ((1 << n) - 1);
+
+        if (0 < layer && 0 > mps[layer - 1].size())
+        {
+            mps[layer - 1].clear();
+        }
+
+        // 递归处理
+        porcRecursively(layer, st1, st2, 0);
+
+        qHead++;
+        if (QS_SIZE <= qHead)
+            qHead -= QS_SIZE;
     }
 
     int ans = -1;

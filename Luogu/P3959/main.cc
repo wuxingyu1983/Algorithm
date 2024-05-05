@@ -26,7 +26,9 @@ using namespace std;
 #define MAX_N 12
 #define MAX_2N 4096
 #define MAX_M 1000
-#define QS_SIZE 1000000
+#define QS_SIZE 3000000
+
+typedef int (*PPTR)[MAX_2N];
 
 class Line
 {
@@ -43,7 +45,9 @@ int length[MAX_N][MAX_N];
 class Record
 {
 public:
-    int state; // layer + st1 + st2;
+    int key; // layer + st1 + st2;
+    unsigned char layer;
+    short st1, st2;
     int cost;
 
     Record() {}
@@ -55,7 +59,8 @@ int qHead, qTail;
 #define IS_EMPTY (qHead == qTail)
 #define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
-unordered_map<int, int> mps[MAX_N];
+//int mps[MAX_N][MAX_2N][MAX_2N];
+PPTR mps[MAX_N];
 
 int n, m;
 int ans;
@@ -102,25 +107,30 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                     // add to queue
                     {
                         int key = ((layer + 1) << (2 * n)) | (st1 << n) | newSt;
-                        unordered_map<int, int>::iterator it = mps[layer + 1].find(key);
 
-                        if (it == mps[layer + 1].end() || qs[it->second].state != key)
+                        if (0 > mps[layer + 1][st1][newSt] || qs[mps[layer + 1][st1][newSt]].key != key)
                         {
                             int pInQ = qTail;
-                            qs[pInQ].state = key;
+                            qs[pInQ].key = key;
+                            qs[pInQ].layer = layer + 1;
+                            qs[pInQ].st1 = st1;
+                            qs[pInQ].st2 = newSt;
                             qs[pInQ].cost = cost;
 
-                            mps[layer + 1][key] = pInQ;
+                            mps[layer + 1][st1][newSt] = pInQ;
 
                             qTail++;
                             if (QS_SIZE <= qTail)
                                 qTail -= QS_SIZE;
+                            
+                            if (IS_FULL)
+                                cout << "FULL" << endl;
                         }
                         else
                         {
-                            if (qs[it->second].cost > cost)
+                            if (qs[mps[layer + 1][st1][newSt]].cost > cost)
                             {
-                                qs[it->second].cost = cost;
+                                qs[mps[layer + 1][st1][newSt]].cost = cost;
                             }
                         }
                     }
@@ -160,7 +170,8 @@ int main()
     // init
     for (size_t i = 0, st = 1; i < n; i++, st <<= 1)
     {
-        qs[qTail].state = st | (st << n);
+        qs[qTail].key = st | (st << n);
+        qs[qTail].st1 = qs[qTail].st2 = st;
         qTail++;
     }
     ans = -1;
@@ -168,14 +179,21 @@ int main()
 
     while (false == IS_EMPTY)
     {
-        int layer = (qs[qHead].state >> (2 * n)) & 0xf;
-        int st1 = (qs[qHead].state >> n) & ((1 << n) - 1);
-        int st2 = qs[qHead].state & ((1 << n) - 1);
+        int layer = qs[qHead].layer;
+        int st1 = qs[qHead].st1;
+        int st2 = qs[qHead].st2;
         int cost = qs[qHead].cost;
 
-        if (0 < mps[layer].size())
+        if (mps[layer])
         {
-            mps[layer].clear();
+            delete[] mps[layer];
+            mps[layer] = NULL;
+        }
+
+        if (NULL == mps[layer + 1])
+        {
+            mps[layer + 1] = new int[MAX_2N][MAX_2N];
+            memset(mps[layer + 1], -1, sizeof(int) * MAX_2N * MAX_2N);
         }
 
         // 递归处理

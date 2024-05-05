@@ -25,7 +25,6 @@ using namespace std;
 
 #define MAX_N 12
 #define MAX_2N 4096
-#define MAX_M 1000
 #define QS_SIZE 3000000
 
 typedef int (*PPTR)[MAX_2N];
@@ -50,6 +49,7 @@ int qHead, qTail;
 #define IS_EMPTY (qHead == qTail)
 #define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
+//unordered_map<int, int> mps[MAX_N];
 PPTR mps[MAX_N];
 
 int n, m;
@@ -80,7 +80,7 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                 {
                     if (st2 & (1 << j))
                     {
-                        if (0 > v || (0 < length[pos][j] && v > length[pos][j]))
+                        if (0 > v || (0 <= length[pos][j] && v > length[pos][j]))
                         {
                             v = length[pos][j];
                         }
@@ -104,6 +104,9 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                     {
                         int key = (layer << (2 * n)) | (st1 << n) | newSt;
 
+//                        unordered_map<int, int>::iterator it = mps[layer].find(key);
+
+//                        if (it == mps[layer + 1].end() || qs[it->second].key != key)
                         if (0 > mps[layer][st1][newSt] || qs[mps[layer][st1][newSt]].key != key)
                         {
                             int pInQ = qTail;
@@ -113,6 +116,7 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                             qs[pInQ].st2 = newSt;
                             qs[pInQ].cost = cost;
 
+//                            mps[layer][key] = pInQ;
                             mps[layer][st1][newSt] = pInQ;
 
                             qTail++;
@@ -124,10 +128,17 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                         }
                         else
                         {
+
                             if (qs[mps[layer][st1][newSt]].cost > cost)
                             {
                                 qs[mps[layer][st1][newSt]].cost = cost;
                             }
+/*
+                            if (qs[it->second].cost > cost)
+                            {
+                                qs[it->second].cost = cost;
+                            }
+*/
                         }
                     }
 
@@ -144,6 +155,8 @@ int main()
 {
     cin >> n >> m;
 
+    memset(length, -1, sizeof(length));
+
     for (size_t i = 0; i < m; i++)
     {
         int src, dst, len;
@@ -156,7 +169,7 @@ int main()
         linesMask[src] |= 1 << dst;
         linesMask[dst] |= 1 << src;
 
-        if (0 == length[src][dst] || len < length[src][dst])
+        if (0 > length[src][dst] || len < length[src][dst])
         {
             length[src][dst] = len;
             length[dst][src] = len;
@@ -180,7 +193,12 @@ int main()
         int st1 = qs[qHead].st1;
         int st2 = qs[qHead].st2;
         int cost = qs[qHead].cost;
-
+        /*
+                if (0 < mps[layer].size())
+                {
+                    mps[layer].clear();
+                }
+        */
         if (mps[layer])
         {
             delete[] mps[layer];

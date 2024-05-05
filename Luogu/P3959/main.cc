@@ -49,7 +49,6 @@ int qHead, qTail;
 #define IS_EMPTY (qHead == qTail)
 #define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
-//unordered_map<int, int> mps[MAX_N];
 PPTR mps[MAX_N];
 
 int n, m;
@@ -104,9 +103,6 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                     {
                         int key = (layer << (2 * n)) | (st1 << n) | newSt;
 
-//                        unordered_map<int, int>::iterator it = mps[layer].find(key);
-
-//                        if (it == mps[layer + 1].end() || qs[it->second].key != key)
                         if (0 > mps[layer][st1][newSt] || qs[mps[layer][st1][newSt]].key != key)
                         {
                             int pInQ = qTail;
@@ -116,7 +112,6 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                             qs[pInQ].st2 = newSt;
                             qs[pInQ].cost = cost;
 
-//                            mps[layer][key] = pInQ;
                             mps[layer][st1][newSt] = pInQ;
 
                             qTail++;
@@ -133,12 +128,6 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                             {
                                 qs[mps[layer][st1][newSt]].cost = cost;
                             }
-/*
-                            if (qs[it->second].cost > cost)
-                            {
-                                qs[it->second].cost = cost;
-                            }
-*/
                         }
                     }
 
@@ -193,12 +182,7 @@ int main()
         int st1 = qs[qHead].st1;
         int st2 = qs[qHead].st2;
         int cost = qs[qHead].cost;
-        /*
-                if (0 < mps[layer].size())
-                {
-                    mps[layer].clear();
-                }
-        */
+
         if (mps[layer])
         {
             delete[] mps[layer];

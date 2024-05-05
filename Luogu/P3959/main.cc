@@ -38,7 +38,7 @@ public:
 };
 
 int linesMask[MAX_N];
-vector<Line> lines[MAX_N];
+int length[MAX_N][MAX_N];
 
 class Record
 {
@@ -74,13 +74,14 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
             // 挖掘
             {
                 int v = -1;
-                for (vector<Line>::iterator it = lines[pos].begin(); it != lines[pos].end(); it++)
+
+                for (size_t j = 0; j < n; j++)
                 {
-                    if (st2 & (1 << it->connect))
+                    if (st2 & (1 << j))
                     {
-                        if (0 > v || v > it->length)
+                        if (0 > v || v > length[pos][j])
                         {
-                            v = it->length;
+                            v = length[pos][j];
                         }
                     }
                 }
@@ -149,8 +150,11 @@ int main()
         linesMask[src] |= 1 << dst;
         linesMask[dst] |= 1 << src;
 
-        lines[src].push_back(Line(dst, len));
-        lines[dst].push_back(Line(src, len));
+        if (0 == length[src][dst] || len < length[src][dst])
+        {
+            length[src][dst] = len;
+            length[dst][src] = len;
+        }
     }
 
     // init

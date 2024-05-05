@@ -50,7 +50,6 @@ int qHead, qTail;
 #define IS_EMPTY (qHead == qTail)
 #define IS_FULL (qHead == ((qTail + 1) % QS_SIZE))
 
-//int mps[MAX_N][MAX_2N][MAX_2N];
 PPTR mps[MAX_N];
 
 int n, m;
@@ -63,6 +62,12 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
     {
         if (0 == (st1 & (1 << pos)) && (st2 & linesMask[pos]))
         {
+            if (NULL == mps[layer])
+            {
+                mps[layer] = new int[MAX_2N][MAX_2N];
+                memset(mps[layer], -1, sizeof(int) * MAX_2N * MAX_2N);
+            }
+
             // 在该 layer 可以挖掘该 pos
             // 不挖掘，留在以后
             procRecursively(layer, st1, st2, cost, newSt, pos + 1);
@@ -84,7 +89,7 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
 
                 st1 |= 1 << pos;
                 newSt |= 1 << pos;
-                cost += (layer + 1) * v;
+                cost += layer * v;
 
                 if (st1 == finalSt)
                 {
@@ -97,31 +102,31 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                 {
                     // add to queue
                     {
-                        int key = ((layer + 1) << (2 * n)) | (st1 << n) | newSt;
+                        int key = (layer << (2 * n)) | (st1 << n) | newSt;
 
-                        if (0 > mps[layer + 1][st1][newSt] || qs[mps[layer + 1][st1][newSt]].key != key)
+                        if (0 > mps[layer][st1][newSt] || qs[mps[layer][st1][newSt]].key != key)
                         {
                             int pInQ = qTail;
                             qs[pInQ].key = key;
-                            qs[pInQ].layer = layer + 1;
+                            qs[pInQ].layer = layer;
                             qs[pInQ].st1 = st1;
                             qs[pInQ].st2 = newSt;
                             qs[pInQ].cost = cost;
 
-                            mps[layer + 1][st1][newSt] = pInQ;
+                            mps[layer][st1][newSt] = pInQ;
 
                             qTail++;
                             if (QS_SIZE <= qTail)
                                 qTail -= QS_SIZE;
-                            
+
                             if (IS_FULL)
                                 cout << "FULL" << endl;
                         }
                         else
                         {
-                            if (qs[mps[layer + 1][st1][newSt]].cost > cost)
+                            if (qs[mps[layer][st1][newSt]].cost > cost)
                             {
-                                qs[mps[layer + 1][st1][newSt]].cost = cost;
+                                qs[mps[layer][st1][newSt]].cost = cost;
                             }
                         }
                     }
@@ -161,8 +166,9 @@ int main()
     // init
     for (size_t i = 0, st = 1; i < n; i++, st <<= 1)
     {
+        qs[qTail].st1 = st;
+        qs[qTail].st2 = st;
         qs[qTail].key = st | (st << n);
-        qs[qTail].st1 = qs[qTail].st2 = st;
         qTail++;
     }
     ans = -1;
@@ -181,14 +187,8 @@ int main()
             mps[layer] = NULL;
         }
 
-        if (NULL == mps[layer + 1])
-        {
-            mps[layer + 1] = new int[MAX_2N][MAX_2N];
-            memset(mps[layer + 1], -1, sizeof(int) * MAX_2N * MAX_2N);
-        }
-
         // 递归处理
-        procRecursively(layer, st1, st2, cost, 0, 0);
+        procRecursively(layer + 1, st1, st2, cost, 0, 0);
 
         qHead++;
         if (QS_SIZE <= qHead)

@@ -30,15 +30,6 @@ using namespace std;
 
 typedef int (*PPTR)[MAX_2N];
 
-class Line
-{
-public:
-    int connect;
-    int length;
-
-    Line(int _connect, int _length) : connect(_connect), length(_length) {}
-};
-
 int linesMask[MAX_N];
 int length[MAX_N][MAX_N];
 
@@ -84,7 +75,7 @@ void procRecursively(int layer, int st1, int st2, int cost, int newSt, int start
                 {
                     if (st2 & (1 << j))
                     {
-                        if (0 > v || v > length[pos][j])
+                        if (0 > v || (0 < length[pos][j] && v > length[pos][j]))
                         {
                             v = length[pos][j];
                         }

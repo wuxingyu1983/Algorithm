@@ -20,12 +20,13 @@ public:
         init();
 
         int ans = 0;
+        int act = 0;
 
         for (size_t i = 0; i < n; i++)
         {
             for (size_t st = 0; st < (1 << (2 * numSlots)); st++)
             {
-                if (0 <= dp[i][st])
+                if (0 <= dp[act][st])
                 {
                     for (size_t slot = 0; slot < numSlots; slot++)
                     {
@@ -33,11 +34,11 @@ public:
                         if (2 > cnt)
                         {
                             int newSt = st + (1 << (2 * slot));
-                            short newSum = dp[i][st] + (nums[i] & slot);
+                            short newSum = dp[act][st] + (nums[i] & (slot +1));
 
-                            if (newSum > dp[i + 1][newSt])
+                            if (newSum > dp[1 - act][newSt])
                             {
-                                dp[i + 1][newSt] = newSum;
+                                dp[1 - act][newSt] = newSum;
                                 if (ans < newSum)
                                 {
                                     ans = newSum;
@@ -47,6 +48,9 @@ public:
                     }
                 }
             }
+
+            memset(dp[act], -1, sizeof(dp[act]));
+            act = 1 - act;
         }
 
         return ans;
@@ -54,7 +58,7 @@ public:
 
 private:
     int n;
-    short dp[19][262144];
+    short dp[2][262144];
 
     void init() {
         memset(dp, -1, sizeof(dp));

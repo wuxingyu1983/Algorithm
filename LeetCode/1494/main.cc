@@ -13,9 +13,11 @@
 
 using namespace std;
 
-class Solution {
+class Solution
+{
 public:
-    int minNumberOfSemesters(int n, vector< vector<int> >& relations, int k) {
+    int minNumberOfSemesters(int n, vector<vector<int>> &relations, int k)
+    {
         // init
         pN = n;
         pK = k;
@@ -29,27 +31,28 @@ public:
         }
         finalSt = (1 << n) - 1;
 
-        int iRet = 0;   // term - 1
+        int iRet = 0; // term - 1
         act = 0;
         term[act][0] = 1;
 
         while (true)
         {
-            iRet ++;
+            iRet++;
             for (size_t st = 0; st <= finalSt; st++)
             {
                 if (term[act][st])
                 {
                     if (proc(st, st, 0, 0))
                     {
-                        break;
+                        goto END;
                     }
                 }
             }
             memset(term[act], 0, sizeof(term[act]));
             act = 1 - act;
         }
-        
+
+    END:
         return iRet;
     }
 
@@ -76,12 +79,12 @@ private:
                 bRet = proc(st, newSt, start + 1, tmpK);
 
                 // 选该 start 课程
-                if (false == bRet && 0 == (1 << start) & newSt)
+                if (false == bRet && 0 == ((1 << start) & newSt))
                 {
                     bool flag = true;
                     for (vector<int>::iterator it = parents[start].begin(); it != parents[start].end(); it++)
                     {
-                        if (0 == st & (1 << *it))
+                        if (0 == (st & (1 << *it)))
                         {
                             flag = false;
                             break;
@@ -105,7 +108,7 @@ int main()
     int n, k;
     cin >> n >> k;
 
-    vector< vector<int> > vec;
+    vector<vector<int>> vec;
 
     int parent, child;
     while (cin >> parent >> child)

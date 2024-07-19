@@ -38,12 +38,41 @@ public:
             {
                 if (0 <= dp[h -1][st])
                 {
+                    // 该帽子[h]不戴，直接考虑下一个帽子
+                    if (0 > dp[h][st])
+                    {
+                        dp[h][st] = dp[h - 1][st];
+                    }
+                    else
+                    {
+                        // 0 <= dp[h][st]
+                        dp[h][st] += dp[h - 1][st];
+                        dp[h][st] %= mod;
+                    }
 
+                    // 尝试戴该帽子
+                    for (vector<int>::iterator it = likes[h].begin(); it != likes[h].end(); it++)
+                    {
+                        if (0 == (st & (1 << *it)))
+                        {
+                            int newSt = st | (1 << *it);
+
+                            if (0 > dp[h][newSt])
+                            {
+                                dp[h][newSt] = dp[h - 1][st];
+                            }
+                            else
+                            {
+                                dp[h][newSt] += dp[h - 1][st];
+                                dp[h][newSt] %= mod;
+                            }
+                        }
+                    }
                 }
             }
         }
         
-        return dp[40][finalSt];
+        return dp[40][finalSt] >= 0 ? dp[40][finalSt] : 0;
     }
 
 private:
@@ -62,6 +91,8 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
+        vec.push_back(vector<int>());
+
         int hat;
         while (cin >> hat)
         {

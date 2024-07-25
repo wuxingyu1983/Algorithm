@@ -30,7 +30,14 @@ private:
         memset(gcd, 0, sizeof(gcd));
         memset(dp, 0, sizeof(dp));
 
-
+        for (size_t i = 0; i < nums.size(); i++)
+        {
+            for (size_t j = 0; j < i; j++)
+            {
+                gcd[i][j] = gcd[j][i] = gcdFunc(nums[i], nums[j]);
+            }
+        }
+        
     }
 
     int gcdFunc(int a, int b)

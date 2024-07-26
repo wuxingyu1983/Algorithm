@@ -43,7 +43,7 @@ public:
 
                             for (size_t col = 0; col < n; col++)
                             {
-                                if ('#' == seats[row - 1][col] && (curr && (1 << col)))
+                                if ('#' == seats[row - 1][col] && (curr & (1 << col)))
                                 {
                                     valid = false;
                                     break;
@@ -55,6 +55,7 @@ public:
                                 if (0 > dp[row][curr] || dp[row][curr] < (ones[curr] + dp[row - 1][pre]))
                                 {
                                     dp[row][curr] = ones[curr] + dp[row - 1][pre];
+
                                     if (row == m && iRet < dp[row][curr])
                                     {
                                         iRet = dp[row][curr];

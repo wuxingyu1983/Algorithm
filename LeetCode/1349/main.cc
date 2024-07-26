@@ -23,7 +23,7 @@ public:
         m = seats.size();
         n = seats[0].size();
 
-        int finalSt = (1 << n) - 1;
+        finalSt = (1 << n) - 1;
 
         init();
 
@@ -75,6 +75,7 @@ private:
     unsigned char flags[256][256];
     int dp[9][256];
     int m, n;   // row, col
+    int finalSt;
 
     void init()
     {
@@ -82,9 +83,9 @@ private:
         memset(flags, 1, sizeof(flags));
         memset(dp, -1, sizeof(dp));
 
-        for (size_t st = 0; st < 256; st++)
+        for (size_t st = 0; st <= finalSt; st++)
         {
-            for (size_t i = 0; i < 8; i++)
+            for (size_t i = 0; i < n; i++)
             {
                 if (st & (1 << i))
                 {
@@ -93,11 +94,11 @@ private:
             }
         }
 
-        for (size_t pre = 0; pre < 256; pre++)
+        for (size_t pre = 0; pre <= finalSt; pre++)
         {
-            for (size_t curr = 0; curr < 256; curr++)
+            for (size_t curr = 0; curr <= finalSt; curr++)
             {
-                for (size_t i = 0; i < 8; i++)
+                for (size_t i = 0; i < n; i++)
                 {
                     if (curr & (1 << i))
                     {

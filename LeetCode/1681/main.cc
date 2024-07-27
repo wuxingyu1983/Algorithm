@@ -24,9 +24,16 @@ public:
         }
 
         // init
-        memset(dp, -1, sizeof(dp));
         cntInSet = nums.size() / k;
         finalSt = (1 << nums.size()) - 1;
+
+        dp = new int *[k + 1];
+        for (size_t i = 0; i <= k; i++)
+        {
+            dp[i] = new int[finalSt + 1];
+            memset(dp[i], -1, sizeof(int) * (finalSt + 1));
+        }
+
         sort(nums.begin(), nums.end());
         dp[0][0] = 0;
 
@@ -40,12 +47,12 @@ public:
                 }
             }
         }
-        
+
         return dp[k][finalSt];
     }
 
 private:
-    int dp[17][65536];
+    int **dp;
     int cntInSet;
     int finalSt;
 
@@ -53,29 +60,34 @@ private:
     {
         if (curr < nums.size())
         {
-            // 忽略当前 curr
-            func(nums, rd, st, newSt, last, curr + 1, cnt, sum);
-
             if (0 == (st & (1 << curr)))
             {
                 if (0 > last || nums[last] != nums[curr])
                 {
-                    newSt |= 1 << curr;
-                    sum += nums[curr] - nums[last];
+                    int tmpSt = newSt | (1 << curr);
+                    int tmpSum = sum;
+
+                    if (0 <= last)
+                    {
+                        tmpSum += nums[curr] - nums[last];
+                    }
 
                     if (1 == cnt)
                     {
-                        if (0 > dp[rd][newSt] || sum < dp[rd][newSt])
+                        if (0 > dp[rd][tmpSt] || tmpSum < dp[rd][tmpSt])
                         {
-                            dp[rd][newSt] = sum;
+                            dp[rd][tmpSt] = tmpSum;
                         }
                     }
                     else
                     {
-                        func(nums, rd, st, newSt, curr, curr + 1, cnt - 1, sum);
+                        func(nums, rd, st, tmpSt, curr, curr + 1, cnt - 1, tmpSum);
                     }
                 }
             }
+
+            // 忽略当前 curr
+            func(nums, rd, st, newSt, last, curr + 1, cnt, sum);
         }
     }
 };

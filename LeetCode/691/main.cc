@@ -67,10 +67,12 @@ private:
             {
                 if (0 == (newSt & (1 << iT)))
                 {
-                    if (sticker[iS] == target[iT])
+                    if (sticker.at(iS) == target.at(iT))
                     {
                         newSt |= 1 << iT;
-                        iRet ++;
+                        iRet++;
+
+                        break;
                     }
                 }
             }
@@ -78,7 +80,7 @@ private:
 
         if (iRet)
         {
-            cnt ++;
+            cnt++;
             if (0 > dp[rd][newSt] || cnt < dp[rd][newSt])
             {
                 dp[rd][newSt] = cnt;
@@ -94,13 +96,15 @@ int main()
     string target;
     cin >> target;
 
+    int n;
+    cin >> n;
+
     vector<string> stickers;
     string str;
-    while (cin >> str)
+    for (int i = 0; i < n; i++)
     {
+        cin >> str;
         stickers.push_back(str);
-        if (cin.get() == '\n')
-            break;
     }
 
     Solution s;

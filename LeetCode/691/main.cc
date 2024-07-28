@@ -34,7 +34,18 @@ public:
             {
                 if (0 <= dp[i - 1][st])
                 {
-                    
+                    // 忽略该 string
+                    if (0 > dp[i][st] || dp[i][st] > dp[i - 1][st])
+                    {
+                        dp[i][st] = dp[i - 1][st];
+                    }
+
+                    int newSt = st;
+                    int cnt = dp[i - 1][st];
+
+                    while (func(stickers[i - 1], target, i, newSt, cnt))
+                    {
+                    }
                 }
             }
         }
@@ -45,6 +56,37 @@ public:
 private:
     int **dp;
     int finalSt;
+
+    int func(string sticker, string target, int rd, int &newSt, int &cnt)
+    {
+        int iRet = 0;
+
+        for (size_t iS = 0; iS < sticker.length(); iS++)
+        {
+            for (size_t iT = 0; iT < target.length(); iT++)
+            {
+                if (0 == (newSt & (1 << iT)))
+                {
+                    if (sticker[iS] == target[iT])
+                    {
+                        newSt |= 1 << iT;
+                        iRet ++;
+                    }
+                }
+            }
+        }
+
+        if (iRet)
+        {
+            cnt ++;
+            if (0 > dp[rd][newSt] || cnt < dp[rd][newSt])
+            {
+                dp[rd][newSt] = cnt;
+            }
+        }
+
+        return iRet;
+    }
 };
 
 int main()

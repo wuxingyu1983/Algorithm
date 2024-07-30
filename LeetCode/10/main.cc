@@ -25,6 +25,20 @@ public:
 
         for (size_t iP = 1; iP <= p.length(); iP++)
         {
+            if ('*' == p.at(iP - 1))
+            {
+                int tmpP = iP;
+                while (0 < tmpP && '*' == p.at(tmpP - 1))
+                {
+                    tmpP--;
+                }
+
+                dp[0][iP] = dp[0][tmpP - 1];
+            }
+        }
+
+        for (size_t iP = 1; iP <= p.length(); iP++)
+        {
             char chP = p.at(iP - 1);
             for (size_t iS = 1; iS <= s.length(); iS++)
             {
@@ -32,7 +46,21 @@ public:
 
                 if ('*' == chP)
                 {
-                    dp[iS][iP] = dp[iS - 1][iP - 1] + dp[iS - 1][iP] + dp[iS][iP - 1];
+                    // get last ch
+                    int tmpP = iP;
+                    while (0 < tmpP && '*' == p.at(tmpP - 1))
+                    {
+                        tmpP--;
+                    }
+
+                    if (chS == p.at(tmpP - 1) || '.' == p.at(tmpP - 1))
+                    {
+                        dp[iS][iP] = dp[iS][iP - 1] + dp[iS - 1][iP - 1] + dp[iS - 1][iP] + dp[iS][tmpP - 1];
+                    }
+                    else
+                    {
+                        dp[iS][iP] = dp[iS][tmpP - 1];
+                    }
                 }
                 else if ('.' == chP)
                 {

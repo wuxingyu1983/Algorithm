@@ -30,9 +30,44 @@ class Solution
 public:
     int getMaxLayerSum(TreeNode *root)
     {
-        int ret = 0;
+        // init
+        max = INT_MIN;
+        memset(layers, 0, sizeof(layers));
+        initLayers(root, 0);
 
-        return ret;
+        for (size_t l = 0; l < 100000; l++)
+        {
+            if (max < layers[l])
+            {
+                max = layers[l];
+            }
+        }
+        
+
+
+        return max;
+    }
+
+private:
+    int max;
+    int layers[100000];
+
+    void initLayers(TreeNode * node, int ly)
+    {
+        if (node)
+        {
+            layers[ly] += node->val;
+
+            if (node->left)
+            {
+                initLayers(node->left, ly + 1);
+            }
+
+            if (node->right)
+            {
+                initLayers(node->right, ly + 1);
+            }
+        }
     }
 };
 

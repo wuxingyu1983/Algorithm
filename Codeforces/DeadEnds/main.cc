@@ -24,109 +24,206 @@ using namespace std;
 
 #define DEBUG   0
 #define MAX_N   10
-#define MAX_2N  1024
-#define MAX_M   46
 
-#define getVal4St(ST, POS) (((ST) >> (POS)) & 1)
+#define ST1_BITS 3
+#define ST1_MASK 7
+#define ST2_BITS 1
+#define ST2_MASK 1
+#define QS_SIZE 50000
 
-#define setVal4St(ST, POS, VAL) \
-    ST &= ~(1 << (POS));        \
-    if (VAL)                    \
-        ST |= (VAL) << (POS);
+class Record
+{
+public:
+    unsigned int state1;
+    unsigned short state2;
+    unsigned int cnt;
+    unsigned char minUnused;
 
-int dp[MAX_M][MAX_2N][MAX_2N];     // [st1][st2], st1 : 1 - 已经包含了；st2 : 1 - dead ends
+    Record() {}
+};
+
+#define getVal4St(ST, POS, BITS, MASK) (((ST) >> (POS) * BITS) & MASK)
+
+#define setVal4St(ST, POS, VAL, BITS, MASK) \
+    ST &= ~(MASK << ((POS) * BITS));        \
+    if (VAL)                                \
+        ST |= (VAL) << ((POS) * BITS);
+
+
+Record qs[2][QS_SIZE];
+int qTail[2];
+unordered_map<unsigned long long, unsigned int> cnts[2];
+int act = 0; // 当前生效的 map
 
 int n, m, k;
+
+inline void addSts(unsigned int st1, unsigned short st2, unsigned int cnt, int idx)
+{
+    int bb[16];
+    memset(bb, -1, sizeof(bb));
+
+    int bn = 1;
+    bb[0] = 0;
+    for (int i = 0; i < n; i++)
+    {
+        int tmp = getVal4St(st1, i, ST1_BITS, ST1_MASK);
+        if (0 < tmp)
+        {
+            if (0 > bb[tmp])
+            {
+                bb[tmp] = bn++;
+            }
+            setVal4St(st1, i, bb[tmp], ST1_BITS, ST1_MASK);
+        }
+    }
+
+    unsigned long long key = (((unsigned long long)st1) >> 16) + st2;
+
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
+    if (it == cnts[idx].end())
+    {
+        int pInQ = qTail[idx];
+        // 加入队尾
+        qs[idx][pInQ].state1 = st1;
+        qs[idx][pInQ].state2 = st2;
+        qs[idx][pInQ].cnt = cnt;
+        qs[idx][pInQ].minUnused = bn;
+
+        cnts[idx][key] = pInQ;
+        qTail[idx]++;
+    }
+    else
+    {
+        qs[idx][it->second].cnt += cnt;
+    }
+}
 
 int main()
 {
     cin >> n >> m >> k;
-
-    int finalSt = (1 << n) - 1;
-
+    
     // init
-    memset(dp, 0, sizeof(dp));
-    dp[0][0][0] = 1;
+    act = 0;
 
-    for (size_t iM = 1; iM <= m; iM++)
+    qTail[0] = 0;
+    qTail[1] = 0;
+
+    cnts[0].clear();
+    cnts[1].clear();
+
+    qs[act][0].state1 = 0;
+    qs[act][0].state2 = 0;
+    qs[act][0].cnt = 1;
+    qs[act][0].minUnused = 1;
+
+    qTail[act]++;
+
+    for (size_t i = 0; i < m; i++)
     {
         int v1, v2;
         cin >> v1 >> v2;
 
-        v1 --;
-        v2 --;
+        v1--;
+        v2--;
 
-        for (size_t st1 = 0; st1 <= finalSt; st1++)
+        int nAct = 1 - act;
+
+        for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
-            for (size_t st2 = 0; st2 <= finalSt; st2++)
+            unsigned int st1 = qs[act][iQ].state1;
+            unsigned short st2 = qs[act][iQ].state2;
+            unsigned int cnt = qs[act][iQ].cnt;
+            unsigned char minUnused = qs[act][iQ].minUnused;
+
+            unsigned int gp1 = getVal4St(st1, v1, ST1_BITS, ST1_MASK);  // group 1
+            unsigned int gp2 = getVal4St(st1, v2, ST1_BITS, ST1_MASK);  // group 2
+
+            if (gp1 && gp2)
             {
-                if (dp[iM - 1][st1][st2])
+                if (gp1 != gp2)
                 {
-                    int newSt1 = st1;
-                    int newSt2 = st2;
-
-                    if (getVal4St(st1, v1) && getVal4St(st1, v2))
+                    // 2 个不同的 group 合并
+                    // gp2 ==> gp1
+                    for (int i = 0; i < n; i++)
                     {
-                        // v1, v2 都已经包含了，忽略该 road
+                        int tmp = getVal4St(st1, i, ST1_BITS, ST1_MASK);
+                        if (gp2 == tmp)
+                        {
+                            setVal4St(st1, i, gp1, ST1_BITS, ST1_MASK);
+                        }
                     }
-                    else if (getVal4St(st1, v1))
-                    {
-                        // unset st2 : v1
-                        setVal4St(newSt2, v1, 0);
 
-                        // set st1,st2 : v2
-                        setVal4St(newSt1, v2, 1);
-                        setVal4St(newSt2, v2, 1);
+                    setVal4St(st2, v1, 0, ST2_BITS, ST2_MASK);
+                    setVal4St(st2, v2, 0, ST2_BITS, ST2_MASK);
 
-                        dp[iM][newSt1][newSt2] += dp[iM - 1][st1][st2];
-                    }
-                    else if (getVal4St(st1, v2))
-                    {
-                        // unset st2 : v2
-                        setVal4St(newSt2, v2, 0);
-
-                        // set st1,st2 : v1
-                        setVal4St(newSt1, v1, 1);
-                        setVal4St(newSt2, v1, 1);
-
-                        dp[iM][newSt1][newSt2] += dp[iM - 1][st1][st2];
-                    }
-                    else
-                    {
-                        // set st1,st2 : v1
-                        setVal4St(newSt1, v1, 1);
-                        setVal4St(newSt2, v1, 1);
-
-                        // set st1,st2 : v2
-                        setVal4St(newSt1, v2, 1);
-                        setVal4St(newSt2, v2, 1);
-
-                        dp[iM][newSt1][newSt2] += dp[iM - 1][st1][st2];
-                    }
+                    addSts(st1, st2, cnt, nAct);
                 }
             }
+            else if (gp1)
+            {
+                setVal4St(st1, v2, gp1, ST1_BITS, ST1_MASK);
+
+                setVal4St(st2, v1, 0, ST2_BITS, ST2_MASK);
+                setVal4St(st2, v2, 1, ST2_BITS, ST2_MASK);
+
+                addSts(st1, st2, cnt, nAct);
+            }
+            else if (gp2)
+            {
+                setVal4St(st1, v1, gp2, ST1_BITS, ST1_MASK);
+
+                setVal4St(st2, v1, 1, ST2_BITS, ST2_MASK);
+                setVal4St(st2, v2, 0, ST2_BITS, ST2_MASK);
+
+                addSts(st1, st2, cnt, nAct);
+            }
+            else
+            {
+                setVal4St(st1, v1, minUnused, ST1_BITS, ST1_MASK);
+                setVal4St(st1, v2, minUnused, ST1_BITS, ST1_MASK);
+
+                setVal4St(st2, v1, 1, ST2_BITS, ST2_MASK);
+                setVal4St(st2, v2, 1, ST2_BITS, ST2_MASK);
+
+                addSts(st1, st2, cnt, nAct);
+            }
         }
+
+        qTail[act] = 0;
+        cnts[act].clear();
+        act = nAct;
     }
 
-    int ans = 0;
+    unsigned int ans = 0;
 
-    for (size_t st2 = 0; st2 <= finalSt; st2++)
+    unsigned int finalSt = 1;
+    for (size_t i = 1; i < n; i++)
     {
-        if (dp[m][finalSt][st2])
+        finalSt <<= ST1_BITS;
+        finalSt += 1;
+    }
+
+    for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+    {
+        unsigned int st1 = qs[act][iQ].state1;
+        unsigned short st2 = qs[act][iQ].state2;
+        unsigned int cnt = qs[act][iQ].cnt;
+
+        if (st1 == finalSt)
         {
             int tmp = 0;
 
-            for (size_t pos = 0; pos < n; pos ++)
+            for (size_t pos = 0; pos < n; pos++)
             {
-                if (getVal4St(st2, pos))
+                if (getVal4St(st2, pos, ST2_BITS, ST2_MASK))
                 {
-                    tmp ++;
+                    tmp++;
                 }
             }
 
             if (k == tmp)
             {
-                ans += dp[m][finalSt][st2];
+                ans += cnt;
             }
         }
     }

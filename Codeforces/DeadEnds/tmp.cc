@@ -32,9 +32,9 @@ using namespace std;
 class Record
 {
 public:
-    unsigned short state1;      // 已经加入树的节点
-    unsigned short state2;      // 最后一层的节点
-    unsigned short state3;      // 节点是否是 end , 1 - yes
+    unsigned short state1; // 已经加入树的节点
+    unsigned short state2; // 最后一层的节点
+    unsigned short state3; // 节点是否是 end , 1 - yes
     unsigned int cnt;
 
     Record() {}
@@ -46,7 +46,6 @@ public:
     ST &= ~(MASK << ((POS) * BITS));        \
     if (VAL)                                \
         ST |= (VAL) << ((POS) * BITS);
-
 
 Record qs[2][QS_SIZE];
 int qTail[2];
@@ -109,7 +108,7 @@ void func(unsigned int layer, int start, unsigned short st1, unsigned short st2,
 
             unsigned short newSt2 = currSt2;
             setVal4St(newSt2, v2, 1, ST_BITS, ST_MASK);
-            
+
             unsigned short newSt1 = st1 | newSt2;
 
             unsigned short newSt3 = st3;
@@ -126,6 +125,8 @@ void func(unsigned int layer, int start, unsigned short st1, unsigned short st2,
             addSts(newSt1, newSt2, newSt3, cnt, idx);
 
             func(layer, i + 1, newSt1, st2, newSt2, newSt3, cnt, idx);
+
+            break;
         }
         else if (getVal4St(st2, v2, ST_BITS, ST_MASK))
         {
@@ -137,7 +138,7 @@ void func(unsigned int layer, int start, unsigned short st1, unsigned short st2,
 
             unsigned short newSt2 = currSt2;
             setVal4St(newSt2, v2, 1, ST_BITS, ST_MASK);
-            
+
             unsigned short newSt1 = st1 | newSt2;
 
             unsigned short newSt3 = st3;
@@ -154,6 +155,8 @@ void func(unsigned int layer, int start, unsigned short st1, unsigned short st2,
             addSts(newSt1, newSt2, newSt3, cnt, idx);
 
             func(layer, i + 1, newSt1, st2, newSt2, newSt3, cnt, idx);
+
+            break;
         }
         else
         {
@@ -165,7 +168,7 @@ void func(unsigned int layer, int start, unsigned short st1, unsigned short st2,
 int main()
 {
     cin >> n >> m >> k;
-    
+
     for (size_t i = 0; i < m; i++)
     {
         int v1, v2;
@@ -174,7 +177,7 @@ int main()
         v1s.push_back(v1 - 1);
         v2s.push_back(v2 - 1);
     }
-    
+
     // init
     ans = 0;
 
@@ -186,7 +189,7 @@ int main()
         {
             if (getVal4St(st, pos, ST_BITS, ST_MASK))
             {
-                digits[st] ++;
+                digits[st]++;
             }
         }
     }
@@ -209,7 +212,7 @@ int main()
 
     int maxLen = 0;
 
-    for (size_t layer = 1; layer < n; layer ++)
+    for (size_t layer = 1; layer < n; layer++)
     {
         if (0 == qTail[act])
         {
@@ -238,7 +241,7 @@ int main()
         act = nAct;
     }
 
-    cout << maxLen << endl;
+//    cout << maxLen << endl;
     cout << ans << endl;
 
     return 0;

@@ -27,7 +27,7 @@ using namespace std;
 #define ST1_MASK 7
 #define ST2_BITS 1
 #define ST2_MASK 1
-#define QS_SIZE 5000000
+#define QS_SIZE 3000000
 
 class Record
 {
@@ -58,26 +58,44 @@ int n, m, k;
 unsigned int finalSt;
 unsigned int ans;
 
-inline void addSts(unsigned int st1, unsigned short st2, unsigned int cnt, unsigned int roads, int idx)
+unsigned char digits[1024];
+
+inline void addSts(unsigned int st1, unsigned short st2, unsigned int cnt, int roads, int idx)
 {
     if (roads == (n - 1))
     {
         if (finalSt == st1)
         {
-            int tmp = 0;
-
-            for (size_t pos = 0; pos < n; pos++)
+            if (digits[st2])
             {
-                if (getVal4St(st2, pos, ST2_BITS, ST2_MASK))
+                if (k == digits[st2])
                 {
-                    tmp++;
+                    ans += cnt;
                 }
             }
-
-            if (k == tmp)
+            else
             {
-                ans += cnt;
+                int tmp = 0;
+
+                for (size_t pos = 0; pos < n; pos++)
+                {
+                    if (getVal4St(st2, pos, ST2_BITS, ST2_MASK))
+                    {
+                        tmp++;
+                    }
+                }
+
+                digits[st2] = tmp;
+                
+                if (k == tmp)
+                {
+                    ans += cnt;
+                }
             }
+        }
+        else
+        {
+            cout << st1 << endl;
         }
     }
     else
@@ -100,7 +118,14 @@ inline void addSts(unsigned int st1, unsigned short st2, unsigned int cnt, unsig
             }
         }
 
-        unsigned long long key = (((unsigned long long)st1) << 16) + st2;
+        // 目前有 bn - 1 个 block, 至少需要 bn - 1 - 1 个 road 才能形成一个整体
+        // 目前 还有 n - 1 - roads 条可选
+        if ((n - 1) < (bn - 2 + roads))
+        {
+            return;
+        }
+
+        unsigned long long key = (((unsigned long long)st1) << 12) + st2;
 
         unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
         if (it == cnts[idx].end())
@@ -154,6 +179,8 @@ int main()
 
     qTail[act]++;
 
+    int maxLen = 0;
+
     for (size_t i = 0; i < m; i++)
     {
         int v1, v2;
@@ -163,6 +190,11 @@ int main()
         v2--;
 
         int nAct = 1 - act;
+
+        if (maxLen < qTail[act])
+        {
+            maxLen = qTail[act];
+        }
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
         {
@@ -239,6 +271,7 @@ int main()
         act = nAct;
     }
 
+    cout << maxLen << endl;
     cout << ans << endl;
 
     return 0;

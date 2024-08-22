@@ -51,7 +51,6 @@ int qTail[2];
 unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 
-int ans = 0;
 int sums[MAX_N + 1];
 int n, m;
 
@@ -60,10 +59,9 @@ char digits[MAX_2N];
 
 inline void addSts(unsigned int st1, unsigned int st2, unsigned int cnt, int idx)
 {
-    if (0 != st1 && 0 == st2)
+    if (0 == st2)
     {
-//        cout << st1 << " " << st2 << endl;
-        ans += cnt;
+        sums[digits[st1]] += cnt;
         return;
     }
 
@@ -127,8 +125,15 @@ int main()
         addSts(1 << pos, 1 << pos, 1, act);
     }
 
+    int maxLen = 0;
+
     while (qTail[act])
     {
+        if (maxLen < qTail[act])
+        {
+            maxLen = qTail[act];
+        }
+
         int nAct = 1 - act;
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
@@ -244,7 +249,15 @@ int main()
         act = nAct;
     }
 
+    int ans = 0;
+
+    for (size_t i = 3; i <= n; i++)
+    {
+        ans += sums[i] / i;
+    }
+
     cout << ans << endl;
+    cout << maxLen << endl;
 
     return 0;
 }

@@ -51,7 +51,7 @@ int qTail[2];
 unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 
-unsigned long long sums[MAX_N + 1];
+//unsigned long long sums[MAX_N + 1];
 int n, m;
 
 char edges[MAX_N][MAX_N];
@@ -122,15 +122,17 @@ int main()
     int maxLen = 0;
     int round = 0;
 
+    unsigned long long ans = 0;
+
     while (qTail[act])
     {
+/*
         printf("round %d => %d\n", round ++, qTail[act]);
-
         if (maxLen < qTail[act])
         {
             maxLen = qTail[act];
         }
-
+*/
         int nAct = 1 - act;
 
         for (size_t iQ = 0; iQ < qTail[act]; iQ++)
@@ -207,7 +209,8 @@ int main()
                 // v1 和 v2 中间是否有 edge
                 if (edges[v1][v2])
                 {
-                    sums[digits[st1]] += cnt;
+                    ans += cnt;
+//                    sums[digits[st1]] += cnt;
                 }
 
                 // 有个 v 和 v1, v2 都有 edge
@@ -219,18 +222,31 @@ int main()
 
                         setVal4St(newSt1, v, 1, ST_BITS, ST_MASK);
 
-                        sums[digits[newSt1]] += cnt;
+                        ans += cnt;
+//                        sums[digits[newSt1]] += cnt;
                     }
                 }
                 
                 // a - v1 和 b - v2
                 for (size_t a = v0 + 1; a < n; a++)
                 {
-                    if (edges[v1][a] && 0 == getVal4St(st1, a, ST_BITS, ST_MASK))
+                    for (size_t b = a + 1; b < n; b++)
                     {
-                        for (size_t b = v0 + 1; b < n; b++)
+                        if (0 == getVal4St(st1, a, ST_BITS, ST_MASK) && 0 == getVal4St(st1, b, ST_BITS, ST_MASK))
                         {
-                            if (edges[v2][b] && a != b && 0 == getVal4St(st1, b, ST_BITS, ST_MASK))
+                            unsigned long long tmpCnt = 0;
+
+                            if (edges[v1][a] && edges[v2][b])
+                            {
+                                tmpCnt += cnt;
+                            }
+                            
+                            if (edges[v1][b] && edges[v2][a])
+                            {
+                                tmpCnt += cnt;
+                            }
+
+                            if (0 < tmpCnt)
                             {
                                 unsigned int newSt1 = st1;
                                 unsigned int newSt2 = 0;
@@ -241,7 +257,7 @@ int main()
                                 setVal4St(newSt2, a, 1, ST_BITS, ST_MASK);
                                 setVal4St(newSt2, b, 1, ST_BITS, ST_MASK);
 
-                                addSts(newSt1, newSt2, cnt, nAct);
+                                addSts(newSt1, newSt2, tmpCnt, nAct);
                             }
                         }
                     }
@@ -254,16 +270,15 @@ int main()
         act = nAct;
     }
 
-    unsigned long long ans = 0;
-
+/*
     for (size_t i = 3; i <= n; i++)
     {
 //        ans += sums[i] / i;
         ans += sums[i];
     }
-
+*/
     cout << ans << endl;
-    cout << maxLen << endl;
+//    cout << maxLen << endl;
 
     return 0;
 }

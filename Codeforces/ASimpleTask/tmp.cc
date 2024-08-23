@@ -27,7 +27,7 @@ using namespace std;
 #define MAX_2N 524288
 #define ST_BITS 1
 #define ST_MASK 1
-#define QS_SIZE 30000000
+#define QS_SIZE 10000000
 
 #define getVal4St(ST, POS, BITS, MASK) (((ST) >> (POS) * BITS) & MASK)
 
@@ -41,7 +41,7 @@ class Record
 public:
     unsigned int state1;
     unsigned int state2;    // 1 - 叶子节点
-    unsigned int cnt;
+    unsigned long long cnt;
 
     Record() {}
 };
@@ -51,20 +51,14 @@ int qTail[2];
 unordered_map<unsigned long long, unsigned int> cnts[2];
 int act = 0; // 当前生效的 map
 
-int sums[MAX_N + 1];
+unsigned long long sums[MAX_N + 1];
 int n, m;
 
 char edges[MAX_N][MAX_N];
 char digits[MAX_2N];
 
-inline void addSts(unsigned int st1, unsigned int st2, unsigned int cnt, int idx)
+inline void addSts(unsigned int st1, unsigned int st2, unsigned long long cnt, int idx)
 {
-    if (0 == st2)
-    {
-        sums[digits[st1]] += cnt;
-        return;
-    }
-
     unsigned long long key = (((unsigned long long)st1) << MAX_N) + st2;
 
     unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
@@ -126,9 +120,12 @@ int main()
     }
 
     int maxLen = 0;
+    int round = 0;
 
     while (qTail[act])
     {
+        printf("round %d => %d\n", round ++, qTail[act]);
+
         if (maxLen < qTail[act])
         {
             maxLen = qTail[act];
@@ -140,7 +137,7 @@ int main()
         {
             unsigned int st1 = qs[act][iQ].state1;
             unsigned int st2 = qs[act][iQ].state2;
-            unsigned int cnt = qs[act][iQ].cnt;
+            unsigned long long cnt = qs[act][iQ].cnt;
         
             if (1 == digits[st2])
             {
@@ -153,7 +150,7 @@ int main()
                     }
                 }
                 
-                for (size_t a = 0; a < n; a++)
+                for (size_t a = v + 1; a < n; a++)
                 {
                     if (edges[v][a])
                     {
@@ -180,9 +177,18 @@ int main()
             else
             {
                 // 2 == digits[st2]
+                int v0;
+                for (v0 = 0; v0 < n; v0++)
+                {
+                    if (st1 & (1 << v0))
+                    {
+                        break;
+                    }
+                }
+
                 int v1 = -1, v2 = -1;
 
-                for (int p = 0; p < n; p++)
+                for (int p = v0 + 1; p < n; p++)
                 {
                     if (st2 & (1 << p))
                     {
@@ -201,11 +207,11 @@ int main()
                 // v1 和 v2 中间是否有 edge
                 if (edges[v1][v2])
                 {
-                    addSts(st1, 0, cnt, nAct);
+                    sums[digits[st1]] += cnt;
                 }
 
                 // 有个 v 和 v1, v2 都有 edge
-                for (size_t v = 0; v < n; v++)
+                for (size_t v = v0 + 1; v < n; v++)
                 {
                     if (0 == getVal4St(st1, v, ST_BITS, ST_MASK) && edges[v][v1] && edges[v][v2])
                     {
@@ -213,18 +219,18 @@ int main()
 
                         setVal4St(newSt1, v, 1, ST_BITS, ST_MASK);
 
-                        addSts(newSt1, 0, cnt, nAct);
+                        sums[digits[newSt1]] += cnt;
                     }
                 }
                 
                 // a - v1 和 b - v2
-                for (size_t a = 0; a < n; a++)
+                for (size_t a = v0 + 1; a < n; a++)
                 {
                     if (edges[v1][a] && 0 == getVal4St(st1, a, ST_BITS, ST_MASK))
                     {
-                        for (size_t b = 0; b < n; b++)
+                        for (size_t b = v0 + 1; b < n; b++)
                         {
-                            if (edges[v1][b] && a != b && 0 == getVal4St(st1, b, ST_BITS, ST_MASK))
+                            if (edges[v2][b] && a != b && 0 == getVal4St(st1, b, ST_BITS, ST_MASK))
                             {
                                 unsigned int newSt1 = st1;
                                 unsigned int newSt2 = 0;
@@ -240,7 +246,6 @@ int main()
                         }
                     }
                 }
-                
             }
         }
 
@@ -249,11 +254,12 @@ int main()
         act = nAct;
     }
 
-    int ans = 0;
+    unsigned long long ans = 0;
 
     for (size_t i = 3; i <= n; i++)
     {
-        ans += sums[i] / i;
+//        ans += sums[i] / i;
+        ans += sums[i];
     }
 
     cout << ans << endl;

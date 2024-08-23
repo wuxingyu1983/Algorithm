@@ -26,7 +26,7 @@ using namespace std;
 #define MAX_N 19
 #define ST_BITS 1
 #define ST_MASK 1
-#define QS_SIZE 3000000
+#define QS_SIZE 60000000
 
 #define getVal4St(ST, POS, BITS, MASK) (((ST) >> (POS) * BITS) & MASK)
 
@@ -55,13 +55,6 @@ int n, m;
 
 inline void addSts(unsigned int st1, unsigned int st2, unsigned int cnt, int idx)
 {
-    if (0 != st1 && 0 == st2)
-    {
-//        cout << st1 << " " << st2 << endl;
-        ans += cnt;
-        return;
-    }
-
     unsigned long long key = (((unsigned long long)st1) << MAX_N) + st2;
 
     unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
@@ -129,8 +122,14 @@ int main()
                     setVal4St(newSt2, a, 0, ST_BITS, ST_MASK);
                     setVal4St(newSt2, b, 0, ST_BITS, ST_MASK);
 
-                    addSts(newSt1, newSt2, cnt, nAct);
-
+                    if (0 == newSt2)
+                    {
+                        ans += cnt;
+                    }
+                    else
+                    {
+                        addSts(newSt1, newSt2, cnt, nAct);
+                    }
 //                    printf("(%u, %u) => (%u, %u)\n", st1, st2, newSt1, newSt2);
                 }
             }

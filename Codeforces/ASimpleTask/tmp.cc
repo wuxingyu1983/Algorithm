@@ -111,8 +111,6 @@ int main()
 
     cnts[0].clear();
     cnts[1].clear();
-    
-    qTail[act]++;
 
     for (size_t pos = 0; pos < n; pos++)
     {

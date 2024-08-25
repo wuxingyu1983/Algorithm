@@ -55,6 +55,20 @@ int n;
 vector<int> as;
 int cmpNums[MAX_A];
 
+class Num
+{
+public:
+    int val;
+    int ones;
+
+    Num(int _val, int _ones) : val(_val), ones(_ones) {}
+};
+
+bool cmp(Num &a, Num &b)
+{
+    return a.ones > b.ones;
+}
+
 int func(Node *curr, int a, int pos)
 {
     int ret = -1;
@@ -115,11 +129,24 @@ int main()
 {
     cin >> n;
 
+    vector<Num> nums;
+
     for (size_t i = 0; i < n; i++)
     {
         int a;
         cin >> a;
         as.push_back(a);
+
+        int ones = 0;
+        for (int f = 1; f <= a; f <<= 1)
+        {
+            if (f & a)
+            {
+                ones ++;
+            }
+        }
+
+        nums.push_back(Num(a, ones));
     }
 
     // init
@@ -162,9 +189,12 @@ int main()
         }
     }
 
+    // sort
+    sort(nums.begin(), nums.end(), cmp);
+
     for (size_t i = 0; i < n; i++)
     {
-        int a = as[i];
+        int a = nums[i].val;
         if (0 == cmpNums[a])
         {
             cmpNums[a] = func(&root, a, 0);

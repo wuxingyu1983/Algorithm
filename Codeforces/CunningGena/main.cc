@@ -117,6 +117,7 @@ int main()
     }
     
     // sort friends
+    // order by friend.k desc
     sort(friends, friends + n, comp);
 
     // init

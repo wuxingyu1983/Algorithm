@@ -124,9 +124,15 @@ public:
 
             for (size_t iQ = 0; iQ < qTail[act]; iQ++)
             {
-                unsigned int curr = qs[act][iQ].curr;   // nowX th row
-                unsigned int next = qs[act][iQ].next;   // nowX+1 th row
+                unsigned int curr = qs[act][iQ].curr; // nowX th row
+                unsigned int next = qs[act][iQ].next; // nowX+1 th row
                 unsigned int cnt = qs[act][iQ].cnt;
+
+                if (nowR == row)
+                {
+                    ret = cnt;
+                    break;
+                }
 
                 if (getVal4St(curr, nowC, ST_BITS, ST_MASK))
                 {
@@ -184,12 +190,140 @@ public:
                 {
                     if (nowR + 1 < row)
                     {
+                        //      00
+                        //      00
+                        if (nowC + 1 < col)
+                        {
+                            bool check = true;
+                            for (size_t pos = nowC; pos <= nowC + 1; pos++)
+                            {
+                                if (getVal4St(curr, pos, ST_BITS, ST_MASK) && 0 == getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                                {
+                                    // 已经被 brick 覆盖了
+                                    check = false;
+                                    break;
+                                }
 
+                                if (getVal4St(next, pos, ST_BITS, ST_MASK) && 0 == getVal4St(sts[nowR + 1], pos, ST_BITS, ST_MASK))
+                                {
+                                    // 已经被 brick 覆盖了
+                                    check = false;
+                                    break;
+                                }
+                            }
+
+                            if (check)
+                            {
+                                unsigned int newCurr = curr;
+                                unsigned int newNext = next;
+                                for (size_t pos = nowC; pos <= nowC + 1; pos++)
+                                {
+                                    setVal4St(newCurr, pos, 1, ST_BITS, ST_MASK);
+                                    setVal4St(newNext, pos, 1, ST_BITS, ST_MASK);
+                                }
+
+                                if (newCurr != curr && newNext != next)
+                                {
+                                    addSts(newCurr, newNext, cnt + 1, nAct);
+                                }
+                            }
+                        }
+
+                        //  00
+                        //   00
+                        if (nowC + 2 < col)
+                        {
+                            bool check = true;
+                            for (size_t pos = nowC; pos <= nowC + 1; pos++)
+                            {
+                                if (getVal4St(curr, pos, ST_BITS, ST_MASK) && 0 == getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                                {
+                                    // 已经被 brick 覆盖了
+                                    check = false;
+                                    break;
+                                }
+
+                                if (getVal4St(next, pos + 1, ST_BITS, ST_MASK) && 0 == getVal4St(sts[nowR + 1], pos + 1, ST_BITS, ST_MASK))
+                                {
+                                    // 已经被 brick 覆盖了
+                                    check = false;
+                                    break;
+                                }
+                            }
+
+                            if (check)
+                            {
+                                unsigned int newCurr = curr;
+                                unsigned int newNext = next;
+                                for (size_t pos = nowC; pos <= nowC + 1; pos++)
+                                {
+                                    setVal4St(newCurr, pos, 1, ST_BITS, ST_MASK);
+                                    setVal4St(newNext, pos + 1, 1, ST_BITS, ST_MASK);
+                                }
+
+                                if (newCurr != curr && newNext != next)
+                                {
+                                    addSts(newCurr, newNext, cnt + 1, nAct);
+                                }
+                            }
+                        }
+
+                        //   00
+                        //  00
+                        if (0 < nowC && nowC + 1 < col)
+                        {
+                            bool check = true;
+                            for (size_t pos = nowC; pos <= nowC + 1; pos++)
+                            {
+                                if (getVal4St(curr, pos, ST_BITS, ST_MASK) && 0 == getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                                {
+                                    // 已经被 brick 覆盖了
+                                    check = false;
+                                    break;
+                                }
+
+                                if (getVal4St(next, pos - 1, ST_BITS, ST_MASK) && 0 == getVal4St(sts[nowR - 1], pos + 1, ST_BITS, ST_MASK))
+                                {
+                                    // 已经被 brick 覆盖了
+                                    check = false;
+                                    break;
+                                }
+                            }
+
+                            if (check)
+                            {
+                                unsigned int newCurr = curr;
+                                unsigned int newNext = next;
+                                for (size_t pos = nowC; pos <= nowC + 1; pos++)
+                                {
+                                    setVal4St(newCurr, pos, 1, ST_BITS, ST_MASK);
+                                    setVal4St(newNext, pos - 1, 1, ST_BITS, ST_MASK);
+                                }
+
+                                if (newCurr != curr && newNext != next)
+                                {
+                                    addSts(newCurr, newNext, cnt + 1, nAct);
+                                }
+                            }
+                        }
                     }
                 }
             }
+
+            qTail[act] = 0;
+            cnts[act].clear();
+            act = nAct;
+
+            if (nowC + 1 < col)
+            {
+                nowC ++;
+            }
+            else
+            {
+                nowC = 0;
+                nowR ++;
+            }
         }
-        
 
         return ret;
     }
@@ -199,7 +333,10 @@ private:
 
 int main()
 {
-    vector<string> strs = {"..XX....", "....X..X", "XX..XXXX"};
+    vector<string> strs =
+        {"..XX....",
+         "....X..X",
+         "XX..XXXX"};
 
     BrickPuzzle s;
     cout << s.leastShapes(strs) << endl;

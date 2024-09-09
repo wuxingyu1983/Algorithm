@@ -13,7 +13,7 @@
 #include <set>
 #include <queue>
 #include <stack>
-#include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
@@ -29,19 +29,45 @@ using namespace std;
     if (VAL)                                \
         ST |= (VAL) << ((POS) * BITS);
 
-class Record
+unordered_set<unsigned long long> cnts[MAX_NM][MAX_NM];
+
+int row, col;
+unsigned int sts[MAX_NM + 1];
+unsigned int endSt;
+
+inline bool addSts(unsigned int curr, unsigned int next, int r, int c)
 {
-public:
-    unsigned int curr;  // 当前行
-    unsigned int next;  // 下一行 
+    if (endSt == curr)
+    {
+        // 当前行已经没有空白位置了
+        // 找到下一个还有空白位置的 行
+        while (curr == endSt && (++r) <= (row - 1))
+        {
+            c = 0;
+            curr = next;
+            next = sts[r + 1];
+        }
 
-    Record() {}
-};
+        if (r == row)
+        {
+            return true;
+        }
+    }
 
-Record qs[2][QS_SIZE];
-int qTail[2];
-unordered_map<unsigned long long, unsigned int> cnts[2];
-int act = 0; // 当前生效的 map
+    while (getVal4St(curr, c, ST_BITS, ST_MASK))
+    {
+        c++;
+    }
+
+    unsigned long long key = (((unsigned long long)curr) << MAX_NM) + next;
+    auto it = cnts[r][c].find(key);
+    if (it == cnts[r][c].end())
+    {
+        cnts[r][c].insert(key);
+    }
+
+    return false;
+}
 
 class BrickPuzzle
 {
@@ -53,7 +79,7 @@ public:
         row = board.size();
         col = board[0].length();
 
-        int endSt = (1 << col) - 1;
+        endSt = (1 << col) - 1;
 
         memset(sts, 0, sizeof(sts));
 
@@ -78,15 +104,18 @@ public:
          
         if (0 == (whiteCnt % 4))
         {
+            for (size_t i = row; i <= MAX_NM; i++)
+            {
+                sts[i] = endSt;
+            }
             
+
         }
 
         return ret;
     }
 
 private:
-    int row, col;
-    unsigned int sts[MAX_NM];
 };
 
 int main()

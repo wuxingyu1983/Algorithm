@@ -13,7 +13,7 @@
 #include <set>
 #include <queue>
 #include <stack>
-#include <unordered_set>
+#include <unordered_map>
 
 using namespace std;
 
@@ -29,41 +29,46 @@ using namespace std;
     if (VAL)                                \
         ST |= (VAL) << ((POS) * BITS);
 
-unordered_set<unsigned long long> cnts[MAX_NM][MAX_NM];
+class Record
+{
+public:
+    unsigned int curr;
+    unsigned int next;
+    unsigned int cnt;
+
+    Record() {}
+};
+
+Record qs[2][QS_SIZE];
+int qTail[2];
+unordered_map<unsigned long long, unsigned int> cnts[2];
+int act = 0; // 当前生效的 map
 
 int row, col;
-unsigned int sts[MAX_NM + 1];
+unsigned int sts[MAX_NM];
 unsigned int endSt;
 
-inline bool addSts(unsigned int curr, unsigned int next, int r, int c)
+inline bool addSts(unsigned int curr, unsigned int next, unsigned int cnt, unsigned int idx)
 {
-    if (endSt == curr)
-    {
-        // 当前行已经没有空白位置了
-        // 找到下一个还有空白位置的 行
-        while (curr == endSt && (++r) <= (row - 1))
-        {
-            c = 0;
-            curr = next;
-            next = sts[r + 1];
-        }
-
-        if (r == row)
-        {
-            return true;
-        }
-    }
-
-    while (getVal4St(curr, c, ST_BITS, ST_MASK))
-    {
-        c++;
-    }
-
     unsigned long long key = (((unsigned long long)curr) << MAX_NM) + next;
-    auto it = cnts[r][c].find(key);
-    if (it == cnts[r][c].end())
+    unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
+    if (it == cnts[idx].end())
     {
-        cnts[r][c].insert(key);
+        int pInQ = qTail[idx];
+        // 加入队尾
+        qs[idx][pInQ].curr = curr;
+        qs[idx][pInQ].next = next;
+        qs[idx][pInQ].cnt = cnt;
+
+        cnts[idx][key] = pInQ;
+        qTail[idx]++;
+    }
+    else
+    {
+        if (cnt < qs[idx][it->second].cnt)
+        {
+            qs[idx][it->second].cnt = cnt;
+        }
     }
 
     return false;
@@ -83,8 +88,6 @@ public:
 
         memset(sts, 0, sizeof(sts));
 
-        int whiteCnt = 0;
-
         for (size_t i = 0; i < row; i++)
         {
             for (size_t j = 0; j < col; j++)
@@ -94,23 +97,99 @@ public:
                     // black
                     setVal4St(sts[i], j, 1, ST_BITS, ST_MASK);
                 }
-                else
+            }
+        }
+
+        // init
+        qTail[0] = 0;
+        qTail[1] = 0;
+
+        cnts[0].clear();
+        cnts[1].clear();
+
+        qs[act][0].curr = sts[0];
+        if (1 < row)
+        {
+            qs[act][0].next = sts[1];
+        }
+        qs[act][0].cnt = 0;
+
+        qTail[act]++;
+
+        int nowR = 0, nowC = 0;
+
+        while (qTail[act])
+        {
+            int nAct = 1 - act;
+
+            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            {
+                unsigned int curr = qs[act][iQ].curr;   // nowX th row
+                unsigned int next = qs[act][iQ].next;   // nowX+1 th row
+                unsigned int cnt = qs[act][iQ].cnt;
+
+                if (getVal4St(curr, nowC, ST_BITS, ST_MASK))
                 {
-                    // white
-                    whiteCnt ++;
+                    // 可以什么都不做 传给下一个
+                    if (nowC == col - 1)
+                    {
+                        // 已经是最后一列了
+                        if (nowR + 1 < row)
+                        {
+                            addSts(next, sts[nowR + 1], cnt, nAct);
+                        }
+                        else
+                        {
+                            addSts(next, endSt, cnt, nAct);
+                        }
+                    }
+                    else
+                    {
+                        addSts(curr, next, cnt, nAct);
+                    }
+                }
+
+                // 0000
+                {
+                    if (nowC + 3 < col)
+                    {
+                        bool check = true;
+
+                        for (size_t pos = nowC; pos <= nowC + 3; pos++)
+                        {
+                            if (getVal4St(curr, pos, ST_BITS, ST_MASK) && 0 == getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                            {
+                                // 已经被 brick 覆盖了
+                                check = false;
+                                break;
+                            }
+                        }
+
+                        if (check)
+                        {
+                            unsigned int newCurr = curr;
+                            for (size_t pos = nowC; pos <= nowC + 3; pos++)
+                            {
+                                setVal4St(newCurr, pos, 1, ST_BITS, ST_MASK);
+                            }
+
+                            if (newCurr != curr)
+                            {
+                                addSts(newCurr, next, cnt + 1, nAct);
+                            }
+                        }
+                    }
+                }
+
+                {
+                    if (nowR + 1 < row)
+                    {
+
+                    }
                 }
             }
         }
-         
-        if (0 == (whiteCnt % 4))
-        {
-            for (size_t i = row; i <= MAX_NM; i++)
-            {
-                sts[i] = endSt;
-            }
-            
-
-        }
+        
 
         return ret;
     }

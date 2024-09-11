@@ -20,7 +20,7 @@ using namespace std;
 #define MAX_NM  22
 #define ST_BITS 1
 #define ST_MASK 1
-#define QS_SIZE 20000000
+#define NEXT_MASK 4194303
 
 #define getVal4St(ST, POS, BITS, MASK) (((ST) >> (POS) * BITS) & MASK)
 
@@ -39,10 +39,7 @@ public:
     Record() {}
 };
 
-Record qs[2][QS_SIZE];
-int qTail[2];
-unordered_map<unsigned long long, unsigned int> cnts[2];
-int act = 0; // 当前生效的 map
+unordered_map<unsigned long long, unsigned int> cnts[MAX_NM + 1];
 
 int row, col;
 unsigned int sts[MAX_NM];
@@ -50,24 +47,23 @@ unsigned int endSt;
 
 inline bool addSts(unsigned int curr, unsigned int next, unsigned int cnt, unsigned int idx)
 {
+    if (col == idx)
+    {
+        curr = next;
+        next = 0;
+    }
+
     unsigned long long key = (((unsigned long long)curr) << MAX_NM) + next;
     unordered_map<unsigned long long, unsigned int>::iterator it = cnts[idx].find(key);
     if (it == cnts[idx].end())
     {
-        int pInQ = qTail[idx];
-        // 加入队尾
-        qs[idx][pInQ].curr = curr;
-        qs[idx][pInQ].next = next;
-        qs[idx][pInQ].cnt = cnt;
-
-        cnts[idx][key] = pInQ;
-        qTail[idx]++;
+        cnts[idx][key] = cnt;
     }
     else
     {
-        if (cnt < qs[idx][it->second].cnt)
+        if (cnt < it->second)
         {
-            qs[idx][it->second].cnt = cnt;
+            cnts[idx][key] = cnt;
         }
     }
 
@@ -101,69 +97,35 @@ public:
         }
 
         // init
-        qTail[0] = 0;
-        qTail[1] = 0;
-
-        cnts[0].clear();
-        cnts[1].clear();
-
-        qs[act][0].curr = 0;
-        if (1 < row)
-        {
-            qs[act][0].next = 0;
-        }
-        else
-        {
-            qs[act][0].next = endSt;
-        }
-        qs[act][0].cnt = 0;
-
-        qTail[act]++;
-
         int nowR = 0, nowC = 0;
+        
+        addSts(0, 0, 0, nowC);
 
-        while (qTail[act])
+        while (nowR <= row)
         {
-            int nAct = 1 - act;
-
             if (nowR == row)
             {
-                for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+                for (unordered_map<unsigned long long, unsigned int>::iterator it = cnts[nowC].begin(); it != cnts[nowC].end(); it++)
                 {
-                    unsigned int cnt = qs[act][iQ].cnt;
-                    if (0 > ret || ret > cnt)
+                    if (0 > ret || ret > it->second)
                     {
-                        ret = cnt;
+                        ret = it->second;
                     }
                 }
                 break;
             }
 
-            for (size_t iQ = 0; iQ < qTail[act]; iQ++)
+            for (unordered_map<unsigned long long, unsigned int>::iterator it = cnts[nowC].begin(); it != cnts[nowC].end(); it++)
             {
-                unsigned int curr = qs[act][iQ].curr; // nowR th row
-                unsigned int next = qs[act][iQ].next; // nowR+1 th row
-                unsigned int cnt = qs[act][iQ].cnt;
+                unsigned long long key = it->first;
+                unsigned int curr = key >> MAX_NM; // nowR th row
+                unsigned int next = key & NEXT_MASK; // nowR+1 th row
+                unsigned int cnt = it->second;
 
                 if (getVal4St((curr | sts[nowR]), nowC, ST_BITS, ST_MASK))
                 {
                     // 可以什么都不做 传给下一个
-                    if (nowC == col - 1)
-                    {
-                        // 已经是最后一列了
-                        if (nowR + 1 < row)
-                        {
-                            addSts(next, 0, cnt, nAct);
-                        }
-                        else
-                        {
-                            addSts(next, endSt, cnt, nAct);
-                        }
-                    }
-                    else
-                    {
-                        addSts(curr, next, cnt, nAct);
-                    }
+                    addSts(curr, next, cnt, nowC + 1);
                 }
 
                 // 0000
@@ -195,7 +157,7 @@ public:
                                 setVal4St(newCurr, pos, 1, ST_BITS, ST_MASK);
                             }
 
-                            addSts(newCurr, next, cnt + 1, nAct);
+                            addSts(newCurr, next, cnt + 1, nowC + 4);
                         }
                     }
                 }
@@ -246,7 +208,7 @@ public:
                                     setVal4St(newNext, pos, 1, ST_BITS, ST_MASK);
                                 }
 
-                                addSts(newCurr, newNext, cnt + 1, nAct);
+                                addSts(newCurr, newNext, cnt + 1, nowC + 2);
                             }
                         }
 
@@ -293,7 +255,7 @@ public:
                                     setVal4St(newNext, pos + 1, 1, ST_BITS, ST_MASK);
                                 }
 
-                                addSts(newCurr, newNext, cnt + 1, nAct);
+                                addSts(newCurr, newNext, cnt + 1, nowC + 2);
                             }
                         }
 
@@ -340,25 +302,27 @@ public:
                                     setVal4St(newNext, pos - 1, 1, ST_BITS, ST_MASK);
                                 }
 
-                                addSts(newCurr, newNext, cnt + 1, nAct);
+                                addSts(newCurr, newNext, cnt + 1, nowC + 2);
                             }
                         }
                     }
                 }
             }
 
-            qTail[act] = 0;
-            cnts[act].clear();
-            act = nAct;
+            cnts[nowC].clear();
 
             if (nowC + 1 < col)
             {
-                nowC ++;
+                nowC++;
             }
             else
             {
+                // nowC + 1 == col
+                cnts[0] = move(cnts[col]);
+                cnts[col].clear();
+
                 nowC = 0;
-                nowR ++;
+                nowR++;
             }
         }
 

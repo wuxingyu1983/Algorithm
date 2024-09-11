@@ -4,11 +4,11 @@
 #include <cmath>
 #include <cstdio>
 #include <vector>
-#include <iostream>
 #include <algorithm>
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <set>
 #include <queue>
@@ -20,7 +20,7 @@ using namespace std;
 #define MAX_NM  22
 #define ST_BITS 1
 #define ST_MASK 1
-#define QS_SIZE 1000000
+#define QS_SIZE 20000000
 
 #define getVal4St(ST, POS, BITS, MASK) (((ST) >> (POS) * BITS) & MASK)
 
@@ -171,7 +171,7 @@ public:
                     if (nowC + 3 < col)
                     {
                         bool check = true;
-
+                        int blacks = 0;
                         for (size_t pos = nowC; pos <= nowC + 3; pos++)
                         {
                             if (getVal4St(curr, pos, ST_BITS, ST_MASK))
@@ -180,9 +180,14 @@ public:
                                 check = false;
                                 break;
                             }
+
+                            if (getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                            {
+                                blacks ++;
+                            }
                         }
 
-                        if (check)
+                        if (check && 4 > blacks)
                         {
                             unsigned int newCurr = curr;
                             for (size_t pos = nowC; pos <= nowC + 3; pos++)
@@ -203,6 +208,7 @@ public:
                         if (nowC + 1 < col)
                         {
                             bool check = true;
+                            int blacks = 0;
                             for (size_t pos = nowC; pos <= nowC + 1; pos++)
                             {
                                 if (getVal4St(curr, pos, ST_BITS, ST_MASK))
@@ -218,9 +224,19 @@ public:
                                     check = false;
                                     break;
                                 }
+
+                                if (getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                                {
+                                    blacks ++;
+                                }
+
+                                if (getVal4St(sts[nowR + 1], pos, ST_BITS, ST_MASK))
+                                {
+                                    blacks ++;
+                                }
                             }
 
-                            if (check)
+                            if (check && 4 > blacks)
                             {
                                 unsigned int newCurr = curr;
                                 unsigned int newNext = next;
@@ -239,6 +255,7 @@ public:
                         if (nowC + 2 < col)
                         {
                             bool check = true;
+                            int blacks = 0;
                             for (size_t pos = nowC; pos <= nowC + 1; pos++)
                             {
                                 if (getVal4St(curr, pos, ST_BITS, ST_MASK))
@@ -247,6 +264,11 @@ public:
                                     check = false;
                                     break;
                                 }
+                                
+                                if (getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                                {
+                                    blacks ++;
+                                }
 
                                 if (getVal4St(next, pos + 1, ST_BITS, ST_MASK))
                                 {
@@ -254,9 +276,14 @@ public:
                                     check = false;
                                     break;
                                 }
+                                
+                                if (getVal4St(sts[nowR + 1], pos + 1, ST_BITS, ST_MASK))
+                                {
+                                    blacks ++;
+                                }
                             }
 
-                            if (check)
+                            if (check && 4 > blacks)
                             {
                                 unsigned int newCurr = curr;
                                 unsigned int newNext = next;
@@ -275,6 +302,7 @@ public:
                         if (0 < nowC && nowC + 1 < col)
                         {
                             bool check = true;
+                            int blacks = 0;
                             for (size_t pos = nowC; pos <= nowC + 1; pos++)
                             {
                                 if (getVal4St(curr, pos, ST_BITS, ST_MASK))
@@ -283,6 +311,11 @@ public:
                                     check = false;
                                     break;
                                 }
+                                
+                                if (getVal4St(sts[nowR], pos, ST_BITS, ST_MASK))
+                                {
+                                    blacks ++;
+                                }
 
                                 if (getVal4St(next, pos - 1, ST_BITS, ST_MASK))
                                 {
@@ -290,9 +323,14 @@ public:
                                     check = false;
                                     break;
                                 }
+                                
+                                if (getVal4St(sts[nowR + 1], pos - 1, ST_BITS, ST_MASK))
+                                {
+                                    blacks ++;
+                                }
                             }
 
-                            if (check)
+                            if (check && 4 > blacks)
                             {
                                 unsigned int newCurr = curr;
                                 unsigned int newNext = next;
@@ -330,10 +368,26 @@ public:
 private:
 };
 
+std::vector<std::string> splitString(const std::string &s, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::stringstream ss(s);
+    std::string item;
+
+    while (std::getline(ss, item, delimiter))
+    {
+        tokens.push_back(item);
+    }
+
+    return tokens;
+}
+
 int main()
 {
-    vector<string> strs =
-    {"...X.X.XXX.","X....XXXXX.",".X.....XX.X","..X.XXX..XX",".XXX..X.X..","X.XX.X..XX.",".X.X.XXX.XX","..XX.XX..XX",".....X..XX.","XXXX.XX.X..",".XXXXX.XX..","...XX.....X",".XXX.X.X.XX","XXX..X..X..","X.XX.XXX...","...X......X",".XX...XXXXX"};
+    string raw;
+    cin >> raw;
+
+    vector<string> strs = splitString(raw, ',');
 
     BrickPuzzle s;
     cout << s.leastShapes(strs) << endl;

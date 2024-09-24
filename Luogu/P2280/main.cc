@@ -24,7 +24,7 @@ using namespace std;
 
 #define MAX_XY  5001
 
-int dp[MAX_XY][MAX_XY];
+long long dp[MAX_XY][MAX_XY];
 
 int main()
 {
@@ -54,17 +54,21 @@ int main()
         }
     }
     
-    int ans = 0;
+    long long ans = 0;
 
-    for (size_t row = m; row < MAX_XY; row++)
+    for (size_t row = 0; row < MAX_XY; row++)
     {
-        for (size_t col = m; col < MAX_XY; col++)
+        for (size_t col = 0; col < MAX_XY; col++)
         {
-            int tmp = dp[row][col] - dp[row - m][col] - dp[row][col - m] + dp[row - m][col - m];
+            long long tmp = dp[row][col];
+            if (row >= m)
+                tmp -= dp[row - m][col];
+            if (col >= m)
+                tmp -= dp[row][col - m];
+            if (row >= m && col >= m)
+                tmp += dp[row - m][col - m];
             if (tmp > ans)
-            {
                 ans = tmp;
-            }
         }
     }
 

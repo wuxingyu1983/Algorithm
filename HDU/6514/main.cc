@@ -27,6 +27,23 @@ using namespace std;
 char land[MAX_MN];
 int dp[MAX_MN];
 
+class Monitor
+{
+public:
+    int x1, y1, x2, y2;
+
+    Monitor(int _x1, int _y1, int _x2, int _y2) : x1(_x1),
+                                                  y1(_y1),
+                                                  x2(_x2),
+                                                  y2(_y2) {}
+};
+
+vector<Monitor> vecIn;      // 进入扫描线的顺序队列
+vector<Monitor> vecOut;     // 出扫描线的顺序队列
+
+bool cmpIn (Monitor &a, Monitor &b) { return a.y1 < b.y1; }
+bool cmpOut (Monitor &a, Monitor &b) { return a.y2 < b.y2; }
+
 int main()
 {
     int n, m;   // n = rows, m = cols
@@ -45,11 +62,11 @@ int main()
         x2 --;
         y2 --;
 
-        for (size_t row = x1; row <= x2; row++)
-        {
-            memset(&(land[row * m + y1]), 1, (y2 - y1 + 1));
-        }
+        vecIn.push_back(Monitor(x1, y1, x2, y2));
     }
+
+    // sort
+    sort(vecIn.begin(), vecIn.end(), cmpIn);
     
     for (size_t row = 0; row < n; row++)
     {

@@ -101,6 +101,9 @@ int main()
 
     int p;
     cin >> p;
+
+    vecIn.reserve(p + 1);
+    vecOut.reserve(p + 1);
     
     for (size_t i = 0; i < p; i++)
     {
@@ -122,16 +125,26 @@ int main()
     d.resize(4 * n, 0);
     b.resize(4 * n, 0);
 
+    int vecInHead = 0;
+    int vecOutHead = 0;
+
     for (size_t col = 0; col < m; col++)
     {
-        while (0 < vecIn.size() && vecIn[0].y1 == col)
+        bool needSort = false;
+
+        while (vecInHead < vecIn.size() && vecIn[vecInHead].y1 == col)
         {
-            update(vecIn[0].x1, vecIn[0].x2, 1, 0, n - 1, ROOT);
+            update(vecIn[vecInHead].x1, vecIn[vecInHead].x2, 1, 0, n - 1, ROOT);
 
-            vecOut.push_back(vecIn[0]);
+            vecOut.push_back(vecIn[vecInHead]);
+            needSort = true;
+
+            vecInHead ++;
+        }
+
+        if (needSort)
+        {
             sort(vecOut.begin(), vecOut.end(), cmpOut);
-
-            vecIn.erase(vecIn.begin());
         }
 
         if (0 < vecOut.size())
@@ -145,10 +158,11 @@ int main()
             }
         }
 
-        while (0 < vecOut.size() && vecOut[0].y2 == col)
+        while (vecOutHead < vecOut.size() && vecOut[vecOutHead].y2 == col)
         {
-            update(vecOut[0].x1, vecOut[0].x2, -1, 0, n - 1, ROOT);
-            vecOut.erase(vecOut.begin());
+            update(vecOut[vecOutHead].x1, vecOut[vecOutHead].x2, -1, 0, n - 1, ROOT);
+
+            vecOutHead++;
         }
     }
 

@@ -147,7 +147,7 @@ int main()
             sort(vecOut.begin(), vecOut.end(), cmpOut);
         }
 
-        if (0 < vecOut.size())
+        if (vecOutHead < vecOut.size())
         {
             for (size_t row = 0; row < n; row++)
             {

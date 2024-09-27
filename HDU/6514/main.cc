@@ -32,15 +32,19 @@ class Monitor
 {
 public:
     int x1, y1, x2, y2;
+    Monitor *next;
 
     Monitor(int _x1, int _y1, int _x2, int _y2) : x1(_x1),
                                                   y1(_y1),
                                                   x2(_x2),
-                                                  y2(_y2) {}
+                                                  y2(_y2)
+    {
+        next = NULL;
+    }
 };
 
-vector<Monitor> vecIn;      // 进入扫描线的顺序队列
-vector<Monitor> vecOut;     // 出扫描线的顺序队列
+vector<Monitor> vecIn;
+Monitor * vecOut[MAX_MN];
 
 bool cmpIn (Monitor &a, Monitor &b) { return a.y1 < b.y1; }
 bool cmpOut (Monitor &a, Monitor &b) { return a.y2 < b.y2; }
@@ -96,14 +100,15 @@ int getsum(int l, int r, int s, int t, int p)
 
 int main()
 {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+
     int n, m;   // n = rows, m = cols
     cin >> n >> m;
 
     int p;
     cin >> p;
-
-    vecIn.reserve(p + 1);
-    vecOut.reserve(p + 1);
     
     for (size_t i = 0; i < p; i++)
     {
@@ -126,43 +131,33 @@ int main()
     b.resize(4 * n, 0);
 
     int vecInHead = 0;
-    int vecOutHead = 0;
 
     for (size_t col = 0; col < m; col++)
     {
-        bool needSort = false;
-
         while (vecInHead < vecIn.size() && vecIn[vecInHead].y1 == col)
-        {
+         {
             update(vecIn[vecInHead].x1, vecIn[vecInHead].x2, 1, 0, n - 1, ROOT);
 
-            vecOut.push_back(vecIn[vecInHead]);
-            needSort = true;
+            vecIn[vecInHead].next = vecOut[vecIn[vecInHead].y2];
+            vecOut[vecIn[vecInHead].y2] = &(vecIn[vecInHead]);
 
             vecInHead ++;
         }
 
-        if (needSort)
+        for (size_t row = 0; row < n; row++)
         {
-            sort(vecOut.begin(), vecOut.end(), cmpOut);
-        }
-
-        if (vecOutHead < vecOut.size())
-        {
-            for (size_t row = 0; row < n; row++)
+            if (0 < getsum(row, row, 0, n - 1, ROOT))
             {
-                if (0 < getsum(row, row, 0, n - 1, ROOT))
-                {
-                    land[row * m + col] = 1;
-                }
+                land[row * m + col] = 1;
             }
         }
 
-        while (vecOutHead < vecOut.size() && vecOut[vecOutHead].y2 == col)
+        Monitor * curr = vecOut[col];
+        while (curr)
         {
-            update(vecOut[vecOutHead].x1, vecOut[vecOutHead].x2, -1, 0, n - 1, ROOT);
-
-            vecOutHead++;
+            update(curr->x1, curr->x2, -1, 0, n - 1, ROOT);
+            
+            curr = curr->next;
         }
     }
 
@@ -204,11 +199,10 @@ int main()
         if (0 < x1 && 0 < y1)
             cnt += dp[(x1 - 1) * m + (y1 - 1)];
         if (total == cnt)
-            cout << "YES" << endl;
+            cout << "YES\n";
         else
-            cout << "NO" << endl;
+            cout << "NO\n";
     }
-    
 
     return 0;
 }

@@ -44,7 +44,7 @@ public:
 };
 
 vector<Monitor> vecIn;
-Monitor *vecOut[MAX_MN];
+vector<Monitor *> vecOut;
 
 bool cmpIn(Monitor &a, Monitor &b) { return a.y1 < b.y1; }
 // bool cmpOut(Monitor &a, Monitor &b) { return a.y2 < b.y2; }
@@ -53,7 +53,7 @@ vector<int> d;
 vector<int> b;
 
 // segment tree functions
-void update(int l, int r, long c, int s, int t, int p)
+void update(int l, int r, int c, int s, int t, int p)
 {
     if (l <= s && t <= r)
     {
@@ -101,6 +101,8 @@ int main()
 
     int n, m; // n = rows, m = cols
     cin >> n >> m;
+
+    vecOut.resize(m, NULL);
 
     int p;
     cin >> p;

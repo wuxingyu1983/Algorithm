@@ -1,4 +1,5 @@
 // https://acm.hdu.edu.cn/showproblem.php?pid=6514
+// 涉及到了 线段树 和 扫描线
 
 #include <cmath>
 #include <cstdio>
@@ -95,110 +96,121 @@ int getsum(int l, int r, int s, int t, int p)
 
 int main()
 {
+/*
     ios::sync_with_stdio(0);
     cin.tie(0);
     cout.tie(0);
-
+*/
     int n, m; // n = rows, m = cols
-    cin >> n >> m;
 
-    vecOut.resize(m, NULL);
-
-    int p;
-    cin >> p;
-
-    for (size_t i = 0; i < p; i++)
+    while(~scanf("%d %d", &n, &m))
     {
-        int x1, y1, x2, y2;
-        cin >> x1 >> y1 >> x2 >> y2;
+        memset(land, 0, sizeof(land));
+        memset(dp, 0, sizeof(dp));
 
-        x1--;
-        y1--;
-        x2--;
-        y2--;
+        vecOut.clear();
+        vecOut.resize(m, NULL);
 
-        vecIn.push_back(Monitor(x1, y1, x2, y2));
-    }
+        int p;
+        scanf("%d", &p);
 
-    // sort
-    sort(vecIn.begin(), vecIn.end(), cmpIn);
+        vecIn.clear();
 
-    // segment tree
-    d.resize(4 * n + 4, 0);
-    b.resize(4 * n + 4, 0);
-
-    int vecInHead = 0;
-
-    for (size_t col = 0; col < m; col++)
-    {
-        while (vecInHead < vecIn.size() && vecIn[vecInHead].y1 == col)
+        for (size_t i = 0; i < p; i++)
         {
-            update(vecIn[vecInHead].x1, vecIn[vecInHead].x2, 1, 0, n - 1, ROOT);
+            int x1, y1, x2, y2;
+            scanf("%d %d %d %d", &x1, &y1, &x2, &y2);
 
-            vecIn[vecInHead].next = vecOut[vecIn[vecInHead].y2];
-            vecOut[vecIn[vecInHead].y2] = &(vecIn[vecInHead]);
+            x1--;
+            y1--;
+            x2--;
+            y2--;
 
-            vecInHead++;
+            vecIn.push_back(Monitor(x1, y1, x2, y2));
+        }
+
+        // sort
+        sort(vecIn.begin(), vecIn.end(), cmpIn);
+
+        // segment tree
+        d.clear();
+        d.resize(4 * n + 4, 0);
+        b.clear();
+        b.resize(4 * n + 4, 0);
+
+        int vecInHead = 0;
+
+        for (size_t col = 0; col < m; col++)
+        {
+            while (vecInHead < vecIn.size() && vecIn[vecInHead].y1 == col)
+            {
+                update(vecIn[vecInHead].x1, vecIn[vecInHead].x2, 1, 0, n - 1, ROOT);
+
+                vecIn[vecInHead].next = vecOut[vecIn[vecInHead].y2];
+                vecOut[vecIn[vecInHead].y2] = &(vecIn[vecInHead]);
+
+                vecInHead++;
+            }
+
+            for (size_t row = 0; row < n; row++)
+            {
+                if (0 < getsum(row, row, 0, n - 1, ROOT))
+                {
+                    land[row * m + col] = 1;
+                }
+            }
+
+            Monitor *curr = vecOut[col];
+            while (curr)
+            {
+                update(curr->x1, curr->x2, -1, 0, n - 1, ROOT);
+
+                curr = curr->next;
+            }
         }
 
         for (size_t row = 0; row < n; row++)
         {
-            if (0 < getsum(row, row, 0, n - 1, ROOT))
+            for (size_t col = 1; col < m; col++)
             {
-                land[row * m + col] = 1;
+                dp[row * m + col] += dp[row * m + col - 1] + land[row * m + col];
             }
         }
 
-        Monitor *curr = vecOut[col];
-        while (curr)
+        for (size_t col = 0; col < m; col++)
         {
-            update(curr->x1, curr->x2, -1, 0, n - 1, ROOT);
-
-            curr = curr->next;
+            for (size_t row = 1; row < n; row++)
+            {
+                dp[row * m + col] += dp[(row - 1) * m + col];
+            }
         }
-    }
 
-    for (size_t row = 0; row < n; row++)
-    {
-        for (size_t col = 1; col < m; col++)
+        int q;
+        scanf("%d", &q);
+
+        for (size_t i = 0; i < q; i++)
         {
-            dp[row * m + col] += dp[row * m + col - 1] + land[row * m + col];
+            int x1, y1, x2, y2;
+            scanf("%d %d %d %d", &x1, &y1, &x2, &y2);
+
+            x1--;
+            y1--;
+            x2--;
+            y2--;
+
+            int total = (y2 - y1 + 1) * (x2 - x1 + 1);
+            int cnt = dp[x2 * m + y2];
+            if (0 < x1)
+                cnt -= dp[(x1 - 1) * m + y2];
+            if (0 < y1)
+                cnt -= dp[x2 * m + (y1 - 1)];
+            if (0 < x1 && 0 < y1)
+                cnt += dp[(x1 - 1) * m + (y1 - 1)];
+            if (total == cnt)
+                printf("YES\n");
+            else
+                printf("NO\n");
         }
-    }
-
-    for (size_t col = 0; col < m; col++)
-    {
-        for (size_t row = 1; row < n; row++)
-        {
-            dp[row * m + col] += dp[(row - 1) * m + col];
-        }
-    }
-
-    int q;
-    cin >> q;
-
-    for (size_t i = 0; i < q; i++)
-    {
-        int x1, y1, x2, y2;
-        cin >> x1 >> y1 >> x2 >> y2;
-
-        x1--;
-        y1--;
-        x2--;
-        y2--;
-
-        int total = (y2 - y1 + 1) * (x2 - x1 + 1);
-        int cnt = dp[x2 * m + y2];
-        if (0 < x1)
-            cnt -= dp[(x1 - 1) * m + y2];
-        if (0 < y1)
-            cnt -= dp[x2 * m + (y1 - 1)];
-        if (0 < x1 && 0 < y1)
-            cnt += dp[(x1 - 1) * m + (y1 - 1)];
-        if (total == cnt)
-            cout << "YES\n";
-        else
-            cout << "NO\n";
     }
 
     return 0;

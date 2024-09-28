@@ -44,30 +44,28 @@ public:
 };
 
 vector<Monitor> vecIn;
-Monitor * vecOut[MAX_MN];
+Monitor *vecOut[MAX_MN];
 
-bool cmpIn (Monitor &a, Monitor &b) { return a.y1 < b.y1; }
-bool cmpOut (Monitor &a, Monitor &b) { return a.y2 < b.y2; }
+bool cmpIn(Monitor &a, Monitor &b) { return a.y1 < b.y1; }
+// bool cmpOut(Monitor &a, Monitor &b) { return a.y2 < b.y2; }
 
 vector<int> d;
 vector<int> b;
 
-void update(int l, int r, int c, int s, int t, int p)
+// segment tree functions
+void update(int l, int r, long c, int s, int t, int p)
 {
-    // [l, r] 为修改区间, c 为被修改的元素的变化量, [s, t] 为当前节点包含的区间, p
-    // 为当前节点的编号
     if (l <= s && t <= r)
     {
         d[p] += (t - s + 1) * c, b[p] += c;
         return;
-    } // 当前区间为修改区间的子集时直接修改当前节点的值,然后打标记,结束修改
+    }
     int m = s + ((t - s) >> 1);
     if (b[p] && s != t)
     {
-        // 如果当前节点的懒标记非空,则更新当前节点两个子节点的值和懒标记值
         d[p * 2] += b[p] * (m - s + 1), d[p * 2 + 1] += b[p] * (t - m);
-        b[p * 2] += b[p], b[p * 2 + 1] += b[p]; // 将标记下传给子节点
-        b[p] = 0;                               // 清空当前节点的标记
+        b[p * 2] += b[p], b[p * 2 + 1] += b[p];
+        b[p] = 0;
     }
     if (l <= m)
         update(l, r, c, s, m, p * 2);
@@ -78,17 +76,14 @@ void update(int l, int r, int c, int s, int t, int p)
 
 int getsum(int l, int r, int s, int t, int p)
 {
-    // [l, r] 为查询区间, [s, t] 为当前节点包含的区间, p 为当前节点的编号
     if (l <= s && t <= r)
         return d[p];
-    // 当前区间为询问区间的子集时直接返回当前区间的和
     int m = s + ((t - s) >> 1);
     if (b[p])
     {
-        // 如果当前节点的懒标记非空,则更新当前节点两个子节点的值和懒标记值
         d[p * 2] += b[p] * (m - s + 1), d[p * 2 + 1] += b[p] * (t - m);
-        b[p * 2] += b[p], b[p * 2 + 1] += b[p]; // 将标记下传给子节点
-        b[p] = 0;                               // 清空当前节点的标记
+        b[p * 2] += b[p], b[p * 2 + 1] += b[p];
+        b[p] = 0;
     }
     int sum = 0;
     if (l <= m)
@@ -104,21 +99,21 @@ int main()
     cin.tie(0);
     cout.tie(0);
 
-    int n, m;   // n = rows, m = cols
+    int n, m; // n = rows, m = cols
     cin >> n >> m;
 
     int p;
     cin >> p;
-    
+
     for (size_t i = 0; i < p; i++)
     {
         int x1, y1, x2, y2;
         cin >> x1 >> y1 >> x2 >> y2;
 
-        x1 --;
-        y1 --;
-        x2 --;
-        y2 --;
+        x1--;
+        y1--;
+        x2--;
+        y2--;
 
         vecIn.push_back(Monitor(x1, y1, x2, y2));
     }
@@ -127,21 +122,21 @@ int main()
     sort(vecIn.begin(), vecIn.end(), cmpIn);
 
     // segment tree
-    d.resize(4 * n, 0);
-    b.resize(4 * n, 0);
+    d.resize(4 * n + 4, 0);
+    b.resize(4 * n + 4, 0);
 
     int vecInHead = 0;
 
     for (size_t col = 0; col < m; col++)
     {
         while (vecInHead < vecIn.size() && vecIn[vecInHead].y1 == col)
-         {
+        {
             update(vecIn[vecInHead].x1, vecIn[vecInHead].x2, 1, 0, n - 1, ROOT);
 
             vecIn[vecInHead].next = vecOut[vecIn[vecInHead].y2];
             vecOut[vecIn[vecInHead].y2] = &(vecIn[vecInHead]);
 
-            vecInHead ++;
+            vecInHead++;
         }
 
         for (size_t row = 0; row < n; row++)
@@ -152,11 +147,11 @@ int main()
             }
         }
 
-        Monitor * curr = vecOut[col];
+        Monitor *curr = vecOut[col];
         while (curr)
         {
             update(curr->x1, curr->x2, -1, 0, n - 1, ROOT);
-            
+
             curr = curr->next;
         }
     }
@@ -185,10 +180,10 @@ int main()
         int x1, y1, x2, y2;
         cin >> x1 >> y1 >> x2 >> y2;
 
-        x1 --;
-        y1 --;
-        x2 --;
-        y2 --;
+        x1--;
+        y1--;
+        x2--;
+        y2--;
 
         int total = (y2 - y1 + 1) * (x2 - x1 + 1);
         int cnt = dp[x2 * m + y2];

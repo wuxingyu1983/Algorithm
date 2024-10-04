@@ -1,3 +1,6 @@
+// LCA - euler path : https://oi-wiki.org/graph/lca/#%E7%94%A8%E6%AC%A7%E6%8B%89%E5%BA%8F%E5%88%97%E8%BD%AC%E5%8C%96%E4%B8%BA-rmq-%E9%97%AE%E9%A2%98
+// Sparse Table : https://oi-wiki.org/ds/sparse-table/
+
 #include <cmath>
 #include <cstdio>
 #include <vector>
@@ -105,7 +108,7 @@ void buildEulerPath(int curr)
 
     if (0 < nodes[curr].children.size())
     {
-        for (vector<int>::iterator it = edges[curr].begin(); it != edges[curr].end(); it++)
+        for (vector<int>::iterator it = nodes[curr].children.begin(); it != nodes[curr].children.end(); it++)
         {
             buildEulerPath(*it);
 
@@ -116,6 +119,14 @@ void buildEulerPath(int curr)
     }
 }
 
+int minSt(const int &a, const int &b)
+{
+    if (st[a] < st[b])
+        return a;
+    else
+        return b;
+}
+
 int main()
 {
     ios::sync_with_stdio(0);
@@ -123,6 +134,7 @@ int main()
     cout.tie(0);
 
     int n, m, s;
+    cin >> n >> m >> s;
 
     for (size_t i = 1; i < n; i++)
     {
@@ -138,6 +150,27 @@ int main()
 
     // build euler path
     buildEulerPath(s);
+
+    // init ST
+    SparseTable<int> stbl(euler_path, minSt);
+
+    for (size_t i = 0; i < m; i++)
+    {
+        int a, b;
+        cin >> a >> b;
+
+        if (st[a] > st[b])
+            swap(a, b);
+
+        if ((st[a] < st[b]) && (ed[b] < ed[a]))
+        {
+            cout << a << "\n";
+        }
+        else
+        {
+            cout << stbl.query(ed[a], st[b]) << "\n";
+        }
+    }
 
     return 0;
 }

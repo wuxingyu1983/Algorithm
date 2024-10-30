@@ -53,5 +53,51 @@ int main()
         cin >> h[i];
     }
 
+    // init
+    for (int i = 0; i < MAX_N; ++i)
+    {
+        for (int mask = 0; mask <= maxSt; ++mask)
+        {
+            if (mask & (1 << i))
+                f[mask] += f[mask ^ (1 << i)];
+                g[mask] += g[mask ^ (1 << i)];
+                h[mask] += h[mask ^ (1 << i)];
+        }
+    }
+
+    for (size_t i = 0; i <= maxSt; i++)
+    {
+        d[i] = f[i] * g[i];
+        d[i] %= MOD;
+        d[i] *= h[i];
+        d[i] %= MOD;
+    }
+
+    pow2[0] = 1;
+    for (size_t i = 1; i <= MAX_N; i++)
+    {
+        pow2[i] = pow2[i - 1] << 1;
+    }
+
+    sum[0] = 1;
+    for (size_t i = 1; i <= MAX_N; i++)
+    {
+        if (i & 1)
+        {
+            sum[i] = sum[i - 1] - pow2[i];
+        }
+        else
+        {
+            sum[i] = sum[i - 1] + pow2[i];
+        }
+
+        sum[i] += MOD;
+        sum[i] %= MOD;
+    }
+
+    long long ans = 0;
+
+    cout << ans << endl;
+
     return 0;
 }

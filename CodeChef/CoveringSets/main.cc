@@ -97,6 +97,27 @@ int main()
 
     long long ans = 0;
 
+    for (size_t st = 0; st <= maxSt; st++)
+    {
+        int ones = 0;
+        for (size_t i = 0; i < n; i++)
+        {
+            if (st & (1 << i))
+            {
+                ones ++;
+            }
+        }
+
+        long long tmp = d[st] * pow2[ones];
+        tmp %= MOD;
+
+        tmp *= sum[n - ones];
+        tmp %= MOD;
+
+        ans += tmp;
+        ans %= MOD;
+    }
+
     cout << ans << endl;
 
     return 0;

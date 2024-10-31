@@ -25,7 +25,9 @@ long long d[MAX_2N];
 long long f[MAX_2N];
 long long g[MAX_2N];
 long long h[MAX_2N];
-long long sum[MAX_N + 1];
+
+long long C[MAX_N + 1][MAX_N + 1];
+long long sum[MAX_N + 1][MAX_N + 1];
 
 int main()
 {
@@ -54,14 +56,19 @@ int main()
     }
 
     // init
-    for (int i = 0; i < MAX_N; ++i)
+    for (int i = 0; i < n; ++i)
     {
         for (int mask = 0; mask <= maxSt; ++mask)
         {
             if (mask & (1 << i))
+            {
                 f[mask] += f[mask ^ (1 << i)];
+                f[mask] %= MOD;
                 g[mask] += g[mask ^ (1 << i)];
+                g[mask] %= MOD;
                 h[mask] += h[mask ^ (1 << i)];
+                h[mask] %= MOD;
+            }
         }
     }
 
@@ -79,20 +86,38 @@ int main()
         pow2[i] = pow2[i - 1] << 1;
     }
 
-    sum[0] = 1;
-    for (size_t i = 1; i <= MAX_N; i++)
+    C[0][0] = 1;
+    for (size_t i = 1; i <= n; i++)
     {
-        if (i & 1)
-        {
-            sum[i] = sum[i - 1] - pow2[i];
-        }
-        else
-        {
-            sum[i] = sum[i - 1] + pow2[i];
-        }
+        C[i][0] = 1;
 
-        sum[i] += MOD;
-        sum[i] %= MOD;
+        for (size_t j = 1; j <= i; j++)
+        {
+            C[i][j] = C[i][j - 1] * (i + 1 - j) / j;
+        }
+    }
+
+    sum[0][0] = 1;
+    for (size_t i = 1; i <= n; i++)
+    {
+        sum[i][0] = 1;
+
+        for (size_t j = 1; j <= i; j++)
+        {
+            C[i][j] %= MOD;
+
+            if (j & 1)
+            {
+                sum[i][j] = sum[i][j - 1] - ((pow2[j] * C[i][j]) % MOD);
+            }
+            else
+            {
+                sum[i][j] = sum[i][j - 1] + ((pow2[j] * C[i][j]) % MOD);
+            }
+
+            sum[i][j] += MOD;
+            sum[i][j] %= MOD;
+        }
     }
 
     long long ans = 0;
@@ -111,7 +136,7 @@ int main()
         long long tmp = d[st] * pow2[ones];
         tmp %= MOD;
 
-        tmp *= sum[n - ones];
+        tmp *= sum[n - ones][n - ones];
         tmp %= MOD;
 
         ans += tmp;

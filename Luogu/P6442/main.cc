@@ -21,6 +21,7 @@ using namespace std;
 #define MOD 1000000007
 
 long long dp[MAX_2M];
+long long pow2[MAX_2M];
 
 int main()
 {
@@ -31,7 +32,10 @@ int main()
     int n, m;
     cin >> n >> m;
 
-    for (size_t iN = 0; iN < n; iN++)
+    int maxSt = (1 << m) - 1;
+
+    pow2[0] = 1;
+    for (size_t iN = 1; iN <= n; iN++)
     {
         int k;
         cin >> k;
@@ -45,18 +49,19 @@ int main()
             tmp |= 1 << (toy - 1);
         }
 
-        dp[tmp] ++;
+        dp[maxSt - tmp] ++;
+
+        pow2[iN] = pow2[iN - 1] << 1;
+        pow2[iN] %= MOD;
     }
     
-    int maxSt = (1 << m) - 1;
     for (int i = 0; i < m; ++i)
     {
         for (int st = 0; st <= maxSt; ++st)
         {
-            if (st & (1 << i))
+            if (0 == (st & (1 << i)))
             {
                 dp[st] += dp[st ^ (1 << i)];
-                dp[st] %= MOD;
             }
         }
     }
@@ -65,22 +70,22 @@ int main()
 
     for (int st = 0; st <= maxSt; ++st)
     {
-        int zeros = 0;
+        int ones = 0;
         for (size_t i = 0; i < m; i++)
         {
-            if (0 == (st & (1 << i)))
+            if (st & (1 << i))
             {
-                zeros ++;
+                ones ++;
             }
         }
         
-        if (1 & zeros)
+        if (1 & ones)
         {
-            ans += (MOD - dp[st]);
+            ans += (MOD - pow2[dp[st]]);
         }
         else
         {
-            ans += dp[st];
+            ans += pow2[dp[st]];
         }
 
         ans %= MOD;

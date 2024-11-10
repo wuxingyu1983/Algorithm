@@ -21,6 +21,8 @@ using namespace std;
 
 int edges[MAX_N];
 vector<int> cmpltGh[MAX_N];
+char dp[MAX_N + 1][MAX_2N];
+char rnd[MAX_2N];     // st 第一次出现的 轮次
 
 int main()
 {
@@ -77,6 +79,60 @@ int main()
         }
     }
     
+    int ans = 0;
+
+    for (vector<int>::iterator it = cmpltGh[0].begin(); it != cmpltGh[0].end(); it++)
+    {
+        dp[1][*it] = 1;
+        rnd[*it] = 1;
+    }
+
+    if (0 < dp[1][maxSt])
+    {
+        ans = 1;
+    }
+    else
+    {
+        for (size_t rd = 1; rd < n; rd++)
+        {
+            for (size_t st = 0; st <= maxSt; st++)
+            {
+                if (0 < dp[rd][st])
+                {
+                    // find first 0
+                    int pos = 0;
+                    for (; pos < n; pos++)
+                    {
+                        if (0 == (st & (1 << pos)))
+                        {
+                            break;
+                        }
+                    }
+                    
+                    for (vector<int>::iterator it = cmpltGh[pos].begin(); it != cmpltGh[pos].end(); it++)
+                    {
+                        int newSt = st | (*it);
+                        if (newSt == maxSt)
+                        {
+                            ans = rd + 1;
+                            goto finish;
+                        }
+                        else
+                        {
+                            if (0 == rnd[newSt])
+                            {
+                                rnd[newSt] = rd + 1;
+                                dp[rd + 1][newSt] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+finish:
+    cout << ans << endl;
 
     return 0;
 }

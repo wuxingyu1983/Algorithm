@@ -40,7 +40,64 @@ int main()
         cin >> a[i];
     }
 
-        
+    // init
+    memset(max1st, -1 ,sizeof(max1st));
+    memset(max2nd, -1 ,sizeof(max2nd));
+    memset(min1st, -1 ,sizeof(min1st));
+
+    for (size_t i = 0; i < n; i++)
+    {
+        if (0 > min1st[a[i]])
+        {
+            min1st[a[i]] = i;
+        }
+    }
+    
+    for (int i = n - 1; i >= 0; i--)
+    {
+        if (0 > max1st[a[i]])
+        {
+            max1st[a[i]] = i;
+        }
+        else if (0 > max2nd[a[i]])
+        {
+            max2nd[a[i]] = i;
+        }
+    }
+    
+    // st 的超集的最大、第二大的index
+    for (int i = 0; i < MAX_M; ++i)
+    {
+        for (int st = 0; st < MAX_2M; ++st)
+        {
+            if (0 == (st & (1 << i)))
+            {
+                int othSt = st ^ (1 << i);
+
+                if (max1st[st] >= max1st[othSt])
+                {
+                    if (max2nd[st] < max1st[othSt])
+                    {
+                        max2nd[st] = max1st[othSt];
+                    }
+                }
+                else
+                {
+                    // max1st[st] < max1st[othSt]
+                    if (max1st[st] >= max2nd[othSt])
+                    {
+                        max2nd[st] = max1st[st];
+                    }
+                    else
+                    {
+                        max2nd[st] = max2nd[othSt];
+                    }
+
+                    max1st[st] = max1st[othSt];
+                }
+            }
+        }
+    }
 
     return 0;
 }

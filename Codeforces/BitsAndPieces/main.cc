@@ -17,12 +17,12 @@
 using namespace std;
 
 #define MAX_M 21
-#define MAX_2M 2097152
+#define MAX_2M 2097151
 #define MAX_N 1000000
 
-int max1st[MAX_2M];     // 最大的 index
-int max2nd[MAX_2M];     // 第二大的 index
-int min1st[MAX_2M];     // 最小的 index
+int max1st[MAX_2M + 1];     // 最大的 index
+int max2nd[MAX_2M + 1];     // 第二大的 index
+int min1st[MAX_2M + 1];     // 最小的 index
 
 int a[MAX_N];
 
@@ -47,9 +47,9 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
-        if (0 > min1st[a[i]])
+        if (0 > min1st[MAX_2M - a[i]])
         {
-            min1st[a[i]] = i;
+            min1st[MAX_2M - a[i]] = i;
         }
     }
     
@@ -68,7 +68,7 @@ int main()
     // st 的超集的最大、第二大的index
     for (int i = 0; i < MAX_M; ++i)
     {
-        for (int st = 0; st < MAX_2M; ++st)
+        for (int st = 0; st <= MAX_2M; ++st)
         {
             if (0 == (st & (1 << i)))
             {
@@ -94,6 +94,53 @@ int main()
                     }
 
                     max1st[st] = max1st[othSt];
+                }
+            }
+        }
+    }
+
+    // 只要处理 min1st 和 max2nd 这两个数组
+    for (size_t st = 0; st <= (MAX_2M / 2); st++)
+    {
+        swap(max2nd[st], max2nd[MAX_2M - st]);
+    }
+
+    // 求 min1st 的超集最小的 index
+    for (int i = 0; i < MAX_M; ++i)
+    {
+        for (int st = 0; st <= MAX_2M; ++st)
+        {
+            if (0 == (st & (1 << i)))
+            {
+                int othSt = st ^ (1 << i);
+
+                if (0 <= min1st[st] && 0 <= min1st[othSt])
+                {
+                    if (min1st[st] > min1st[othSt])
+                    {
+                        min1st[st] = min1st[othSt];
+                    }
+                }
+                else if (0 <= min1st[othSt])
+                {
+                    min1st[st] = min1st[othSt];
+                }
+            }
+        }
+    }
+
+    // 求 max2nd 的超集最大的 index
+    for (int i = 0; i < MAX_M; ++i)
+    {
+        for (int st = 0; st <= MAX_2M; ++st)
+        {
+            if (0 == (st & (1 << i)))
+            {
+                int othSt = st ^ (1 << i);
+
+                if (max2nd[st] < max2nd[othSt])
+                {
+                    max2nd[st] = max2nd[othSt];
                 }
             }
         }

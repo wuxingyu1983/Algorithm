@@ -146,5 +146,21 @@ int main()
         }
     }
 
+    int ans = -1;
+
+    for (int st = 0; st <= MAX_2M; ++st)
+    {
+        if (0 <= min1st[st] && 0 <= max2nd[st])
+        {
+            if (min1st[st] < max2nd[st])
+            {
+                ans = MAX_2M - st;
+                break;
+            }
+        }
+    }
+
+    cout << ans << endl;
+
     return 0;
 }

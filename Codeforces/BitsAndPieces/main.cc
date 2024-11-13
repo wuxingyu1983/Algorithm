@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits.h>
+#include <functional>
 
 using namespace std;
 
@@ -25,6 +26,48 @@ int max2nd[MAX_2M + 1];     // 第二大的 index
 int min1st[MAX_2M + 1];     // 最小的 index
 
 int a[MAX_N];
+int indexs[MAX_N];
+
+template <typename T>
+class SparseTable
+{
+    using VT = vector<T>;
+    using VVT = vector<VT>;
+    using func_type = function<T(const T &, const T &)>;
+
+    VVT ST;
+
+    static T default_func(const T &t1, const T &t2) { return max(t1, t2); }
+
+    func_type op;
+
+public:
+    SparseTable(const vector<T> &v, func_type _func = default_func)
+    {
+        op = _func;
+        int len = v.size(), l1 = ceil(log2(len)) + 1;
+        ST.assign(len, VT(l1, 0));
+        for (int i = 0; i < len; ++i)
+        {
+            ST[i][0] = v[i];
+        }
+        for (int j = 1; j < l1; ++j)
+        {
+            int pj = (1 << (j - 1));
+            for (int i = 0; i + pj < len; ++i)
+            {
+                ST[i][j] = op(ST[i][j - 1], ST[i + (1 << (j - 1))][j - 1]);
+            }
+        }
+    }
+
+    T query(int l, int r)
+    {
+        int lt = r - l + 1;
+        int q = floor(log2(lt));
+        return op(ST[l][q], ST[r - (1 << q) + 1][q]);
+    }
+};
 
 int main()
 {
@@ -47,9 +90,9 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
-        if (0 > min1st[MAX_2M - a[i]])
+        if (0 > min1st[a[i]])
         {
-            min1st[MAX_2M - a[i]] = i;
+            min1st[a[i]] = i;
         }
     }
     
@@ -100,54 +143,20 @@ int main()
     }
 
     // 只要处理 min1st 和 max2nd 这两个数组
-    for (size_t st = 0; st <= (MAX_2M / 2); st++)
-    {
-        swap(max2nd[st], max2nd[MAX_2M - st]);
-    }
+    memset(indexs, -1, sizeof(indexs));
 
-    // 求 min1st 的超集最小的 index
-    for (int i = 0; i < MAX_M; ++i)
+    for (int st = 0; st <= MAX_2M; ++st)
     {
-        for (int st = 0; st <= MAX_2M; ++st)
+        if (0 <= max2nd[st])
         {
-            if (0 == (st & (1 << i)))
-            {
-                int othSt = st ^ (1 << i);
-
-                if (0 <= min1st[st] && 0 <= min1st[othSt])
-                {
-                    if (min1st[st] > min1st[othSt])
-                    {
-                        min1st[st] = min1st[othSt];
-                    }
-                }
-                else if (0 <= min1st[othSt])
-                {
-                    min1st[st] = min1st[othSt];
-                }
-            }
+            indexs[max2nd[st]] = st;
         }
     }
 
-    // 求 max2nd 的超集最大的 index
-    for (int i = 0; i < MAX_M; ++i)
-    {
-        for (int st = 0; st <= MAX_2M; ++st)
-        {
-            if (0 == (st & (1 << i)))
-            {
-                int othSt = st ^ (1 << i);
-
-                if (max2nd[st] < max2nd[othSt])
-                {
-                    max2nd[st] = max2nd[othSt];
-                }
-            }
-        }
-    }
+    
 
     int ans = -1;
-
+/*
     for (int st = 0; st <= MAX_2M; ++st)
     {
         if (0 <= min1st[st] && 0 <= max2nd[st])
@@ -159,7 +168,7 @@ int main()
             }
         }
     }
-
+*/
     cout << ans << endl;
 
     return 0;

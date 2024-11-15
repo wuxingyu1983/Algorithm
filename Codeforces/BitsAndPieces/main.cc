@@ -26,48 +26,6 @@ int max2nd[MAX_2M + 1];     // 第二大的 index
 int min1st[MAX_2M + 1];     // 最小的 index
 
 int a[MAX_N];
-int indexs[MAX_N];
-
-template <typename T>
-class SparseTable
-{
-    using VT = vector<T>;
-    using VVT = vector<VT>;
-    using func_type = function<T(const T &, const T &)>;
-
-    VVT ST;
-
-    static T default_func(const T &t1, const T &t2) { return max(t1, t2); }
-
-    func_type op;
-
-public:
-    SparseTable(const vector<T> &v, func_type _func = default_func)
-    {
-        op = _func;
-        int len = v.size(), l1 = ceil(log2(len)) + 1;
-        ST.assign(len, VT(l1, 0));
-        for (int i = 0; i < len; ++i)
-        {
-            ST[i][0] = v[i];
-        }
-        for (int j = 1; j < l1; ++j)
-        {
-            int pj = (1 << (j - 1));
-            for (int i = 0; i + pj < len; ++i)
-            {
-                ST[i][j] = op(ST[i][j - 1], ST[i + (1 << (j - 1))][j - 1]);
-            }
-        }
-    }
-
-    T query(int l, int r)
-    {
-        int lt = r - l + 1;
-        int q = floor(log2(lt));
-        return op(ST[l][q], ST[r - (1 << q) + 1][q]);
-    }
-};
 
 int main()
 {
@@ -143,32 +101,38 @@ int main()
     }
 
     // 只要处理 min1st 和 max2nd 这两个数组
-    memset(indexs, -1, sizeof(indexs));
-
-    for (int st = 0; st <= MAX_2M; ++st)
-    {
-        if (0 <= max2nd[st])
-        {
-            indexs[max2nd[st]] = st;
-        }
-    }
-
-    
-
     int ans = -1;
-/*
+
     for (int st = 0; st <= MAX_2M; ++st)
     {
-        if (0 <= min1st[st] && 0 <= max2nd[st])
+        if (0 <= min1st[st])
         {
-            if (min1st[st] < max2nd[st])
+            int tmp = 0;
+            bool flag = false;
+            for (int i = MAX_M - 1; i >= 0; i--)
             {
-                ans = MAX_2M - st;
-                break;
+                if (0 == (st & (1 << i)))
+                {
+                    if (min1st[st] < max2nd[tmp | (1 << i)])
+                    {
+                        tmp |= 1 << i;
+                        flag = true;
+                    }
+                }
+            }
+            
+            if (false == flag && min1st[st] < max2nd[tmp])
+            {
+                flag = true;
+            }
+
+            if (flag && ans < (st | tmp))
+            {
+                ans = st | tmp;
             }
         }
     }
-*/
+
     cout << ans << endl;
 
     return 0;

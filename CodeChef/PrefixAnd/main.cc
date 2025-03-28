@@ -18,7 +18,7 @@ using namespace std;
 
 const int maxSt = 1048576;
 
-long long dp[20][maxSt];
+long long dp[21][maxSt];
 long long cnt[maxSt];
 int t;
 
@@ -63,15 +63,54 @@ int main()
         {
             if (cnt[st])
             {
-                dp[0][st] = cnt[st] * st;
-
                 if (n == cnt[st] && dp[0][st] > ans)
                 {
-                    ans = dp[0][st];
+                    ans = cnt[st] * st;
+                }
+                else
+                {
+                    dp[0][st] = cnt[st] * st;
                 }
             }
         }
         
+        for (size_t i = 0; i < 20; i++)
+        {
+            for (long long st = 1; st < maxSt; st++)
+            {
+                if (dp[i][st])
+                {
+                    bool flag = false;
+
+                    for (long long subSt = st - 1; subSt > 0; subSt--)
+                    {
+                        if (subSt == (subSt & st))
+                        {
+                            long long tmp = dp[i][st] + subSt * (cnt[subSt] - cnt[st]);
+                            if (tmp > dp[i + 1][subSt])
+                            {
+                                if (n == cnt[subSt] && tmp > ans)
+                                {
+                                    ans = tmp;
+                                }
+                                else
+                                {
+                                    dp[i + 1][subSt] = tmp;
+                                }
+                            }
+                        }
+                    }
+                   
+                    if (false == flag)
+                    {
+                        if (dp[i][st] > ans)
+                        {
+                            ans = dp[i][st];
+                        }
+                    }
+                }
+            }
+        }
 
         cout << ans << endl;
     }

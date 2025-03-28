@@ -98,6 +98,8 @@ int main()
                                     dp[i + 1][subSt] = tmp;
                                 }
                             }
+
+                            flag = true;
                         }
                     }
                    

@@ -19,7 +19,7 @@ using namespace std;
 const int maxSt = 1048576;
 
 long long dp[20][maxSt];
-int cnt[maxSt];
+long long cnt[maxSt];
 int t;
 
 int main()
@@ -57,6 +57,21 @@ int main()
         }
 
         long long ans = 0;
+
+        // 初始状态
+        for (long long st = 1; st < maxSt; st++)
+        {
+            if (cnt[st])
+            {
+                dp[0][st] = cnt[st] * st;
+
+                if (n == cnt[st] && dp[0][st] > ans)
+                {
+                    ans = dp[0][st];
+                }
+            }
+        }
+        
 
         cout << ans << endl;
     }

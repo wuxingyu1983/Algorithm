@@ -18,8 +18,6 @@ class Solution
 public:
     string largestPalindrome(int n, int k)
     {
-        string str;
-
         const int maxN = 100002;
         
         int rmds[maxN];
@@ -52,7 +50,7 @@ public:
 
             for (size_t i = 0; i < 10; i++)
             {
-                int rd = i * (rmds[i] * rmds[i - 1]) % k;
+                int rd = i * (rmds[idx] + rmds[idx - 1]) % k;
                 dp[idx][rd] = i;
             }
         }
@@ -71,6 +69,32 @@ public:
                     }
                 }
             }
+        }
+
+        string str;
+        string tmpStr;
+        int rd = 0;
+        for (size_t i = n - 1; i > idx; i--)
+        {
+            tmpStr.push_back('0' + dp[i][rd]);
+
+            rd += k - ((rmds[i] + rmds[n - 1 - i]) * dp[i][rd] % k);
+            rd %= k;
+        }
+        
+        if (n % 2)
+        {
+            str.append(tmpStr);
+            str.push_back('0' + dp[idx][rd]);
+            reverse(tmpStr.begin(), tmpStr.end());
+            str.append(tmpStr);
+        }
+        else
+        {
+            tmpStr.push_back('0' + dp[idx][rd]);
+            str.append(tmpStr);
+            reverse(tmpStr.begin(), tmpStr.end());
+            str.append(tmpStr);
         }
 
         return str;

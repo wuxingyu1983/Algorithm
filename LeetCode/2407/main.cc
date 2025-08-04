@@ -25,6 +25,24 @@ public:
         vector<int> d(2 * maxN * 4);
         vector<int> b(2 * maxN * 4);
 
+        for (size_t i = 0; i < nums.size(); i++)
+        {
+            int num = nums[i];
+
+            int left = num - k;
+            if (1 > left)
+            {
+                left = 1;
+            }
+
+            int max = getMax(d, b, left, num - 1, 1, maxN, 1);
+            if (ret < max + 1)
+            {
+                ret = max + 1;
+            }
+
+            update(d, b, num, num, (max + 1), 1, maxN, 1);
+        }
         
 
         return ret;

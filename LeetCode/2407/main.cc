@@ -22,79 +22,83 @@ public:
 
         const int maxN = 100001;
 
-        vector<int> d(2 * maxN * 4);
-        vector<int> b(2 * maxN * 4);
+        vector<int> d(maxN * 4 + 2);
 
         for (size_t i = 0; i < nums.size(); i++)
         {
             int num = nums[i];
 
-            int left = num - k;
-            if (1 > left)
+            int max = 0;
+
+            if (1 < num)
             {
-                left = 1;
+                int left = num - k;
+                if (1 > left)
+                {
+                    left = 1;
+                }
+
+                max = getMax(d, left, num - 1, 1, maxN, 1);
             }
 
-            int max = getMax(d, b, left, num - 1, 1, maxN, 1);
+            update(d, num, (max + 1), 1, maxN, 1);
+
             if (ret < max + 1)
             {
                 ret = max + 1;
             }
-
-            update(d, b, num, num, (max + 1), 1, maxN, 1);
         }
-        
 
         return ret;
     }
 
 private:
     // segment tree func
-    void update(vector<int> &d, vector<int> &b, int l, int r, int c, int s, int t, int p)
+    int update(vector<int> &d, int idx, int c, int s, int t, int p)
     {
-        if (l <= s && t <= r)
+        if (idx == s && idx == t)
         {
-            d[p] += (t - s + 1) * c, b[p] += c;
-            return;
+            d[p] = c;
+            return c;
         }
         int m = s + ((t - s) >> 1);
-        if (b[p] && s != t)
+        if (idx <= m)
         {
-            d[p * 2] += b[p] * (m - s + 1), d[p * 2 + 1] += b[p] * (t - m);
-            b[p * 2] += b[p], b[p * 2 + 1] += b[p];
-            b[p] = 0;
+            unsigned long long tmp = update(d, idx, c, s, m, p * 2);
+            if (tmp > d[p])
+            {
+                d[p] = tmp;
+            }
         }
-        if (l <= m)
-            update(d, b, l, r, c, s, m, p * 2);
-        if (r > m)
-            update(d, b, l, r, c, m + 1, t, p * 2 + 1);
-        if (d[p * 2] < d[p * 2 + 1])
-            d[p] = d[p * 2];
-        else
-            d[p] = d[p * 2 + 1];
+        if (idx > m)
+        {
+            unsigned long long tmp = update(d, idx, c, m + 1, t, p * 2 + 1);
+            if (tmp > d[p])
+            {
+                d[p] = tmp;
+            }
+        }
+
+        return d[p];
     }
 
-    int getMax(vector<int> &d, vector<int> &b, int l, int r, int s, int t, int p)
+    int getMax(vector<int> &d, int l, int r, int s, int t, int p)
     {
+        if (l > r)
+        {
+            return 0;
+        }
         if (l <= s && t <= r)
-        {
             return d[p];
-        }
         int m = s + ((t - s) >> 1);
-        if (b[p])
-        {
-            d[p * 2] += b[p] * (m - s + 1), d[p * 2 + 1] += b[p] * (t - m);
-            b[p * 2] += b[p], b[p * 2 + 1] += b[p];
-            b[p] = 0;
-        }
         int max = 0;
         if (l <= m)
         {
-            max = getMax(d, b, l, r, s, m, p * 2);
+            max = getMax(d, l, r, s, m, p * 2);
         }
         if (r > m)
         {
-            int tmp = getMax(d, b, l, r, m + 1, t, p * 2 + 1);
+            int tmp = getMax(d, l, r, m + 1, t, p * 2 + 1);
             if (tmp > max)
             {
                 max = tmp;

@@ -20,6 +20,22 @@ public:
     {
         string strRet;
 
+        // 降序
+        std::sort(digits.begin(), digits.end(), [](int a, int b)
+                  {
+                      return a > b;
+                  });
+
+        int cnt[10];
+        memset(cnt, 0, sizeof(cnt));
+
+        for (size_t i = 0; i < digits.size(); i++)
+        {
+            cnt[digits[i]] ++;
+        }
+        
+        
+
         return strRet;
     }
 };

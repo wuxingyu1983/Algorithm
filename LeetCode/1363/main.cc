@@ -66,7 +66,26 @@ public:
             }
             else
             {
+                int mod = 0;
+                for (int num = 9; num > 0; num--)
+                {
+                    int n = cnt[num];
+                    for (int i = 0; i < 3 && n - i >= 0; i++)
+                    {
+                        int newMod = (mod + 6 - ((n - i) * num) % 3) % 3;
+                        if (0 <= dp[num - 1][newMod])
+                        {
+                            if (0 < (n - i))
+                            {
+                                strRet.append('0' + num, n - i);
+                            }
 
+                            mod = newMod;
+
+                            break;
+                        }
+                    }
+                }
             }
         }
 

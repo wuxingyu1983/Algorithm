@@ -24,6 +24,7 @@ public:
 
         vector<string> vecW;
         vector<int> vecC;
+        vector<int> vecF;
         {
             unordered_map<string, int> mp;
             for (size_t i = 0; i < words.size(); i++)
@@ -45,6 +46,7 @@ public:
 
             vecW.resize(mp.size());
             vecC.resize(mp.size());
+            vecF.resize(mp.size());
 
             int idx;
             unordered_map<string, int>::iterator it;
@@ -52,7 +54,20 @@ public:
             {
                 vecW[idx] = it->first;
                 vecC[idx] = it->second;
+
+                int f = 0;
+                for (size_t i = 0; i < vecW[idx].length(); i++)
+                {
+                    f |= 1 << (vecW[idx].at(i) - 'a');
+                }
+                vecF[idx] = f;
             }
+        }
+
+        int targetF = 0;
+        for (size_t i = 0; i < target.length(); i++)
+        {
+            targetF |= 1 << (target.at(i) - 'a');
         }
 
         vector< bitset<50000> > flags(vecW.size());
@@ -63,6 +78,7 @@ public:
         
         for (int idx = 0; idx < vecW.size(); idx ++)
         {
+            if (vecF[idx] == (targetF & vecF[idx]))
             {
                 string cur = vecW[idx] + '#' + target;
                 int sz1 = target.size(), sz2 = vecW[idx].size();
@@ -84,11 +100,11 @@ public:
                     if (pi[i] == sz2)
                         flags[idx][i - 2 * sz2] = 1;
                 }
-            }
 
-            if (flags[idx][0])
-            {
-                dp[vecW[idx].length() - 1] = vecC[idx];
+                if (flags[idx][0])
+                {
+                    dp[vecW[idx].length() - 1] = vecC[idx];
+                }
             }
         }
 

@@ -19,7 +19,7 @@ class Solution
 public:
     int minimumCost(string target, vector<string> &words, vector<int> &costs)
     {
-        int ret = 1;
+        int ret = -1;
 
         map<string, int> mp;
         for (size_t i = 0; i < words.size(); i++)
@@ -40,9 +40,38 @@ public:
         }
 
         const int maxLen = 50001;
-        vector<vector<int>> flag(mp.size(), vector<int>(maxLen, 0));
+        vector< vector<int> > flags(mp.size(), vector<int>(maxLen, 0));
 
+        vector<int> dp(target.length(), -1);
         // 计算 每个 word 在 target 中的位置
+        int idx;
+        map<string, int>::iterator it;
+        for (it = mp.begin(), idx = 0; it != mp.end(); it ++, idx ++)
+        {
+            find_occurrences(target, it->first, flags[idx]);
+
+            if (flags[idx][0])
+            {
+                dp[it->first.length() - 1] = it->second;
+            }
+        }
+
+        for (size_t i = 1; i < target.length(); i++)
+        {
+            if (0 < dp[i - 1])
+            {
+                for (it = mp.begin(), idx = 0; it != mp.end(); it++, idx++)
+                {
+                    if (flags[idx][i])
+                    {
+                        if (0 > dp[i + it->first.length() - 1] || dp[i + it->first.length() - 1] > dp[i - 1] + it->second)
+                        dp[i + it->first.length() - 1] = dp[i - 1] + it->second;
+                    }
+                }
+            }
+        }
+
+        ret = dp[target.length() - 1];
 
         return ret;
     }

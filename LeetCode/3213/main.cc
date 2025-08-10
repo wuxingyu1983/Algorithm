@@ -38,9 +38,42 @@ public:
                 mp.insert({key, costs[i]});
             }
         }
-        
-        
+
+        const int maxLen = 50001;
+        vector<vector<int>> flag(mp.size(), vector<int>(maxLen, 0));
+
+        // 计算 每个 word 在 target 中的位置
+
         return ret;
+    }
+
+private:
+    vector<int> prefix_function(string s)
+    {
+        int n = (int)s.length();
+        vector<int> pi(n);
+        for (int i = 1; i < n; i++)
+        {
+            int j = pi[i - 1];
+            while (j > 0 && s[i] != s[j])
+                j = pi[j - 1];
+            if (s[i] == s[j])
+                j++;
+            pi[i] = j;
+        }
+        return pi;
+    }
+
+    void find_occurrences(string text, string pattern, vector<int> &flags)
+    {
+        string cur = pattern + '#' + text;
+        int sz1 = text.size(), sz2 = pattern.size();
+        vector<int> lps = prefix_function(cur);
+        for (int i = sz2 + 1; i <= sz1 + sz2; i++)
+        {
+            if (lps[i] == sz2)
+                flags[i - 2 * sz2] = 1;
+        }
     }
 };
 

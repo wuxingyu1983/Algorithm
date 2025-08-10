@@ -10,7 +10,7 @@
 #include <set>
 #include <queue>
 #include <stack>
-#include <map>
+#include <unordered_map>
 #include <bitset>
 
 using namespace std;
@@ -22,7 +22,7 @@ public:
     {
         int ret = -1;
 
-        map<string, int> mp;
+        unordered_map<string, int> mp;
         for (size_t i = 0; i < words.size(); i++)
         {
             string key = words[i];
@@ -41,15 +41,38 @@ public:
         }
 
         vector< bitset<50000> > flags(mp.size());
-        int pos[100002];
+        int pi[100002];
 
         vector<int> dp(target.length(), -1);
         // 计算 每个 word 在 target 中的位置
         int idx;
-        map<string, int>::iterator it;
+        unordered_map<string, int>::iterator it;
         for (it = mp.begin(), idx = 0; it != mp.end(); it ++, idx ++)
         {
-            find_occurrences(target, it->first, flags[idx], pos);
+            {
+                string pattern = it->first;
+                string text = target;
+                string cur = pattern + '#' + text;
+                int sz1 = text.size(), sz2 = pattern.size();
+                int n = (int)cur.length();
+                memset(pi, 0, sizeof(pi));
+
+                for (int i = 1; i < n; i++)
+                {
+                    int j = pi[i - 1];
+                    while (j > 0 && cur[i] != cur[j])
+                        j = pi[j - 1];
+                    if (cur[i] == cur[j])
+                        j++;
+                    pi[i] = j;
+                }
+
+                for (int i = sz2 + 1; i <= sz1 + sz2; i++)
+                {
+                    if (pi[i] == sz2)
+                        flags[idx][i - 2 * sz2] = 1;
+                }
+            }
 
             if (flags[idx][0])
             {
@@ -75,30 +98,6 @@ public:
         ret = dp[target.length() - 1];
 
         return ret;
-    }
-
-private:
-    void find_occurrences(const string &text, const string &pattern, bitset<50000> &flags, int (&pi)[100002])
-    {
-        string cur = pattern + '#' + text;
-        int sz1 = text.size(), sz2 = pattern.size();
-        int n = (int)cur.length();
-        memset(pi, 0, sizeof(pi));
-        for (int i = 1; i < n; i++)
-        {
-            int j = pi[i - 1];
-            while (j > 0 && cur[i] != cur[j])
-                j = pi[j - 1];
-            if (cur[i] == cur[j])
-                j++;
-            pi[i] = j;
-        }
-
-        for (int i = sz2 + 1; i <= sz1 + sz2; i++)
-        {
-            if (pi[i] == sz2)
-                flags[i - 2 * sz2] = 1;
-        }
     }
 };
 

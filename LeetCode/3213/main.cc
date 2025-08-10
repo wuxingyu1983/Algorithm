@@ -21,6 +21,25 @@ public:
     {
         int ret = 1;
 
+        map<string, int> mp;
+        for (size_t i = 0; i < words.size(); i++)
+        {
+            string key = words[i];
+            auto it = mp.find(key);
+            if (it != mp.end())
+            {
+                if (it->second > costs[i])
+                {
+                    mp[key] = costs[i];
+                }
+            }
+            else
+            {
+                mp.insert({key, costs[i]});
+            }
+        }
+        
+        
         return ret;
     }
 };

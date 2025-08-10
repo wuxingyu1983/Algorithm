@@ -11,6 +11,7 @@
 #include <queue>
 #include <stack>
 #include <map>
+#include <bitset>
 
 using namespace std;
 
@@ -39,8 +40,7 @@ public:
             }
         }
 
-        const int maxLen = 50001;
-        vector< vector<int> > flags(mp.size(), vector<int>(maxLen, 0));
+        vector< bitset<50000> > flags(mp.size());
 
         vector<int> dp(target.length(), -1);
         // 计算 每个 word 在 target 中的位置
@@ -93,7 +93,7 @@ private:
         return pi;
     }
 
-    void find_occurrences(string text, string pattern, vector<int> &flags)
+    void find_occurrences(string text, string pattern, bitset<50000> &flags)
     {
         string cur = pattern + '#' + text;
         int sz1 = text.size(), sz2 = pattern.size();
@@ -132,7 +132,7 @@ int main()
     }
     
     Solution s;
-    cout << s.minimumCost(target, words, costs);
+    cout << s.minimumCost(target, words, costs) << endl;
 
     return 0;
 }

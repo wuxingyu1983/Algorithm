@@ -22,38 +22,50 @@ public:
     {
         int ret = -1;
 
-        unordered_map<string, int> mp;
-        for (size_t i = 0; i < words.size(); i++)
+        vector<string> vecW;
+        vector<int> vecC;
         {
-            string key = words[i];
-            auto it = mp.find(key);
-            if (it != mp.end())
+            unordered_map<string, int> mp;
+            for (size_t i = 0; i < words.size(); i++)
             {
-                if (it->second > costs[i])
+                string key = words[i];
+                auto it = mp.find(key);
+                if (it != mp.end())
                 {
-                    mp[key] = costs[i];
+                    if (it->second > costs[i])
+                    {
+                        mp[key] = costs[i];
+                    }
+                }
+                else
+                {
+                    mp.insert({key, costs[i]});
                 }
             }
-            else
+
+            vecW.resize(mp.size());
+            vecC.resize(mp.size());
+
+            int idx;
+            unordered_map<string, int>::iterator it;
+            for (it = mp.begin(), idx = 0; it != mp.end(); it++, idx++)
             {
-                mp.insert({key, costs[i]});
+                vecW[idx] = it->first;
+                vecC[idx] = it->second;
             }
         }
 
-        vector< bitset<50000> > flags(mp.size());
+        vector< bitset<50000> > flags(vecW.size());
         int pi[100002];
 
         vector<int> dp(target.length(), -1);
         // 计算 每个 word 在 target 中的位置
-        int idx;
-        unordered_map<string, int>::iterator it;
-        for (it = mp.begin(), idx = 0; it != mp.end(); it ++, idx ++)
+        
+        for (int idx = 0; idx < vecW.size(); idx ++)
         {
             {
-                string pattern = it->first;
-                string text = target;
-                string cur = pattern + '#' + text;
-                int sz1 = text.size(), sz2 = pattern.size();
+                string cur = vecW[idx] + '#' + target;
+                int sz1 = target.size(), sz2 = vecW[idx].size();
                 int n = (int)cur.length();
                 memset(pi, 0, sizeof(pi));
 
@@ -76,7 +88,7 @@ public:
 
             if (flags[idx][0])
             {
-                dp[it->first.length() - 1] = it->second;
+                dp[vecW[idx].length() - 1] = vecC[idx];
             }
         }
 
@@ -84,12 +96,12 @@ public:
         {
             if (0 < dp[i - 1])
             {
-                for (it = mp.begin(), idx = 0; it != mp.end(); it++, idx++)
+                for (int idx = 0; idx < vecW.size(); idx++)
                 {
                     if (flags[idx][i])
                     {
-                        if (0 > dp[i + it->first.length() - 1] || dp[i + it->first.length() - 1] > dp[i - 1] + it->second)
-                        dp[i + it->first.length() - 1] = dp[i - 1] + it->second;
+                        if (0 > dp[i + vecW[idx].length() - 1] || dp[i + vecW[idx].length() - 1] > dp[i - 1] + vecC[idx])
+                        dp[i + vecW[idx].length() - 1] = dp[i - 1] + vecC[idx];
                     }
                 }
             }

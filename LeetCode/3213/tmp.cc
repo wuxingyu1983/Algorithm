@@ -25,6 +25,8 @@ public:
         vector<string> vecW;
         vector<int> vecC;
         vector<int> vecF;
+        int maxWLen =0;
+
         {
             unordered_map<string, int> mp;
             for (size_t i = 0; i < words.size(); i++)
@@ -61,6 +63,9 @@ public:
                     f |= 1 << (vecW[idx].at(i) - 'a');
                 }
                 vecF[idx] = f;
+
+                if (maxWLen < vecW[idx].length())
+                    maxWLen = vecW[idx].length();
             }
 
             mp.clear();
@@ -72,55 +77,57 @@ public:
             targetF |= 1 << (target.at(i) - 'a');
         }
 
-        vector< bitset<50000> > flags(vecW.size());
-        int pi[100002];
+        vector< vector<int> > flags(target.size());
+
+        {
+            int *pi = (int *)malloc(sizeof(int) * (target.size() + maxWLen + 2));
+
+            for (int idx = 0; idx < vecW.size(); idx++)
+            {
+                if (vecF[idx] == (targetF & vecF[idx]))
+                {
+                    string cur = vecW[idx] + '#' + target;
+                    int sz1 = target.size(), sz2 = vecW[idx].size();
+                    int n = (int)cur.length();
+                    memset(pi, 0, sizeof(int) * (target.size() + maxWLen + 2));
+
+                    for (int i = 1; i < n; i++)
+                    {
+                        int j = pi[i - 1];
+                        while (j > 0 && cur[i] != cur[j])
+                            j = pi[j - 1];
+                        if (cur[i] == cur[j])
+                            j++;
+                        pi[i] = j;
+                    }
+
+                    for (int i = sz2 + 1; i <= sz1 + sz2; i++)
+                    {
+                        if (pi[i] == sz2)
+                            flags[i - 2 * sz2].push_back(idx);
+                    }
+                }
+            }
+
+            free(pi);
+        }
 
         vector<int> dp(target.length(), -1);
         // 计算 每个 word 在 target 中的位置
-        
-        for (int idx = 0; idx < vecW.size(); idx ++)
+
+        for (size_t i = 0; i < flags[0].size(); i++)
         {
-            if (vecF[idx] == (targetF & vecF[idx]))
-            {
-                string cur = vecW[idx] + '#' + target;
-                int sz1 = target.size(), sz2 = vecW[idx].size();
-                int n = (int)cur.length();
-                memset(pi, 0, sizeof(pi));
-
-                for (int i = 1; i < n; i++)
-                {
-                    int j = pi[i - 1];
-                    while (j > 0 && cur[i] != cur[j])
-                        j = pi[j - 1];
-                    if (cur[i] == cur[j])
-                        j++;
-                    pi[i] = j;
-                }
-
-                for (int i = sz2 + 1; i <= sz1 + sz2; i++)
-                {
-                    if (pi[i] == sz2)
-                        flags[idx][i - 2 * sz2] = 1;
-                }
-
-                if (flags[idx][0])
-                {
-                    dp[vecW[idx].length() - 1] = vecC[idx];
-                }
-            }
+            dp[vecW[flags[0][i]].length() - 1] = vecC[flags[0][i]];
         }
 
         for (size_t i = 1; i < target.length(); i++)
         {
-            if (0 < dp[i - 1])
+            if (0 < dp[i - 1] && 0 < flags[i].size())
             {
-                for (int idx = 0; idx < vecW.size(); idx++)
+                for (size_t idx = 0; idx < flags[i].size(); idx++)
                 {
-                    if (flags[idx][i])
-                    {
-                        if (0 > dp[i + vecW[idx].length() - 1] || dp[i + vecW[idx].length() - 1] > dp[i - 1] + vecC[idx])
-                            dp[i + vecW[idx].length() - 1] = dp[i - 1] + vecC[idx];
-                    }
+                    if (0 > dp[i + vecW[flags[i][idx]].length() - 1] || dp[i + vecW[flags[i][idx]].length() - 1] > dp[i - 1] + vecC[flags[i][idx]])
+                        dp[i + vecW[flags[i][idx]].length() - 1] = dp[i - 1] + vecC[flags[i][idx]];
                 }
             }
         }

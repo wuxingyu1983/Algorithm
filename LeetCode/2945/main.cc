@@ -22,6 +22,15 @@ public:
     {
         int ret = 0;
 
+        vector<long long> preSum;
+        long long sum = 0;
+        for (size_t i = 0; i < nums.size(); i++)
+        {
+            sum += nums[i];
+            preSum.push_back(sum);
+        }
+
+
         return ret;
     }
 };

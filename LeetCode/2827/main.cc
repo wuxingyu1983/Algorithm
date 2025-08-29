@@ -28,6 +28,9 @@ public:
     }
 
 private:
+    int edp[9][20][11];     // even 偶数
+    int odp[9][20][11];     // odd 奇数
+
     int getNumOfBeautyInt(const int num, const int k)
     {
         int ret = 0;
@@ -35,17 +38,7 @@ private:
         if (10 <= num)
         {
             string strNum = to_string(num);
-            int digit = strNum.length();  // 位数
-            int max = strNum.at(0) - '0';    // 最高位的最大值
-
-            if (1 == max)
-            {
-                max = 9;
-                digit --;
-            }
-            
-            int edp[9][20][11];     // even
-            int odp[9][20][11];     // odd
+            int digit = strNum.length();        // 位数
 
             memset(edp, 0, sizeof(edp));
             memset(odp, 0, sizeof(odp));
@@ -54,17 +47,19 @@ private:
             {
                 if (n % 2)
                 {
-                    edp[0][n % k][1] ++;
+                    // odd
+                    odp[0][n % k][1] ++;
                 }
                 else
                 {
-                    odp[0][n % k][1] ++;
+                    // even
+                    edp[0][n % k][1] ++;
                 }
             }
 
-            int tmp = 10;
-            for (size_t d = 1; d < digit - 1; d++, tmp *= 10)
+            for (size_t d = 1; d < digit - 1; d++)
             {
+                int tmp = pow(10, d);
                 for (int n = 9; n >= 0; n--)
                 {
                     if (0 == n)

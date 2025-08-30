@@ -31,6 +31,259 @@ private:
     int edp[9][20][11];     // even 偶数
     int odp[9][20][11];     // odd 奇数
 
+    int fucnRec(const int num, const int idx, const int k, bool limit)
+    {
+        int ret = 0;
+        string strNum = to_string(num);
+
+        memset(edp[idx], 0, sizeof(int) * 20 * 11);
+        memset(odp[idx], 0, sizeof(int) * 20 * 11);
+
+        if (true == limit)
+        {
+            int start = 0, end = strNum.at(idx) - '0', n;
+
+            if (0 == idx)
+            {
+                start = 1;    
+
+                for (n = start; n < end; n++)
+                {
+                    int newM = n * pow(10, strNum.length() - 1 - idx);
+                    newM %= k;
+
+                    if (n % 2)
+                    {
+                        // odd
+                        odp[idx][newM][1]++;
+                    }
+                    else
+                    {
+                        // even
+                        edp[idx][newM][1]++;
+                    }
+                }
+
+                if (idx == (strNum.length() - 1))
+                    ret = edp[idx][0][0] + odp[idx][0][0];
+                else
+                    ret = fucnRec(num, idx + 1, k, false);
+
+                // 处理边界
+                {
+                    memset(edp[idx], 0, sizeof(int) * 20 * 11);
+                    memset(odp[idx], 0, sizeof(int) * 20 * 11);
+
+                    int newM = n * pow(10, strNum.length() - 1 - idx);
+                    newM %= k;
+
+                    if (n % 2)
+                    {
+                        // odd
+                        odp[idx][newM][1]++;
+                    }
+                    else
+                    {
+                        // even
+                        edp[idx][newM][1]++;
+                    }
+
+                    if (idx == (strNum.length() - 1))
+                        ret += edp[idx][0][0] + odp[idx][0][0];
+                    else
+                        ret += fucnRec(num, idx + 1, k, true);
+                }
+            }
+            else
+            {
+                for (n = start; n < end; n++)
+                {
+                    int newM = n * pow(10, strNum.length() - 1 - idx);
+                    newM %= k;
+
+                    for (size_t iK = 0; iK < k; iK++)
+                    {
+                        for (size_t offset = 0; offset < strNum.length(); offset++)
+                        {
+                            if (edp[idx - 1][iK][offset])
+                            {
+                                if (n % 2)
+                                {
+                                    // odd
+                                    if (0 == offset)
+                                    {
+                                        odp[idx][(iK + newM) % k][1] += edp[idx - 1][iK][offset];
+                                    }
+                                    else
+                                    {
+                                        edp[idx][(iK + newM) % k][offset - 1] += edp[idx - 1][iK][offset];
+                                    }
+                                }
+                                else
+                                {
+                                    // even
+                                    edp[idx][(iK + newM) % k][offset + 1] += edp[idx - 1][iK][offset];
+                                }
+                            }
+
+                            if (odp[idx - 1][iK][offset])
+                            {
+                                if (n % 2)
+                                {
+                                    // odd
+                                    odp[idx][(iK + newM) % k][offset + 1] += odp[idx - 1][iK][offset];
+                                }
+                                else
+                                {
+                                    // even
+                                    if (0 == offset)
+                                    {
+                                        edp[idx][(iK + newM) % k][1] += odp[idx - 1][iK][offset];
+                                    }
+                                    else
+                                    {
+                                        odp[idx][(iK + newM) % k][offset - 1] += odp[idx - 1][iK][offset];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (idx == (strNum.length() - 1))
+                    ret = edp[idx][0][0] + odp[idx][0][0];
+                else
+                    ret = fucnRec(num, idx + 1, k, false);
+
+                // 处理边界
+                {
+                    memset(edp[idx], 0, sizeof(int) * 20 * 11);
+                    memset(odp[idx], 0, sizeof(int) * 20 * 11);
+
+                    int newM = n * pow(10, strNum.length() - 1 - idx);
+                    newM %= k;
+
+                    for (size_t iK = 0; iK < k; iK++)
+                    {
+                        for (size_t offset = 0; offset < strNum.length(); offset++)
+                        {
+                            if (edp[idx - 1][iK][offset])
+                            {
+                                if (n % 2)
+                                {
+                                    // odd
+                                    if (0 == offset)
+                                    {
+                                        odp[idx][(iK + newM) % k][1] += edp[idx - 1][iK][offset];
+                                    }
+                                    else
+                                    {
+                                        edp[idx][(iK + newM) % k][offset - 1] += edp[idx - 1][iK][offset];
+                                    }
+                                }
+                                else
+                                {
+                                    // even
+                                    edp[idx][(iK + newM) % k][offset + 1] += edp[idx - 1][iK][offset];
+                                }
+                            }
+
+                            if (odp[idx - 1][iK][offset])
+                            {
+                                if (n % 2)
+                                {
+                                    // odd
+                                    odp[idx][(iK + newM) % k][offset + 1] += odp[idx - 1][iK][offset];
+                                }
+                                else
+                                {
+                                    // even
+                                    if (0 == offset)
+                                    {
+                                        edp[idx][(iK + newM) % k][1] += odp[idx - 1][iK][offset];
+                                    }
+                                    else
+                                    {
+                                        odp[idx][(iK + newM) % k][offset - 1] += odp[idx - 1][iK][offset];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (idx == (strNum.length() - 1))
+                        ret += edp[idx][0][0] + odp[idx][0][0];
+                    else
+                        ret += fucnRec(num, idx + 1, k, true);
+                }
+            }
+        }
+        else
+        {
+            int start = 0, end = 9;
+            for (size_t n = start; n <= end; n++)
+            {
+                int newM = n * pow(10, strNum.length() - 1 - idx);
+                newM %= k;
+
+                for (size_t iK = 0; iK < k; iK++)
+                {
+                    for (size_t offset = 0; offset < strNum.length(); offset++)
+                    {
+                        if (edp[idx - 1][iK][offset])
+                        {
+                            if (n % 2)
+                            {
+                                // odd
+                                if (0 == offset)
+                                {
+                                    odp[idx][(iK + newM) % k][1] += edp[idx - 1][iK][offset];
+                                }
+                                else
+                                {
+                                    edp[idx][(iK + newM) % k][offset - 1] += edp[idx - 1][iK][offset];
+                                }
+                            }
+                            else
+                            {
+                                // even
+                                edp[idx][(iK + newM) % k][offset + 1] += edp[idx - 1][iK][offset];
+                            }
+                        }
+
+                        if (odp[idx - 1][iK][offset])
+                        {
+                            if (n % 2)
+                            {
+                                // odd
+                                odp[idx][(iK + newM) % k][offset + 1] += odp[idx - 1][iK][offset];
+                            }
+                            else
+                            {
+                                // even
+                                if (0 == offset)
+                                {
+                                    edp[idx][(iK + newM) % k][1] += odp[idx - 1][iK][offset];
+                                }
+                                else
+                                {
+                                    odp[idx][(iK + newM) % k][offset - 1] += odp[idx - 1][iK][offset];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (idx == (strNum.length() - 1))
+                ret = edp[idx][0][0] + odp[idx][0][0];
+            else
+                ret = fucnRec(num, idx + 1, k, false);
+        }
+
+        return ret;
+    }
+
     int getNumOfBeautyInt(const int num, const int k)
     {
         int ret = 0;
@@ -117,12 +370,9 @@ private:
                         }
                     }
                 }
-
-                
-                
             }
-             
 
+            ret += fucnRec(num, 0, k, true);
         }
 
         return ret;
@@ -135,7 +385,7 @@ int main()
     cin >> low >> high >> k;
 
     Solution s;
-    cout << s.numberOfBeautifulIntegers(low, high, k);
+    cout << s.numberOfBeautifulIntegers(low, high, k) << endl;
 
     return 0;
 }

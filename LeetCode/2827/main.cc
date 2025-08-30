@@ -28,16 +28,22 @@ public:
     }
 
 private:
-    int edp[9][20][11];     // even 偶数
-    int odp[9][20][11];     // odd 奇数
+    int ***edp;
+    int ***odp;
 
     int fucnRec(const int num, const int idx, const int k, bool limit)
     {
         int ret = 0;
         string strNum = to_string(num);
 
-        memset(edp[idx], 0, sizeof(int) * 20 * 11);
-        memset(odp[idx], 0, sizeof(int) * 20 * 11);
+        {
+            // clear
+            for (size_t j = 0; j < k; j++)
+            {
+                memset(edp[idx][j], 0, sizeof(int) * (strNum.length() + 1));
+                memset(odp[idx][j], 0, sizeof(int) * (strNum.length() + 1));
+            }
+        }
 
         if (true == limit)
         {
@@ -71,8 +77,14 @@ private:
 
                 // 处理边界
                 {
-                    memset(edp[idx], 0, sizeof(int) * 20 * 11);
-                    memset(odp[idx], 0, sizeof(int) * 20 * 11);
+                    {
+                        // clear
+                        for (size_t j = 0; j < k; j++)
+                        {
+                            memset(edp[idx][j], 0, sizeof(int) * (strNum.length() + 1));
+                            memset(odp[idx][j], 0, sizeof(int) * (strNum.length() + 1));
+                        }
+                    }
 
                     int newM = n * pow(10, strNum.length() - 1 - idx);
                     newM %= k;
@@ -157,8 +169,14 @@ private:
 
                 // 处理边界
                 {
-                    memset(edp[idx], 0, sizeof(int) * 20 * 11);
-                    memset(odp[idx], 0, sizeof(int) * 20 * 11);
+                    {
+                        // clear
+                        for (size_t j = 0; j < k; j++)
+                        {
+                            memset(edp[idx][j], 0, sizeof(int) * (strNum.length() + 1));
+                            memset(odp[idx][j], 0, sizeof(int) * (strNum.length() + 1));
+                        }
+                    }
 
                     int newM = n * pow(10, strNum.length() - 1 - idx);
                     newM %= k;
@@ -293,8 +311,29 @@ private:
             string strNum = to_string(num);
             int digit = strNum.length();        // 位数
 
-            memset(edp, 0, sizeof(edp));
-            memset(odp, 0, sizeof(odp));
+            // 内存分配
+            {
+                edp = new int**[digit];
+                odp = new int**[digit];
+
+                for (size_t i = 0; i < digit; i++)
+                {
+                    edp[i] = new int*[k];
+                    for (size_t j = 0; j < k; j++)
+                    {
+                        edp[i][j] = new int[digit + 1];
+                        memset(edp[i][j], 0, sizeof(int) * (digit + 1));
+                    }
+
+                    odp[i] = new int*[k];
+                    for (size_t j = 0; j < k; j++)
+                    {
+                        odp[i][j] = new int[digit + 1];
+                        memset(odp[i][j], 0, sizeof(int) * (digit + 1));
+                    }
+                }
+                
+            }
 
             for (size_t n = 0; n < 10; n++)
             {
@@ -324,7 +363,7 @@ private:
 
                     for (size_t iK = 0; iK < k; iK++)
                     {
-                        for (size_t offset = 0; offset < 10; offset++)
+                        for (size_t offset = 0; offset <= digit; offset++)
                         {
                             if (edp[d - 1][iK][offset])
                             {

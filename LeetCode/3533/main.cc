@@ -15,19 +15,6 @@
 
 using namespace std;
 
-class Item
-{
-public:
-    int state;
-    vector<char> idxs;
-
-    Item(int _n)
-    {
-        state = 0;
-        idxs.resize(_n, 0);
-    }
-};
-
 class Solution
 {
 public:
@@ -53,9 +40,18 @@ public:
             tmp %= k;
         }
 
-        vector< vector<Item> > dp(totalDigit, vector<Item>(k, Item(nums.size())));
+        vector< unordered_map<int, vector<int> > > dp(totalDigit);
 
-        
+        // init
+        for (int i = 0; i < nums.size(); i++)
+        {
+            int newIdx = totalDigit - strNums[i].length();
+            int newMod = (nums[i] * mods[totalDigit - strNums[i].length()]) % k;
+
+            int key = (1 << i) * 1000 + newMod;
+            vector<int> val = {i};
+            dp[newIdx].insert({key, val});
+        }
 
         return ret;
     }

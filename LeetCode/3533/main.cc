@@ -15,15 +15,51 @@
 
 using namespace std;
 
+class Item
+{
+public:
+    int state;
+    vector<char> idxs;
+
+    Item(int _n)
+    {
+        state = 0;
+        idxs = vector<char>(_n, 0);
+    }
+};
+
 class Solution
 {
 public:
     vector<int> concatenatedDivisibility(vector<int> &nums, int k)
     {
         vector<int> ret;
+        vector<string> strNums;
+        int totalDigit = 0;     // 总的位数
+
+        for (size_t i = 0; i < nums.size(); i++)
+        {
+            string str = to_string(nums[i]);
+
+            strNums.push_back(str);
+            totalDigit += str.length();
+        }
+
+        for (int i = 0, tmp = 1; i < totalDigit; i++)
+        {
+            mods.push_back(tmp);
+            tmp *= 10;
+            tmp %= k;
+        }
+
+        
 
         return ret;
     }
+
+private:
+    vector< vector<Item> > dp;
+    vector<int> mods;
 };
 
 int main()

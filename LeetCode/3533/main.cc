@@ -32,21 +32,13 @@ public:
             totalDigit += str.length();
         }
 
-        vector<int> mods(totalDigit);
-        for (int i = 0, tmp = 1; i < totalDigit; i++)
-        {
-            mods[i] = tmp;
-            tmp *= 10;
-            tmp %= k;
-        }
-
         vector< unordered_map<int, vector<int> > > dp(totalDigit);
 
         // init
         for (int i = 0; i < nums.size(); i++)
         {
             int idx = totalDigit - strNums[i].length();
-            int mod = (nums[i] * mods[idx]) % k;
+            int mod = nums[i] % k;
 
             int key = (1 << i) * 1000 + mod;
             vector<int> val = {nums[i]};
@@ -68,7 +60,7 @@ public:
                         if (0 == ((1 << pos) & state))
                         {
                             int newIdx = idx - strNums[pos].length();
-                            int newMod = (oldMod + (nums[pos] * mods[newIdx])) % k;
+                            int newMod = (oldMod * (int)pow(10, strNums[pos].length()) + nums[pos]) % k;
                             int newSt = (1 << pos) | state;
                             int newKey = newSt * 1000 + newMod;
 
@@ -87,16 +79,16 @@ public:
                                 int i;
                                 for (i = 0; i < newVal.size(); i++)
                                 {
-                                    if (newVal[i] < search->second[i])
+                                    if (newVal[i] != search->second[i])
                                     {
                                         break;
                                     }
                                 }
                                 
-                                if (i < newVal.size())
+                                if (i < newVal.size() && newVal[i] < search->second[i])
                                 {
                                     dp[newIdx][newKey] = newVal;
-                                }
+                                } 
                             }
                         }
                     }
@@ -140,7 +132,7 @@ int main()
     Solution s;
     vector<int> result = s.concatenatedDivisibility(nums, k);
 
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < result.size(); i++)
     {
         cout << result[i] << endl;
     }

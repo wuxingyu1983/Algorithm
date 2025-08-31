@@ -45,12 +45,49 @@ public:
         // init
         for (int i = 0; i < nums.size(); i++)
         {
-            int newIdx = totalDigit - strNums[i].length();
-            int newMod = (nums[i] * mods[totalDigit - strNums[i].length()]) % k;
+            int idx = totalDigit - strNums[i].length();
+            int mod = (nums[i] * mods[idx]) % k;
 
-            int key = (1 << i) * 1000 + newMod;
+            int key = (1 << i) * 1000 + mod;
             vector<int> val = {i};
-            dp[newIdx].insert({key, val});
+            dp[idx].insert({key, val});
+        }
+
+        for (int idx = totalDigit - 1; idx > 0; idx--)
+        {
+            if (0 < dp[idx].size())
+            {
+                for (unordered_map<int, vector<int> >::iterator it = dp[idx].begin(); it != dp[idx].end(); it++)
+                {
+                    int key = it->first;
+                    int oldMod = key % 1000;
+                    int state = key / 1000;
+
+                    for (int pos = 0; pos < nums.size(); pos++)
+                    {
+                        if (0 == ((1 << pos) & state))
+                        {
+                            int newIdx = idx - strNums[pos].length();
+                            int newMod = (oldMod + (nums[pos] * mods[newIdx])) % k;
+                            int newSt = (1 << pos) | state;
+                            int newKey = newSt * 1000 + newMod;
+
+                            auto search = dp[newIdx].find(newKey);
+                            if (search == dp[newIdx].end())
+                            {
+                                it->second.push_back(pos);
+                                dp[newIdx].insert(make_pair(newKey, it->second));
+                            }
+                            else
+                            {
+                                // 判断 it->second 和 search->second 谁大谁小
+                                
+                            }
+                        }
+                    }
+                    
+                }
+            }
         }
 
         return ret;

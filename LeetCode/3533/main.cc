@@ -49,7 +49,7 @@ public:
             int mod = (nums[i] * mods[idx]) % k;
 
             int key = (1 << i) * 1000 + mod;
-            vector<int> val = {i};
+            vector<int> val = {nums[i]};
             dp[idx].insert({key, val});
         }
 
@@ -75,17 +75,43 @@ public:
                             auto search = dp[newIdx].find(newKey);
                             if (search == dp[newIdx].end())
                             {
-                                it->second.push_back(pos);
-                                dp[newIdx].insert(make_pair(newKey, it->second));
+                                vector<int> newVal(it->second);
+                                newVal.push_back(nums[pos]);
+                                dp[newIdx].insert(make_pair(newKey, newVal));
                             }
                             else
                             {
                                 // 判断 it->second 和 search->second 谁大谁小
+                                vector<int> newVal(it->second);
+                                newVal.push_back(nums[pos]);
+                                int i;
+                                for (i = 0; i < newVal.size(); i++)
+                                {
+                                    if (newVal[i] < search->second[i])
+                                    {
+                                        break;
+                                    }
+                                }
                                 
+                                if (i < newVal.size())
+                                {
+                                    dp[newIdx][newKey] = newVal;
+                                }
                             }
                         }
                     }
-                    
+                }
+            }
+        }
+
+        {
+            int key = ((1 << nums.size()) - 1) * 1000;
+            auto search = dp[0].find(key);
+            if (search != dp[0].end())
+            {
+                for (size_t i = 0; i < search->second.size(); i++)
+                {
+                    ret.push_back(search->second[i]);
                 }
             }
         }

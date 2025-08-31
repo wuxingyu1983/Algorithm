@@ -24,7 +24,7 @@ public:
     Item(int _n)
     {
         state = 0;
-        idxs = vector<char>(_n, 0);
+        idxs.resize(_n, 0);
     }
 };
 
@@ -45,21 +45,20 @@ public:
             totalDigit += str.length();
         }
 
+        vector<int> mods(totalDigit);
         for (int i = 0, tmp = 1; i < totalDigit; i++)
         {
-            mods.push_back(tmp);
+            mods[i] = tmp;
             tmp *= 10;
             tmp %= k;
         }
+
+        vector< vector<Item> > dp(totalDigit, vector<Item>(k, Item(nums.size())));
 
         
 
         return ret;
     }
-
-private:
-    vector< vector<Item> > dp;
-    vector<int> mods;
 };
 
 int main()

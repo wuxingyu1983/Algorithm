@@ -42,8 +42,14 @@ public:
             for (size_t iK = 2; iK <= k; iK++)
             {
                 dp[floor][iK] = -1;
-                
-                for (size_t i = 1; i <= floor; i++)
+               
+                int mid = (floor + 1) / 2;
+                if (0 == (floor & 1))
+                {
+                    mid += 1;
+                }
+
+                for (int i = mid; i >= 1; i--)
                 {
                     int tmp = max(dp[i - 1][iK - 1], dp[floor - i][iK]);
                     tmp += 1;

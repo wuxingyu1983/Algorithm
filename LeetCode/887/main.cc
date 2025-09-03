@@ -23,17 +23,20 @@ public:
         int ret = 0;
 
         vector<vector<int>> dp(n + 1, vector<int>(k + 1, 0));
+        vector<vector<int>> lastOcc(k + 1, vector<int>(n + 1, 0));
 
         // init
         {
             for (size_t floor = 1; floor <= n; floor++)
             {
                 dp[floor][1] = floor;
+                lastOcc[1][floor] = floor;
             }
 
             for (size_t iK = 2; iK <= k; iK++)
             {
                 dp[1][iK] = 1;
+                lastOcc[iK][1] = 1;
             }
         }
 
@@ -43,21 +46,22 @@ public:
             {
                 dp[floor][iK] = -1;
                
-                int mid = (floor + 1) / 2;
-                if (0 == (floor & 1))
+                for (int val = 1; val < floor; val++)
                 {
-                    mid += 1;
-                }
+                    int stp = lastOcc[iK][val];
+                    if (0 >= stp || stp >= floor)
+                    {
+                        break;
+                    }
 
-                for (int i = mid; i >= 1; i--)
-                {
-                    int tmp = max(dp[i - 1][iK - 1], dp[floor - i][iK]);
+                    int tmp = max(dp[floor - stp - 1][iK - 1], dp[stp][iK]);
                     tmp += 1;
 
                     if (0 > dp[floor][iK] || dp[floor][iK] > tmp)
                         dp[floor][iK] = tmp;
                 }
-                
+
+                lastOcc[iK][dp[floor][iK]] = floor;
             }
         }
 

@@ -28,7 +28,6 @@ public:
     }
 
 private:
-    int ***dp;
 
     int func(int n)
     {
@@ -37,27 +36,58 @@ private:
         if (0 < n)
         {
             string strNum = to_string(n);
+            vector<vector<unordered_map<int, int>>> dp(strNum.length(), vector<unordered_map<int, int>>(82));
 
-            dp = new int**[strNum.length()];
-            for (size_t i = 0; i < strNum.length(); i++)
-            {
-                dp[i] = new int *[82];
-                for (size_t j = 0; j < 82; j++)
-                {
-                    dp[i][j] = new int[82];
-                    memset(dp[i][j], 0, sizeof(int) * 82);
-                }
-            }
-
-            ret = dfs(strNum, 0, true);
+            ret = dfs(dp, strNum, 0, 0, true);
         }
 
         return ret;
     }
 
-    int dfs(const string& strNum, int pos, bool limit)
+    int dfs(vector<vector<unordered_map<int, int>>> &dp, const string& strNum, int top, int pos, bool limit)
     {
         int ret = 0;
+
+        if (pos < strNum.length())
+        {
+            if (0 == pos)
+            {
+                int up = strNum.at(pos) - '0';
+
+                // 0
+                ret += dfs(dp, strNum, 0, pos + 1, false);
+                // clear
+                
+
+                // 1 -> up - 1
+                for (size_t n = 1; n < up; n++)
+                {
+//                    dp[pos][n][0] ++;
+                }
+                ret += dfs(dp, strNum, 1, pos + 1, false);
+                // clear
+
+                // up
+//                dp[pos][up][0] ++;
+                ret += dfs(dp, strNum, 1, pos + 1, true);
+            }
+            else
+            {
+                int up = 10;
+                if (limit)
+                {
+                    up = strNum.at(pos) - '0';
+                }
+
+                // clear
+                
+                for (size_t n = 0; n < up; n++)
+                {
+                    
+                }
+                
+            }
+        }
 
         return ret;
     }

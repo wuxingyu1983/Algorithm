@@ -119,14 +119,65 @@ private:
                             }
                         }
                     }
+
+                    if (0 < n && 0 == top)
+                    {
+                        for (size_t s = 1; s < 82; s++)
+                        {
+                            int key = (s << 7) | (n % s);
+                            dp[pos][n][key]++;
+                        }
+                    }
                 }
                 
+                ret += dfs(dp, strNum, top, pos + 1, false);
+
+                if (up < 10)
+                {
+                    // limit
+                    // clear
+                    for (size_t sum = 1; sum < 82; sum++)
+                    {
+                        dp[pos][sum].clear();
+                    }
+
+                    for (size_t sum = 1; sum < 82; sum++)
+                    {
+                        if (0 < dp[pos - 1][sum].size())
+                        {
+                            for (unordered_map<int, int>::iterator it = dp[pos - 1][sum].begin(); it != dp[pos - 1][sum].end(); it++)
+                            {
+                                int oldMod = it->first & 127;
+                                int oldS = it->first >> 7;
+
+                                int newSum = sum + up;
+                                int newMod = (oldMod * up) % oldS;
+
+                                int newKey = (oldS << 7) + newMod;
+                                dp[pos][newSum][newKey] += it->second;
+                            }
+                        }
+                    }
+
+                    ret += dfs(dp, strNum, top, pos + 1, true);
+                }
             }
         }
         else
         {
             // pos == strNum.length()
-
+            for (size_t sum = 1; sum < 82; sum++)
+            {
+                if (0 < dp[pos - 1][sum].size())
+                {
+                    int key = sum << 7;
+                    unordered_map<int, int>::const_iterator it = dp[pos - 1][sum].find(key);
+                    if (it != dp[pos - 1][sum].end())
+                    {
+                        ret += it->second;
+                    }
+                }
+            }
         }
 
         return ret;

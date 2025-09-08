@@ -28,6 +28,7 @@ public:
     }
 
 private:
+    int maxSum;
 
     int func(int n)
     {
@@ -36,7 +37,15 @@ private:
         if (0 < n)
         {
             string strNum = to_string(n);
-            vector<vector<unordered_map<int, int>>> dp(strNum.length(), vector<unordered_map<int, int>>(82));
+            if (10 == strNum.length())
+            {
+                maxSum = 82;
+            }
+            else
+            {
+                maxSum = 9 * strNum.length() + 1;
+            }
+            vector<vector<unordered_map<int, int>>> dp(strNum.length(), vector<unordered_map<int, int>>(maxSum));
 
             ret = dfs(dp, strNum, 0, 0, true);
         }
@@ -57,7 +66,7 @@ private:
                 // 0
                 ret += dfs(dp, strNum, 0, pos + 1, false);
                 // clear
-                for (size_t sum = 1; sum < 82; sum++)
+                for (size_t sum = 1; sum < maxSum; sum++)
                 {
                     dp[pos][sum].clear();
                 }
@@ -65,7 +74,7 @@ private:
                 // 1 -> up - 1
                 for (size_t n = 1; n < up; n++)
                 {
-                    for (size_t mod = 1; mod < 82; mod++)
+                    for (size_t mod = 1; mod < maxSum; mod++)
                     {
                         int key = (mod << 7) | (n % mod);
                         dp[pos][n][key] ++;
@@ -73,13 +82,13 @@ private:
                 }
                 ret += dfs(dp, strNum, 1, pos + 1, false);
                 // clear
-                for (size_t sum = 1; sum < 82; sum++)
+                for (size_t sum = 1; sum < maxSum; sum++)
                 {
                     dp[pos][sum].clear();
                 }
 
                 // up
-                for (size_t mod = 1; mod < 82; mod++)
+                for (size_t mod = 1; mod < maxSum; mod++)
                 {
                     int key = (mod << 7) | (up % mod);
                     dp[pos][up][key] ++;
@@ -95,16 +104,16 @@ private:
                 }
 
                 // clear
-                for (size_t sum = 1; sum < 82; sum++)
+                for (size_t sum = 1; sum < maxSum; sum++)
                 {
                     dp[pos][sum].clear();
                 }
-                
-                for (size_t n = 0; n < up; n++)
+               
+                for (size_t sum = 1; sum < maxSum; sum++)
                 {
-                    for (size_t sum = 1; sum < 82; sum++)
+                    if (0 < dp[pos - 1][sum].size())
                     {
-                        if (0 < dp[pos - 1][sum].size())
+                        for (size_t n = 0; n < up; n++)
                         {
                             for (unordered_map<int, int>::iterator it = dp[pos - 1][sum].begin(); it != dp[pos - 1][sum].end(); it++)
                             {
@@ -119,29 +128,32 @@ private:
                             }
                         }
                     }
+                }
 
-                    if (0 < n && 0 == top)
+                if (0 == top)
+                {
+                    for (size_t n = 1; n < up; n++)
                     {
-                        for (size_t s = 1; s < 82; s++)
+                        for (size_t s = 1; s < maxSum; s++)
                         {
                             int key = (s << 7) | (n % s);
                             dp[pos][n][key]++;
                         }
                     }
                 }
-                
+
                 ret += dfs(dp, strNum, top, pos + 1, false);
 
                 if (up < 10)
                 {
                     // limit
                     // clear
-                    for (size_t sum = 1; sum < 82; sum++)
+                    for (size_t sum = 1; sum < maxSum; sum++)
                     {
                         dp[pos][sum].clear();
                     }
 
-                    for (size_t sum = 1; sum < 82; sum++)
+                    for (size_t sum = 1; sum < maxSum; sum++)
                     {
                         if (0 < dp[pos - 1][sum].size())
                         {
@@ -166,7 +178,7 @@ private:
         else
         {
             // pos == strNum.length()
-            for (size_t sum = 1; sum < 82; sum++)
+            for (size_t sum = 1; sum < maxSum; sum++)
             {
                 if (0 < dp[pos - 1][sum].size())
                 {

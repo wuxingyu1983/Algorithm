@@ -74,7 +74,7 @@ private:
                 // 1 -> up - 1
                 for (size_t n = 1; n < up; n++)
                 {
-                    for (size_t mod = 1; mod < maxSum; mod++)
+                    for (size_t mod = n; mod < maxSum; mod++)
                     {
                         int key = (mod << 7) | (n % mod);
                         dp[pos][n][key] ++;
@@ -88,7 +88,7 @@ private:
                 }
 
                 // up
-                for (size_t mod = 1; mod < maxSum; mod++)
+                for (size_t mod = up; mod < maxSum; mod++)
                 {
                     int key = (mod << 7) | (up % mod);
                     dp[pos][up][key] ++;
@@ -121,6 +121,12 @@ private:
                                 int oldS = it->first >> 7;
 
                                 int newSum = sum + n;
+
+                                if (newSum > oldS)
+                                {
+                                    continue;
+                                }
+
                                 int newMod = (oldMod * n) % oldS;
 
                                 int newKey = (oldS << 7) + newMod;
@@ -134,7 +140,7 @@ private:
                 {
                     for (size_t n = 1; n < up; n++)
                     {
-                        for (size_t s = 1; s < maxSum; s++)
+                        for (size_t s = n; s < maxSum; s++)
                         {
                             int key = (s << 7) | (n % s);
                             dp[pos][n][key]++;
@@ -163,6 +169,12 @@ private:
                                 int oldS = it->first >> 7;
 
                                 int newSum = sum + up;
+
+                                if (newSum > oldS)
+                                {
+                                    continue;
+                                }
+
                                 int newMod = (oldMod * up) % oldS;
 
                                 int newKey = (oldS << 7) + newMod;

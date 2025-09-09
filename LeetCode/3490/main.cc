@@ -113,18 +113,18 @@ private:
                 {
                     if (0 < dp[pos - 1][sum].size())
                     {
-                        for (size_t n = 0; n < up; n++)
+                        for (unordered_map<int, int>::iterator it = dp[pos - 1][sum].begin(); it != dp[pos - 1][sum].end(); it++)
                         {
-                            for (unordered_map<int, int>::iterator it = dp[pos - 1][sum].begin(); it != dp[pos - 1][sum].end(); it++)
+                            int oldMod = it->first & 127;
+                            int oldS = it->first >> 7;
+                            
+                            for (size_t n = 0; n < up; n++)
                             {
-                                int oldMod = it->first & 127;
-                                int oldS = it->first >> 7;
-
                                 int newSum = sum + n;
 
                                 if (newSum > oldS)
                                 {
-                                    continue;
+                                    break;
                                 }
 
                                 int newMod = (oldMod * n) % oldS;

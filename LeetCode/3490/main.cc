@@ -48,6 +48,38 @@ private:
             vector<vector<unordered_map<int, int>>> dp(strNum.length(), vector<unordered_map<int, int>>(maxSum));
 
             ret = dfs(dp, strNum, 0, 0, true);
+
+            // 处理含有0的数字个数
+            {
+                // 不含有0的数字个数
+                int cnt = 0;
+                for (size_t i = 1; i < strNum.length(); i++)
+                {
+                    cnt += (int)pow(9, i);
+                }
+
+                bool have0 = false;
+                for (size_t i = 0; i < strNum.length(); i++)
+                {
+                    int up = strNum.at(i) - '0';
+                    if (up)
+                    {
+                        cnt += (up - 1) * (int)pow(9, strNum.length() - 1 - i);
+                    }
+                    else
+                    {
+                        have0 = true;
+                        break;
+                    }
+                }
+
+                if (false == have0)
+                {
+                    cnt ++;
+                }
+
+                ret += n - cnt;
+            }
         }
 
         return ret;
@@ -118,7 +150,7 @@ private:
                             int oldMod = it->first & 127;
                             int oldS = it->first >> 7;
                             
-                            for (size_t n = 0; n < up; n++)
+                            for (size_t n = 1; n < up; n++)
                             {
                                 int newSum = sum + n;
 
@@ -150,7 +182,7 @@ private:
 
                 ret += dfs(dp, strNum, top, pos + 1, false);
 
-                if (up < 10)
+                if (up < 10 && 0 < up)
                 {
                     // limit
                     // clear

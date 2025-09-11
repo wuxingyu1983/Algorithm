@@ -47,7 +47,77 @@ private:
             }
             vector<vector<unordered_map<int, int>>> dp(strNum.length(), vector<unordered_map<int, int>>(maxSum));
 
-            ret = dfs(dp, strNum, 0, 0, true);
+            // 预处理
+            dfs(dp, strNum, 0);
+
+            if (2 <= strNum.length())
+            {
+                for (size_t sum = 1; sum < maxSum; sum++)
+                {
+                    if (0 < dp[strNum.length() - 2][sum].size())
+                    {
+                        int key = sum << 7;
+                        unordered_map<int, int>::const_iterator it = dp[strNum.length() - 2][sum].find(key);
+                        if (it != dp[strNum.length() - 2][sum].end())
+                        {
+                            ret += it->second;
+                        }
+                    }
+                }
+            }
+
+            int preSum = 0;
+            int prePrdt = 1;
+            for (int pos = 0; pos < strNum.length(); pos++)
+            {
+                int up = strNum.at(pos) - '0';
+                if (0 == up)
+                {
+                    break;
+                }
+
+                int i = strNum.length() - 1 - pos - 1;
+                if (0 <= i)
+                {
+                    for (size_t sum = 1; sum < maxSum; sum++)
+                    {
+                        if (0 < dp[i][sum].size())
+                        {
+                            for (unordered_map<int, int>::iterator it = dp[i][sum].begin(); it != dp[i][sum].end(); it++)
+                            {
+                                int oldMod = it->first & 127;
+                                int oldS = it->first >> 7;
+
+                                for (size_t n = 1; n < up; n++)
+                                {
+                                    int newSum = sum + n + preSum;
+                                    if (oldS == newSum)
+                                    {
+                                        int newMod = (oldMod * prePrdt * n) % oldS;
+                                        if (0 == newMod)
+                                        {
+                                            ret += it->second;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (size_t n = 1; n <= up; n++)
+                    {
+                        if (0 == ((prePrdt * n) % (preSum + n)))
+                        {
+                            ret++;
+                        }
+                    }
+                }
+
+                preSum += up;
+                prePrdt *= up;
+            }
 
             // 处理含有0的数字个数
             {
@@ -85,62 +155,23 @@ private:
         return ret;
     }
 
-    int dfs(vector<vector<unordered_map<int, int>>> &dp, const string& strNum, int top, int pos, bool limit)
+    void dfs(vector<vector<unordered_map<int, int>>> &dp, const string& strNum, int pos)
     {
-        int ret = 0;
-
-        if (pos < strNum.length())
+        if (pos < strNum.length() - 1)
         {
             if (0 == pos)
             {
-                int up = strNum.at(pos) - '0';
-
-                // 0
-                ret += dfs(dp, strNum, 0, pos + 1, false);
-                // clear
-                for (size_t sum = 1; sum < maxSum; sum++)
+                for (size_t n = 1; n <= 9; n++)
                 {
-                    dp[pos][sum].clear();
-                }
-
-                // 1 -> up - 1
-                for (size_t n = 1; n < up; n++)
-                {
-                    for (size_t mod = n; mod < maxSum; mod++)
+                    for (size_t s = n; s < maxSum; s++)
                     {
-                        int key = (mod << 7) | (n % mod);
-                        dp[pos][n][key] ++;
+                        int key = (s << 7) | (n % s);
+                        dp[pos][n][key]++;
                     }
                 }
-                ret += dfs(dp, strNum, 1, pos + 1, false);
-                // clear
-                for (size_t sum = 1; sum < maxSum; sum++)
-                {
-                    dp[pos][sum].clear();
-                }
-
-                // up
-                for (size_t mod = up; mod < maxSum; mod++)
-                {
-                    int key = (mod << 7) | (up % mod);
-                    dp[pos][up][key] ++;
-                }
-                ret += dfs(dp, strNum, 1, pos + 1, true);
             }
             else
             {
-                int up = 10;
-                if (limit)
-                {
-                    up = strNum.at(pos) - '0';
-                }
-
-                // clear
-                for (size_t sum = 1; sum < maxSum; sum++)
-                {
-                    dp[pos][sum].clear();
-                }
-               
                 for (size_t sum = 1; sum < maxSum; sum++)
                 {
                     if (0 < dp[pos - 1][sum].size())
@@ -149,8 +180,8 @@ private:
                         {
                             int oldMod = it->first & 127;
                             int oldS = it->first >> 7;
-                            
-                            for (size_t n = 1; n < up; n++)
+
+                            for (size_t n = 1; n <= 9; n++)
                             {
                                 int newSum = sum + n;
 
@@ -168,75 +199,18 @@ private:
                     }
                 }
 
-                if (0 == top)
+                for (size_t n = 1; n <= 9; n++)
                 {
-                    for (size_t n = 1; n < up; n++)
+                    for (size_t s = n; s < maxSum; s++)
                     {
-                        for (size_t s = n; s < maxSum; s++)
-                        {
-                            int key = (s << 7) | (n % s);
-                            dp[pos][n][key]++;
-                        }
-                    }
-                }
-
-                ret += dfs(dp, strNum, top, pos + 1, false);
-
-                if (up < 10 && 0 < up)
-                {
-                    // limit
-                    // clear
-                    for (size_t sum = 1; sum < maxSum; sum++)
-                    {
-                        dp[pos][sum].clear();
-                    }
-
-                    for (size_t sum = 1; sum < maxSum; sum++)
-                    {
-                        if (0 < dp[pos - 1][sum].size())
-                        {
-                            for (unordered_map<int, int>::iterator it = dp[pos - 1][sum].begin(); it != dp[pos - 1][sum].end(); it++)
-                            {
-                                int oldMod = it->first & 127;
-                                int oldS = it->first >> 7;
-
-                                int newSum = sum + up;
-
-                                if (newSum > oldS)
-                                {
-                                    continue;
-                                }
-
-                                int newMod = (oldMod * up) % oldS;
-
-                                int newKey = (oldS << 7) + newMod;
-                                dp[pos][newSum][newKey] += it->second;
-                            }
-                        }
-                    }
-
-                    ret += dfs(dp, strNum, top, pos + 1, true);
-                }
-            }
-        }
-        else
-        {
-            // pos == strNum.length()
-            for (size_t sum = 1; sum < maxSum; sum++)
-            {
-                if (0 < dp[pos - 1][sum].size())
-                {
-                    int key = sum << 7;
-                    unordered_map<int, int>::const_iterator it = dp[pos - 1][sum].find(key);
-                    if (it != dp[pos - 1][sum].end())
-                    {
-                        ret += it->second;
+                        int key = (s << 7) | (n % s);
+                        dp[pos][n][key]++;
                     }
                 }
             }
+            
+            dfs(dp, strNum, pos + 1);
         }
-
-        return ret;
     }
 };
 

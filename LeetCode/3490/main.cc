@@ -22,7 +22,21 @@ public:
     {
         int ret = 0;
 
-        ret = func(r) - func(l - 1);
+        string strNum = to_string(r);
+        if (10 == strNum.length())
+        {
+            maxSum = 82;
+        }
+        else
+        {
+            maxSum = 9 * strNum.length() + 1;
+        }
+        vector<vector<unordered_map<int, int>>> dp(strNum.length(), vector<unordered_map<int, int>>(maxSum));
+
+        // 预处理
+        dfs(dp, strNum, 0);
+
+        ret = func(r, dp) - func(l - 1, dp);
 
         return ret;
     }
@@ -30,7 +44,7 @@ public:
 private:
     int maxSum;
 
-    int func(int n)
+    int func(int n, vector<vector<unordered_map<int, int>>> &dp)
     {
         int ret = 0;
 
@@ -45,20 +59,16 @@ private:
             {
                 maxSum = 9 * strNum.length() + 1;
             }
-            vector<vector<unordered_map<int, int>>> dp(strNum.length(), vector<unordered_map<int, int>>(maxSum));
 
-            // 预处理
-            dfs(dp, strNum, 0);
-
-            if (2 <= strNum.length())
+            for (size_t pos = 0; pos < strNum.length() - 1; pos++)
             {
                 for (size_t sum = 1; sum < maxSum; sum++)
                 {
-                    if (0 < dp[strNum.length() - 2][sum].size())
+                    if (0 < dp[pos][sum].size())
                     {
                         int key = sum << 7;
-                        unordered_map<int, int>::const_iterator it = dp[strNum.length() - 2][sum].find(key);
-                        if (it != dp[strNum.length() - 2][sum].end())
+                        unordered_map<int, int>::const_iterator it = dp[pos][sum].find(key);
+                        if (it != dp[pos][sum].end())
                         {
                             ret += it->second;
                         }
@@ -184,12 +194,12 @@ private:
                             for (size_t n = 1; n <= 9; n++)
                             {
                                 int newSum = sum + n;
-
+/*
                                 if (newSum > oldS)
                                 {
                                     break;
                                 }
-
+*/
                                 int newMod = (oldMod * n) % oldS;
 
                                 int newKey = (oldS << 7) + newMod;
@@ -198,17 +208,8 @@ private:
                         }
                     }
                 }
-
-                for (size_t n = 1; n <= 9; n++)
-                {
-                    for (size_t s = n; s < maxSum; s++)
-                    {
-                        int key = (s << 7) | (n % s);
-                        dp[pos][n][key]++;
-                    }
-                }
             }
-            
+
             dfs(dp, strNum, pos + 1);
         }
     }

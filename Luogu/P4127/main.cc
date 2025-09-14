@@ -47,7 +47,6 @@ int main()
         for (size_t j = 0; j < maxLen; j++)
         {
             dp[i][j] = new long long [maxSum];
-            memset(dp[i][j], 0, sizeof(long long) * maxSum);
         }
     }
    
@@ -58,12 +57,13 @@ int main()
         // pos = 0, init
         for (size_t n = 0; n <= 9 && n <= sum; n++)
         {
+            memset(dp[0][n], 0, sizeof(long long) * maxSum);
             dp[0][n][n % sum] ++;
         }
        
-        long long tens = 10;
         for (size_t pos = 1; pos < maxLen; pos++)
         {
+            long long tens = (long long)pow(10, pos);
             // copy
             for (size_t s = 0; s <= sum; s++)
             {
@@ -92,12 +92,59 @@ int main()
                     }
                 }
             }
-            
-            tens *= 10;
         }
 
+        // left
+        {
+            int preSum = 0;
+            long long preVal = 0;
+            long long cntL = 0;
+            for (int pos = strL.length() - 1; pos > 0; pos--)
+            {
+                int up = strL.at(strL.length() - 1 - pos) - '0';
+                long long tens = (long long)pow(10, pos);
+                for (size_t n = 0; n < up; n++)
+                {
+                    int s = sum - n - preSum;
+                    if (0 > s)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        for (size_t mod = 0; mod < sum; mod++)
+                        {
+                            if (dp[pos - 1][s][mod])
+                            {
+                                int newMod = (preVal * tens + mod) % sum;
+                                if (0 == newMod)
+                                {
+                                    cntL += dp[pos - 1][s][mod];
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                preSum += up;
+                preVal *= 10;
+                preVal += up;
+            }
 
+            // pos == 0
+            int up = strL.at(strL.length() - 1) - '0';
+            for (size_t n = 0; n <= up; n++)
+            {
+                if (0 == (preVal * 10 + n) % (preSum + n))
+                {
+                    cntL++;
+                }
+            }
+        }
         
+
+        // right
+
         
     }
 

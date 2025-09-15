@@ -17,6 +17,57 @@ using namespace std;
 
 int maxSum, maxLen;
 
+long long func(long long ***dp, string str, int sum)
+{
+    long long ret = 0;
+
+    int preSum = 0;
+    long long preVal = 0;
+    for (int pos = str.length() - 1; pos > 0; pos--)
+    {
+        int up = str.at(str.length() - 1 - pos) - '0';
+        long long tens = (long long)pow(10, pos);
+        for (size_t n = 0; n < up; n++)
+        {
+            int s = sum - n - preSum;
+            if (0 > s)
+            {
+                break;
+            }
+            else
+            {
+                for (size_t mod = 0; mod < sum; mod++)
+                {
+                    if (dp[pos - 1][s][mod])
+                    {
+                        int newMod = (preVal * tens + mod) % sum;
+                        if (0 == newMod)
+                        {
+                            ret += dp[pos - 1][s][mod];
+                        }
+                    }
+                }
+            }
+        }
+
+        preSum += up;
+        preVal *= 10;
+        preVal += up;
+    }
+
+    // pos == 0
+    int up = str.at(str.length() - 1) - '0';
+    for (size_t n = 0; n <= up; n++)
+    {
+        if (0 == (preVal * 10 + n) % (preSum + n))
+        {
+            ret++;
+        }
+    }
+
+    return ret;
+}
+
 int main()
 {
     long long l, r;
@@ -95,57 +146,12 @@ int main()
         }
 
         // left
-        {
-            int preSum = 0;
-            long long preVal = 0;
-            long long cntL = 0;
-            for (int pos = strL.length() - 1; pos > 0; pos--)
-            {
-                int up = strL.at(strL.length() - 1 - pos) - '0';
-                long long tens = (long long)pow(10, pos);
-                for (size_t n = 0; n < up; n++)
-                {
-                    int s = sum - n - preSum;
-                    if (0 > s)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        for (size_t mod = 0; mod < sum; mod++)
-                        {
-                            if (dp[pos - 1][s][mod])
-                            {
-                                int newMod = (preVal * tens + mod) % sum;
-                                if (0 == newMod)
-                                {
-                                    cntL += dp[pos - 1][s][mod];
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                preSum += up;
-                preVal *= 10;
-                preVal += up;
-            }
-
-            // pos == 0
-            int up = strL.at(strL.length() - 1) - '0';
-            for (size_t n = 0; n <= up; n++)
-            {
-                if (0 == (preVal * 10 + n) % (preSum + n))
-                {
-                    cntL++;
-                }
-            }
-        }
-        
+        long long cntL = func(dp, strL, sum);
 
         // right
+        long long cntR = func(dp, strR, sum);
 
-        
+        cnt += cntR - cntL;
     }
 
     cout << cnt << endl;

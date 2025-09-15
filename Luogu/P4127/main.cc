@@ -17,15 +17,15 @@ using namespace std;
 
 int maxSum, maxLen;
 
-long long func(long long ***dp, string str, int sum)
+long long func(long long ***dp, string str, long long sum)
 {
     long long ret = 0;
 
-    int preSum = 0;
+    long long preSum = 0;
     long long preVal = 0;
     for (int pos = str.length() - 1; pos > 0; pos--)
     {
-        int up = str.at(str.length() - 1 - pos) - '0';
+        long long up = str.at(str.length() - 1 - pos) - '0';
         long long tens = (long long)pow(10, pos);
         for (size_t n = 0; n < up; n++)
         {
@@ -40,7 +40,7 @@ long long func(long long ***dp, string str, int sum)
                 {
                     if (dp[pos - 1][s][mod])
                     {
-                        int newMod = ((preVal + n) * tens + mod) % sum;
+                        long long newMod = ((preVal * 10 + n) * tens + mod) % sum;
                         if (0 == newMod)
                         {
                             ret += dp[pos - 1][s][mod];
@@ -56,7 +56,7 @@ long long func(long long ***dp, string str, int sum)
     }
 
     // pos == 0
-    int up = str.at(str.length() - 1) - '0';
+    long long up = str.at(str.length() - 1) - '0';
     for (size_t n = 0; n <= up; n++)
     {
         if (sum == (preSum + n) && 0 == (preVal * 10 + n) % sum)
@@ -103,7 +103,7 @@ int main()
    
     long long cnt = 0;
 
-    for (size_t sum = 1; sum < maxSum; sum++)
+    for (long long sum = 1; sum < maxSum; sum++)
     {
         // pos = 0, init
         for (size_t n = 0; n <= 9 && n <= sum; n++)
@@ -129,14 +129,14 @@ int main()
                     {
                         for (size_t n = 1; n <= 9; n++)
                         {
-                            int newS = s + n;
+                            long long newS = s + n;
                             if (sum < newS)
                             {
                                 break;
                             }
                             else
                             {
-                                int newMod = (mod + tens * n) % sum;
+                                long long newMod = (mod + tens * n) % sum;
                                 dp[pos][newS][newMod] += dp[pos - 1][s][mod];
                             }
                         }

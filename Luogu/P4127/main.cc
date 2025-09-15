@@ -40,7 +40,7 @@ long long func(long long ***dp, string str, int sum)
                 {
                     if (dp[pos - 1][s][mod])
                     {
-                        int newMod = (preVal * tens + mod) % sum;
+                        int newMod = ((preVal + n) * tens + mod) % sum;
                         if (0 == newMod)
                         {
                             ret += dp[pos - 1][s][mod];
@@ -59,7 +59,7 @@ long long func(long long ***dp, string str, int sum)
     int up = str.at(str.length() - 1) - '0';
     for (size_t n = 0; n <= up; n++)
     {
-        if (0 == (preVal * 10 + n) % (preSum + n))
+        if (sum == (preSum + n) && 0 == (preVal * 10 + n) % sum)
         {
             ret++;
         }
@@ -95,7 +95,7 @@ int main()
     for (size_t i = 0; i < maxLen; i++)
     {
         dp[i] = new long long * [maxSum];
-        for (size_t j = 0; j < maxLen; j++)
+        for (size_t j = 0; j < maxSum; j++)
         {
             dp[i][j] = new long long [maxSum];
         }

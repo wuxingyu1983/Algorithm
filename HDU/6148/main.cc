@@ -149,21 +149,66 @@ int main()
                 {
                     for (int n = 0; n < up; n++)
                     {
-                        if (n == pre)
-                        {
-                            // 3 种 type 都可以
-                        }
-                        else if (pre < n)
+                        if (pre < n)
                         {
                             // type 0 和 1
+                            cnt += dp[len - 2 - idx][0][n];
+                            cnt %= mod;
+
+                            for (int m = n; m < 10; m++)
+                            {
+                                if (m != n)
+                                {
+                                    cnt += dp[len - 2 - idx][0][m];
+                                }
+                                cnt += dp[len - 2 - idx][1][m];
+                                cnt %= mod;
+                            }
+
+                            type = 1;
                         }
                         else
                         {
-                            // pre > n
+                            // pre > n or pre == n
                             // 3 种 type 都可以
+                            cnt += dp[len - 2 - idx][0][n];
+                            cnt %= mod;
+
+                            for (int m = n; m < 10; m++)
+                            {
+                                if (m != n)
+                                {
+                                    cnt += dp[len - 2 - idx][0][m];
+                                }
+                                cnt += dp[len - 2 - idx][1][m];
+                                cnt %= mod;
+                            }
+
+                            for (int m = 0; m <= n; m++)
+                            {
+                                if (m != n)
+                                {
+                                    cnt += dp[len - 2 - idx][0][m];
+                                }
+                                cnt += dp[len - 2 - idx][1][m];
+                                cnt += dp[len - 2 - idx][2][m];
+                                cnt %= mod;
+                            }
+
+                            if (pre == n)
+                            {
+                                type = 0;
+                            }
+                            else
+                            {
+                                type = 2;
+                            }
                         }
                     }
-                    
+                }
+                else
+                {
+
                 }
                 
                 pre = up;

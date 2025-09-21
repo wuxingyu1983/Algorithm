@@ -72,8 +72,8 @@ int main()
                 if (n != m)
                 {
                     dp[idx][2][n] += dp[idx - 1][0][m];
+                    dp[idx][2][n] += dp[idx - 1][1][m];
                 }
-                dp[idx][2][n] += dp[idx - 1][1][m];
                 dp[idx][2][n] += dp[idx - 1][2][m];
             }
 
@@ -123,46 +123,17 @@ int main()
                         cnt %= mod;
                     }
                 }
-                else if (1 == idx)
-                {
-                    for (int n = 0; n < up; n++)
-                    {
-                        if (pre > n || pre == n)
-                        {
-                            cnt += dp[len - 1 - idx][0][n];
-                            cnt += dp[len - 1 - idx][1][n];
-                            cnt += dp[len - 1 - idx][2][n];
-                            cnt %= mod;
-                        }
-                        else
-                        {
-                            // pre < n
-                            cnt += dp[len - 1 - idx][0][n];
-                            cnt += dp[len - 1 - idx][1][n];
-                            cnt %= mod;
-                        }
-                    }
-
-                    if (pre < up)
-                    {
-                        type = 1;
-                    }
-                    else if (pre == up)
-                    {
-                        type = 0;
-                    }
-                    else
-                    {
-                        // pre > up
-                        type = 2;
-                    }
-                }
                 else
                 {
                     if (1 == type && pre > up)
                     {
                         // invalid
                         break;
+                    }
+
+                    if (idx == len - 1)
+                    {
+                        up += 1;
                     }
 
                     if (0 == type)

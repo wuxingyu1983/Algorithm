@@ -167,16 +167,65 @@ int main()
 
                     if (0 == type)
                     {
+                        for (int n = 0; n < up; n++)
+                        {
+                            if (pre < n)
+                            {
+                                cnt += dp[len - 1 - idx][0][n];
+                                cnt += dp[len - 1 - idx][1][n];
+                                cnt %= mod;
+                            }
+                            else
+                            {
+                                cnt += dp[len - 1 - idx][0][n];
+                                cnt += dp[len - 1 - idx][1][n];
+                                cnt += dp[len - 1 - idx][2][n];
+                                cnt %= mod;
+                            }
+                        }
 
+                        if (pre < up)
+                        {
+                            type = 1;
+                        }
+                        else if (pre > up)
+                        {
+                            type = 2;
+                        }
                     }
                     else if (1 == type)
                     {
-
+                        for (int n = pre; n < up; n++)
+                        {
+                            cnt += dp[len - 1 - idx][0][n];
+                            cnt += dp[len - 1 - idx][1][n];
+                            cnt %= mod;
+                        }
                     }
                     else
                     {
                         // 2 == type
+                        for (int n = 0; n < up; n++)
+                        {
+                            if (pre < n)
+                            {
+                                cnt += dp[len - 1 - idx][0][n];
+                                cnt += dp[len - 1 - idx][1][n];
+                                cnt %= mod;
+                            }
+                            else
+                            {
+                                cnt += dp[len - 1 - idx][0][n];
+                                cnt += dp[len - 1 - idx][1][n];
+                                cnt += dp[len - 1 - idx][2][n];
+                                cnt %= mod;
+                            }
+                        }
 
+                        if (pre < up)
+                        {
+                            type = 1;
+                        }
                     }
                 }
                 

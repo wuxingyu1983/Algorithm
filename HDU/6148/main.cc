@@ -38,7 +38,10 @@ int main()
         for (int n = 0; n < 10; n++)
         {
             dp[idx][0][n] += dp[idx - 1][0][n];
-            sum[idx] += dp[idx][0][n];
+            if (0 < n)
+            {
+                sum[idx] += dp[idx][0][n];
+            }
         }
 
         // type = 1
@@ -46,13 +49,19 @@ int main()
         {
             for (int m = n; m < 10; m++)
             {
-                dp[idx][1][n] += dp[idx - 1][0][m];
+                if (m != n)
+                {
+                    dp[idx][1][n] += dp[idx - 1][0][m];
+                }
                 dp[idx][1][n] += dp[idx - 1][1][m];
             }
 
             dp[idx][1][n] %= mod;
-            sum[idx] += dp[idx][1][n];
-            sum[idx] %= mod;
+            if (0 < n)
+            {
+                sum[idx] += dp[idx][1][n];
+                sum[idx] %= mod;
+            }
         }
 
         // type = 2
@@ -60,14 +69,20 @@ int main()
         {
             for (int m = 0; m <= n; m++)
             {
-                dp[idx][2][n] += dp[idx - 1][0][m];
+                if (n != m)
+                {
+                    dp[idx][2][n] += dp[idx - 1][0][m];
+                }
                 dp[idx][2][n] += dp[idx - 1][1][m];
                 dp[idx][2][n] += dp[idx - 1][2][m];
             }
 
             dp[idx][2][n] %= mod;
-            sum[idx] += dp[idx][2][n];
-            sum[idx] %= mod;
+            if (0 < n)
+            {
+                sum[idx] += dp[idx][2][n];
+                sum[idx] %= mod;
+            }
         }
 
         sum[idx] += sum[idx - 1];
@@ -109,7 +124,10 @@ int main()
                         // type = 1
                         for (int m = n; m < 10; m++)
                         {
-                            cnt += dp[len - 2][0][m];
+                            if (m != n)
+                            {
+                                cnt += dp[len - 2][0][m];
+                            }
                             cnt += dp[len - 2][1][m];
                             cnt %= mod;
                         }
@@ -117,7 +135,10 @@ int main()
                         // type = 2
                         for (int m = 0; m <= n; m++)
                         {
-                            cnt += dp[len - 2][0][m];
+                            if (m != n)
+                            {
+                                cnt += dp[len - 2][0][m];
+                            }
                             cnt += dp[len - 2][1][m];
                             cnt += dp[len - 2][2][m];
                             cnt %= mod;

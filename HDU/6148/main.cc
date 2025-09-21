@@ -117,98 +117,67 @@ int main()
 
                     for (int n = 1; n < up; n++)
                     {
-                        // type = 0
-                        cnt += dp[len - 2][0][n];
+                        cnt += dp[len - 1 - idx][0][n];
+                        cnt += dp[len - 1 - idx][1][n];
+                        cnt += dp[len - 1 - idx][2][n];
                         cnt %= mod;
-
-                        // type = 1
-                        for (int m = n; m < 10; m++)
-                        {
-                            if (m != n)
-                            {
-                                cnt += dp[len - 2][0][m];
-                            }
-                            cnt += dp[len - 2][1][m];
-                            cnt %= mod;
-                        }
-
-                        // type = 2
-                        for (int m = 0; m <= n; m++)
-                        {
-                            if (m != n)
-                            {
-                                cnt += dp[len - 2][0][m];
-                            }
-                            cnt += dp[len - 2][1][m];
-                            cnt += dp[len - 2][2][m];
-                            cnt %= mod;
-                        }
                     }
                 }
                 else if (1 == idx)
                 {
                     for (int n = 0; n < up; n++)
                     {
-                        if (pre < n)
+                        if (pre > n || pre == n)
                         {
-                            // type 0 和 1
-                            cnt += dp[len - 2 - idx][0][n];
+                            cnt += dp[len - 1 - idx][0][n];
+                            cnt += dp[len - 1 - idx][1][n];
+                            cnt += dp[len - 1 - idx][2][n];
                             cnt %= mod;
-
-                            for (int m = n; m < 10; m++)
-                            {
-                                if (m != n)
-                                {
-                                    cnt += dp[len - 2 - idx][0][m];
-                                }
-                                cnt += dp[len - 2 - idx][1][m];
-                                cnt %= mod;
-                            }
-
-                            type = 1;
                         }
                         else
                         {
-                            // pre > n or pre == n
-                            // 3 种 type 都可以
-                            cnt += dp[len - 2 - idx][0][n];
+                            // pre < n
+                            cnt += dp[len - 1 - idx][0][n];
+                            cnt += dp[len - 1 - idx][1][n];
                             cnt %= mod;
-
-                            for (int m = n; m < 10; m++)
-                            {
-                                if (m != n)
-                                {
-                                    cnt += dp[len - 2 - idx][0][m];
-                                }
-                                cnt += dp[len - 2 - idx][1][m];
-                                cnt %= mod;
-                            }
-
-                            for (int m = 0; m <= n; m++)
-                            {
-                                if (m != n)
-                                {
-                                    cnt += dp[len - 2 - idx][0][m];
-                                }
-                                cnt += dp[len - 2 - idx][1][m];
-                                cnt += dp[len - 2 - idx][2][m];
-                                cnt %= mod;
-                            }
-
-                            if (pre == n)
-                            {
-                                type = 0;
-                            }
-                            else
-                            {
-                                type = 2;
-                            }
                         }
+                    }
+
+                    if (pre < up)
+                    {
+                        type = 1;
+                    }
+                    else if (pre == up)
+                    {
+                        type = 0;
+                    }
+                    else
+                    {
+                        // pre > up
+                        type = 2;
                     }
                 }
                 else
                 {
+                    if (1 == type && pre > up)
+                    {
+                        // invalid
+                        break;
+                    }
 
+                    if (0 == type)
+                    {
+
+                    }
+                    else if (1 == type)
+                    {
+
+                    }
+                    else
+                    {
+                        // 2 == type
+
+                    }
                 }
                 
                 pre = up;

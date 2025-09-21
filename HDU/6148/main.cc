@@ -96,7 +96,7 @@ int main()
 
         long long cnt = 0;
 
-        int type = -1;
+        int type = 0; 
         int pre = -1;
         int len = strNum.length();
 
@@ -106,7 +106,7 @@ int main()
         }
         else
         {
-            for (int idx = 0; idx < len - 1; idx++)
+            for (int idx = 0; idx < len; idx++)
             {
                 int up = strNum.at(idx) - '0';
 

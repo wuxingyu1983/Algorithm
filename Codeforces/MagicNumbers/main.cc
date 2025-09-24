@@ -36,43 +36,53 @@ int func(string str, int m, int d)
             ret %= mod;
         }
     }
-    int pre = up;
 
-    for (idx = 2; idx <= len; idx++)
+    if (up != d)
     {
-        up = str.at(idx - 1) - '0';
-        if (idx & 1)
+        int pre = up;
+
+        for (idx = 2; idx <= len; idx++)
         {
-            // odd, 奇数
-            for (int n = 0; n < 10; n++)
+            up = str.at(idx - 1) - '0';
+            if (idx & 1)
             {
-                if (n != d)
+                // odd, 奇数
+                for (int n = 0; n < up; n++)
                 {
-                    ret += dp[idx][n][(m - ((pre * 10) % m)) % m];
-                    ret %= mod;
+                    if (n != d)
+                    {
+                        ret += dp[idx][n][(m - ((pre * 10) % m)) % m];
+                        ret %= mod;
+                    }
                 }
-            }
-        }
-        else
-        {
-            // even, 偶数
-            if (up < d)
-            {
-                break;
-            }
-            else if (up == d)
-            {
+
+                if (up == d)
+                {
+                    break;
+                }
             }
             else
             {
-                // up > d
-                ret += dp[idx][d][(m - ((pre * 10) % m)) % m];
-                ret %= mod;
+                // even, 偶数
+                if (up < d)
+                {
+                    break;
+                }
+                else if (up == d)
+                {
+                }
+                else
+                {
+                    // up > d
+                    ret += dp[idx][d][(m - ((pre * 10) % m)) % m];
+                    ret %= mod;
+                    break;
+                }
             }
-        }
 
-        pre = pre * 10 + up;
-        pre %= mod;
+            pre = pre * 10 + up;
+            pre %= mod;
+        }
     }
 
     return ret;
@@ -160,15 +170,32 @@ int main()
     cnt += func(b, m, d) - func(a, m, d);
     
     // 判断 a 是否符合
+    bool flag = true;
     int tmp = 0;
     for (int idx = 1; idx <= a.length(); idx++)
     {
         int up = a.at(idx - 1) - '0';
+        if (idx & 1)
+        {
+            if (up == d)
+            {
+                flag = false;
+                break;
+            }
+        }
+        else
+        {
+            if (up != d)
+            {
+                flag = false;
+                break;
+            }
+        }
         tmp += up * mods[idx];
         tmp %= mod;
     }
 
-    if (tmp == 0)
+    if (flag && tmp == 0)
     {
         cnt ++;
     }

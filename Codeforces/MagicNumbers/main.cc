@@ -158,6 +158,24 @@ int main()
 
     int cnt = mod;
     cnt += func(b, m, d) - func(a, m, d);
+    
+    // 判断 a 是否符合
+    int tmp = 0;
+    for (int idx = 1; idx <= a.length(); idx++)
+    {
+        int up = a.at(idx - 1) - '0';
+        tmp += up * mods[idx];
+        tmp %= mod;
+    }
+
+    if (tmp == 0)
+    {
+        cnt ++;
+    }
+    
+    cnt %= mod;
+
+    cout << cnt << endl;
 
     return 0;
 }

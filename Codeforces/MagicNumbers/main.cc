@@ -97,7 +97,7 @@ int func(string str, int m, int d)
             }
 
             pre = pre * 10 + up;
-            pre %= mod;
+            pre %= m;
         }
     }
 

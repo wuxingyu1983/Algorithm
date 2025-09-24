@@ -1,4 +1,4 @@
-// https://codeforces.com/problemset/problem/55/D
+// https://codeforces.com/contest/628/problem/D
 
 #include <cmath>
 #include <cstdio>
@@ -18,7 +18,7 @@
 using namespace std;
 
 const int mod = 1000000007;
-int dp[2001][9][2000];
+int dp[2001][10][2000];
 int mods[2001];
 
 int func(string str, int m, int d)
@@ -28,6 +28,10 @@ int func(string str, int m, int d)
 
     int idx = 1;
     int up = str.at(idx - 1) - '0';
+    if (1 == len)
+    {
+        up += 1;
+    }
     for (int n = 1; n < up; n++)
     {
         if (n != d)
@@ -47,11 +51,16 @@ int func(string str, int m, int d)
             if (idx & 1)
             {
                 // odd, 奇数
+                if (len == idx)
+                {
+                    up += 1;
+                }
+
                 for (int n = 0; n < up; n++)
                 {
                     if (n != d)
                     {
-                        ret += dp[idx][n][(m - ((pre * 10) % m)) % m];
+                        ret += dp[idx][n][(m - ((pre * 10 * mods[idx]) % m)) % m];
                         ret %= mod;
                     }
                 }
@@ -70,11 +79,18 @@ int func(string str, int m, int d)
                 }
                 else if (up == d)
                 {
+                    if (len == idx)
+                    {
+                        if (0 == (pre * 10 + up) % m)
+                        {
+                            ret += 1;
+                        }
+                    }
                 }
                 else
                 {
                     // up > d
-                    ret += dp[idx][d][(m - ((pre * 10) % m)) % m];
+                    ret += dp[idx][d][(m - ((pre * 10 * mods[idx]) % m)) % m];
                     ret %= mod;
                     break;
                 }
@@ -192,7 +208,7 @@ int main()
             }
         }
         tmp += up * mods[idx];
-        tmp %= mod;
+        tmp %= m;
     }
 
     if (flag && tmp == 0)

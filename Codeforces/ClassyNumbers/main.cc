@@ -40,7 +40,7 @@ long long func(long long num)
             else
             {
                 ret += 1;
-                up ++;
+                up++;
             }
 
             for (int n = 1; n < up; n++)
@@ -56,7 +56,7 @@ long long func(long long num)
         {
             if (0 == idx)
             {
-                up ++;
+                up++;
             }
 
             for (int n = 0; n < up; n++)
@@ -69,9 +69,13 @@ long long func(long long num)
 
             if (0 < up)
             {
-                nonZero ++;
+                nonZero++;
                 if (3 <= nonZero)
                 {
+                    if (0 < idx)
+                    {
+                        ret += dp[idx - 1][0][0];
+                    }
                     break;
                 }
             }
@@ -103,7 +107,7 @@ int main()
 
         sums[idx] = 10;
 
-        for (idx = 0; idx <= 19; idx++)
+        for (idx = 1; idx < 19; idx++)
         {
             for (int n = 0; n < 10; n++)
             {

@@ -86,12 +86,14 @@ void initDP(int st)
             }
         }
 
+        long long tmp = pow(10, idx);
+        tmp %= mod;
+
         for (int n = 1; n < 10; n++)
         {
             if (st & (1 << (n - 1)))
             {
-                long long tmp = n * pow(10, idx);
-                int nMod = tmp % mod;
+                int nMod = (tmp * n) % mod;
 
                 for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
                 {
@@ -109,6 +111,73 @@ void initDP(int st)
 long long func(long long num, int st)
 {
     long long ret = 0;
+
+    initDP(st);
+
+    int mod = lcm[st];
+
+    string str = to_string(num);
+    reverse(str.begin(), str.end());
+
+    ret += dp[str.length() - 1][st][0];
+
+    int preSt = 0;
+    int preMod = 0;
+
+    for (int idx = str.length() - 1; idx >= 0; idx--)
+    {
+        int up = str.at(idx) - '0';
+        if (0 == idx)
+        {
+            up ++;
+        }
+
+        long long tmp = pow(10, idx);
+        tmp %= mod;
+
+        for (size_t n = 0; n < up; n++)
+        {
+            int newSt = preSt;
+            if (0 < n)
+            {
+                newSt |= 1 << (n - 1);
+            }
+
+            if (newSt == (newSt & st))
+            {
+                int newMod = (preSt * 10 + n) * tmp;
+                newMod %= mod;
+
+                if (0 == idx)
+                {
+                    if (0 == newMod)
+                    {
+                        ret ++;
+                    }
+                }
+                else
+                {
+                    int needMod = (mod - newMod) % mod;
+                    for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
+                    {
+                        ret += dp[idx - 1][*it][newMod];
+                    }
+                }
+            }
+        }
+
+        up = str.at(idx) - '0';
+        preMod = (preMod * 10 + up) % mod;
+        
+        if (0 < up)
+        {
+            preSt |= 1 << (up - 1);
+            if (preSt != (preSt & st))
+            {
+                break;
+            }
+        }
+    }
 
     return ret;
 }

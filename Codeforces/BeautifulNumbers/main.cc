@@ -58,7 +58,52 @@ void init()
 
 void initDP(int st)
 {
+    memset(dp, 0, sizeof(dp));
 
+    int mod = lcm[st];
+
+    int idx = 0;
+
+    {
+        dp[idx][0][0] = 1;
+
+        for (int n = 1; n < 10; n++)
+        {
+            if (st & (1 << (n - 1)))
+            {
+                dp[idx][1 << (n - 1)][n % mod] = 1;
+            }
+        }
+    }
+
+    for (idx = 1; idx < 19; idx++)
+    {
+        for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
+        {
+            for (size_t m = 0; m < mod; m++)
+            {
+                dp[idx][*it][m] = dp[idx - 1][*it][m];
+            }
+        }
+
+        for (int n = 1; n < 10; n++)
+        {
+            if (st & (1 << (n - 1)))
+            {
+                long long tmp = n * pow(10, idx);
+                int nMod = tmp % mod;
+
+                for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
+                {
+                    int newSt = *it | (1 << (n - 1));
+                    for (size_t m = 0; m < mod; m++)
+                    {
+                        dp[idx][newSt][(nMod + m) % mod] += dp[idx - 1][*it][m];
+                    }
+                }
+            }
+        }
+    }
 }
 
 long long func(long long num, int st)

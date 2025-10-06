@@ -19,16 +19,16 @@ using namespace std;
 
 vector<int> subsets[512];
 int lcm[512];
-int num[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
+//int num[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
 
 long long dp[19][512][2520];
 
 int gcd(int a, int b)
 {
-	if (a % b == 0)
-		return b;
-	else
-		return gcd(b, a % b);
+    if (a % b == 0)
+        return b;
+    else
+        return gcd(b, a % b);
 }
 
 void init()
@@ -89,18 +89,20 @@ void initDP(int st)
         long long tmp = pow(10, idx);
         tmp %= mod;
 
-        for (int n = 1; n < 10; n++)
+        for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
         {
-            if (st & (1 << (n - 1)))
+            for (size_t m = 0; m < mod; m++)
             {
-                int nMod = (tmp * n) % mod;
-
-                for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
+                if (dp[idx - 1][*it][m])
                 {
-                    int newSt = *it | (1 << (n - 1));
-                    for (size_t m = 0; m < mod; m++)
+                    for (int n = 1; n < 10; n++)
                     {
-                        dp[idx][newSt][(nMod + m) % mod] += dp[idx - 1][*it][m];
+                        if (st & (1 << (n - 1)))
+                        {
+                            int nMod = (tmp * n) % mod;
+                            int newSt = *it | (1 << (n - 1));
+                            dp[idx][newSt][(nMod + m) % mod] += dp[idx - 1][*it][m];
+                        }
                     }
                 }
             }
@@ -129,7 +131,7 @@ long long func(long long num, int st)
         int up = str.at(idx) - '0';
         if (0 == idx)
         {
-            up ++;
+            up++;
         }
 
         long long tmp = pow(10, idx);
@@ -150,9 +152,9 @@ long long func(long long num, int st)
 
                 if (0 == idx)
                 {
-                    if (0 == newMod)
+                    if (0 == newMod && newSt == st)
                     {
-                        ret ++;
+                        ret++;
                     }
                 }
                 else
@@ -168,7 +170,7 @@ long long func(long long num, int st)
 
         up = str.at(idx) - '0';
         preMod = (preMod * 10 + up) % mod;
-        
+
         if (0 < up)
         {
             preSt |= 1 << (up - 1);

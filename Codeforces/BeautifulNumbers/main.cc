@@ -17,6 +17,8 @@
 
 using namespace std;
 
+#pragma GCC target("popcnt")
+
 vector<int> subsets[512];
 int lcm[512];
 //int num[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
@@ -78,30 +80,27 @@ void initDP(int st)
 
     for (idx = 1; idx < 19; idx++)
     {
-        for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
-        {
-            for (size_t m = 0; m < mod; m++)
-            {
-                dp[idx][*it][m] = dp[idx - 1][*it][m];
-            }
-        }
-
         long long tmp = pow(10, idx);
         tmp %= mod;
 
         for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
         {
-            for (size_t m = 0; m < mod; m++)
+            if (__builtin_popcount(*it) <= idx)
             {
-                if (dp[idx - 1][*it][m])
+                for (size_t m = 0; m < mod; m++)
                 {
-                    for (int n = 1; n < 10; n++)
+                    if (dp[idx - 1][*it][m])
                     {
-                        if (st & (1 << (n - 1)))
+                        dp[idx][*it][m] += dp[idx - 1][*it][m];
+
+                        for (int n = 1; n < 10; n++)
                         {
-                            int nMod = (tmp * n) % mod;
-                            int newSt = *it | (1 << (n - 1));
-                            dp[idx][newSt][(nMod + m) % mod] += dp[idx - 1][*it][m];
+                            if (st & (1 << (n - 1)))
+                            {
+                                int nMod = (tmp * n) % mod;
+                                int newSt = *it | (1 << (n - 1));
+                                dp[idx][newSt][(nMod + m) % mod] += dp[idx - 1][*it][m];
+                            }
                         }
                     }
                 }
@@ -113,8 +112,6 @@ void initDP(int st)
 long long func(long long num, int st)
 {
     long long ret = 0;
-
-    initDP(st);
 
     int mod = lcm[st];
 

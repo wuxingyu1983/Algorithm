@@ -12,6 +12,7 @@
 #include <set>
 #include <queue>
 #include <stack>
+#include <map>
 #include <unordered_map>
 #include <bitset>
 
@@ -21,7 +22,8 @@ using namespace std;
 
 vector<int> subsets[512];
 int lcm[512];
-//int num[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
+int num[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
+multimap<int, int> mltmap;
 
 long long dp[19][512][2520];
 
@@ -35,7 +37,7 @@ int gcd(int a, int b)
 
 void init()
 {
-    for (int n = 1; n < 512; n++)
+    for (int n = 511; n > 0; n--)
     {
         int l = 1;
         for (int idx = 0; idx < 10; idx++)
@@ -48,6 +50,8 @@ void init()
 
         lcm[n] = l;
 
+        mltmap.insert(make_pair<int, int>((int)l, (int)n));
+
         for (int m = 1; m <= n; m++)
         {
             if (m == (m & n))
@@ -55,6 +59,20 @@ void init()
                 subsets[n].push_back(m);
             }
         }
+    }
+
+    for (size_t i = 0; i < 48; i++)
+    {
+        cout << num[i] << ":";
+
+        auto range = mltmap.equal_range(num[i]);
+        for (auto it = range.first; it != range.second; ++it)
+        {
+//            cout << bitset<9>(it->second) << ',';
+            cout << it->second << ',';
+        }
+
+        cout << endl;
     }
 }
 

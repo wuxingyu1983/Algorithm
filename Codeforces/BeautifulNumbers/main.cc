@@ -21,8 +21,7 @@ using namespace std;
 #pragma GCC target("popcnt")
 
 vector<int> subsets[512];
-int lcm[512];
-int num[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
+int lcm[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
 multimap<int, int> mltmap;
 
 long long dp[19][512][2520];
@@ -48,8 +47,6 @@ void init()
             }
         }
 
-        lcm[n] = l;
-
         mltmap.insert(make_pair<int, int>((int)l, (int)n));
 
         for (int m = 1; m <= n; m++)
@@ -60,27 +57,16 @@ void init()
             }
         }
     }
-
-    for (size_t i = 0; i < 48; i++)
-    {
-        cout << num[i] << ":";
-
-        auto range = mltmap.equal_range(num[i]);
-        for (auto it = range.first; it != range.second; ++it)
-        {
-//            cout << bitset<9>(it->second) << ',';
-            cout << it->second << ',';
-        }
-
-        cout << endl;
-    }
 }
 
-void initDP(int st)
+void initDP(int iInLcm)
 {
-    memset(dp, 0, sizeof(dp));
+    if (iInLcm)
+        memset(dp, 0, sizeof(dp));
 
-    int mod = lcm[st];
+    int mod = lcm[iInLcm];
+    auto range = mltmap.equal_range(mod);
+    int st = range.first->second;
 
     int idx = 0;
 
@@ -101,6 +87,21 @@ void initDP(int st)
         long long tmp = pow(10, idx);
         tmp %= mod;
 
+        // pre st = 0
+        {
+            dp[idx][0][0] += dp[idx - 1][0][0];
+
+            for (int n = 1; n < 10; n++)
+            {
+                if (st & (1 << (n - 1)))
+                {
+                    int nMod = (tmp * n) % mod;
+                    int newSt = 1 << (n - 1);
+                    dp[idx][newSt][nMod % mod] += dp[idx - 1][0][0];
+                }
+            }
+        }
+
         for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
         {
             if (__builtin_popcount(*it) <= idx)
@@ -115,9 +116,8 @@ void initDP(int st)
                         {
                             if (st & (1 << (n - 1)))
                             {
-                                int nMod = (tmp * n) % mod;
                                 int newSt = *it | (1 << (n - 1));
-                                dp[idx][newSt][(nMod + m) % mod] += dp[idx - 1][*it][m];
+                                dp[idx][newSt][((tmp * n) + m) % mod] += dp[idx - 1][*it][m];
                             }
                         }
                     }
@@ -127,71 +127,94 @@ void initDP(int st)
     }
 }
 
-long long func(long long num, int st)
+long long func(long long num, int iInLcm)
 {
     long long ret = 0;
 
-    int mod = lcm[st];
+    int mod = lcm[iInLcm];
 
     string str = to_string(num);
     reverse(str.begin(), str.end());
 
-    ret += dp[str.length() - 1][st][0];
-
-    int preSt = 0;
-    int preMod = 0;
-
-    for (int idx = str.length() - 1; idx >= 0; idx--)
+    auto range = mltmap.equal_range(mod);
+    for (auto it = range.first; it != range.second; ++it)
     {
-        int up = str.at(idx) - '0';
-        if (0 == idx)
+        int st = it->second;
+
+        if (1 < str.length())
         {
-            up++;
+            ret += dp[str.length() - 2][st][0];
         }
 
-        long long tmp = pow(10, idx);
-        tmp %= mod;
+        int preSt = 0;
+        int preMod = 0;
 
-        for (size_t n = 0; n < up; n++)
+        for (int idx = str.length() - 1; idx >= 0; idx--)
         {
-            int newSt = preSt;
-            if (0 < n)
+            int down = 0;
+            int up = str.at(idx) - '0';
+            if (str.length() - 1 == idx)
             {
-                newSt |= 1 << (n - 1);
+                down = 1;
             }
 
-            if (newSt == (newSt & st))
+            if (0 == idx)
             {
-                int newMod = (preSt * 10 + n) * tmp;
-                newMod %= mod;
+                up++;
+            }
 
-                if (0 == idx)
+            long long tmp = pow(10, idx);
+            tmp %= mod;
+
+            for (size_t n = down; n < up; n++)
+            {
+                int newSt = preSt;
+                if (0 < n)
                 {
-                    if (0 == newMod && newSt == st)
-                    {
-                        ret++;
-                    }
+                    newSt |= 1 << (n - 1);
                 }
-                else
+
+                if (newSt == (newSt & st))
                 {
-                    int needMod = (mod - newMod) % mod;
-                    for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
+                    int newMod = (preMod * 10 + n) * tmp;
+                    newMod %= mod;
+
+                    if (0 == idx)
                     {
-                        ret += dp[idx - 1][*it][newMod];
+                        if (0 == newMod && newSt == st)
+                        {
+                            ret++;
+                        }
+                    }
+                    else
+                    {
+                        int needMod = (mod - newMod) % mod;
+                        for (vector<int>::iterator it = subsets[st].begin(); it != subsets[st].end(); it++)
+                        {
+                            if (st == (newSt | (*it)))
+                            {
+                                ret += dp[idx - 1][*it][needMod];
+                            }
+                        }
+
+                        if (st == newSt)
+                        {
+                            ret += dp[idx - 1][0][needMod];
+                        }
                     }
                 }
             }
-        }
 
-        up = str.at(idx) - '0';
-        preMod = (preMod * 10 + up) % mod;
+            up = str.at(idx) - '0';
+            preMod = (preMod * 10 + up) % mod;
 
-        if (0 < up)
-        {
-            preSt |= 1 << (up - 1);
-            if (preSt != (preSt & st))
+            if (0 < up)
             {
-                break;
+                preSt |= 1 << (up - 1);
+                if (preSt != (preSt & st))
+                {
+                    break;
+                }
             }
         }
     }
@@ -218,13 +241,16 @@ int main()
     }
 
     vector<long long> cnts(t, 0);
-    for (int st = 1; st < 512; st++)
+    for (int idx = 0; idx < 48; idx ++)
     {
-        initDP(st);
+        initDP(idx);
 
         for (size_t i = 0; i < t; i++)
         {
-            cnts[i] += func(rs[i], st) - func(ls[i] - 1, st);
+            long long rrst = func(rs[i], idx);
+            long long lrst = func(ls[i] - 1, idx);
+            cnts[i] += rrst - lrst;
+//            cout << st << ": rrst = " << rrst << ", lrst = " << lrst << endl;
         }
     }
 

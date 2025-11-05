@@ -61,7 +61,8 @@ void init()
 
 void initDP(int iInLcm)
 {
-    memset(dp, 0, sizeof(dp));
+    if (iInLcm)
+        memset(dp, 0, sizeof(dp));
 
     int mod = lcm[iInLcm];
     auto range = mltmap.equal_range(mod);
@@ -115,9 +116,8 @@ void initDP(int iInLcm)
                         {
                             if (st & (1 << (n - 1)))
                             {
-                                int nMod = (tmp * n) % mod;
                                 int newSt = *it | (1 << (n - 1));
-                                dp[idx][newSt][(nMod + m) % mod] += dp[idx - 1][*it][m];
+                                dp[idx][newSt][((tmp * n) + m) % mod] += dp[idx - 1][*it][m];
                             }
                         }
                     }

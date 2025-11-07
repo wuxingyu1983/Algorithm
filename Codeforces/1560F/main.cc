@@ -53,7 +53,7 @@ string func(string num, int idx, int k, int flag)
             {
                 if (__builtin_popcount(flag) == k)
                 {
-                    int newN = findMinOne(flag, n);
+                    int newN = findMinOne(flag, n + 1);
                     if (0 > newN)
                     {
                         ret = "";
@@ -73,7 +73,7 @@ string func(string num, int idx, int k, int flag)
                     int newFlag = flag | (1 << (n + 1));
                     if (__builtin_popcount(newFlag) == k)
                     {
-                        int minN = findMinOne(flag, 0);
+                        int minN = findMinOne(newFlag, 0);
                         for (size_t i = idx + 1; i < num.length(); i++)
                         {
                             ret += '0' + minN;
@@ -121,7 +121,24 @@ string func(string num, int idx, int k, int flag)
                 string postRet = func(num, idx + 1, k, flag | (1 << n));
                 if (postRet.empty())
                 {
-
+                    ret = '0' + n + 1;
+                    int newFlag = flag | (1 << (n + 1));
+                    if (__builtin_popcount(newFlag) == k)
+                    {
+                        int minN = findMinOne(newFlag, 0);
+                        for (size_t i = idx + 1; i < num.length(); i++)
+                        {
+                            ret += '0' + minN;
+                        }
+                    }
+                    else
+                    {
+                        int minN = 0;
+                        for (size_t i = idx + 1; i < num.length(); i++)
+                        {
+                            ret += '0' + minN;
+                        }
+                    }
                 }
                 else
                 {

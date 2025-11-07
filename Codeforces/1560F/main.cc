@@ -21,6 +21,57 @@ using namespace std;
 
 #pragma GCC target("popcnt")
 
+int findMinOne(int flag)
+{
+    int ret = 0;
+
+    for (size_t i = 0; i < 10; i++)
+    {
+        if (flag & (1 << i))
+        {
+            ret = i;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+string func(string num, int idx, int k, int flag)
+{
+    string ret = "";
+
+    int n = num.at(idx) - '0';
+
+    if (flag & (1 << n))
+    {
+        ret = '0' + n;
+        if (idx < num.length() - 1)
+        {
+            string postRet = func(num, idx + 1, k, flag);
+            if (postRet.empty())
+            {
+                ret = '0' + n + 1;
+                int minN = findMinOne(flag);
+                for (size_t i = idx + 1; i < num.length(); i++)
+                {
+                    ret += '0' + minN;
+                }
+            }
+            else
+            {
+                ret += postRet;
+            }
+        }
+    }
+    else
+    {
+
+    }
+
+    return ret;
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -34,7 +85,9 @@ int main()
         int n, k;
         cin >> n >> k;
 
+        string num = to_string(n);
 
+        cout << func(num, 0, k, 0) << "\n";
     }
 
     return 0;

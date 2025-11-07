@@ -99,7 +99,14 @@ string func(string num, int idx, int k, int flag)
     {
         if (__builtin_popcount(flag) == k)
         {
-            ret = '0' + findMinOne(flag, n);
+            int newN = findMinOne(flag, n);
+            if (0 > newN)
+            {
+                ret = "";
+                return ret;
+            }
+
+            ret = '0' + newN;
             int minN = findMinOne(flag, 0);
             for (size_t i = idx + 1; i < num.length(); i++)
             {
@@ -111,7 +118,15 @@ string func(string num, int idx, int k, int flag)
             ret = '0' + n;
             if (idx < num.length() -1)
             {
+                string postRet = func(num, idx + 1, k, flag | (1 << n));
+                if (postRet.empty())
+                {
 
+                }
+                else
+                {
+                    ret += postRet;
+                }
             }
         }
     }

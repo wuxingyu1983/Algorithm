@@ -21,11 +21,11 @@ using namespace std;
 
 #pragma GCC target("popcnt")
 
-int findMinOne(int flag)
+int findMinOne(int flag, int after)
 {
-    int ret = 0;
+    int ret = -1;
 
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = after; i < 10; i++)
     {
         if (flag & (1 << i))
         {
@@ -51,11 +51,42 @@ string func(string num, int idx, int k, int flag)
             string postRet = func(num, idx + 1, k, flag);
             if (postRet.empty())
             {
-                ret = '0' + n + 1;
-                int minN = findMinOne(flag);
-                for (size_t i = idx + 1; i < num.length(); i++)
+                if (__builtin_popcount(flag) == k)
                 {
-                    ret += '0' + minN;
+                    int newN = findMinOne(flag, n);
+                    if (0 > newN)
+                    {
+                        ret = "";
+                        return ret;
+                    }
+
+                    ret = '0' + newN;
+                    int minN = findMinOne(flag, 0);
+                    for (size_t i = idx + 1; i < num.length(); i++)
+                    {
+                        ret += '0' + minN;
+                    }
+                }
+                else
+                {
+                    ret = '0' + n + 1;
+                    int newFlag = flag | (1 << (n + 1));
+                    if (__builtin_popcount(newFlag) == k)
+                    {
+                        int minN = findMinOne(flag, 0);
+                        for (size_t i = idx + 1; i < num.length(); i++)
+                        {
+                            ret += '0' + minN;
+                        }
+                    }
+                    else
+                    {
+                        int minN = 0;
+                        for (size_t i = idx + 1; i < num.length(); i++)
+                        {
+                            ret += '0' + minN;
+                        }
+                    }
                 }
             }
             else
@@ -66,7 +97,23 @@ string func(string num, int idx, int k, int flag)
     }
     else
     {
+        if (__builtin_popcount(flag) == k)
+        {
+            ret = '0' + findMinOne(flag, n);
+            int minN = findMinOne(flag, 0);
+            for (size_t i = idx + 1; i < num.length(); i++)
+            {
+                ret += '0' + minN;
+            }
+        }
+        else
+        {
+            ret = '0' + n;
+            if (idx < num.length() -1)
+            {
 
+            }
+        }
     }
 
     return ret;

@@ -22,9 +22,8 @@ using namespace std;
 
 const int mod = 1000000007;
 
-int C[1001][1001];
+long long C[1001][1001];
 int ops[1001];
-long long dp[1001];
 
 int main()
 {
@@ -36,13 +35,12 @@ int main()
 
     // init
     {
-        ops[1] = 1;
         for (size_t i = 2; i <= 1000; i++)
         {
             ops[i] = 1 + ops[__builtin_popcount(i)];
         }
 
-        for (size_t n = 1; n <= 1000; n++)
+        for (size_t n = 0; n <= 1000; n++)
         {
             for (size_t m = 0; m <= n; m++)
             {
@@ -59,6 +57,7 @@ int main()
         }
     }
 
+    long long ans = 0;
     int preOnes = 0;
     for (size_t pos = 0; pos < strN.length(); pos++)
     {
@@ -68,50 +67,45 @@ int main()
         {
             int remain = strN.length() - 1 - pos;
 
-            if (0 < remain)
+            if (0 <= remain)
             {
                 for (size_t i = 0; i <= remain; i++)
                 {
-                    dp[preOnes + i] += C[remain][i];
-                    dp[preOnes + i] %= mod;
+                    if (0 < (preOnes + i) && ops[preOnes + i] == k - 1)
+                    {
+                        ans += C[remain][i];
+                        ans %= mod;
+                    }
                 }
             }
-        }
 
-        preOnes += num;
+            preOnes += num;
+        }
     }
 
-    dp[preOnes] += 1;
-    dp[preOnes] %= mod;
-
-    int ret = 0;
+    if (ops[preOnes] == k - 1)
+    {
+        ans += 1;
+        ans %= mod;
+    }
 
     if (0 == k)
     {
         if (0 < preOnes)
         {
-            ret = 1;
+            ans = 1;
         }
     }
     else
     {
-        for (size_t i = 0; i <= 1000; i++)
-        {
-            if (k == ops[i])
-            {
-                ret += dp[i];
-                ret %= mod;
-            }
-        }
-
         if (1 == k)
         {
-            ret += mod - 1;
-            ret %= mod;
+            ans += mod - 1;
+            ans %= mod;
         }
     }
 
-    cout << ret << endl;
+    cout << ans << endl;
 
     return 0;
 }

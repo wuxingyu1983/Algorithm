@@ -18,7 +18,10 @@
 
 using namespace std;
 
+const int maxN = 10001;
 const int mod = 1000007;
+
+int maxT[maxN];
 
 int main()
 {
@@ -32,6 +35,22 @@ int main()
         cin >> t;
 
         tms.push_back(t);
+
+        if (0 == i)
+        {
+            maxT[i] = t;
+        }
+        else
+        {
+            if (maxT[i - 1] < t)
+            {
+                maxT[i] = t;
+            }
+            else
+            {
+                maxT[i] = maxT[i - 1];
+            }
+        }
     }
    
     int ans = 0;

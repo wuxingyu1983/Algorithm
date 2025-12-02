@@ -29,16 +29,62 @@ long long sums[maxLen];
 long long seqs[maxLen];
 long long seqCnt[maxLen];
 
+int b;
+
 long long func(vector<int> &vec)
 {
     long long ret = 0;
 
+    int len = vec.size();
+    long long sum = 0;
+    long long seq = 0;
+    long long s = b * (b - 1) / 2;
+    s %= mod;
+
+    for (size_t i = 0; i < len; i++)
+    {
+        int digit = vec[i];
+
+        if (len - 1 == i)
+        {
+            ret += sum * digit;
+            ret %= mod;
+
+            seq *= b;
+            seq %= mod;
+            seq *= digit;
+            seq %= mod;
+            seq += digit * (digit - 1) / 2 + digit * (digit - 1) / 2;
+            seq %= mod;
+
+            sum += seq;
+            sum %= mod;
+
+            ret += sum;
+            ret %= mod;
+        }
+        else
+        {
+            if (0 < digit)
+            {
+
+            }
+
+            seq *= b;
+            seq %= mod;
+            seq += digit + digit;
+            seq %= mod;
+
+            sum += seq;
+            sum %= mod;
+        }
+    }
+    
     return ret;
 }
 
 int main()
 {
-    int b;
     cin >> b;
 
     // init

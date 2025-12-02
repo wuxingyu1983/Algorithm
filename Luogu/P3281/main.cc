@@ -22,12 +22,19 @@ const int mod = 20130427;
 const int maxLen = 100001;
 
 long long powers[maxLen];   // 1, b, b*b, b*b*b ...
-vector<long long> ls, rs;
+vector<int> ls, rs;
 
 // 0 ...  [b-1][b-1][b-1] 全部的和
 long long sums[maxLen];
 long long seqs[maxLen];
 long long seqCnt[maxLen];
+
+long long func(vector<int> &vec)
+{
+    long long ret = 0;
+
+    return ret;
+}
 
 int main()
 {
@@ -50,7 +57,7 @@ int main()
         sums[0] %= mod;
         seqs[0] = sums[0];
         seqCnt[0] = b;
-        
+
         for (size_t i = 1; i < maxLen; i++)
         {
             seqCnt[i] = seqCnt[i - 1] * b + b;
@@ -63,6 +70,29 @@ int main()
             sums[i] %= mod;
         }
     }
+
+    int n;
+    cin >> n;
+    for (size_t i = 0; i < n; i++)
+    {
+        int digit;
+        cin >> digit;
+
+        ls.push_back(digit);
+    }
+
+    int m;
+    cin >> m;
+    for (size_t i = 0; i < m; i++)
+    {
+        int digit;
+        cin >> digit;
+
+        rs.push_back(digit);
+    }
+    
+    long long retL = func(ls);
+    long long retR = func(rs);
 
     return 0;
 }

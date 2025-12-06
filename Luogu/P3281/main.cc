@@ -27,7 +27,6 @@ vector<int> ls, rs;
 // 0 ...  [b-1][b-1][b-1] 全部的和
 long long sums[maxLen];
 long long seqs[maxLen];
-long long seqCnt[maxLen];
 
 int b;
 
@@ -102,17 +101,17 @@ int main()
         sums[0] = b * (b - 1) / 2;  // 0 + 1 + 2 + ... + b - 1
         sums[0] %= mod;
         seqs[0] = sums[0];
-        seqCnt[0] = b;
 
+        long long tmp = 0;
         for (size_t i = 1; i < maxLen; i++)
         {
-            seqCnt[i] = seqCnt[i - 1] * b + b;
-            seqCnt[i] %= mod;
+            tmp += powers[i - 1] * (i + 1);
+            tmp %= mod;
 
-            seqs[i] = seqs[i - 1] * ((b * b) % mod) + seqCnt[i - 1] * s + s;
+            seqs[i] = seqs[i - 1] * ((b * b) % mod) + tmp * ((s * (b - 1)) % mod) + s;
             seqs[i] %= mod;
 
-            sums[i] = sums[i - 1] + seqs[i];
+            sums[i] = sums[i - 1] * b + seqs[i];
             sums[i] %= mod;
         }
     }
@@ -136,9 +135,12 @@ int main()
 
         rs.push_back(digit);
     }
-    
+/*    
     long long retL = func(ls);
     long long retR = func(rs);
+*/
+
+    cout << sums[m - 1] << endl;
 
     return 0;
 }

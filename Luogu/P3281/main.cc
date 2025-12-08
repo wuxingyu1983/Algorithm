@@ -27,6 +27,10 @@ vector<int> ls, rs;
 // 0 ...  [b-1][b-1][b-1] 全部的和
 long long sums[maxLen];
 long long seqs[maxLen];
+long long sumb[maxLen];
+long long seqb[maxLen];
+
+long long dp[maxLen];
 
 int b;
 
@@ -42,41 +46,25 @@ long long func(vector<int> &vec)
 
     for (size_t i = 0; i < len; i++)
     {
-        int digit = vec[i];
+        int d = vec[i];
 
-        if (len - 1 == i)
+        if (0 == i)
         {
-            ret += sum * digit;
-            ret %= mod;
 
-            seq *= b;
-            seq %= mod;
-            seq *= digit;
-            seq %= mod;
-            seq += digit * (digit - 1) / 2 + digit * (digit - 1) / 2;
-            seq %= mod;
+        }
+        else if (len - 1 == i)
+        {
 
-            sum += seq;
-            sum %= mod;
-
-            ret += sum;
-            ret %= mod;
         }
         else
         {
-            if (0 < digit)
-            {
 
-            }
-
-            seq *= b;
-            seq %= mod;
-            seq += digit + digit;
-            seq %= mod;
-
-            sum += seq;
-            sum %= mod;
         }
+
+        seq = seq * b + 2 * d;
+        seq %= mod;
+        sum += seq;
+        sum %= mod;
     }
     
     return ret;
@@ -89,10 +77,13 @@ int main()
     // init
     {
         powers[0] = 1;
+        dp[0] = 1;
         for (size_t i = 1; i < maxLen; i++)
         {
             powers[i] = powers[i - 1] * b;
             powers[i] %= mod;
+
+            dp[i] = dp[i - 1] + ((powers[i] * (powers[i] - 1) / 2) % mod);
         }
         
         long long s = b * (b - 1) / 2;
@@ -102,6 +93,9 @@ int main()
         sums[0] %= mod;
         seqs[0] = sums[0];
 
+        sumb[0] = sums[0];
+        seqb[0] = seqs[0];
+
         long long tmp = 0;
         for (size_t i = 1; i < maxLen; i++)
         {
@@ -110,9 +104,13 @@ int main()
 
             seqs[i] = seqs[i - 1] * ((b * b) % mod) + tmp * ((s * (b - 1)) % mod) + s;
             seqs[i] %= mod;
+            seqb[i] = seqb[i - 1] * ((b * b) % mod) + (((i + 1) * powers[i]) % mod) * s;
+            seqb[i] %= mod;
 
             sums[i] = sums[i - 1] * b + seqs[i];
             sums[i] %= mod;
+            sumb[i] = sumb[i - 1] * b + seqb[i];
+            sumb[i] %= mod;
         }
     }
 
@@ -135,12 +133,13 @@ int main()
 
         rs.push_back(digit);
     }
-/*    
+    
     long long retL = func(ls);
     long long retR = func(rs);
-*/
 
-    cout << sums[m - 1] << endl;
+    long long ans = 0;
+//    cout << sums[m - 1] << endl;
+    cout << ans << endl;
 
     return 0;
 }

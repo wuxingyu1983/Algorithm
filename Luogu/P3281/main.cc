@@ -48,21 +48,55 @@ long long func(vector<int> &vec)
     {
         int d = vec[i];
 
+        if (0 < d)
+        {
+            // 处理(1)部分
+            {
+                int up = d - 1;
+                if (len - 1 == i)
+                {
+                    up = d;
+                }
+
+                ret += (sum * (up + 1) * powers[len - 1 - i]) % mod;
+                ret %= mod;
+            }
+
+            // 处理(2)部分
+            {
+                if (i < len - 1)
+                {
+                    int up = d;
+                    if (0 == i)
+                    {
+                        up = d - 1;
+                    }
+
+                    ret += sumb[len - 1 - i - 1] * up;
+                    ret %= mod;
+                }
+            }
+
+            if (0 == i)
+            {
+            }
+            else if (len - 1 == i)
+            {
+            }
+            else
+            {
+            }
+        }
+
         if (0 == i)
         {
-
-        }
-        else if (len - 1 == i)
-        {
-
+            seq = d;
         }
         else
         {
-
+            seq = seq * b + 2 * d;
+            seq %= mod;
         }
-
-        seq = seq * b + 2 * d;
-        seq %= mod;
         sum += seq;
         sum %= mod;
     }

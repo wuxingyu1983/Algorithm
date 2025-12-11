@@ -77,14 +77,25 @@ long long func(vector<int> &vec)
                 }
             }
 
-            if (0 == i)
+            // 处理跨(1)和(2)部分
             {
-            }
-            else if (len - 1 == i)
-            {
-            }
-            else
-            {
+                int down = 0, up = d - 1;
+                if (0 == i)
+                {
+                    down = 1;
+                }
+                if (len - 1 == i)
+                {
+                    up = d;
+                }
+
+                long long SEQ = seq * b * (up - down + 1) + (i + 1) * ((up - down + 1) * (up + down) / 2);
+                SEQ %= mod;
+                SEQ *= powers[len - 1 - i];
+                SEQ %= mod;
+
+                ret += (SEQ * dp[len - 1 - i]) % mod;
+                ret %= mod;
             }
         }
 

@@ -21,7 +21,7 @@ using namespace std;
 const int mod = 20130427;
 const int maxLen = 100001;
 
-long long powers[maxLen];   // 1, b, b*b, b*b*b ...
+long long powers[maxLen]; // 1, b, b*b, b*b*b ...
 vector<int> ls, rs;
 
 // 0 ...  [b-1][b-1][b-1] 全部的和
@@ -44,21 +44,30 @@ long long func(vector<int> &vec)
     long long s = b * (b - 1) / 2;
     s %= mod;
 
+    if (1 < len)
+    {
+        ret += sums[len - 2];
+    }
+
     for (size_t i = 0; i < len; i++)
     {
         int d = vec[i];
 
         if (0 < d)
         {
+            int down = 0, up = d - 1;
+            if (0 == i)
+            {
+                down = 1;
+            }
+            if (len - 1 == i)
+            {
+                up = d;
+            }
+
             // 处理(1)部分
             {
-                int up = d - 1;
-                if (len - 1 == i)
-                {
-                    up = d;
-                }
-
-                ret += (sum * (up + 1) * powers[len - 1 - i]) % mod;
+                ret += (sum * (up - down + 1) * powers[len - 1 - i]) % mod;
                 ret %= mod;
             }
 
@@ -66,29 +75,13 @@ long long func(vector<int> &vec)
             {
                 if (i < len - 1)
                 {
-                    int up = d;
-                    if (0 == i)
-                    {
-                        up = d - 1;
-                    }
-
-                    ret += sumb[len - 1 - i - 1] * up;
+                    ret += sumb[len - 1 - i - 1] * (up - down + 1);
                     ret %= mod;
                 }
             }
 
             // 处理跨(1)和(2)部分
             {
-                int down = 0, up = d - 1;
-                if (0 == i)
-                {
-                    down = 1;
-                }
-                if (len - 1 == i)
-                {
-                    up = d;
-                }
-
                 long long SEQ = seq * b * (up - down + 1) + (i + 1) * ((up - down + 1) * (up + down) / 2);
                 SEQ %= mod;
                 SEQ *= powers[len - 1 - i];
@@ -105,13 +98,44 @@ long long func(vector<int> &vec)
         }
         else
         {
-            seq = seq * b + 2 * d;
+            seq = seq * b + (i + 1) * d;
             seq %= mod;
         }
         sum += seq;
         sum %= mod;
+
+        if (0 == d && len - 1 == i)
+        {
+            ret += sum;
+            ret %= mod;
+        }
     }
-    
+
+    return ret;
+}
+
+long long funcEdge(vector<int> &vec)
+{
+    long long ret = 0;
+    long long seq = 0;
+
+    for (size_t i = 0; i < vec.size(); i++)
+    {
+        int d = vec[i];
+
+        if (0 == i)
+        {
+            seq = d;
+        }
+        else
+        {
+            seq = seq * b + (i + 1) * d;
+            seq %= mod;
+        }
+        ret += seq;
+        ret %= mod;
+    }
+
     return ret;
 }
 
@@ -130,11 +154,11 @@ int main()
 
             dp[i] = dp[i - 1] + ((powers[i] * (powers[i] - 1) / 2) % mod);
         }
-        
+
         long long s = b * (b - 1) / 2;
         s %= mod;
 
-        sums[0] = b * (b - 1) / 2;  // 0 + 1 + 2 + ... + b - 1
+        sums[0] = b * (b - 1) / 2; // 0 + 1 + 2 + ... + b - 1
         sums[0] %= mod;
         seqs[0] = sums[0];
 
@@ -178,12 +202,18 @@ int main()
 
         rs.push_back(digit);
     }
-    
+
     long long retL = func(ls);
     long long retR = func(rs);
+    long long retLEdge = funcEdge(ls);
 
     long long ans = 0;
-//    cout << sums[m - 1] << endl;
+    ans = mod + retR - retL;
+    ans %= mod;
+    ans += retLEdge;
+    ans %= mod;
+
+    cout << retR << " " << retL << " " << retLEdge << endl;
     cout << ans << endl;
 
     return 0;

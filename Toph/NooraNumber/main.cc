@@ -23,8 +23,18 @@ using namespace std;
 int flag[1024];
 long long dp[20][1024];
 
+long long func(string strNum)
+{
+    long long ret = 0;
+
+    return ret;
+}
+
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
     int t;
     cin >> t;
 
@@ -76,6 +86,12 @@ int main()
                 }
             }
         }
+    }
+
+    for (size_t i = 0; i < t; i++)
+    {
+        long long ans = func(vec[i]);
+        cout << ans << "\n";
     }
 
     return 0;

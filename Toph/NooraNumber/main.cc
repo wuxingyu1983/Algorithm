@@ -21,6 +21,7 @@ using namespace std;
 #pragma GCC target("popcnt")
 
 int flag[1024];
+long long dp[20][1024];
 
 int main()
 {
@@ -53,6 +54,26 @@ int main()
             if (__builtin_popcount(n) == max)
             {
                 flag[n] = 1;
+            }
+        }
+
+        int pos = 0;
+        for (size_t i = 0; i < 10; i++)
+        {
+            dp[pos][1 << i] = 1;
+        }
+       
+        for (; pos < 19; pos++)
+        {
+            for (size_t n = 1; n < 1024; n++)
+            {
+                if (dp[pos][n])
+                {
+                    for (size_t i = 0; i < 10; i++)
+                    {
+                        dp[pos + 1][n | (1 << i)] += dp[pos][n];
+                    }
+                }
             }
         }
     }

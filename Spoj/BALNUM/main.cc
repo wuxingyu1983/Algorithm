@@ -18,13 +18,84 @@
 
 using namespace std;
 
-long long dp[20][1024][1024];   // dp[pos][mask][cnt]
+long long dp[20][1024][1024]; // dp[pos][mask][cnt]
 long long sum[20];
 int valid[1024];
 
 long long func(long long num)
 {
     long long ret = 0;
+
+    string strNum = to_string(num);
+    int len = strNum.length();
+
+    int preMask = 0, preCnt = 0;
+    for (size_t pos = 0; pos < len; pos++)
+    {
+        int d = strNum.at(pos) - '0';
+        int down = 0, up = d - 1;
+        if (0 == pos)
+        {
+            down = 1;
+            if (1 < len)
+            {
+                ret += sum[len - 2];
+            }
+        }
+
+        if (len - 1 == pos)
+        {
+            down = 0;
+            up = d;
+        }
+
+        for (int n = down; n <= up; n++)
+        {
+            int tmpMask = preMask | (1 << n);
+            int tmpCnt = 0;
+            if (preCnt & (1 << n))
+            {
+                // odd => even
+                tmpCnt = (~(1 << n)) & preCnt;
+            }
+            else
+            {
+                // even => odd
+                tmpCnt = (1 << n) | preCnt;
+            }
+
+            if (len - 1 == pos)
+            {
+                if (valid[tmpMask] == tmpCnt)
+                {
+                    ret++;
+                }
+            }
+            else
+            {
+                for (size_t mask = 1; mask < 1024; mask++)
+                {
+                    int newMask = mask | tmpMask;
+                    int validCnt = valid[newMask];
+                    int needCnt = validCnt ^ tmpCnt;
+
+                    ret += dp[len - 2 - pos][mask][needCnt];
+                }
+            }
+        }
+
+        preMask |= 1 << d;
+        if (preCnt & (1 << d))
+        {
+            // odd => even
+            preCnt &= ~(1 << d);
+        }
+        else
+        {
+            // even => odd
+            preCnt |= 1 << d;
+        }
+    }
 
     return ret;
 }
@@ -51,10 +122,10 @@ int main()
 
             if (valid[1 << n] == (1 << n))
             {
-                sum[pos] ++;
+                sum[pos]++;
             }
         }
-        
+
         for (; pos < 19; pos++)
         {
             for (size_t mask = 0; mask < 1024; mask++)

@@ -20,6 +20,7 @@ using namespace std;
 
 long long dp[20][1024][1024];   // dp[pos][mask][cnt]
 long long sum[20];
+int valid[1024];
 
 long long func(long long num)
 {
@@ -65,6 +66,17 @@ int main()
                             dp[pos + 1][newMask][newCnt] += dp[pos][mask][cnt];
                         }
                     }
+                }
+            }
+        }
+
+        for (size_t mask = 1; mask < 1024; mask++)
+        {
+            for (size_t n = 0; n < 10; n++)
+            {
+                if (0 == (n & 1) && (mask & (1 << n)))
+                {
+                    valid[mask] |= 1 << n;
                 }
             }
         }

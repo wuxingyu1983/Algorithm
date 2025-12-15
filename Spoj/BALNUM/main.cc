@@ -46,7 +46,24 @@ int main()
                 {
                     if (dp[pos][mask][cnt])
                     {
-                        
+                        for (size_t n = 0; n < 10; n++)
+                        {
+                            int newMask = mask | (1 << n);
+                            int newCnt = cnt;
+
+                            if (cnt & (1 << n))
+                            {
+                                // odd => even
+                                newCnt &= ~(1 << n);
+                            }
+                            else
+                            {
+                                // even => odd
+                                newCnt |= 1 << n;
+                            }
+
+                            dp[pos + 1][newMask][newCnt] += dp[pos][mask][cnt];
+                        }
                     }
                 }
             }

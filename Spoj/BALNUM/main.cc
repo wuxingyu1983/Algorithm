@@ -18,6 +18,9 @@
 
 using namespace std;
 
+long long dp[20][1024][1024];   // dp[pos][mask][cnt]
+long long sum[20];
+
 long long func(long long num)
 {
     long long ret = 0;
@@ -29,7 +32,25 @@ int main()
 {
     // init
     {
-
+        int pos = 0;
+        for (size_t n = 0; n < 10; n++)
+        {
+            dp[pos][1 << n][1 << n] = 1;
+        }
+        
+        for (; pos < 19; pos++)
+        {
+            for (size_t mask = 0; mask < 1024; mask++)
+            {
+                for (size_t cnt = 0; cnt < 1024; cnt++)
+                {
+                    if (dp[pos][mask][cnt])
+                    {
+                        
+                    }
+                }
+            }
+        }
     }
 
     int t;

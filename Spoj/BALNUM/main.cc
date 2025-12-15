@@ -33,10 +33,26 @@ int main()
 {
     // init
     {
+        for (size_t mask = 1; mask < 1024; mask++)
+        {
+            for (size_t n = 0; n < 10; n++)
+            {
+                if (0 == (n & 1) && (mask & (1 << n)))
+                {
+                    valid[mask] |= 1 << n;
+                }
+            }
+        }
+
         int pos = 0;
         for (size_t n = 0; n < 10; n++)
         {
             dp[pos][1 << n][1 << n] = 1;
+
+            if (valid[1 << n] == (1 << n))
+            {
+                sum[pos] ++;
+            }
         }
         
         for (; pos < 19; pos++)
@@ -64,21 +80,17 @@ int main()
                             }
 
                             dp[pos + 1][newMask][newCnt] += dp[pos][mask][cnt];
+
+                            if (0 < n && valid[newMask] == newCnt)
+                            {
+                                sum[pos + 1] += dp[pos][mask][cnt];
+                            }
                         }
                     }
                 }
             }
-        }
 
-        for (size_t mask = 1; mask < 1024; mask++)
-        {
-            for (size_t n = 0; n < 10; n++)
-            {
-                if (0 == (n & 1) && (mask & (1 << n)))
-                {
-                    valid[mask] |= 1 << n;
-                }
-            }
+            sum[pos + 1] += sum[pos];
         }
     }
 

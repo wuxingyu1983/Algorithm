@@ -57,21 +57,63 @@ void func(long long n, vector<long long> &vec)
             up = d;
         }
 
-        for (int n = down; n <= up; n++)
+        if (0 == pos && len - 1 == pos)
         {
-            for (int preN = 1; preN < n; preN++)
+            for (int n = down; n <= up; n++)
             {
-                for (int preL = 1; preL < pos; preL++)
+                vec[1] ++;
+            }
+        }
+        else if (0 == pos)
+        {
+            for (int n = down; n <= up; n++)
+            {
+                for (int aftN = n + 1; aftN < 10; aftN++)
                 {
-                    if (pre[preN][preL])
+                    for (int aftL = 1; aftL < 10; aftL++)
                     {
-                        for (int aftN = n + 1; aftN < 10; aftN++)
+                        if (dp[len - 2 - pos][aftN][aftL])
                         {
-                            for (int aftL = 1; aftL < 10; aftL++)
+                            vec[1 + aftN] += dp[len - 2 - pos][aftN][aftL];
+                        }
+                    }
+                }
+            }
+        }
+        else if (len - 1 == pos)
+        {
+            for (int n = down; n <= up; n++)
+            {
+                for (int preN = 1; preN < n; preN++)
+                {
+                    for (int preL = 1; preL < pos; preL++)
+                    {
+                        if (pre[preN][preL])
+                        {
+                            vec[preL + 1] += pre[preN][preL];
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int n = down; n <= up; n++)
+            {
+                for (int preN = 1; preN < n; preN++)
+                {
+                    for (int preL = 1; preL < pos; preL++)
+                    {
+                        if (pre[preN][preL])
+                        {
+                            for (int aftN = n + 1; aftN < 10; aftN++)
                             {
-                                if (dp[len - 2 - pos][aftN][aftL])
+                                for (int aftL = 1; aftL < 10; aftL++)
                                 {
-                                    vec[preL + 1 + aftN] += pre[preN][preL] * dp[len - 2 - pos][aftN][aftL];
+                                    if (dp[len - 2 - pos][aftN][aftL])
+                                    {
+                                        vec[preL + 1 + aftN] += pre[preN][preL] * dp[len - 2 - pos][aftN][aftL];
+                                    }
                                 }
                             }
                         }

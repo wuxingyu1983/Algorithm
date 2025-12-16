@@ -197,7 +197,16 @@ int main()
         vector<long long> vecY(10, 0);
         func(x - 1, vecX);
         func(y, vecY);
-//        printf("Case %d: %lld %lld\n", i, x, y);
+
+        for (int l = 9; l > 0; l--)
+        {
+            long long cnt = vecY[l] - vecX[l];
+            if (0 < cnt)
+            {
+                printf("Case %d: %d %lld\n", i, l, cnt);
+                break;
+            }
+        }
     }
 
     return 0;

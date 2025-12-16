@@ -49,7 +49,6 @@ void func(long long n, vector<long long> &vec)
                         }
                     }
                 }
-                
             }
         }
 
@@ -58,7 +57,44 @@ void func(long long n, vector<long long> &vec)
             up = d;
         }
 
+        for (int n = down; n <= up; n++)
+        {
+            for (int preN = 1; preN < n; preN++)
+            {
+                for (int preL = 1; preL < pos; preL++)
+                {
+                    if (pre[preN][preL])
+                    {
+                        for (int aftN = n + 1; aftN < 10; aftN++)
+                        {
+                            for (int aftL = 1; aftL < 10; aftL++)
+                            {
+                                if (dp[len - 2 - pos][aftN][aftL])
+                                {
+                                    vec[preL + 1 + aftN] += pre[preN][preL] * dp[len - 2 - pos][aftN][aftL];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
+        // update pre
+        {
+            pre[d][1] += 1;
+            for (int n = 1; n < d; n++)
+            {
+                for (int l = 10; l >= 0; l--)
+                {
+                    if (pre[n][l])
+                    {
+                        pre[d][l + 1] += pre[n][l];
+                    }
+                }
+            }
+            
+        }
     }
 }
 

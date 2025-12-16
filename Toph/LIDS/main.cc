@@ -20,6 +20,48 @@ using namespace std;
 
 long long dp[11][10][10];   // dp[pos][num][len]
 
+void func(long long n, vector<long long> &vec)
+{
+    string strN = to_string(n);
+    int len = strN.length();
+
+    long long pre[10][10]; // pre[num][len]
+    memset(pre, 0, sizeof(pre));
+
+    for (int pos = 0; pos < len; pos++)
+    {
+        int d = strN.at(pos) - '0';
+        int down = 0, up = d - 1;
+        
+        if (0 == pos)
+        {
+            down = 1;
+
+            if (1 < len)
+            {
+                for (int n = 0; n < 10; n++)
+                {
+                    for (int l = 0; l < 10; l++)
+                    {
+                        if (dp[len - 2][n][l])
+                        {
+                            vec[l] += dp[len - 2][n][l];
+                        }
+                    }
+                }
+                
+            }
+        }
+
+        if (len - 1 == pos)
+        {
+            up = d;
+        }
+
+
+    }
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -73,6 +115,10 @@ int main()
         long long x, y;
         cin >> x >> y;
 
+        vector<long long> vecX(10, 0);
+        vector<long long> vecY(10, 0);
+        func(x - 1, vecX);
+        func(y, vecY);
 //        printf("Case %d: %lld %lld\n", i, x, y);
     }
 

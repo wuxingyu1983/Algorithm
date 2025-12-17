@@ -74,7 +74,7 @@ void func(long long n, vector<long long> &vec)
                     {
                         if (dp[len - 2 - pos][aftN][aftL])
                         {
-                            vec[1 + aftN] += dp[len - 2 - pos][aftN][aftL];
+                            vec[1 + aftL] += dp[len - 2 - pos][aftN][aftL];
                         }
                     }
                 }
@@ -112,7 +112,7 @@ void func(long long n, vector<long long> &vec)
                                 {
                                     if (dp[len - 2 - pos][aftN][aftL])
                                     {
-                                        vec[preL + 1 + aftN] += pre[preN][preL] * dp[len - 2 - pos][aftN][aftL];
+                                        vec[preL + 1 + aftL] += pre[preN][preL] * dp[len - 2 - pos][aftN][aftL];
                                     }
                                 }
                             }

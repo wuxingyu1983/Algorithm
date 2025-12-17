@@ -18,8 +18,8 @@
 
 using namespace std;
 
-long long dp[15][127][127];     // dp[pos][num][mod]
-long long powers[15];
+long long dp[15][127][127];     // dp[pos][sum][mod]
+int powers[15];
 
 long long func(string strN, int m)
 {
@@ -46,7 +46,31 @@ long long func(string strN, int m)
             }
         }
 
-        
+        for (pos = 1; pos < len - 1; pos++)
+        {
+            for (int oldSum = 0; oldSum <= m; oldSum++)
+            {
+                for (int oldMod = 0; oldMod < m; oldMod++)
+                {
+                    if (dp[pos - 1][oldSum][oldMod])
+                    {
+                        for (int n = 0; n < 10; n++)
+                        {
+                            int newSum = oldSum + n;
+                            if (newSum <= m)
+                            {
+                                int newMod = (powers[pos] * n + oldMod) % m;
+                                dp[pos][newSum][newMod] += dp[pos - 1][oldSum][oldMod];
+                                if (m == newSum && 0 == newMod)
+                                {
+                                    ret += dp[pos - 1][oldSum][oldMod];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return ret;

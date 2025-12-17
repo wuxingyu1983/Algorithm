@@ -20,6 +20,7 @@ using namespace std;
 
 long long dp[11][11][10];           // dp[pos][num][len]
 long long surfix[11][11][10];       // surfix[pos][num][len]
+long long sum[11][10];              // sum[pos][len]
 
 void func(long long n, vector<long long> &vec)
 {
@@ -156,7 +157,7 @@ int main()
         surfix[pos][9][1] = 1;
         for (int n = 8; n >= 0; n--)
         {
-            surfix[pos][n][1] = surfix[pos][n + 1][1];
+            surfix[pos][n][1] += surfix[pos][n + 1][1];
         }
         
        
@@ -186,6 +187,15 @@ int main()
                 {
                     surfix[pos][n][len] = surfix[pos][n + 1][len] + dp[pos][n][len];
                 }
+            }
+        }
+
+        sum[0][1] = 10;
+        for (int pos = 1; pos < 11; pos++)
+        {
+            for (int len = 1; len < 10; len++)
+            {
+                sum[pos][len] = sum[pos - 1][len] + surfix[pos][1][len];
             }
         }
     }

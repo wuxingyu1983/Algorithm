@@ -18,7 +18,7 @@
 
 using namespace std;
 
-long long dp[15][127][127];     // dp[pos][sum][mod]
+long long dp[15][127][127]; // dp[pos][sum][mod]
 int powers[15];
 
 long long func(string strN, int m)
@@ -37,12 +37,12 @@ long long func(string strN, int m)
 
         memset(dp, 0, sizeof(dp));
         int pos = 0;
-        for (size_t n = 0; n <= m; n++)
+        for (size_t n = 0; n < 10; n++)
         {
             dp[pos][n][n % m] = 1;
-            if (n == m)
+            if (pos < len - 1 && n == m)
             {
-                ret ++;
+                ret++;
             }
         }
 
@@ -73,6 +73,50 @@ long long func(string strN, int m)
         }
     }
 
+    int preSum = 0, preMod = 0;
+    for (size_t pos = 0; pos < len; pos++)
+    {
+        int d = strN.at(pos) - '0';
+        int down = 0, up = d - 1;
+        if (0 == pos)
+        {
+            down = 1;
+        }
+        if (len - 1 == pos)
+        {
+            up = d;
+        }
+
+        for (int n = down; n <= up; n++)
+        {
+            int tmpSum = preSum + n;
+            if (m < tmpSum)
+            {
+                break;
+            }
+
+            int tmpMod = (preMod * 10 + n * powers[len - 1 - pos]) % m;
+            if (len - 1 == pos)
+            {
+                if (m == tmpSum && 0 == tmpMod)
+                {
+                    ret++;
+                }
+            }
+            else
+            {
+                ret += dp[len - 2 - pos][m - tmpSum][(m - tmpMod) % m];
+            }
+        }
+
+        preSum += d;
+        if (m < preSum)
+        {
+            break;
+        }
+        preMod = (preMod * 10 + d * powers[len - 1 - pos]) % m;
+    }
+
     return ret;
 }
 
@@ -80,7 +124,7 @@ int main()
 {
     string strN;
     cin >> strN;
-    
+
     long long ans = 0;
 
     for (size_t m = 1; m <= 126; m++)

@@ -18,7 +18,8 @@
 
 using namespace std;
 
-long long dp[11][10][10];   // dp[pos][num][len]
+long long dp[11][11][10];           // dp[pos][num][len]
+long long surfix[11][11][10];       // surfix[pos][num][len]
 
 void func(long long n, vector<long long> &vec)
 {
@@ -148,38 +149,42 @@ int main()
     // init
     {
         int pos = 0;
-        for (int n = 1; n < 10; n++)
+        for (int n = 0; n < 10; n++)
         {
             dp[pos][n][1] = 1;
         }
-       
-        for (; pos < 10; pos++)
+        surfix[pos][9][1] = 1;
+        for (int n = 8; n >= 0; n--)
         {
-            for (int n = 1; n < 10; n++)
+            surfix[pos][n][1] = surfix[pos][n + 1][1];
+        }
+        
+       
+        for (pos = 1; pos < 11; pos++)
+        {
+            for (int n = 0; n < 10; n++)
             {
-                dp[pos + 1][n][1] = 1;
-            }
+                int len = 1;
+                dp[pos][n][len] = (long long)pow(n + 1, pos);
 
-            // pos => pos + 1
-            for (int num = 0; num < 10; num++)
-            {
-                for (int len = 0; len < 10; len++)
+                for (len = 2; len < 10; len++)
                 {
-                    dp[pos + 1][num][len] += dp[pos][num][len];
+                    for (int i = pos - 1; i >= 0; i--)
+                    {
+                        dp[pos][n][len] += surfix[i][n + 1][len - 1] * (long long)pow(n + 1, pos - i - 1);
+                    }
                 }
             }
 
-            for (int num = 0; num < 10; num++)
+            for (int len = 1; len < 10; len++)
             {
-                for (int len = 0; len < 10; len++)
+                surfix[pos][9][len] = dp[pos][9][len];
+            }
+            for (int n = 8; n >= 0; n--)
+            {
+                for (int len = 1; len < 10; len++)
                 {
-                    if (dp[pos][num][len])
-                    {
-                        for (int sub = 1; sub < num; sub++)
-                        {
-                            dp[pos + 1][sub][len + 1] += dp[pos][num][len];
-                        }
-                    }
+                    surfix[pos][n][len] = surfix[pos][n + 1][len] + dp[pos][n][len];
                 }
             }
         }

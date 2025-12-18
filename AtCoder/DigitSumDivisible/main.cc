@@ -61,7 +61,7 @@ long long func(string strN, int m)
                             {
                                 int newMod = (powers[pos] * n + oldMod) % m;
                                 dp[pos][newSum][newMod] += dp[pos - 1][oldSum][oldMod];
-                                if (m == newSum && 0 == newMod)
+                                if (0 < n && m == newSum && 0 == newMod)
                                 {
                                     ret += dp[pos - 1][oldSum][oldMod];
                                 }
@@ -95,7 +95,7 @@ long long func(string strN, int m)
                 break;
             }
 
-            int tmpMod = (preMod * 10 + n * powers[len - 1 - pos]) % m;
+            int tmpMod = (preMod + n * powers[len - 1 - pos]) % m;
             if (len - 1 == pos)
             {
                 if (m == tmpSum && 0 == tmpMod)
@@ -114,7 +114,7 @@ long long func(string strN, int m)
         {
             break;
         }
-        preMod = (preMod * 10 + d * powers[len - 1 - pos]) % m;
+        preMod = (preMod + d * powers[len - 1 - pos]) % m;
     }
 
     return ret;

@@ -127,7 +127,13 @@ int main()
 
     long long ans = 0;
 
-    for (size_t m = 1; m <= 126; m++)
+    int maxM = 126;
+    if (maxM > 9 * strN.length())
+    {
+        maxM = 9 * strN.length();
+    }
+
+    for (size_t m = 1; m <= maxM; m++)
     {
         ans += func(strN, m);
     }

@@ -21,7 +21,8 @@ using namespace std;
 
 int lcm[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
 unordered_map<int, unordered_set<int>> mltmap;
-long long dp[13][1024][2520];
+long long dp[13][1024][2520];   // dp[pos][mask][mod]
+long long sum[13];
 long long powers[10];
 
 int gcd(int a, int b)
@@ -64,12 +65,60 @@ void init()
     }
 }
 
-void initDP(int mask, int mod)
+void initDP(int mask, int mod, unordered_set<int> &st)
 {
     memset(dp, 0, sizeof(dp));
+    memset(sum, 0, sizeof(sum));
 
     int pos = 0;
+    dp[pos][0][0] = 1;
+    dp[pos][1][0] = 1;
+    for (size_t n = 1; n < 10; n++)
+    {
+        if (mask & (1 << n))
+        {
+            dp[pos][1 << n][powers[n] % mod] = 1;
 
+            auto search = st.find(1 << n);
+            if ( search != st.end())
+            {
+                sum[pos] += 1;
+            }
+        }
+    }
+
+    for (; pos < 12; pos++)
+    {
+        for (int oldMask = 0; oldMask < 1024; oldMask++)
+        {
+            for (int oldMod = 0; oldMod < mod; oldMod++)
+            {
+                if (dp[pos][oldMask][oldMod])
+                {
+                    for (int n = 0; n < 10; n++)
+                    {
+                        if (mask & (1 << n))
+                        {
+                            int newMask = oldMask | (1 << n);
+                            int newMod = (oldMod + powers[n]) & mod;
+
+                            dp[pos + 1][newMask][newMod] += dp[pos][oldMask][oldMod];
+
+                            if (0 < n)
+                            {
+                                auto search = st.find(newMask);
+                                if (search != st.end())
+                                {
+                                    sum[pos + 1] += dp[pos][oldMask][oldMod];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
 }
 
 long long func(int num, int mask, int mod)
@@ -113,7 +162,7 @@ int main()
             }
         }
 
-        initDP(mask, mod);
+        initDP(mask, mod, search->second);
 
         for (size_t j = 0; j < q; j++)
         {

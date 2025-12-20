@@ -14,13 +14,15 @@
 #include <stack>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <bitset>
 
 using namespace std;
 
 int lcm[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
-multimap<int, int> mltmap;
+unordered_map<int, unordered_set<int>> mltmap;
 long long dp[13][1024][2520];
+long long powers[10];
 
 int gcd(int a, int b)
 {
@@ -32,6 +34,11 @@ int gcd(int a, int b)
 
 void init()
 {
+    for (size_t i = 1; i < 10; i++)
+    {
+        powers[i] = pow(i, i);
+    }
+
     for (int n = 1023; n > 0; n--)
     {
         int l = 1;
@@ -43,13 +50,26 @@ void init()
             }
         }
 
-        mltmap.insert(make_pair<int, int>((int)l, (int)n));
+        if (mltmap.end() == mltmap.find(l))
+        {
+            unordered_set<int> st;
+            st.insert(n);
+
+            mltmap[l] = st;
+        }
+        else
+        {
+            mltmap[l].insert(n);
+        }
     }
 }
 
 void initDP(int mask, int mod)
 {
     memset(dp, 0, sizeof(dp));
+
+    int pos = 0;
+
 }
 
 long long func(int num, int mask, int mod)
@@ -82,12 +102,15 @@ int main()
     for (size_t i = 0; i < 48; i++)
     {
         int mod = lcm[i];
-        int mask = 0;
+        int mask = 1;   // 0 - valid
 
-        auto range = mltmap.equal_range(mod);
-        for (auto it = range.first; it != range.second; ++it)
+        auto search = mltmap.find(mod);
+        if (search != mltmap.end())
         {
-            mask |= it->second;
+            for (auto it : search->second)
+            {
+                mask |= it;
+            }
         }
 
         initDP(mask, mod);

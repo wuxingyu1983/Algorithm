@@ -42,12 +42,12 @@ void init()
 
     for (int n = 1023; n > 0; n--)
     {
-        int l = 0;
+        int l = -1;
         for (int idx = 1; idx < 10; idx++)
         {
             if (n & (1 << idx))
             {
-                if (0 == l)
+                if (0 > l)
                 {
                     l = 1;
                 }
@@ -84,7 +84,7 @@ void initDP(int mask, int mod, unordered_set<int> &st)
         {
             dp[pos][1 << n][powers[n] % mod] = 1;
 
-            if (0 < n)
+            if (0 < n && 0 == (powers[n] % mod))
             {
                 auto search = st.find(1 << n);
                 if (search != st.end())
@@ -112,7 +112,7 @@ void initDP(int mask, int mod, unordered_set<int> &st)
 
                             dp[pos + 1][newMask][newMod] += dp[pos][oldMask][oldMod];
 
-                            if (0 < n)
+                            if (0 < n && 0 == newMod)
                             {
                                 auto search = st.find(newMask);
                                 if (search != st.end())
@@ -130,7 +130,7 @@ void initDP(int mask, int mod, unordered_set<int> &st)
     }
 }
 
-long long func(int num, int mask, int mod, unordered_set<int> &st)
+long long func(long long num, int mask, int mod, unordered_set<int> &st)
 {
     long long ret = 0;
 
@@ -160,7 +160,7 @@ long long func(int num, int mask, int mod, unordered_set<int> &st)
             up = d;
         }
 
-        for (size_t n = down; n <= up; n++)
+        for (int n = down; n <= up; n++)
         {
             if (mask & (1 << n))
             {
@@ -196,8 +196,6 @@ long long func(int num, int mask, int mod, unordered_set<int> &st)
         preMod += powers[d];
         preMod %= mod;
     }
-
-//    printf("num = %d, mod = %d, ret = %lld\n", num, mod, ret);
 
     return ret;
 }

@@ -42,25 +42,32 @@ void init()
 
     for (int n = 1023; n > 0; n--)
     {
-        int l = 1;
+        int l = 0;
         for (int idx = 1; idx < 10; idx++)
         {
             if (n & (1 << idx))
             {
+                if (0 == l)
+                {
+                    l = 1;
+                }
                 l = l * idx / gcd(l, idx);
             }
         }
 
-        if (mltmap.end() == mltmap.find(l))
+        if (0 < l)
         {
-            unordered_set<int> st;
-            st.insert(n);
+            if (mltmap.end() == mltmap.find(l))
+            {
+                unordered_set<int> st;
+                st.insert(n);
 
-            mltmap[l] = st;
-        }
-        else
-        {
-            mltmap[l].insert(n);
+                mltmap[l] = st;
+            }
+            else
+            {
+                mltmap[l].insert(n);
+            }
         }
     }
 }
@@ -71,9 +78,7 @@ void initDP(int mask, int mod, unordered_set<int> &st)
     memset(sum, 0, sizeof(sum));
 
     int pos = 0;
-    dp[pos][0][0] = 1;
-    dp[pos][1][0] = 1;
-    for (size_t n = 1; n < 10; n++)
+    for (size_t n = 0; n < 10; n++)
     {
         if (mask & (1 << n))
         {
@@ -89,7 +94,7 @@ void initDP(int mask, int mod, unordered_set<int> &st)
 
     for (; pos < 12; pos++)
     {
-        for (int oldMask = 0; oldMask < 1024; oldMask++)
+        for (int oldMask = 1; oldMask < 1024; oldMask++)
         {
             for (int oldMod = 0; oldMod < mod; oldMod++)
             {
@@ -131,7 +136,7 @@ long long func(int num, int mask, int mod, unordered_set<int> &st)
 
     int preMask = 0;
     int preMod = 0;
-    for (size_t pos = 0; pos < len; pos++)
+    for (int pos = 0; pos < len; pos++)
     {
         int d = strN.at(pos) - '0';
         int down = 0;

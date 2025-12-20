@@ -47,6 +47,17 @@ void init()
     }
 }
 
+void initDP(int mask, int mod)
+{
+    memset(dp, 0, sizeof(dp));
+}
+
+long long func(int num, int mask, int mod)
+{
+    long long ret = 0;
+
+    return ret;
+}
 
 int main()
 {
@@ -68,7 +79,29 @@ int main()
 
     vector<long long> ans(q, 0);
 
+    for (size_t i = 0; i < 48; i++)
+    {
+        int mod = lcm[i];
+        int mask = 0;
 
+        auto range = mltmap.equal_range(mod);
+        for (auto it = range.first; it != range.second; ++it)
+        {
+            mask |= it->second;
+        }
+
+        initDP(mask, mod);
+
+        for (size_t j = 0; j < q; j++)
+        {
+            ans[j] += func(rs[j], mask, mod) - func(ls[j] - 1, mask, mod);
+        }
+    }
+
+    for (size_t i = 0; i < q; i++)
+    {
+        cout << ans[i] << endl;
+    }
 
     return 0;
 }

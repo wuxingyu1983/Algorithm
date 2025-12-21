@@ -31,7 +31,70 @@ long long func(long long num, int k)
 {
     long long ret = 0;
 
+    string strN = to_string(num);
+    int len = strN.length();
+    
+    for (int pos = 0; pos < len; pos++)
+    {
+        int d = strN.at(pos) - '0';
+        int down = 0, up = d - 1;
 
+        if (0 == pos)
+        {
+            down = 1;
+
+            if (1 < len)
+            {
+                ret += sums[len - 2];
+            }
+        }
+
+        if (len - 1 == pos)
+        {
+            up = d;
+        }
+
+        int preMask = 0;
+        long long preSum = 0;
+        for (int n = down; n <= up; n++)
+        {
+            int tmpMask = preMask | (1 << n);
+            if (k >= __builtin_popcount(tmpMask))
+            {
+                long long tmpSum = preSum + n * powers[len - 1 - pos];
+                tmpSum %= mod;
+
+                if (len - 1 == pos)
+                {
+                    ret += tmpSum;
+                    ret %= mod;
+                }
+                else
+                {
+                    for (int mask = 1; mask < 1024; mask++)
+                    {
+                        if (cnts[len - 2 - pos][mask])
+                        {
+                            int newMask = mask | tmpMask;
+                            if (k >= __builtin_popcount(newMask))
+                            {
+                                ret += dp[len - 2 - pos][mask];
+                                ret += tmpSum * (cnts[len - 2 - pos][mask] % mod);
+                                ret %= mod;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        preMask |= 1 << d;
+        if (k < __builtin_popcount(preMask))
+        {
+            break;
+        }
+        preSum += d * powers[len - 1 - pos];
+    }
 
     return ret;
 }

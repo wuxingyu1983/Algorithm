@@ -34,6 +34,8 @@ long long func(long long num, int k)
     string strN = to_string(num);
     int len = strN.length();
     
+    int preMask = 0;
+    long long preSum = 0;
     for (int pos = 0; pos < len; pos++)
     {
         int d = strN.at(pos) - '0';
@@ -54,8 +56,6 @@ long long func(long long num, int k)
             up = d;
         }
 
-        int preMask = 0;
-        long long preSum = 0;
         for (int n = down; n <= up; n++)
         {
             int tmpMask = preMask | (1 << n);
@@ -136,7 +136,7 @@ int main()
                         {
                             cnts[pos + 1][newMask] += cnts[pos][mask];
 
-                            long long tmp = (n * powers[pos + 1] * (cnts[pos][mask] % mod)) % mod;
+                            long long tmp = (n * powers[pos + 1] * (cnts[pos][mask] % mod)) % mod + dp[pos][mask];
                             dp[pos + 1][newMask] += tmp;
                             dp[pos + 1][newMask] %= mod;
 
@@ -149,6 +149,9 @@ int main()
                     }
                 }
             }
+
+            sums[pos + 1] += sums[pos];
+            sums[pos + 1] %= mod;
         }
     }
 

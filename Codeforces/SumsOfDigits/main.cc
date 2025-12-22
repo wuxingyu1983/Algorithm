@@ -21,8 +21,9 @@ using namespace std;
 string func(int b, string preA)
 {
     string ret;
+    int len = preA.length();
 
-    if (0 == preA.length())
+    if (0 == len)
     {
         while (0 < b)
         {
@@ -41,7 +42,72 @@ string func(int b, string preA)
     }
     else
     {
+        vector<int> sum(len, 0);
+        for (int pos = 0; pos < len; pos++)
+        {
+            int d = preA.at(pos) - '0';
+            if (0 == pos)
+            {
+                sum[pos] = d;
+            }
+            else
+            {
+                sum[pos] = sum[pos - 1] + d;
+            }
+        }
+        
+        for (int pos = len - 1; pos >= 0; pos --)
+        {
+            if (sum[pos] < b)
+            {
+                int diff = b - sum[pos];
+                int d = preA.at(pos) - '0';
+                if (len - 1 == pos)
+                {
+                    if (9 >= d + diff)
+                    {
+                        ret += '0' + d + diff;
+                        for (int i = pos - 1; i >= 0; i--)
+                        {
+                            ret += preA.at(i);
+                        }
+                        
+                        break;
+                    }
+                }
+                else
+                {
+                    if (9 > d)
+                    {
+                        // d + 1
+                        diff -= 1;
+                        if (diff <= 9 * (len - 1 - pos))
+                        {
+                            for (int i = len - 1; i > pos ; i--)
+                            {
+                                if (9 < diff)
+                                {
+                                    ret += '9';
+                                    diff -= 9;
+                                }
+                                else
+                                {
+                                    ret += '0' + diff;
+                                    diff = 0;
+                                }
+                            }
+                        }
 
+                        ret += '0' + d + 1;
+                        for (int i = pos - 1; i >= 0; i--)
+                        {
+                            ret += preA.at(i);
+                        }
+                    }
+                }
+                
+            }
+        }
     }
 
     reverse(ret.begin(), ret.end());

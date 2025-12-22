@@ -79,29 +79,33 @@ string func(int b, string preA)
                 {
                     if (9 > d)
                     {
-                        // d + 1
-                        diff -= 1;
-                        if (diff <= 9 * (len - 1 - pos))
+                        for (int num = d + 1; num < 10; num++)
                         {
-                            for (int i = len - 1; i > pos ; i--)
+                            diff -= 1;
+                            if (diff <= 9 * (len - 1 - pos))
                             {
-                                if (9 < diff)
+                                for (int i = len - 1; i > pos; i--)
                                 {
-                                    ret += '9';
-                                    diff -= 9;
+                                    if (9 < diff)
+                                    {
+                                        ret += '9';
+                                        diff -= 9;
+                                    }
+                                    else
+                                    {
+                                        ret += '0' + diff;
+                                        diff = 0;
+                                    }
                                 }
-                                else
-                                {
-                                    ret += '0' + diff;
-                                    diff = 0;
-                                }
-                            }
-                        }
 
-                        ret += '0' + d + 1;
-                        for (int i = pos - 1; i >= 0; i--)
-                        {
-                            ret += preA.at(i);
+                                ret += '0' + num;
+                                for (int i = pos - 1; i >= 0; i--)
+                                {
+                                    ret += preA.at(i);
+                                }
+
+                                break;
+                            }
                         }
                     }
                 }

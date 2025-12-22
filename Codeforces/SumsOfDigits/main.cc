@@ -22,6 +22,30 @@ string func(int b, string preA)
 {
     string ret;
 
+    if (0 == preA.length())
+    {
+        while (0 < b)
+        {
+            if (9 < b)
+            {
+                ret += '9';
+                b -= 9;
+            }
+            else
+            {
+                ret += b + '0';
+                b = 0;
+            }
+        }
+        
+    }
+    else
+    {
+
+    }
+
+    reverse(ret.begin(), ret.end());
+
     return ret;
 }
 

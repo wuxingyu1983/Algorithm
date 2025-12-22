@@ -38,7 +38,6 @@ string func(int b, string preA)
                 b = 0;
             }
         }
-        
     }
     else
     {
@@ -55,8 +54,8 @@ string func(int b, string preA)
                 sum[pos] = sum[pos - 1] + d;
             }
         }
-        
-        for (int pos = len - 1; pos >= 0; pos --)
+
+        for (int pos = len - 1; pos >= 0; pos--)
         {
             if (sum[pos] < b)
             {
@@ -71,7 +70,7 @@ string func(int b, string preA)
                         {
                             ret += preA.at(i);
                         }
-                        
+
                         break;
                     }
                 }
@@ -107,10 +106,40 @@ string func(int b, string preA)
                                 break;
                             }
                         }
+
+                        if (0 < ret.length())
+                        {
+                            break;
+                        }
                     }
                 }
-                
             }
+        }
+
+        if (0 == ret.length())
+        {
+            // 最小长度 len + 1，最高位为1
+            b--;
+            // 几个 9？
+            int n9 = b / 9;
+            for (int i = 0; i < n9; i++)
+            {
+                ret += '9';
+            }
+
+            int n18 = 0;
+            if (b > 9 * n9)
+            {
+                n18 = 1;
+                ret += '0' + b - 9 * n9;
+            }
+
+            for (int i = n9 + n18; i < len; i++)
+            {
+                ret += '0';
+            }
+
+            ret += '1';
         }
     }
 

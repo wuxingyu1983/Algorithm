@@ -25,12 +25,20 @@ long long sum[18];
 
 void initDP(int st, vector<int> &vec)
 {
+    memset(dp, 0, sizeof(dp));
+    memset(sum, 0, sizeof(sum));
+
     int needLen = 0;
+    vector<int> offsets(10, -1);
+    int preOff = 0;
     for (int n = 0; n < 10; n++)
     {
         if (st & (1 << n))
         {
             needLen += vec[n];
+
+            offsets[n] = preOff;
+            preOff += vec[n];
         }
     }
    
@@ -39,7 +47,56 @@ void initDP(int st, vector<int> &vec)
         return;
     }
 
-    
+    int goal = (1 << needLen) - 1;
+    int pos = 0;
+    for (int n = 0; n < 10; n++)
+    {
+        if (st & (1 << n))
+        {
+            dp[pos][1 << offsets[n]] = 1;
+            if (goal == (1 << offsets[n]))
+            {
+                sum[pos] ++;
+            }
+        }
+    }
+
+    for (; pos < 17; pos++)
+    {
+        for (int oldSt = 1; oldSt < 1024; oldSt++)
+        {
+            if (dp[pos][oldSt])
+            {
+                int newSt = oldSt;
+
+                for (int n = 0; n < 10; n++)
+                {
+                    if (st & (1 << n))
+                    {
+                        int mask = (1 << vec[n]) - 1;
+                        mask <<= offsets[n];
+                        int cnt = __builtin_popcount(mask & st);
+                        if (cnt >= vec[n])
+                        {
+                            continue;
+                        }
+
+                        // cnt < vec[n]
+                        newSt |= 1 << (offsets[n] + cnt);
+                    }
+
+                    dp[pos + 1][newSt] += dp[pos][oldSt];
+
+                    if (0 < n && newSt == goal)
+                    {
+                        sum[pos + 1] += dp[pos][oldSt];
+                    }
+                }
+            }
+        }
+
+        sum[pos + 1] += sum[pos];
+    }
 }
 
 long long func(string strN, int st, vector<int> &vec)

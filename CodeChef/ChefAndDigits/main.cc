@@ -25,12 +25,43 @@ long long sum[18];
 
 void initDP(int st, vector<int> &vec)
 {
+    int needLen = 0;
+    for (int n = 0; n < 10; n++)
+    {
+        if (st & (1 << n))
+        {
+            needLen += vec[n];
+        }
+    }
+   
+    if (18 < needLen)
+    {
+        return;
+    }
 
+    
 }
 
 long long func(string strN, int st, vector<int> &vec)
 {
     long long ret = 0;
+    
+    int needLen = 0;
+    for (int n = 0; n < 10; n++)
+    {
+        if (st & (1 << n))
+        {
+            needLen += vec[n];
+        }
+    }
+
+    int len = strN.length();
+    if (len < needLen)
+    {
+        return 0;
+    }
+
+
 
     return ret;
 }

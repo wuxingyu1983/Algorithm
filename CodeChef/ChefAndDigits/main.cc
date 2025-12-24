@@ -104,11 +104,16 @@ long long func(string strN, int st, vector<int> &vec)
     long long ret = 0;
     
     int needLen = 0;
+    vector<int> offsets(10, -1);
+    int preOff = 0;
     for (int n = 0; n < 10; n++)
     {
         if (st & (1 << n))
         {
             needLen += vec[n];
+
+            offsets[n] = preOff;
+            preOff += vec[n];
         }
     }
 
@@ -118,7 +123,75 @@ long long func(string strN, int st, vector<int> &vec)
         return 0;
     }
 
+    int goal = (1 << needLen) - 1;
+    int preSt = 0;
+    for (int pos = 0; pos < len; pos++)
+    {
+        int d = strN.at(pos) - '0';
+        int down = 0, up = d - 1;
 
+        if (0 == pos)
+        {
+            down = 1;
+
+            if (len > 1)
+            {
+                ret += sum[len - 2];
+            }
+        }
+
+        if (len - 1 == pos)
+        {
+            up = d;
+        }
+
+        for (int n = down; n <= up; n++)
+        {
+            int newSt = preSt;
+            if (st & (1 << n))
+            {
+                int mask = (1 << vec[n]) - 1;
+                mask <<= offsets[n];
+                int cnt = __builtin_popcount(mask & st);
+
+                if (cnt >= vec[n])
+                {
+                    continue;
+                }
+
+                // cnt < vec[n]
+                newSt |= 1 << (offsets[n] + vec[n] - cnt - 1);
+            }
+
+            if (pos == len - 1)
+            {
+                if (goal == newSt)
+                {
+                    ret += 1;
+                }
+            }
+            else
+            {
+                ret += dp[len - 2 - pos][goal - newSt];
+            }
+        }
+
+        // proc preSt
+        if (st & (1 << d))
+        {
+            int mask = (1 << vec[d]) - 1;
+            mask <<= offsets[d];
+            int cnt = __builtin_popcount(mask & st);
+
+            if (cnt >= vec[d])
+            {
+                break;
+            }
+
+            // cnt < vec[d]
+            preSt |= 1 << (offsets[d] + vec[d] - cnt - 1);
+        }
+    }
 
     return ret;
 }

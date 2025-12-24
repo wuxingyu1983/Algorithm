@@ -23,10 +23,9 @@ using namespace std;
 long long dp[18][262144];
 long long sum[18];
 
-void initDP(int st, vector<int> &vec)
+int initDP(int st, vector<int> &vec, int maxLen)
 {
-    memset(dp, 0, sizeof(dp));
-    memset(sum, 0, sizeof(sum));
+    int ret = 0;
 
     int needLen = 0;
     vector<int> offsets(10, -1);
@@ -41,11 +40,14 @@ void initDP(int st, vector<int> &vec)
             preOff += vec[n];
         }
     }
-   
-    if (18 < needLen)
+
+    if (maxLen < needLen)
     {
-        return;
+        return -1;
     }
+
+    memset(dp, 0, sizeof(dp));
+    memset(sum, 0, sizeof(sum));
 
     int goal = (1 << needLen) - 1;
     int pos = 0;
@@ -56,7 +58,7 @@ void initDP(int st, vector<int> &vec)
             dp[pos][1 << offsets[n]] = 1;
             if (goal == (1 << offsets[n]))
             {
-                sum[pos] ++;
+                sum[pos]++;
             }
         }
     }
@@ -97,12 +99,14 @@ void initDP(int st, vector<int> &vec)
 
         sum[pos + 1] += sum[pos];
     }
+
+    return ret;
 }
 
 long long func(string strN, int st, vector<int> &vec)
 {
     long long ret = 0;
-    
+
     int needLen = 0;
     vector<int> offsets(10, -1);
     int preOff = 0;
@@ -198,6 +202,9 @@ long long func(string strN, int st, vector<int> &vec)
 
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
     int t;
     cin >> t;
 
@@ -205,7 +212,7 @@ int main()
     {
         long long l, r;
         cin >> l >> r;
-        l --;
+        l--;
 
         vector<int> vecA;
         for (size_t n = 0; n < 10; n++)
@@ -220,23 +227,23 @@ int main()
         long long cntL = 0, cntR = 0;
         for (int st = 1; st < 1024; st++)
         {
-            initDP(st, vecA);
-
-            if (1 & __builtin_popcount(st))
+            if (0 == initDP(st, vecA, strR.length()))
             {
-                cntL += func(strL, st, vecA);
-                cntR += func(strR, st, vecA);
-            }
-            else
-            {
-                cntL -= func(strL, st, vecA);
-                cntR -= func(strR, st, vecA);
+                if (1 & __builtin_popcount(st))
+                {
+                    cntL += func(strL, st, vecA);
+                    cntR += func(strR, st, vecA);
+                }
+                else
+                {
+                    cntL -= func(strL, st, vecA);
+                    cntR -= func(strR, st, vecA);
+                }
             }
         }
 
-        cout << (r - cntL) - (l - cntL) << endl;
+        cout << (r - cntR) - (l - cntL) << "\n";
     }
-
 
     return 0;
 }

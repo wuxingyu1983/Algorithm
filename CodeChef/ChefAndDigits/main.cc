@@ -69,10 +69,10 @@ int initDP(int st, vector<int> &vec, int maxLen)
         {
             if (dp[pos][oldSt])
             {
-                int newSt = oldSt;
-
                 for (int n = 0; n < 10; n++)
                 {
+                    int newSt = oldSt;
+
                     if (st & (1 << n))
                     {
                         int mask = (1 << vec[n]) - 1;

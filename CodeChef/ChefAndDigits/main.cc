@@ -66,11 +66,15 @@ int initDP(int st, vector<int> &vec, int maxLen)
                 sum[pos]++;
             }
         }
+        else
+        {
+            dp[pos][0]++;
+        }
     }
 
     for (; pos < 17; pos++)
     {
-        for (int oldSt = 1; oldSt <= goal; oldSt++)
+        for (int oldSt = 0; oldSt <= goal; oldSt++)
         {
             if (dp[pos][oldSt])
             {
@@ -201,6 +205,8 @@ long long func(string strN, int st, vector<int> &vec)
             preSt |= 1 << (offsets[d] + vec[d] - cnt - 1);
         }
     }
+
+//    cout << "n = " << strN << ", st = " << st << ", ret = " << ret << "\n";
 
     return ret;
 }

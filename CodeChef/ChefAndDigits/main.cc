@@ -41,6 +41,11 @@ int initDP(int st, vector<int> &vec, int maxLen)
         }
     }
 
+    if (18 < maxLen)
+    {
+        maxLen = 18;
+    }
+
     if (maxLen < needLen)
     {
         return -1;
@@ -65,7 +70,7 @@ int initDP(int st, vector<int> &vec, int maxLen)
 
     for (; pos < 17; pos++)
     {
-        for (int oldSt = 1; oldSt < 1024; oldSt++)
+        for (int oldSt = 1; oldSt <= goal; oldSt++)
         {
             if (dp[pos][oldSt])
             {
@@ -77,7 +82,7 @@ int initDP(int st, vector<int> &vec, int maxLen)
                     {
                         int mask = (1 << vec[n]) - 1;
                         mask <<= offsets[n];
-                        int cnt = __builtin_popcount(mask & st);
+                        int cnt = __builtin_popcount(mask & oldSt);
                         if (cnt >= vec[n])
                         {
                             continue;
@@ -156,7 +161,7 @@ long long func(string strN, int st, vector<int> &vec)
             {
                 int mask = (1 << vec[n]) - 1;
                 mask <<= offsets[n];
-                int cnt = __builtin_popcount(mask & st);
+                int cnt = __builtin_popcount(mask & preSt);
 
                 if (cnt >= vec[n])
                 {
@@ -185,7 +190,7 @@ long long func(string strN, int st, vector<int> &vec)
         {
             int mask = (1 << vec[d]) - 1;
             mask <<= offsets[d];
-            int cnt = __builtin_popcount(mask & st);
+            int cnt = __builtin_popcount(mask & preSt);
 
             if (cnt >= vec[d])
             {

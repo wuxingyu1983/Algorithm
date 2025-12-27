@@ -21,6 +21,7 @@ using namespace std;
 #pragma GCC target("popcnt")
 
 long long sum[18];
+long long power[10][18];
 long long C[19][19]; // C[n][m]
 
 int init(int st, vector<int> &vec, int maxLen)
@@ -54,7 +55,7 @@ int init(int st, vector<int> &vec, int maxLen)
         {
             for (int n = 0; n < 10; n++)
             {
-                if (st && (1 << n) && 1 == vec[n])
+                if ((st & (1 << n)) && 1 == vec[n])
                 {
                     // 排除 a = 0 的情况
                     sum[len - 1]++;
@@ -91,7 +92,7 @@ int init(int st, vector<int> &vec, int maxLen)
 
                 if (0 <= remain)
                 {
-                    tmpS *= pow((10 - __builtin_popcount(st)), remain);
+                    tmpS *= power[10 - __builtin_popcount(st)][remain];
                 }
 
                 sum[len - 1] += tmpS;
@@ -194,7 +195,7 @@ long long func(string strN, int st, vector<int> &vec)
                 }
                 if (0 <= remain)
                 {
-                    tmpS *= pow((10 - __builtin_popcount(st)), remain);
+                    tmpS *= power[10 - __builtin_popcount(st)][remain];
                     ret += tmpS;
                 }
             }
@@ -241,6 +242,21 @@ int main()
                 else
                 {
                     C[n][m] = C[n - 1][m] + C[n - 1][m - 1];
+                }
+            }
+        }
+
+        for (size_t i = 0; i < 18; i++)
+        {
+            for (size_t n = 1; n < 10; n++)
+            {
+                if (0 == i)
+                {
+                    power[n][i] = 1;
+                }
+                else
+                {
+                    power[n][i] = n * power[n][i - 1];
                 }
             }
         }

@@ -21,7 +21,7 @@ using namespace std;
 #pragma GCC target("popcnt")
 
 long long sum[18];
-long long C[19][19];    // C[n][m]
+long long C[19][19]; // C[n][m]
 
 int init(int st, vector<int> &vec, int maxLen)
 {
@@ -57,7 +57,7 @@ int init(int st, vector<int> &vec, int maxLen)
                 if (st && (1 << n) && 1 == vec[n])
                 {
                     // 排除 a = 0 的情况
-                    sum[len - 1] ++;
+                    sum[len - 1]++;
                 }
             }
         }
@@ -82,14 +82,14 @@ int init(int st, vector<int> &vec, int maxLen)
 
                 for (int i = 0; i < 10; i++)
                 {
-                    if (st & (1 << n))
+                    if (st & (1 << i))
                     {
-                        tmpS *= C[remain][tmpVec[n]];
-                        remain -= tmpVec[n];
+                        tmpS *= C[remain][tmpVec[i]];
+                        remain -= tmpVec[i];
                     }
                 }
 
-                if (0 < remain)
+                if (0 <= remain)
                 {
                     tmpS *= pow((10 - __builtin_popcount(st)), remain);
                 }
@@ -103,7 +103,7 @@ int init(int st, vector<int> &vec, int maxLen)
             sum[len - 1] += sum[len - 2];
         }
     }
-    
+
     return ret;
 }
 
@@ -149,7 +149,7 @@ long long func(string strN, int st, vector<int> &vec)
 
         for (int n = down; n <= up; n++)
         {
-            used[n] ++;
+            used[n]++;
             if (len - 1 == pos)
             {
                 int i;
@@ -166,12 +166,12 @@ long long func(string strN, int st, vector<int> &vec)
 
                 if (10 == i)
                 {
-                    ret ++;
+                    ret++;
                 }
             }
             else
             {
-                int remain = pos;
+                int remain = len - 1 - pos;
                 long long tmpS = 1;
                 for (int i = 0; i < 10; i++)
                 {
@@ -192,28 +192,30 @@ long long func(string strN, int st, vector<int> &vec)
                         }
                     }
                 }
-                if (0 < remain)
+                if (0 <= remain)
                 {
                     tmpS *= pow((10 - __builtin_popcount(st)), remain);
                     ret += tmpS;
                 }
             }
-            used[n] --;
+            used[n]--;
         }
 
         // proc array used
         {
-            used[d] ++;
-            
+            used[d]++;
+
             if (st & (1 << d))
             {
                 if (used[d] > vec[d])
                 {
-                    return 0;
+                    break;
                 }
             }
         }
     }
+
+//    cout << "n = " << strN << ", st = " << st << ", ret = " << ret << "\n";
 
     return ret;
 }

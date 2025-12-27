@@ -171,7 +171,32 @@ long long func(string strN, int st, vector<int> &vec)
             }
             else
             {
+                int remain = pos;
+                long long tmpS = 1;
+                for (int i = 0; i < 10; i++)
+                {
+                    if (st & (1 << i))
+                    {
+                        if (used[i] > vec[i])
+                        {
+                            remain = -1;
+                            break;
+                        }
 
+                        // used[i] <= vec[i]
+                        tmpS *= C[remain][vec[i] - used[i]];
+                        remain -= vec[i] - used[i];
+                        if (0 > remain)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (0 < remain)
+                {
+                    tmpS *= pow((10 - __builtin_popcount(st)), remain);
+                    ret += tmpS;
+                }
             }
             used[n] --;
         }

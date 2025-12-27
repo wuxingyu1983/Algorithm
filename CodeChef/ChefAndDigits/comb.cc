@@ -28,16 +28,11 @@ int init(int st, vector<int> &vec, int maxLen)
     int ret = 0;
 
     int needLen = 0;
-    vector<int> offsets(10, -1);
-    int preOff = 0;
     for (int n = 0; n < 10; n++)
     {
         if (st & (1 << n))
         {
             needLen += vec[n];
-
-            offsets[n] = preOff;
-            preOff += vec[n];
         }
     }
 
@@ -131,6 +126,7 @@ long long func(string strN, int st, vector<int> &vec)
         return 0;
     }
 
+    vector<int> used(10, 0);
     for (int pos = 0; pos < len; pos++)
     {
         int d = strN.at(pos) - '0';
@@ -153,7 +149,44 @@ long long func(string strN, int st, vector<int> &vec)
 
         for (int n = down; n <= up; n++)
         {
+            used[n] ++;
+            if (len - 1 == pos)
+            {
+                int i;
+                for (i = 0; i < 10; i++)
+                {
+                    if (st & (1 << i))
+                    {
+                        if (used[i] != vec[i])
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (10 == i)
+                {
+                    ret ++;
+                }
+            }
+            else
+            {
+
+            }
+            used[n] --;
+        }
+
+        // proc array used
+        {
+            used[d] ++;
             
+            if (st & (1 << d))
+            {
+                if (used[d] > vec[d])
+                {
+                    return 0;
+                }
+            }
         }
     }
 

@@ -25,6 +25,26 @@ long long sum[19][4];           // sum[pos][num] num = 3,5,7,9
 int offset[4] = {0, 2, 5, 8};
 int mask[4] = {3, 28, 224, 3840};
 
+bool valid(int st, int mod)
+{
+    bool ret = true;
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (st & (1 << i))
+        {
+            int mod = (mod & mask[i]) >> offset[i];
+            if (0 == mod)
+            {
+                ret = false;
+                break;
+            }
+        }
+    }
+
+    return ret;
+}
+
 void init()
 {
     int pos = 0;
@@ -74,13 +94,16 @@ void init()
                         }
 
                         dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
+
+                        if (valid(newSt, newMod))
+                        {
+                            sum[pos + 1][i] += dp[pos][oldSt][oldMod];
+                        }
                     }
                 }
             }
         }
-        
     }
-    
 }
 
 int main()

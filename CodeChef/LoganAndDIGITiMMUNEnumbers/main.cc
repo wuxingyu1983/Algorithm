@@ -61,7 +61,20 @@ void init()
             {
                 if (dp[pos][oldSt][oldMod])
                 {
-                    
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int num = odds[i];
+                        int newSt = oldSt | (1 << i);
+                        int newMod = 0;
+
+                        for (int j = 0; j < 4; j++)
+                        {
+                            int mod = (num * power[pos + 1][j] + ((oldMod & mask[j]) >> offset[j])) % odds[j];
+                            newMod |= mod << offset[j];
+                        }
+
+                        dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
+                    }
                 }
             }
         }

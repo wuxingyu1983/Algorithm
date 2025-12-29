@@ -21,7 +21,7 @@ using namespace std;
 int odds[4] = {3, 5, 7, 9};
 long long dp[19][16][4096];     // dp[pos][status][mod]  status = 3579, mod = 335557779999
 long long power[19][4];         // power[pos][num] num = 3,5,7,9
-long long sum[19][4];           // sum[pos][num] num = 3,5,7,9
+long long sum[19];              // sum[pos]
 int offset[4] = {0, 2, 5, 8};
 int mask[4] = {3, 28, 224, 3840};
 
@@ -97,13 +97,31 @@ void init()
 
                         if (valid(newSt, newMod))
                         {
-                            sum[pos + 1][i] += dp[pos][oldSt][oldMod];
+                            sum[pos + 1] += dp[pos][oldSt][oldMod];
                         }
                     }
                 }
             }
         }
+
+        sum[pos + 1] += sum[pos];
     }
+}
+
+long long getCount(long long num)
+{
+    long long ret = 0;
+
+
+
+    return ret;
+}
+
+long long getKNum(long long k)
+{
+    long long ret = 0;
+
+    return ret;
 }
 
 int main()
@@ -112,6 +130,24 @@ int main()
     cin >> q;
 
     init();
+
+    for (int i = 0; i < q; i++)
+    {
+        long long a, b, k;
+        cin >> a >> b >> k;
+
+        long long cntB = getCount(b);
+        long long cntA = getCount(a - 1);
+        int cnt = cntB - cntA;
+        if (cnt < k)
+        {
+            cout << -1 << endl;
+        }
+        else
+        {
+            cout << getKNum(k + cntA) << endl;
+        }
+    }
 
     return 0;
 }

@@ -112,7 +112,50 @@ long long getCount(long long num)
 {
     long long ret = 0;
 
+    string strN = to_string(num);
+    int len = strN.length();
+    int preSt = 0, preMod = 0;
+    
+    for (int pos = 0; pos < len; pos++)
+    {
+        int d = strN.at(pos) - '0';
+        int up = d - 1;
 
+        if (0 == pos && 1 < len)
+        {
+            ret += sum[len - 2];
+        }
+
+        if (len - 1 == pos)
+        {
+            up = d;
+        }
+
+        if (3 > up)
+        {
+            break;
+        }
+
+        for (int n = 3; n <= up; n+=2)
+        {
+
+        }
+        
+        if (1 != d && d & 1)
+        {
+            // 3,5,7,9
+            preSt |= 1 << d;
+
+            int newMod = 0;
+            for (int j = 0; j < 4; j++)
+            {
+                int mod = (d * power[len - 1 - pos][j] + ((preMod & mask[j]) >> offset[j])) % odds[j];
+                newMod |= mod << offset[j];
+            }
+
+            preMod = newMod;
+        }
+    }
 
     return ret;
 }

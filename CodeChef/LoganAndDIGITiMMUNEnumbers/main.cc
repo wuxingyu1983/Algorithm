@@ -136,13 +136,58 @@ long long getCount(long long num)
             break;
         }
 
-        for (int n = 3; n <= up; n+=2)
+        for (int i = 0; odds[i] <= up && i < 4; i++)
         {
+            int n = odds[i];
+            int tmpSt = preSt | (1 << i);
+            int tmpMod = 0;
+            for (int j = 0; j < 4; j++)
+            {
+                int mod = (n * power[len - 1 - pos][j] + ((preMod & mask[j]) >> offset[j])) % odds[j];
+                tmpMod |= mod << offset[j];
+            }
 
+            if (len - 1 == pos)
+            {
+                if (valid(tmpSt, tmpMod))
+                {
+                    ret ++;
+                }
+            }
+            else
+            {
+                for (int oldSt = 1; oldSt < 16; oldSt++)
+                {
+                    for (int oldMod = 0; oldMod < 4096; oldMod++)
+                    {
+                        if (dp[len - 2 - pos][oldSt][oldMod])
+                        {
+                            int newSt = oldSt | tmpSt;
+                            int newMod = 0;
+
+                            for (int j = 0; j < 4; j++)
+                            {
+                                int mod = (((tmpMod & mask[j]) >> offset[j]) + ((oldMod & mask[j]) >> offset[j])) % odds[j];
+                                newMod |= mod << offset[j];
+                            }
+
+                            if (valid(newSt, newMod))
+                            {
+                                ret += dp[len - 2 - pos][oldSt][oldMod];
+                            }
+                        }
+                    }
+                }
+            }
         }
-        
-        if (1 != d && d & 1)
+
+        if (len - 1 > pos)
         {
+            if (1 == d || 0 == (d & 1))
+            {
+                break;
+            }
+
             // 3,5,7,9
             preSt |= 1 << d;
 

@@ -327,7 +327,7 @@ int main()
 
         long long cntB = getCount(b);
         long long cntA = getCount(a - 1);
-        int cnt = cntB - cntA;
+        long long cnt = cntB - cntA;
         if (cnt < k)
         {
             cout << -1 << endl;

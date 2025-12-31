@@ -131,11 +131,6 @@ long long getCount(long long num)
             up = d;
         }
 
-        if (3 > up)
-        {
-            break;
-        }
-
         for (int i = 0; odds[i] <= up && i < 4; i++)
         {
             int n = odds[i];

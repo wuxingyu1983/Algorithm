@@ -19,9 +19,9 @@
 using namespace std;
 
 int odds[4] = {3, 5, 7, 9};
-long long dp[19][16][4096];     // dp[pos][status][mod]  status = 3579, mod = 335557779999
-long long power[19][4];         // power[pos][num] num = 3,5,7,9
-long long sum[19];              // sum[pos]
+long long dp[19][16][4096]; // dp[pos][status][mod]  status = 3579, mod = 335557779999
+long long power[19][4];     // power[pos][num] num = 3,5,7,9
+long long sum[19];          // sum[pos]
 int offset[4] = {0, 2, 5, 8};
 int mask[4] = {3, 28, 224, 3840};
 
@@ -33,8 +33,8 @@ bool valid(int st, int mod)
     {
         if (st & (1 << i))
         {
-            int mod = (mod & mask[i]) >> offset[i];
-            if (0 == mod)
+            int tmp = (mod & mask[i]) >> offset[i];
+            if (0 == tmp)
             {
                 ret = false;
                 break;
@@ -69,10 +69,10 @@ void init()
         {
             mod |= (num % odds[j]) << offset[j];
         }
-        
+
         dp[pos][1 << i][mod] = 1;
     }
-    
+
     for (; pos < 18; pos++)
     {
         for (int oldSt = 1; oldSt < 16; oldSt++)
@@ -115,7 +115,7 @@ long long getCount(long long num)
     string strN = to_string(num);
     int len = strN.length();
     int preSt = 0, preMod = 0;
-    
+
     for (int pos = 0; pos < len; pos++)
     {
         int d = strN.at(pos) - '0';
@@ -151,7 +151,7 @@ long long getCount(long long num)
             {
                 if (valid(tmpSt, tmpMod))
                 {
-                    ret ++;
+                    ret++;
                 }
             }
             else
@@ -189,7 +189,22 @@ long long getCount(long long num)
             }
 
             // 3,5,7,9
-            preSt |= 1 << d;
+            switch (d)
+            {
+            case 3:
+                preSt |= 1;
+                break;
+            case 5:
+                preSt |= 1 << 1;
+                break;
+            case 7:
+                preSt |= 1 << 2;
+                break;
+            case 9:
+            default:
+                preSt |= 1 << 3;
+                break;
+            }
 
             int newMod = 0;
             for (int j = 0; j < 4; j++)
@@ -205,11 +220,102 @@ long long getCount(long long num)
     return ret;
 }
 
-long long getKNum(long long k)
+string getKNum(long long k)
 {
-    long long ret = 0;
+    string strRet;
 
-    return ret;
+    // find len
+    int len = 0;
+    for (; len < 19; len++)
+    {
+        if (sum[len] >= k)
+        {
+            break;
+        }
+    }
+
+    k -= sum[len - 1];
+
+    int preSt = 0;
+    int preMod = 0;
+    for (; len >= 0; len--)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            long long cnt = 0;
+            int n = odds[i];
+            int tmpSt = preSt | (1 << i);
+            int tmpMod = 0;
+            for (int j = 0; j < 4; j++)
+            {
+                int mod = (n * power[len][j] + ((preMod & mask[j]) >> offset[j])) % odds[j];
+                tmpMod |= mod << offset[j];
+            }
+
+            if (0 == len)
+            {
+                if (valid(tmpSt, tmpMod))
+                {
+                    k--;
+                    if (0 == k)
+                    {
+                        strRet += '0' + n;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (int oldSt = 1; oldSt < 16; oldSt++)
+                {
+                    for (int oldMod = 0; oldMod < 4096; oldMod++)
+                    {
+                        if (dp[len - 1][oldSt][oldMod])
+                        {
+                            int newSt = oldSt | tmpSt;
+                            int newMod = 0;
+
+                            for (int j = 0; j < 4; j++)
+                            {
+                                int mod = (((tmpMod & mask[j]) >> offset[j]) + ((oldMod & mask[j]) >> offset[j])) % odds[j];
+                                newMod |= mod << offset[j];
+                            }
+
+                            if (valid(newSt, newMod))
+                            {
+                                cnt += dp[len - 1][oldSt][oldMod];
+                            }
+                        }
+                    }
+                }
+
+                if (k <= cnt)
+                {
+                    strRet += '0' + n;
+
+                    preSt |= 1 << i;
+
+                    int newMod = 0;
+                    for (int j = 0; j < 4; j++)
+                    {
+                        int mod = (n * power[len][j] + ((preMod & mask[j]) >> offset[j])) % odds[j];
+                        newMod |= mod << offset[j];
+                    }
+
+                    preMod = newMod;
+
+                    break;
+                }
+                else
+                {
+                    // k > cnt
+                    k -= cnt;
+                }
+            }
+        }
+    }
+
+    return strRet;
 }
 
 int main()

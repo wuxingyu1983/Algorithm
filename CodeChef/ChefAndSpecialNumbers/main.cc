@@ -20,7 +20,9 @@ using namespace std;
 
 #pragma GCC target("popcnt")
 
-long long powers[19];
+long long power[19];
+long long sum[19];
+long long dp[19][1024][2520];
 unordered_multimap<int, int> mltmap;
 
 int gcd(int a, int b)
@@ -33,6 +35,27 @@ int gcd(int a, int b)
 
 void init(int k, int mod)
 {
+    int pos = 0;
+    power[pos] = 1;
+
+    for (pos = 1; pos < 19; pos++)
+    {
+        power[pos] = (power[pos - 1] * 10) % mod;
+    }
+    
+    memset(sum, 0, sizeof(sum));
+    memset(dp, 0, sizeof(dp));
+
+    pos = 0;
+    for (int n = 0; n < 10; n++)
+    {
+        dp[pos][1 << n][n % mod] = 1;
+        if (0 < n && 0 == (n % mod))
+        {
+            sum[pos] ++;
+        }
+    }
+    
     
 }
 

@@ -23,7 +23,7 @@ using namespace std;
 long long power[19];
 long long sum[19];
 long long dp[19][1024][2520];
-unordered_multimap<int, int> mltmap;
+int lcms[1024];
 
 int gcd(int a, int b)
 {
@@ -33,7 +33,7 @@ int gcd(int a, int b)
         return gcd(b, a % b);
 }
 
-void init(int mod)
+void init(int mask, int mod)
 {
     int pos = 0;
     power[pos] = 1;
@@ -50,7 +50,7 @@ void init(int mod)
     for (int n = 0; n < 10; n++)
     {
         dp[pos][1 << n][n % mod] = 1;
-        if (0 == (n % mod) && 0 < n)
+        if (0 == (n % mod) && mask == (mask & (1 << n)))
         {
             sum[pos]++;
         }
@@ -71,7 +71,7 @@ void init(int mod)
 
                         dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
 
-                        if (0 == newMod && 0 < n)
+                        if (0 == newMod && 0 < n && mask == (mask & newSt))
                         {
                             sum[pos + 1] += dp[pos][oldSt][oldMod];
                         }
@@ -84,14 +84,14 @@ void init(int mod)
     }
 }
 
-long long getCnt(long long num, int mod)
+long long getCnt(long long num, int mask, int mod)
 {
     long long ret = 0;
 
     string strNum = to_string(num);
     int len = strNum.length();
 
-    int preMod = 0;
+    int preSt = 0, preMod = 0;
 
     for (int pos = 0; pos < len; pos++)
     {
@@ -115,13 +115,14 @@ long long getCnt(long long num, int mod)
 
         for (int n = down; n <= up; n++)
         {
+            int newSt = preSt | (1 << n);
             int newMod = preMod;
             newMod += n * power[len - 1 - pos];
             newMod %= mod;
 
             if (len - 1 == pos)
             {
-                if (0 == newMod)
+                if (0 == newMod && mask == (mask & newSt))
                 {
                     ret++;
                 }
@@ -131,13 +132,17 @@ long long getCnt(long long num, int mod)
                 int targetMod = (mod - newMod) % mod;
                 for (int st = 1; st < 1024; st++)
                 {
-                    ret += dp[len - 2 - pos][st][targetMod];
+                    if (mask == (mask & (st | newSt)))
+                    {
+                        ret += dp[len - 2 - pos][st][targetMod];
+                    }
                 }
             }
         }
 
         if (pos < len - 1)
         {
+            preSt |= 1 << d;
             preMod += d * power[len - 1 - pos];
             preMod %= mod;
         }
@@ -166,7 +171,7 @@ int main()
                     }
                 }
 
-                mltmap.insert(make_pair<int, int>(__builtin_popcount(n), (int)l));
+                lcms[n] = l;
             }
         }
     }
@@ -179,24 +184,29 @@ int main()
         cin >> l >> r >> k;
 
         long long cntL = 0, cntR = 0;
-        auto range = mltmap.equal_range(k);
-        for (auto it = range.first; it != range.second; ++it)
+        for (int st = 1; st < 1024; st++)
         {
-            init(it->second);
+            if (0 == (1 & st) && k == __builtin_popcount(st))
+            {
+                init(st, lcms[st]);
 
-            cntL += getCnt(l - 1, it->second);
-            cntR += getCnt(r, it->second);
+                cntL += getCnt(l - 1, st, lcms[st]);
+                cntR += getCnt(r, st, lcms[st]);
+            }
         }
 
         if ((k & 1) && (k != 9))
         {
-            range = mltmap.equal_range(9);
-            for (auto it = range.first; it != range.second; ++it)
+            long long cntL = 0, cntR = 0;
+            for (int st = 1; st < 1024; st++)
             {
-                init(it->second);
+                if (0 == (1 & st) && 9 == __builtin_popcount(st))
+                {
+                    init(st, lcms[st]);
 
-                cntL += getCnt(l - 1, it->second);
-                cntR += getCnt(r, it->second);
+                    cntL += getCnt(l - 1, st, lcms[st]);
+                    cntR += getCnt(r, st, lcms[st]);
+                }
             }
         }
 

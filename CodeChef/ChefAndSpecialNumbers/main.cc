@@ -42,7 +42,7 @@ void init(int mod)
     {
         power[pos] = (power[pos - 1] * 10) % mod;
     }
-    
+
     memset(sum, 0, sizeof(sum));
     memset(dp, 0, sizeof(dp));
 
@@ -52,10 +52,10 @@ void init(int mod)
         dp[pos][1 << n][n % mod] = 1;
         if (0 == (n % mod) && 0 < n)
         {
-            sum[pos] ++;
+            sum[pos]++;
         }
     }
-    
+
     for (; pos < 18; pos++)
     {
         for (int oldSt = 1; oldSt < 1024; oldSt++)
@@ -84,9 +84,64 @@ void init(int mod)
     }
 }
 
-long long getCnt(long long num, int k, int mod)
+long long getCnt(long long num, int mod)
 {
     long long ret = 0;
+
+    string strNum = to_string(num);
+    int len = strNum.length();
+
+    int preMod = 0;
+
+    for (int pos = 0; pos < len; pos++)
+    {
+        int d = strNum.at(pos) - '0';
+        int down = 0, up = d - 1;
+
+        if (0 == pos)
+        {
+            down = 1;
+
+            if (1 < len)
+            {
+                ret += sum[len - 2];
+            }
+        }
+
+        if (pos == len - 1)
+        {
+            up = d;
+        }
+
+        for (int n = down; n <= up; n++)
+        {
+            int newMod = preMod;
+            newMod += n * power[len - 1 - pos];
+            newMod %= mod;
+
+            if (len - 1 == pos)
+            {
+                if (0 == newMod)
+                {
+                    ret++;
+                }
+            }
+            else
+            {
+                int targetMod = (mod - newMod) % mod;
+                for (int st = 1; st < 1024; st++)
+                {
+                    ret += dp[len - 2 - pos][st][targetMod];
+                }
+            }
+        }
+
+        if (pos < len - 1)
+        {
+            preMod += d * power[len - 1 - pos];
+            preMod %= mod;
+        }
+    }
 
     return ret;
 }
@@ -100,16 +155,19 @@ int main()
     {
         for (int n = 1; n < 1024; n++)
         {
-            int l = 1;
-            for (int idx = 0; idx < 10; idx++)
+            if (0 == (1 & n))
             {
-                if (n & (1 << idx))
+                int l = 1;
+                for (int idx = 1; idx < 10; idx++)
                 {
-                    l = l * idx / gcd(l, idx);
+                    if (n & (1 << idx))
+                    {
+                        l = l * idx / gcd(l, idx);
+                    }
                 }
-            }
 
-            mltmap.insert(make_pair<int, int>(__builtin_popcount(n), (int)l));
+                mltmap.insert(make_pair<int, int>(__builtin_popcount(n), (int)l));
+            }
         }
     }
 
@@ -126,8 +184,8 @@ int main()
         {
             init(it->second);
 
-            cntL += getCnt(l - 1, k, it->second);
-            cntR += getCnt(r, k, it->second);
+            cntL += getCnt(l - 1, it->second);
+            cntR += getCnt(r, it->second);
         }
 
         if ((k & 1) && (k != 9))
@@ -137,11 +195,12 @@ int main()
             {
                 init(it->second);
 
-                cntL += getCnt(l - 1, 9, it->second);
-                cntR += getCnt(r, 9, it->second);
+                cntL += getCnt(l - 1, it->second);
+                cntR += getCnt(r, it->second);
             }
         }
 
+        printf("cntL = %lld, cntR = %lld\n", cntL, cntR);
         cout << cntR - cntL << endl;
     }
 

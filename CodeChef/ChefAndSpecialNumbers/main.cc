@@ -33,7 +33,7 @@ int gcd(int a, int b)
         return gcd(b, a % b);
 }
 
-void init(int k, int mod)
+void init(int mod)
 {
     int pos = 0;
     power[pos] = 1;
@@ -50,13 +50,38 @@ void init(int k, int mod)
     for (int n = 0; n < 10; n++)
     {
         dp[pos][1 << n][n % mod] = 1;
-        if (0 < n && 0 == (n % mod))
+        if (0 == (n % mod) && 0 < n)
         {
             sum[pos] ++;
         }
     }
     
-    
+    for (; pos < 18; pos++)
+    {
+        for (int oldSt = 1; oldSt < 1024; oldSt++)
+        {
+            for (int oldMod = 0; oldMod < mod; oldMod++)
+            {
+                if (dp[pos][oldSt][oldMod])
+                {
+                    for (int n = 0; n < 10; n++)
+                    {
+                        int newSt = oldSt | (1 << n);
+                        int newMod = (oldMod + n * power[pos + 1]) % mod;
+
+                        dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
+
+                        if (0 == newMod && 0 < n)
+                        {
+                            sum[pos + 1] += dp[pos][oldSt][oldMod];
+                        }
+                    }
+                }
+            }
+        }
+
+        sum[pos + 1] += sum[pos];
+    }
 }
 
 long long getCnt(long long num, int k, int mod)
@@ -99,7 +124,7 @@ int main()
         auto range = mltmap.equal_range(k);
         for (auto it = range.first; it != range.second; ++it)
         {
-            init(k, it->second);
+            init(it->second);
 
             cntL += getCnt(l - 1, k, it->second);
             cntR += getCnt(r, k, it->second);
@@ -110,7 +135,7 @@ int main()
             range = mltmap.equal_range(9);
             for (auto it = range.first; it != range.second; ++it)
             {
-                init(9, it->second);
+                init(it->second);
 
                 cntL += getCnt(l - 1, 9, it->second);
                 cntR += getCnt(r, 9, it->second);

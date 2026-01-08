@@ -21,9 +21,12 @@ using namespace std;
 #pragma GCC target("popcnt")
 
 long long power[19];
-long long sum[19];
+long long sum[19][10];
 long long dp[19][1024][2520];
-int lcms[1024];
+unordered_map<int, int> masks;
+int lcm[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
+vector<long long> cntL(10, 0);
+vector<long long> cntR(10, 0);
 
 int gcd(int a, int b)
 {
@@ -33,7 +36,7 @@ int gcd(int a, int b)
         return gcd(b, a % b);
 }
 
-void init(int mask, int mod)
+void init(int mod)
 {
     int pos = 0;
     power[pos] = 1;
@@ -50,9 +53,17 @@ void init(int mask, int mod)
     for (int n = 0; n < 10; n++)
     {
         dp[pos][1 << n][n % mod] = 1;
-        if (0 == (n % mod) && mask == (mask & (1 << n)))
+        int st = 1 << n;
+        if (0 == (n % mod))
         {
-            sum[pos]++;
+            auto range = masks.equal_range(mod);
+            for (auto it = range.first; it != range.second; ++it)
+            {
+                if (it->second == (st & it->second))
+                {
+                    sum[pos][__builtin_popcount(it->second)]++;
+                }
+            }
         }
     }
 
@@ -71,20 +82,30 @@ void init(int mask, int mod)
 
                         dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
 
-                        if (0 == newMod && 0 < n && mask == (mask & newSt))
+                        if (0 == newMod && 0 < n)
                         {
-                            sum[pos + 1] += dp[pos][oldSt][oldMod];
+                            auto range = masks.equal_range(mod);
+                            for (auto it = range.first; it != range.second; ++it)
+                            {
+                                if (it->second == (newSt & it->second))
+                                {
+                                    sum[pos + 1][__builtin_popcount(it->second)] += dp[pos][oldSt][oldMod];
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        sum[pos + 1] += sum[pos];
+        for (int i = 1; i < 10; i++)
+        {
+            sum[pos + 1][i] += sum[pos][i];
+        }
     }
 }
 
-long long getCnt(long long num, int mask, int mod)
+void getCnt(long long num, int mod, vector<long long>& cnt)
 {
     long long ret = 0;
 
@@ -104,7 +125,10 @@ long long getCnt(long long num, int mask, int mod)
 
             if (1 < len)
             {
-                ret += sum[len - 2];
+                for (int i = 1; i < 10; i++)
+                {
+                    cnt[i] = sum[len - 2][i];
+                }
             }
         }
 
@@ -122,9 +146,16 @@ long long getCnt(long long num, int mask, int mod)
 
             if (len - 1 == pos)
             {
-                if (0 == newMod && mask == (mask & newSt))
+                if (0 == newMod)
                 {
-                    ret++;
+                    auto range = masks.equal_range(mod);
+                    for (auto it = range.first; it != range.second; ++it)
+                    {
+                        if (it->second == (newSt & it->second))
+                        {
+                            cnt[__builtin_popcount(it->second)] += 1;
+                        }
+                    }
                 }
             }
             else
@@ -132,9 +163,16 @@ long long getCnt(long long num, int mask, int mod)
                 int targetMod = (mod - newMod) % mod;
                 for (int st = 1; st < 1024; st++)
                 {
-                    if (mask == (mask & (st | newSt)))
+                    if (dp[len - 2 - pos][st][targetMod])
                     {
-                        ret += dp[len - 2 - pos][st][targetMod];
+                        auto range = masks.equal_range(mod);
+                        for (auto it = range.first; it != range.second; ++it)
+                        {
+                            if (it->second == ((st | newSt) & it->second))
+                            {
+                                cnt[__builtin_popcount(it->second)] += dp[len - 2 - pos][st][targetMod];
+                            }
+                        }
                     }
                 }
             }
@@ -147,8 +185,6 @@ long long getCnt(long long num, int mask, int mod)
             preMod %= mod;
         }
     }
-
-    return ret;
 }
 
 int main()
@@ -171,7 +207,7 @@ int main()
                     }
                 }
 
-                lcms[n] = l;
+                masks.insert(make_pair<int, int>((int)l, (int)n));
             }
         }
     }
@@ -183,35 +219,16 @@ int main()
 
         cin >> l >> r >> k;
 
-        long long cntL = 0, cntR = 0;
-        for (int st = 1; st < 1024; st++)
+        for (int i = 0; i < 48; i++)
         {
-            if (0 == (1 & st) && k == __builtin_popcount(st))
-            {
-                init(st, lcms[st]);
+            init(lcm[i]);
 
-                cntL += getCnt(l - 1, st, lcms[st]);
-                cntR += getCnt(r, st, lcms[st]);
-            }
+            getCnt(l - 1, lcm[i], cntL);
+            getCnt(r, lcm[i], cntR);
         }
 
-        if ((k & 1) && (k != 9))
-        {
-            long long cntL = 0, cntR = 0;
-            for (int st = 1; st < 1024; st++)
-            {
-                if (0 == (1 & st) && 9 == __builtin_popcount(st))
-                {
-                    init(st, lcms[st]);
-
-                    cntL += getCnt(l - 1, st, lcms[st]);
-                    cntR += getCnt(r, st, lcms[st]);
-                }
-            }
-        }
-
-        printf("cntL = %lld, cntR = %lld\n", cntL, cntR);
-        cout << cntR - cntL << endl;
+//        printf("cntL = %lld, cntR = %lld\n", cntL, cntR);
+//        cout << cntR - cntL << endl;
     }
 
     return 0;

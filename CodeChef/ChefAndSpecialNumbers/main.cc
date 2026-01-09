@@ -25,8 +25,9 @@ long long sum[19][10];
 long long dp[19][1024][2520];
 int lcm[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
 vector<int> masks[2521];
-vector<long long> cntL(10, 0);
-vector<long long> cntR(10, 0);
+vector<long long> cntL[3], cntR[3];
+vector<long long> ls, rs;
+vector<int> ks;
 
 int gcd(int a, int b)
 {
@@ -210,28 +211,41 @@ int main()
 
     for (int i = 0; i < q; i++)
     {
+        cntL[i].assign(10, 0);
+        cntR[i].assign(10, 0);
+    }
+
+    for (int i = 0; i < q; i++)
+    {
         long long l, r;
         int k;
 
         cin >> l >> r >> k;
 
-        fill(cntL.begin(), cntL.end(), 0);
-        fill(cntR.begin(), cntR.end(), 0);
+        ls.push_back(l);
+        rs.push_back(r);
+        ks.push_back(k);
+    }
 
-        for (int i = 0; i < 48; i++)
+    for (int i = 0; i < 48; i++)
+    {
+        init(lcm[i]);
+
+        for (int j = 0; j < q; j++)
         {
-            init(lcm[i]);
-
-            getCnt(l - 1, lcm[i], cntL);
-            getCnt(r, lcm[i], cntR);
+            getCnt(ls[j] - 1, lcm[i], cntL[j]);
+            getCnt(rs[j], lcm[i], cntR[j]);
         }
+    }
 
+    for (int j = 0; j < q; j++)
+    {
         long long sumL = 0, sumR = 0;
 
-        for (int i = k, f = 1; i < 10; i++, f *= -1)
+        for (int i = ks[j], f = 1; i < 10; i++, f *= -1)
         {
-            sumL += f * cntL[i];
-            sumR += f * cntR[i];
+            sumL += f * cntL[j][i];
+            sumR += f * cntR[j][i];
         }
 
         cout << sumR - sumL << endl;

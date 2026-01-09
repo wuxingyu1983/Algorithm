@@ -23,8 +23,8 @@ using namespace std;
 long long power[19];
 long long sum[19][10];
 long long dp[19][1024][2520];
-unordered_multimap<int, int> masks;
 int lcm[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
+vector<int> masks[2521];
 vector<long long> cntL(10, 0);
 vector<long long> cntR(10, 0);
 
@@ -56,12 +56,11 @@ void init(int mod)
         int st = 1 << n;
         if (0 == (n % mod))
         {
-            auto range = masks.equal_range(mod);
-            for (auto it = range.first; it != range.second; ++it)
+            for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
             {
-                if (it->second == (st & it->second))
+                if (*it == (st & (*it)))
                 {
-                    sum[pos][__builtin_popcount(it->second)]++;
+                    sum[pos][__builtin_popcount(*it)]++;
                 }
             }
         }
@@ -84,12 +83,11 @@ void init(int mod)
 
                         if (0 == newMod && 0 < n)
                         {
-                            auto range = masks.equal_range(mod);
-                            for (auto it = range.first; it != range.second; ++it)
+                            for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
                             {
-                                if (it->second == (newSt & it->second))
+                                if (*it == (newSt & (*it)))
                                 {
-                                    sum[pos + 1][__builtin_popcount(it->second)] += dp[pos][oldSt][oldMod];
+                                    sum[pos + 1][__builtin_popcount(*it)] += dp[pos][oldSt][oldMod];
                                 }
                             }
                         }
@@ -148,12 +146,11 @@ void getCnt(long long num, int mod, vector<long long>& cnt)
             {
                 if (0 == newMod)
                 {
-                    auto range = masks.equal_range(mod);
-                    for (auto it = range.first; it != range.second; ++it)
+                    for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
                     {
-                        if (it->second == (newSt & it->second))
+                        if (*it == (newSt & (*it)))
                         {
-                            cnt[__builtin_popcount(it->second)] += 1;
+                            cnt[__builtin_popcount(*it)] += 1;
                         }
                     }
                 }
@@ -165,12 +162,11 @@ void getCnt(long long num, int mod, vector<long long>& cnt)
                 {
                     if (dp[len - 2 - pos][st][targetMod])
                     {
-                        auto range = masks.equal_range(mod);
-                        for (auto it = range.first; it != range.second; ++it)
+                        for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
                         {
-                            if (it->second == ((st | newSt) & it->second))
+                            if (*it == ((st | newSt) & (*it)))
                             {
-                                cnt[__builtin_popcount(it->second)] += dp[len - 2 - pos][st][targetMod];
+                                cnt[__builtin_popcount(*it)] += dp[len - 2 - pos][st][targetMod];
                             }
                         }
                     }
@@ -207,7 +203,7 @@ int main()
                     }
                 }
 
-                masks.insert(make_pair<int, int>((int)l, (int)n));
+                masks[l].push_back(n);
             }
         }
     }

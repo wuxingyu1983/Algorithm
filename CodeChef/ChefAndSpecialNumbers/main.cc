@@ -28,6 +28,7 @@ vector<int> masks[2521];
 vector<long long> cntL[3], cntR[3];
 vector<long long> ls, rs;
 vector<int> ks;
+long long C[11][11]; // C[n][m]
 
 int gcd(int a, int b)
 {
@@ -207,6 +208,21 @@ int main()
                 masks[l].push_back(n);
             }
         }
+
+        for (int n = 0; n < 11; n++)
+        {
+            for (int m = 0; m <= n; m++)
+            {
+                if (0 == m || m == n)
+                {
+                    C[n][m] = 1;
+                }
+                else
+                {
+                    C[n][m] = C[n - 1][m] + C[n - 1][m - 1];
+                }
+            }
+        }
     }
 
     for (int i = 0; i < q; i++)
@@ -242,10 +258,10 @@ int main()
     {
         long long sumL = 0, sumR = 0;
 
-        for (int i = ks[j], f = 1; i < 10; i++, f *= -1)
+        for (int i = ks[j], f = 1, n = ks[j]; i < 10; i++, f *= -1, n ++)
         {
-            sumL += f * cntL[j][i];
-            sumR += f * cntR[j][i];
+            sumL += f * cntL[j][i] * C[n - 1][ks[j] - 1];
+            sumR += f * cntR[j][i] * C[n - 1][ks[j] - 1];
         }
 
         cout << sumR - sumL << endl;

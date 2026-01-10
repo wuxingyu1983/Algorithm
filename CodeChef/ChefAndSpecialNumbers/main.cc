@@ -22,7 +22,7 @@ using namespace std;
 
 long long power[19];
 long long sum[19][10];
-long long dp[19][1024][2520];
+long long dp[19][512][2520];
 int lcm[48] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 20, 21, 24, 28, 30, 35, 36, 40, 42, 45, 56, 60, 63, 70, 72, 84, 90, 105, 120, 126, 140, 168, 180, 210, 252, 280, 315, 360, 420, 504, 630, 840, 1260, 2520};
 vector<int> masks[2521];
 vector<long long> cntL[3], cntR[3];
@@ -52,10 +52,11 @@ void init(int mod)
     memset(dp, 0, sizeof(dp));
 
     pos = 0;
-    for (int n = 0; n < 10; n++)
+    dp[pos][0][0] = 1;
+    for (int n = 1; n < 10; n++)
     {
-        dp[pos][1 << n][n % mod] = 1;
-        int st = 1 << n;
+        int st = 1 << (n - 1);
+        dp[pos][st][n % mod] = 1;
         if (0 == (n % mod))
         {
             for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
@@ -70,7 +71,7 @@ void init(int mod)
 
     for (; pos < 18; pos++)
     {
-        for (int oldSt = 1; oldSt < 1024; oldSt++)
+        for (int oldSt = 0; oldSt < 512; oldSt++)
         {
             if (pos + 1 >= __builtin_popcount(oldSt))
             {
@@ -78,14 +79,17 @@ void init(int mod)
                 {
                     if (dp[pos][oldSt][oldMod])
                     {
-                        for (int n = 0; n < 10; n++)
+                        // 0
+                        dp[pos + 1][oldSt][oldMod] += dp[pos][oldSt][oldMod];
+
+                        for (int n = 1; n < 10; n++)
                         {
-                            int newSt = oldSt | (1 << n);
+                            int newSt = oldSt | (1 << (n - 1));
                             int newMod = (oldMod + n * power[pos + 1]) % mod;
 
                             dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
 
-                            if (0 == newMod && 0 < n)
+                            if (0 == newMod)
                             {
                                 for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
                                 {
@@ -142,7 +146,11 @@ void getCnt(long long num, int mod, vector<long long>& cnt)
 
         for (int n = down; n <= up; n++)
         {
-            int newSt = preSt | (1 << n);
+            int newSt = preSt;
+            if (0 < n)
+            {
+                newSt |= (1 << (n - 1));
+            }
             int newMod = preMod;
             newMod += n * power[len - 1 - pos];
             newMod %= mod;
@@ -163,7 +171,7 @@ void getCnt(long long num, int mod, vector<long long>& cnt)
             else
             {
                 int targetMod = (mod - newMod) % mod;
-                for (int st = 1; st < 1024; st++)
+                for (int st = 0; st < 512; st++)
                 {
                     if (dp[len - 2 - pos][st][targetMod])
                     {
@@ -181,7 +189,10 @@ void getCnt(long long num, int mod, vector<long long>& cnt)
 
         if (pos < len - 1)
         {
-            preSt |= 1 << d;
+            if (0 < d)
+            {
+                preSt |= 1 << (d - 1);
+            }
             preMod += d * power[len - 1 - pos];
             preMod %= mod;
         }
@@ -195,21 +206,18 @@ int main()
 
     // init
     {
-        for (int n = 1; n < 1024; n++)
+        for (int n = 0; n < 512; n++)
         {
-            if (0 == (1 & n))
+            int l = 1;
+            for (int idx = 1; idx < 10; idx++)
             {
-                int l = 1;
-                for (int idx = 1; idx < 10; idx++)
+                if (n & (1 << (idx - 1)))
                 {
-                    if (n & (1 << idx))
-                    {
-                        l = l * idx / gcd(l, idx);
-                    }
+                    l = l * idx / gcd(l, idx);
                 }
-
-                masks[l].push_back(n);
             }
+
+            masks[l].push_back(n);
         }
 
         for (int n = 0; n < 11; n++)

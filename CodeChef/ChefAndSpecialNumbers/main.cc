@@ -72,24 +72,27 @@ void init(int mod)
     {
         for (int oldSt = 1; oldSt < 1024; oldSt++)
         {
-            for (int oldMod = 0; oldMod < mod; oldMod++)
+            if (pos + 1 >= __builtin_popcount(oldSt))
             {
-                if (dp[pos][oldSt][oldMod])
+                for (int oldMod = 0; oldMod < mod; oldMod++)
                 {
-                    for (int n = 0; n < 10; n++)
+                    if (dp[pos][oldSt][oldMod])
                     {
-                        int newSt = oldSt | (1 << n);
-                        int newMod = (oldMod + n * power[pos + 1]) % mod;
-
-                        dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
-
-                        if (0 == newMod && 0 < n)
+                        for (int n = 0; n < 10; n++)
                         {
-                            for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
+                            int newSt = oldSt | (1 << n);
+                            int newMod = (oldMod + n * power[pos + 1]) % mod;
+
+                            dp[pos + 1][newSt][newMod] += dp[pos][oldSt][oldMod];
+
+                            if (0 == newMod && 0 < n)
                             {
-                                if (*it == (newSt & (*it)))
+                                for (vector<int>::iterator it = masks[mod].begin(); it != masks[mod].end(); ++it)
                                 {
-                                    sum[pos + 1][__builtin_popcount(*it)] += dp[pos][oldSt][oldMod];
+                                    if (*it == (newSt & (*it)))
+                                    {
+                                        sum[pos + 1][__builtin_popcount(*it)] += dp[pos][oldSt][oldMod];
+                                    }
                                 }
                             }
                         }

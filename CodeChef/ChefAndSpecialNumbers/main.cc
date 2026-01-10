@@ -260,22 +260,33 @@ int main()
 
         for (int j = 0; j < q; j++)
         {
-            getCnt(ls[j] - 1, lcm[i], cntL[j]);
-            getCnt(rs[j], lcm[i], cntR[j]);
+            if (0 < ks[j])
+            {
+                getCnt(ls[j] - 1, lcm[i], cntL[j]);
+                getCnt(rs[j], lcm[i], cntR[j]);
+            }
         }
     }
 
     for (int j = 0; j < q; j++)
     {
-        long long sumL = 0, sumR = 0;
-
-        for (int i = ks[j], f = 1, n = ks[j]; i < 10; i++, f *= -1, n ++)
+        if (0 == ks[j])
         {
-            sumL += f * cntL[j][i] * C[n - 1][ks[j] - 1];
-            sumR += f * cntR[j][i] * C[n - 1][ks[j] - 1];
+            cout << rs[j] - ls[j] + 1 << endl;
         }
+        else
+        {
+            long long sumL = 0, sumR = 0;
 
-        cout << sumR - sumL << endl;
+            // 广义容斥原理
+            for (int i = ks[j], f = 1, n = ks[j]; i < 10; i++, f *= -1, n++)
+            {
+                sumL += f * cntL[j][i] * C[n - 1][ks[j] - 1];
+                sumR += f * cntR[j][i] * C[n - 1][ks[j] - 1];
+            }
+
+            cout << sumR - sumL << endl;
+        }
     }
 
     return 0;

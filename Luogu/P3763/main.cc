@@ -42,6 +42,13 @@ void initHash(const string& str, int arr[])
     }
 }
 
+int getDiffCnt(int startS, int startP, int len)
+{
+    int ret = 0;
+
+    return ret;
+}
+
 int main()
 {
     int t;
@@ -63,14 +70,24 @@ int main()
         cin >> p;
 
         int cnt = 0;
-        if (s.length() >= p.length())
+        int lenS = s.length();
+        int lenP = p.length();
+
+        if (lenS >= lenP)
         {
             initHash(s, hashS);
             initHash(p, hashP);
 
-
+            for (int pos = 0; pos <= lenS - lenP; pos++)
+            {
+                int diffs = getDiffCnt(pos, 0, lenP);
+                if (3 >= diffs)
+                {
+                    cnt ++;
+                }
+            }
         }
-        
+
         cout << cnt << endl;
     }
 

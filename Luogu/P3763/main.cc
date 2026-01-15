@@ -29,7 +29,17 @@ int hashP[MAX_LEN];
 
 void initHash(const string& str, int arr[])
 {
+    memset(arr, 0, sizeof(int) * MAX_LEN);
 
+    int len = str.length();
+
+    arr[0] = str.at(0);
+
+    for (int i = 1; i < len; i++)
+    {
+        arr[i] = str.at(i) + arr[i - 1] * B;
+        arr[i] %= M;
+    }
 }
 
 int main()
@@ -58,7 +68,7 @@ int main()
             initHash(s, hashS);
             initHash(p, hashP);
 
-            
+
         }
         
         cout << cnt << endl;

@@ -18,13 +18,33 @@
 
 using namespace std;
 
+const int MAX_LEN = 100001;
+
 constexpr int M = 1e9 + 7;
 constexpr int B = 233;
+
+int power[MAX_LEN];
+int hashS[MAX_LEN];
+int hashP[MAX_LEN];
+
+void initHash(const string& str, int arr[])
+{
+
+}
 
 int main()
 {
     int t;
     cin >> t;
+
+    // init
+    {
+        power[0] = 1;
+        for (int i = 1; i < MAX_LEN; i++)
+        {
+            power[i] = (power[i - 1] * B) % M;
+        }
+    }
 
     for (int i = 0; i < t; i++)
     {
@@ -32,14 +52,16 @@ int main()
         cin >> s;
         cin >> p;
 
-        if (s.length() < p.length())
+        int cnt = 0;
+        if (s.length() >= p.length())
         {
-            cout << 0 << endl;
-        }
-        else
-        {
+            initHash(s, hashS);
+            initHash(p, hashP);
+
             
         }
+        
+        cout << cnt << endl;
     }
 
     return 0;

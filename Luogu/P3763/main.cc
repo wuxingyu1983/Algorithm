@@ -42,11 +42,48 @@ void initHash(const string& str, int arr[])
     }
 }
 
-int getDiffCnt(int startS, int startP, int len)
+int getHash(int arr[], int l, int r)
 {
     int ret = 0;
 
+    ret = M + arr[r];
+    if (0 < l)
+    {
+        ret -= (arr[l - 1] * power[r - l + 1]) % M;
+    }
+    ret %= M;
+
     return ret;
+}
+
+void getDiffCnt(string& s, int startS, string& p, int startP, int len, int& cnt)
+{
+    int hshs = getHash(hashS, startS, startS + len - 1);
+    int hshp = getHash(hashP, startP, startP + len - 1);
+
+    if (hshs != hshp)
+    {
+        int midS = startS + (len >> 1);
+        int midP = startP + (len >> 1);
+
+        if (s.at(midS) != p.at(midP))
+        {
+            cnt ++;
+        }
+
+        if (3 >= cnt)
+        {
+            if (startS < midS)
+            {
+                getDiffCnt(s, startS, p, startP, midS - startS + 1, cnt);
+            }
+
+            if (3 >= cnt && midS < startS + len - 1)
+            {
+                getDiffCnt(s, midS + 1, p, midP + 1, startP + len - midP - 1, cnt);
+            }
+        }
+    }
 }
 
 int main()
@@ -80,7 +117,8 @@ int main()
 
             for (int pos = 0; pos <= lenS - lenP; pos++)
             {
-                int diffs = getDiffCnt(pos, 0, lenP);
+                int diffs = 0;
+                getDiffCnt(s, pos, p, 0, lenP, diffs);
                 if (3 >= diffs)
                 {
                     cnt ++;

@@ -75,7 +75,7 @@ void getDiffCnt(string& s, int startS, string& p, int startP, int len, int& cnt)
         {
             if (startS < midS)
             {
-                getDiffCnt(s, startS, p, startP, midS - startS + 1, cnt);
+                getDiffCnt(s, startS, p, startP, midS - startS, cnt);
             }
 
             if (3 >= cnt && midS < startS + len - 1)

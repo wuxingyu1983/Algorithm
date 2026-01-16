@@ -20,16 +20,16 @@ using namespace std;
 
 const int MAX_LEN = 100001;
 
-constexpr int M = 1e9 + 7;
-constexpr int B = 233;
+constexpr long long M = 1e9 + 7;
+constexpr long long B = 233;
 
-int power[MAX_LEN];
-int hashS[MAX_LEN];
-int hashP[MAX_LEN];
+long long power[MAX_LEN];
+long long hashS[MAX_LEN];
+long long hashP[MAX_LEN];
 
-void initHash(const string& str, int arr[])
+void initHash(const string &str, long long arr[])
 {
-    memset(arr, 0, sizeof(int) * MAX_LEN);
+    memset(arr, 0, sizeof(long long) * MAX_LEN);
 
     int len = str.length();
 
@@ -50,26 +50,26 @@ void initHash(const string& str, int arr[])
         RET %= M;                                       \
     }
 
-void getDiffCnt(string& s, int startS, string& p, int startP, int len, int& cnt)
+void getDiffCnt(string &s, int startS, string &p, int startP, int len, int &cnt)
 {
     int hshs = 0, hshp = 0;
-    getHash(hshs, hashS, startS, (startS + len - 1))
-    getHash(hshp, hashP, startP, (startP + len - 1))
+    getHash(hshs, hashS, startS, (startS + len - 1));
+    getHash(hshp, hashP, startP, (startP + len - 1));
 
     if (hshs != hshp)
     {
         int midS = startS + (len >> 1);
         int midP = startP + (len >> 1);
-/*
+
         if (3 == cnt)
         {
-            cnt ++;
+            cnt++;
             return;
         }
-*/
+
         if (s.at(midS) != p.at(midP))
         {
-            cnt ++;
+            cnt++;
         }
 
         if (3 >= cnt)
@@ -122,7 +122,7 @@ int main()
                 getDiffCnt(s, pos, p, 0, lenP, diffs);
                 if (3 >= diffs)
                 {
-                    cnt ++;
+                    cnt++;
                 }
             }
         }

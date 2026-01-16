@@ -42,30 +42,31 @@ void initHash(const string& str, int arr[])
     }
 }
 
-int getHash(int arr[], int l, int r)
-{
-    int ret = 0;
-
-    ret = M + arr[r];
-    if (0 < l)
-    {
-        ret -= (arr[l - 1] * power[r - l + 1]) % M;
+#define getHash(RET, ARR, L, R)                         \
+    {                                                   \
+        RET = M + ARR[R];                               \
+        if (0 < L)                                      \
+            RET -= (ARR[L - 1] * power[R - L + 1]) % M; \
+        RET %= M;                                       \
     }
-    ret %= M;
-
-    return ret;
-}
 
 void getDiffCnt(string& s, int startS, string& p, int startP, int len, int& cnt)
 {
-    int hshs = getHash(hashS, startS, startS + len - 1);
-    int hshp = getHash(hashP, startP, startP + len - 1);
+    int hshs = 0, hshp = 0;
+    getHash(hshs, hashS, startS, (startS + len - 1))
+    getHash(hshp, hashP, startP, (startP + len - 1))
 
     if (hshs != hshp)
     {
         int midS = startS + (len >> 1);
         int midP = startP + (len >> 1);
-
+/*
+        if (3 == cnt)
+        {
+            cnt ++;
+            return;
+        }
+*/
         if (s.at(midS) != p.at(midP))
         {
             cnt ++;

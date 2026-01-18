@@ -33,10 +33,11 @@ public:
             initHash(revs, hashR);
         }
 
-        
+        int start = 0, max = 1;
 
-//        string ret(s.begin() + start, s.begin() + start + max);
-//        return ret;
+
+        string ret(s.begin() + start, s.begin() + start + max);
+        return ret;
     }
 
 private:
@@ -51,6 +52,16 @@ private:
             arr[i] = str.at(i) + arr[i - 1] * B;
             arr[i] %= M;
         }
+    }
+
+    int getHash(long long arr[], int l, int r)
+    {                                          
+        int ret = M + arr[r];
+        if (0 < l)
+            ret -= (arr[l - 1] * power[r - l + 1]) % M;
+        ret %= M;
+
+        return ret;
     }
 
 private:

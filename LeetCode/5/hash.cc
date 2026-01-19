@@ -34,7 +34,7 @@ public:
         int mid = len >> 1;
         if (0 == (len & 1))
         {
-            mid --;
+            mid--;
         }
         for (int pos = 0; pos <= mid; pos++)
         {
@@ -52,8 +52,8 @@ public:
                         return false;
                 };
 
-                auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
-                if (it != idx.begin() + pos + 1)
+                auto it = lower_bound(idx.begin(), idx.begin() + pos, pos, cmp);
+                if (it != idx.begin() + pos)
                 {
                     int tmp = 2 * (pos - (*it)) + 1;
                     if (max < tmp)
@@ -65,34 +65,33 @@ public:
             }
 
             // [0 -- pos][(pos + 1) -- (2 * pos + 1)]
-/*
-            if (pos != mid || 0 == (len & 1))
-            {
-                auto cmp = [](const int &a, const int &b)
-                {
-                    int hs = getHash(hashS, a, b);
-                    int hr = getHash(hashR, len - 1 - 2 * b + a, len - 1 - b);
+            /*
+                        if (pos != mid || 0 == (len & 1))
+                        {
+                            auto cmp = [](const int &a, const int &b)
+                            {
+                                int hs = getHash(hashS, a, b);
+                                int hr = getHash(hashR, len - 1 - 2 * b + a, len - 1 - b);
 
-                    if (hs != hr)
-                        return true;
-                    else
-                        return false;
-                };
+                                if (hs != hr)
+                                    return true;
+                                else
+                                    return false;
+                            };
 
-                auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
-                if (it != idx.begin() + pos + 1)
-                {
-                    int tmp = 2 * (pos - (*it));
-                    if (max < tmp)
-                    {
-                        max = tmp;
-                        start = *it;
-                    }
-                }
-            }
-*/
+                            auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
+                            if (it != idx.begin() + pos + 1)
+                            {
+                                int tmp = 2 * (pos - (*it));
+                                if (max < tmp)
+                                {
+                                    max = tmp;
+                                    start = *it;
+                                }
+                            }
+                        }
+            */
         }
-
         for (int pos = 0; pos <= mid; pos++)
         {
             // [0 -- (pos - 1)],pos,[(pos + 1) -- 2 * pos]
@@ -100,8 +99,8 @@ public:
             {
                 auto cmp = [](const int &a, const int &b)
                 {
-                    int hs = getHash(hashR, a, b);
-                    int hr = getHash(hashS, len - 1 - 2 * b + a, len - 1 - b);
+                    int hr = getHash(hashR, a, b);
+                    int hs = getHash(hashS, len - 1 - 2 * b + a, len - 1 - b);
 
                     if (hs != hr)
                         return true;
@@ -109,45 +108,45 @@ public:
                         return false;
                 };
 
-                auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
-                if (it != idx.begin() + pos + 1)
+                auto it = lower_bound(idx.begin(), idx.begin() + pos, pos, cmp);
+                if (it != idx.begin() + pos)
                 {
                     int tmp = 2 * (pos - (*it)) + 1;
                     if (max < tmp)
                     {
                         max = tmp;
-                        start = len - 1 - (*it);
+                        start = len - 1 - (*it) - tmp + 1;
                     }
                 }
             }
 
             // [0 -- pos][(pos + 1) -- (2 * pos + 1)]
-/*
-            if (pos != mid || 0 == (len & 1))
-            {
-                auto cmp = [](const int &a, const int &b)
-                {
-                    int hs = getHash(hashR, a, b);
-                    int hr = getHash(hashS, len - 1 - 2 * b + a, len - 1 - b);
+            /*
+                        if (pos != mid || 0 == (len & 1))
+                        {
+                            auto cmp = [](const int &a, const int &b)
+                            {
+                                int hr = getHash(hashR, a, b);
+                                int hs = getHash(hashS, len - 1 - 2 * b + a, len - 1 - b);
 
-                    if (hs != hr)
-                        return true;
-                    else
-                        return false;
-                };
+                                if (hs != hr)
+                                    return true;
+                                else
+                                    return false;
+                            };
 
-                auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
-                if (it != idx.begin() + pos + 1)
-                {
-                    int tmp = 2 * (pos - (*it));
-                    if (max < tmp)
-                    {
-                        max = tmp;
-                        start = len - 1 - (*it);
-                    }
-                }
-            }
-*/
+                            auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
+                            if (it != idx.begin() + pos + 1)
+                            {
+                                int tmp = 2 * (pos - (*it));
+                                if (max < tmp)
+                                {
+                                    max = tmp;
+                                    start = len - 1 - (*it);
+                                }
+                            }
+                        }
+            */
         }
 
         string ret(s.begin() + start, s.begin() + start + max);

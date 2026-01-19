@@ -34,8 +34,6 @@ public:
         int mid = len >> 1;
         for (int pos = 0; pos <= mid; pos++)
         {
-            int revPos = len - 1 - pos;
-
             // [0 -- (pos - 1)],pos,[(pos + 1) -- 2 * pos]
             if (0 < pos)
             {
@@ -63,19 +61,44 @@ public:
             }
 
             // [0 -- pos][(pos + 1) -- (2 * pos + 1)]
-
-            if (pos == mid)
+            if (pos != mid || 0 == (len & 1))
             {
+                auto cmp = [](const int &a, const int &pos)
+                {
+                    int hs = getHash(hashS, a, pos);
+                    int hr = getHash(hashR, len - 1 - 2 * pos + a, len - 1 - pos);
 
-            }
-            else
-            {
+                    if (hs != hr)
+                        return true;
+                    else
+                        return false;
+                };
 
+                auto it = lower_bound(idx.begin(), idx.begin() + pos, pos, cmp);
+                if (it != idx.begin() + pos)
+                {
+                    int tmp = 2 * (pos - (*it));
+                    if (max < tmp)
+                    {
+                        max = tmp;
+                        start = *it;
+                    }
+                }
             }
         }
 
 
         string ret(s.begin() + start, s.begin() + start + max);
+        return ret;
+    }
+
+    static int getHash(long long arr[], int l, int r)
+    {
+        int ret = M + arr[r];
+        if (0 < l)
+            ret -= (arr[l - 1] * power[r - l + 1]) % M;
+        ret %= M;
+
         return ret;
     }
 
@@ -88,16 +111,6 @@ public:
             arr[i] = str.at(i) + arr[i - 1] * B;
             arr[i] %= M;
         }
-    }
-
-    static int getHash(long long arr[], int l, int r)
-    {                                          
-        int ret = M + arr[r];
-        if (0 < l)
-            ret -= (arr[l - 1] * power[r - l + 1]) % M;
-        ret %= M;
-
-        return ret;
     }
 
     static void init(string &s)

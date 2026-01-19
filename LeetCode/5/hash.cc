@@ -120,32 +120,30 @@ public:
             }
 
             // [0 -- pos][(pos + 1) -- (2 * pos + 1)]
-            /*
-                        if (pos != mid || 0 == (len & 1))
-                        {
-                            auto cmp = [](const int &a, const int &b)
-                            {
-                                int hr = getHash(hashR, a, b);
-                                int hs = getHash(hashS, len - 1 - 2 * b + a, len - 1 - b);
+            if (pos != mid || 0 == (len & 1))
+            {
+                auto cmp = [](const int &a, const int &b)
+                {
+                    int hr = getHash(hashR, a, b);
+                    int hs = getHash(hashS, len - 2 - 2 * b + a, len - 2 - b);
 
-                                if (hs != hr)
-                                    return true;
-                                else
-                                    return false;
-                            };
+                    if (hs != hr)
+                        return true;
+                    else
+                        return false;
+                };
 
-                            auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
-                            if (it != idx.begin() + pos + 1)
-                            {
-                                int tmp = 2 * (pos - (*it));
-                                if (max < tmp)
-                                {
-                                    max = tmp;
-                                    start = len - 1 - (*it);
-                                }
-                            }
-                        }
-            */
+                auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
+                if (it != idx.begin() + pos + 1)
+                {
+                    int tmp = 2 * (pos - (*it)) + 2;
+                    if (max < tmp)
+                    {
+                        max = tmp;
+                        start = len - 1 - (*it) - tmp + 1;
+                    }
+                }
+            }
         }
 
         string ret(s.begin() + start, s.begin() + start + max);

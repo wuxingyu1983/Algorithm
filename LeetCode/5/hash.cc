@@ -65,33 +65,32 @@ public:
             }
 
             // [0 -- pos][(pos + 1) -- (2 * pos + 1)]
-            /*
-                        if (pos != mid || 0 == (len & 1))
-                        {
-                            auto cmp = [](const int &a, const int &b)
-                            {
-                                int hs = getHash(hashS, a, b);
-                                int hr = getHash(hashR, len - 1 - 2 * b + a, len - 1 - b);
+            if (pos != mid || 0 == (len & 1))
+            {
+                auto cmp = [](const int &a, const int &b)
+                {
+                    int hs = getHash(hashS, a, b);
+                    int hr = getHash(hashR, len - 2 - 2 * b + a, len - 2 - b);
 
-                                if (hs != hr)
-                                    return true;
-                                else
-                                    return false;
-                            };
+                    if (hs != hr)
+                        return true;
+                    else
+                        return false;
+                };
 
-                            auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
-                            if (it != idx.begin() + pos + 1)
-                            {
-                                int tmp = 2 * (pos - (*it));
-                                if (max < tmp)
-                                {
-                                    max = tmp;
-                                    start = *it;
-                                }
-                            }
-                        }
-            */
+                auto it = lower_bound(idx.begin(), idx.begin() + pos + 1, pos, cmp);
+                if (it != idx.begin() + pos + 1)
+                {
+                    int tmp = 2 * (pos - (*it)) + 2;
+                    if (max < tmp)
+                    {
+                        max = tmp;
+                        start = *it;
+                    }
+                }
+            }
         }
+
         for (int pos = 0; pos <= mid; pos++)
         {
             // [0 -- (pos - 1)],pos,[(pos + 1) -- 2 * pos]

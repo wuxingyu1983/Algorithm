@@ -18,12 +18,49 @@ class Solution
 public:
     string longestPalindrome(string s)
     {
-        memset(p, 0, sizeof(p));
+        memset(P, 0, sizeof(P));
         string sp = preprocString(s);
 
+        int n = sp.length();
+        int C = 0, R = 0;
+        for (int i = 1; i < n - 1; i++)
+        {
+            int i_mirror = 2 * C - i;
+            if (R > i)
+            {
+                P[i] = min(R - i, P[i_mirror]); // 防止超出 R
+            }
+            else
+            {
+                P[i] = 0; // 等于 R 的情况
+            }
 
+            // 碰到之前讲的三种情况时候，需要利用中心扩展法
+            while (sp.at(i + 1 + P[i]) == sp.at(i - 1 - P[i]))
+            {
+                P[i]++;
+            }
 
-        int start = 0, max = 1;
+            // 判断是否需要更新 R
+            if (i + P[i] > R)
+            {
+                C = i;
+                R = i + P[i];
+            }
+        }
+
+        // 找出 P 的最大值
+        int max = 0;
+        int centerIndex = 0;
+        for (int i = 1; i < n - 1; i++)
+        {
+            if (P[i] > max)
+            {
+                max = P[i];
+                centerIndex = i;
+            }
+        }
+        int start = (centerIndex - max) / 2; // 最开始讲的求原字符串下标
 
         string ret(s.begin() + start, s.begin() + start + max);
         return ret;
@@ -45,7 +82,7 @@ private:
     }
 
 private:
-    int p[2005];
+    int P[2005];
 };
 
 int main()

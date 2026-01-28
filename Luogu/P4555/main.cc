@@ -72,7 +72,7 @@ int main()
         }
     }
 
-    int start = 0, max = 0;
+    int max = 0;
     for (int i = 1; i < n - 1; i++)
     {
         int len = 2 * P[i] + 1;
@@ -83,7 +83,6 @@ int main()
             if (max < len + L[left - 1])
             {
                 max = len + L[left - 1];
-                start = left - L[left - 1];
             }
 
             len -= 2;
@@ -91,7 +90,7 @@ int main()
         }
     }
 
-    
+    cout << max / 2 << endl;
 
     return 0;
 }

@@ -72,5 +72,26 @@ int main()
         }
     }
 
+    int start = 0, max = 0;
+    for (int i = 1; i < n - 1; i++)
+    {
+        int len = 2 * P[i] + 1;
+        int left = i - P[i];
+
+        while (left <= i && len >= 0)
+        {
+            if (max < len + L[left - 1])
+            {
+                max = len + L[left - 1];
+                start = left - L[left - 1];
+            }
+
+            len -= 2;
+            left += 1;
+        }
+    }
+
+    
+
     return 0;
 }

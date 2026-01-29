@@ -110,6 +110,7 @@ int main()
             if (0 == L[i])
             {
                 L[i] = 1;
+                update(d, i, 1 + 2 * (n - i), 1, n - 1, 1);
             }
         }
 
@@ -117,6 +118,7 @@ int main()
         while (sp.at(i + 1 + P[i]) == sp.at(i - 1 - P[i]))
         {
             L[i + 1 + P[i]] = 2 * P[i] + 3;
+            update(d, i + 1 + P[i], 2 * P[i] + 3 + 2 * (n - (i + 1 + P[i])), 1, n - 1, 1);
             P[i]++;
         }
 
@@ -134,16 +136,26 @@ int main()
         int len = 2 * P[i] + 1;
         int left = i - P[i];
 
-        while (1 < left && left <= i && len >= 0)
-        {
-            if (max < len + L[left - 1])
-            {
-                max = len + L[left - 1];
-            }
+        if (1 >= left)
+            continue;
 
-            len -= 2;
-            left += 1;
-        }
+        int tmp = getMax(d, left - 1, i - 1, 1, n - 1, 1);
+        tmp -= 2 * (n - (left - 1));
+        tmp += len;
+        if (tmp > max)
+            max = tmp;
+        /*
+                while (1 < left && left <= i && len >= 0)
+                {
+                    if (max < len + L[left - 1])
+                    {
+                        max = len + L[left - 1];
+                    }
+
+                    len -= 2;
+                    left += 1;
+                }
+        */
     }
 
     cout << max / 2 << endl;

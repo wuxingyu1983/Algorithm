@@ -32,6 +32,60 @@ string preprocString(string &s)
     return ret;
 }
 
+// segment tree func
+int update(vector<int> &d, int idx, int c, int s, int t, int p)
+{
+    if (idx == s && idx == t)
+    {
+        d[p] = c;
+        return c;
+    }
+    int m = s + ((t - s) >> 1);
+    if (idx <= m)
+    {
+        int tmp = update(d, idx, c, s, m, p * 2);
+        if (tmp > d[p])
+        {
+            d[p] = tmp;
+        }
+    }
+    if (idx > m)
+    {
+        int tmp = update(d, idx, c, m + 1, t, p * 2 + 1);
+        if (tmp > d[p])
+        {
+            d[p] = tmp;
+        }
+    }
+
+    return d[p];
+}
+
+int getMax(vector<int> &d, int l, int r, int s, int t, int p)
+{
+    if (l > r)
+    {
+        return 0;
+    }
+    if (l <= s && t <= r)
+        return d[p];
+    int m = s + ((t - s) >> 1);
+    int max = 0;
+    if (l <= m)
+    {
+        max = getMax(d, l, r, s, m, p * 2);
+    }
+    if (r > m)
+    {
+        int tmp = getMax(d, l, r, m + 1, t, p * 2 + 1);
+        if (tmp > max)
+        {
+            max = tmp;
+        }
+    }
+    return max;
+}
+
 int main()
 {
     string str;
@@ -41,6 +95,8 @@ int main()
 
     int n = sp.length();
     int C = 0, R = 0;
+    vector<int> d(4 * n + 5, 0);
+
     for (int i = 1; i < n - 1; i++)
     {
         int i_mirror = 2 * C - i;

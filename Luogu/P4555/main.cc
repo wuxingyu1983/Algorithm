@@ -73,12 +73,12 @@ int main()
     }
 
     int max = 0;
-    for (int i = 1; i < n - 1; i++)
+    for (int i = 1; i < n - 2; i++)
     {
         int len = 2 * P[i] + 1;
         int left = i - P[i];
 
-        while (left <= i && len >= 0)
+        while (1 < left && left <= i && len >= 0)
         {
             if (max < len + L[left - 1])
             {

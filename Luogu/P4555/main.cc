@@ -85,8 +85,8 @@ int main()
                 max = len + L[left - 1];
             }
 
-            len -= 2;
-            left += 1;
+            len -= 4;
+            left += 2;
         }
     }
 

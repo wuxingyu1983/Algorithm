@@ -32,7 +32,27 @@ string preprocString(string &s)
 string func(string &str)
 {
     string ret;
+    int l = 0, r = str.length() - 1;
+    string pre;
 
+    if (l <= r && str.at(l) == str.at(r))
+    {
+        pre += str.at(l);
+        l ++;
+        r --;
+    }
+
+    if (l > r)
+    {
+        ret = str;
+    }
+    else
+    {
+        string s(str, l, r - l + 1);
+        string sp = preprocString(s);
+
+        
+    }
 
     return ret;
 }

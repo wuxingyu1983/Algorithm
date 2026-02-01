@@ -12,7 +12,7 @@
 #include <set>
 #include <queue>
 #include <stack>
-#include <unordered_map>
+#include <map>
 
 using namespace std;
 
@@ -75,12 +75,13 @@ int main()
         int l = 3, r = MAX_N;
         int max = 0;
         string ans;
-        unordered_map<int, int> mp;
+        map<int, int> mp;
 
         int mid;
-        while (l < r)
+        while (l <= r)
         {
             mid = l + (r - l) / 2;
+            mp.clear();
 
             for (int im = 0; im < m; im++)
             {
@@ -93,7 +94,7 @@ int main()
                     }
                     else
                     {
-                        auto search = mp.find(oneHash);
+                        map<int, int>::iterator search = mp.find(oneHash);
                         if (search != mp.end())
                         {
                             if (search->second == im - 1)
@@ -102,10 +103,11 @@ int main()
                                 {
                                     max = mid;
                                     ans = string(strs[im], idx, mid);
+                                    break;
                                 }
                                 else
                                 {
-                                    mp.insert({oneHash, im});
+                                    mp[oneHash] = im;
                                 }
                             }
                         }

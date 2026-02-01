@@ -71,7 +71,18 @@ int main()
             initHash(s, hashs[im]);
         }
 
+        int l = 3, r = MAX_N;
+        int max = 0;
+        string ans;
 
+        if (3 <= max)
+        {
+            cout << ans << endl;
+        }
+        else
+        {
+            cout << "no significant commonalities" << endl;
+        }
     }
 
     return 0;

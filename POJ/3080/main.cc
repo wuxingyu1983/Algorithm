@@ -12,6 +12,7 @@
 #include <set>
 #include <queue>
 #include <stack>
+#include <unordered_map>
 
 using namespace std;
 
@@ -74,6 +75,53 @@ int main()
         int l = 3, r = MAX_N;
         int max = 0;
         string ans;
+        unordered_map<int, int> mp;
+
+        int mid;
+        while (l < r)
+        {
+            mid = l + (r - l) / 2;
+
+            for (int im = 0; im < m; im++)
+            {
+                for (int idx = 0; idx <= MAX_N - mid; idx++)
+                {
+                    int oneHash = getHash(hashs[im], idx, idx + mid - 1);
+                    if (0 == im)
+                    {
+                        mp.insert({oneHash, im});
+                    }
+                    else
+                    {
+                        auto search = mp.find(oneHash);
+                        if (search != mp.end())
+                        {
+                            if (search->second == im - 1)
+                            {
+                                if (im == m - 1)
+                                {
+                                    max = mid;
+                                    ans = string(strs[im], idx, mid);
+                                }
+                                else
+                                {
+                                    mp.insert({oneHash, im});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (max == mid)
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid - 1;
+            }
+        }
 
         if (3 <= max)
         {

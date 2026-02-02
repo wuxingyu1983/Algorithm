@@ -102,8 +102,12 @@ int main()
                                 if (im == m - 1)
                                 {
                                     max = mid;
-                                    ans = string(strs[im], idx, mid);
-                                    break;
+                                    string tmp = string(strs[im], idx, mid);
+
+                                    if (mid != ans.length() || ans > tmp)
+                                    {
+                                        ans = tmp;
+                                    }
                                 }
                                 else
                                 {

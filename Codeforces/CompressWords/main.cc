@@ -37,7 +37,7 @@ void initHash(const string &str, long long arr[], int from)
     if (0 == from)
     {
         arr[0] = str.at(0);
-        from ++;
+        from++;
     }
 
     for (int i = from; i < str.length(); i++)
@@ -49,6 +49,9 @@ void initHash(const string &str, long long arr[], int from)
 
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
     int n;
     cin >> n;
 
@@ -73,36 +76,75 @@ int main()
     string ans(words[0]);
     if (1 < words.size())
     {
-        ans.append(words[1]);
-
-        initHash(ans, hashs, 0);
-
-        int len0 = words[0].length();
-        int len1 = words[1].length();
-
-        int len = min(len0, len1);
-        int l = len0, r = len0 + len1 - 1;
-        int mid, max = 0;
-        while (l <= r)
         {
-            mid = l + (r - l) / 2;
-            
-            long long hash1 = getHash(hashs, l, mid);
-            long long hash0 = getHash(hashs, 2 * l - mid - 1, l - 1);
+            ans.append(words[1]);
+            initHash(ans, hashs, 0);
 
-            if (hash0 == hash1)
+            int len0 = words[0].length();
+            int len1 = words[1].length();
+
+            int len = min(len0, len1);
+            int idx = len0 + len - 1;
+            int max = 0;
+            while (idx >= len0)
             {
-                max = mid - l + 1;
-                l = mid + 1;
+                long long hash1 = getHash(hashs, len0, idx);
+                long long hash0 = getHash(hashs, 2 * len0 - idx - 1, len0 - 1);
+
+                if (hash0 == hash1)
+                {
+                    max = idx - len0 + 1;
+                    break;
+                }
+
+                idx --;
             }
-            else
+
+            if (0 < max)
             {
-                r = mid - 1;
+                ans = ans.substr(0, len0);
+                ans.append(words[1].substr(max, len1 - max));
+
+                initHash(ans, hashs, len0);
+            }
+        }
+
+        for (int i = 2; i < n; i++)
+        {
+            int len0 = ans.length();
+            int len1 = words[i].length();
+
+            ans.append(words[i]);
+            initHash(ans, hashs, len0);
+
+            int len = min(len0, len1);
+            int idx = len0 + len - 1;
+            int max = 0;
+            while (idx >= len0)
+            {
+                long long hash1 = getHash(hashs, len0, idx);
+                long long hash0 = getHash(hashs, 2 * len0 - idx - 1, len0 - 1);
+
+                if (hash0 == hash1)
+                {
+                    max = idx - len0 + 1;
+                    break;
+                }
+                
+                idx --;
+            }
+
+            if (0 < max)
+            {
+                ans = ans.substr(0, len0);
+                ans.append(words[i].substr(max, len1 - max));
+
+                initHash(ans, hashs, len0);
             }
         }
     }
 
-    cout << ans << endl;
+    cout << ans << "\n";
 
     return 0;
 }

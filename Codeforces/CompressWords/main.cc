@@ -20,7 +20,7 @@ const int MAX_N = 1000006;
 const long long M = 1e9 + 7;
 const long long B = 233;
 long long power[MAX_N];
-long long hashs[10][MAX_N];
+long long hashs[MAX_N];
 
 int getHash(long long arr[], int l, int r)
 {
@@ -32,11 +32,15 @@ int getHash(long long arr[], int l, int r)
     return ret;
 }
 
-void initHash(const string &str, long long arr[])
+void initHash(const string &str, long long arr[], int from)
 {
-    arr[0] = str.at(0);
+    if (0 == from)
+    {
+        arr[0] = str.at(0);
+        from ++;
+    }
 
-    for (int i = 1; i < str.length(); i++)
+    for (int i = from; i < str.length(); i++)
     {
         arr[i] = str.at(i) + arr[i - 1] * B;
         arr[i] %= M;
@@ -66,7 +70,39 @@ int main()
         }
     }
 
-    
+    string ans(words[0]);
+    if (1 < words.size())
+    {
+        ans.append(words[1]);
+
+        initHash(ans, hashs, 0);
+
+        int len0 = words[0].length();
+        int len1 = words[1].length();
+
+        int len = min(len0, len1);
+        int l = len0, r = len0 + len1 - 1;
+        int mid, max = 0;
+        while (l <= r)
+        {
+            mid = l + (r - l) / 2;
+            
+            long long hash1 = getHash(hashs, l, mid);
+            long long hash0 = getHash(hashs, 2 * l - mid - 1, l - 1);
+
+            if (hash0 == hash1)
+            {
+                max = mid - l + 1;
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid - 1;
+            }
+        }
+    }
+
+    cout << ans << endl;
 
     return 0;
 }

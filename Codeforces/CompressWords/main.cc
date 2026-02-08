@@ -22,7 +22,8 @@ const long long B = 233;
 long long power[MAX_N];
 long long hashs[MAX_N];
 
-int getHash(long long arr[], int l, int r)
+/*
+inline int getHash(long long arr[], int l, int r)
 {
     int ret = M + arr[r];
     if (0 < l)
@@ -31,6 +32,13 @@ int getHash(long long arr[], int l, int r)
 
     return ret;
 }
+*/
+
+#define getHash(RET, ARR, L, R)                     \
+    RET = M + ARR[R];                               \
+    if (0 < L)                                      \
+        RET -= (ARR[L - 1] * power[R - L + 1]) % M; \
+    RET %= M;
 
 void initHash(const string &str, long long arr[], int from)
 {
@@ -88,8 +96,10 @@ int main()
             int max = 0;
             while (idx >= len0)
             {
-                long long hash1 = getHash(hashs, len0, idx);
-                long long hash0 = getHash(hashs, 2 * len0 - idx - 1, len0 - 1);
+                long long hash1;
+                getHash(hash1, hashs, len0, idx);
+                long long hash0;
+                getHash(hash0, hashs, (2 * len0 - idx - 1), (len0 - 1));
 
                 if (hash0 == hash1)
                 {
@@ -103,7 +113,7 @@ int main()
             if (0 < max)
             {
                 ans = ans.substr(0, len0);
-                ans.append(words[1].substr(max, len1 - max));
+                ans.append(words[1], max, len1 - max);
 
                 initHash(ans, hashs, len0);
             }
@@ -122,8 +132,10 @@ int main()
             int max = 0;
             while (idx >= len0)
             {
-                long long hash1 = getHash(hashs, len0, idx);
-                long long hash0 = getHash(hashs, 2 * len0 - idx - 1, len0 - 1);
+                long long hash1;
+                getHash(hash1, hashs, len0, idx);
+                long long hash0;
+                getHash(hash0, hashs, (2 * len0 - idx - 1), (len0 - 1));
 
                 if (hash0 == hash1)
                 {
@@ -137,7 +149,7 @@ int main()
             if (0 < max)
             {
                 ans = ans.substr(0, len0);
-                ans.append(words[i].substr(max, len1 - max));
+                ans.append(words[i], max, len1 - max);
 
                 initHash(ans, hashs, len0);
             }

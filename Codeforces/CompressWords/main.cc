@@ -81,7 +81,9 @@ int main()
         }
     }
 
-    string ans(words[0]);
+    string ans;
+    ans.reserve(MAX_N);
+    ans.append(words[0]);
     if (1 < words.size())
     {
         {
@@ -112,7 +114,8 @@ int main()
 
             if (0 < max)
             {
-                ans = ans.substr(0, len0);
+                ans.resize(len0);
+//                ans = ans.substr(0, len0);
                 ans.append(words[1], max, len1 - max);
 
                 initHash(ans, hashs, len0);
@@ -148,7 +151,8 @@ int main()
 
             if (0 < max)
             {
-                ans = ans.substr(0, len0);
+                ans.resize(len0);
+//                ans = ans.substr(0, len0);
                 ans.append(words[i], max, len1 - max);
 
                 initHash(ans, hashs, len0);

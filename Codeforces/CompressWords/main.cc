@@ -18,21 +18,9 @@ using namespace std;
 
 const int MAX_N = 1000006;
 const long long M = 1e9 + 7;
-const long long B = 233;
+const long long B = 9973;
 long long power[MAX_N];
 long long hashs[MAX_N];
-
-/*
-inline int getHash(long long arr[], int l, int r)
-{
-    int ret = M + arr[r];
-    if (0 < l)
-        ret -= (arr[l - 1] * power[r - l + 1]) % M;
-    ret %= M;
-
-    return ret;
-}
-*/
 
 #define getHash(RET, ARR, L, R)                     \
     RET = M + ARR[R];                               \
@@ -69,6 +57,7 @@ int main()
     // 默认按空格分割
     while (getline(cin, item, ' '))
     {
+        item.erase(remove(item.begin(), item.end(), '\n'), item.end());
         words.push_back(item);
     }
 
@@ -115,7 +104,6 @@ int main()
             if (0 < max)
             {
                 ans.resize(len0);
-//                ans = ans.substr(0, len0);
                 ans.append(words[1], max, len1 - max);
 
                 initHash(ans, hashs, len0);
@@ -152,7 +140,6 @@ int main()
             if (0 < max)
             {
                 ans.resize(len0);
-//                ans = ans.substr(0, len0);
                 ans.append(words[i], max, len1 - max);
 
                 initHash(ans, hashs, len0);

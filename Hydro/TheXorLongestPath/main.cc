@@ -1,0 +1,101 @@
+// https://hydro.ac/p/bzoj-P1954
+
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+
+using namespace std;
+
+const int MAX_NODES = 300000;
+const int MAX_N = 100005;
+
+int cnt;
+int nex[MAX_NODES][2];
+
+/*
+void insert(const char *s, int l)
+{ // 插入字符串
+    int p = 0;
+    for (int i = 0; i < l; i++)
+    {
+        int c = s[i] - 'a';
+        if (!nex[p][c])
+            nex[p][c] = ++cnt; // 如果没有，就添加结点
+        p = nex[p][c];
+    }
+    exist[p] = true;
+}
+
+int find(const char *s, int l)
+{ // 查找字符串
+    int p = 0;
+    for (int i = 0; i < l; i++)
+    {
+        int c = s[i] - 'a';
+        if (!nex[p][c])
+            return 0;
+        p = nex[p][c];
+    }
+
+    if (exist[p])
+    {
+        found[p]++;
+    }
+    return found[p];
+}
+*/
+
+vector<int> children[MAX_N];
+vector<int> weights[MAX_N];
+int lenToRoot[MAX_N];
+
+void getLen(int curr, int parent)
+{
+    for (size_t i = 0; i < children->size(); i++)
+    {
+        int child = children[curr][i];
+        if (child != parent)
+        {
+            int w = weights[curr][i];
+            lenToRoot[child] = lenToRoot[curr] ^ w;
+
+            getLen(child, curr);
+        }
+    }
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int n;
+    cin >> n;
+
+    for (size_t i = 0; i < n - 1; i++)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+
+        children[u].push_back(v);
+        children[v].push_back(u);
+
+        weights[u].push_back(w);
+        weights[v].push_back(w);
+    }
+
+    int root = 1;
+    getLen(root, 0);
+
+    return 0;
+}

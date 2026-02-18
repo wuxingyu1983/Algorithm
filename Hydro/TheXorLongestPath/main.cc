@@ -16,44 +16,44 @@
 
 using namespace std;
 
-const int MAX_NODES = 300000;
+const int MAX_NODES = 3000000;
 const int MAX_N = 100005;
 
 int cnt;
 int nex[MAX_NODES][2];
 
-/*
-void insert(const char *s, int l)
+void insert(const int w)
 { // 插入字符串
     int p = 0;
-    for (int i = 0; i < l; i++)
+    for (int i = 0; i < 31; i++)
     {
-        int c = s[i] - 'a';
+        int c = (w >> i) & 1;
         if (!nex[p][c])
             nex[p][c] = ++cnt; // 如果没有，就添加结点
         p = nex[p][c];
     }
-    exist[p] = true;
 }
 
-int find(const char *s, int l)
-{ // 查找字符串
+int findMax(const int w)
+{
+    int ret = 0;
     int p = 0;
-    for (int i = 0; i < l; i++)
+    for (int i = 0; i < 31; i++)
     {
-        int c = s[i] - 'a';
-        if (!nex[p][c])
-            return 0;
-        p = nex[p][c];
+        int c = (w >> i) & 1;
+        if (0 == nex[p][1 - c])
+        {
+            p = nex[p][c];
+        }
+        else
+        {
+            ret |= 1 << i;
+            p = nex[p][1 - c];
+        }
     }
 
-    if (exist[p])
-    {
-        found[p]++;
-    }
-    return found[p];
+    return ret;
 }
-*/
 
 vector<int> children[MAX_N];
 vector<int> weights[MAX_N];
@@ -96,6 +96,24 @@ int main()
 
     int root = 1;
     getLen(root, 0);
+
+    for (size_t i = 2; i <= n; i++)
+    {
+        insert(lenToRoot[i]);
+    }
+
+    int max = 0;
+
+    for (size_t i = 2; i <= n; i++)
+    {
+        int tmp = findMax(lenToRoot[i]);
+        if (tmp > max)
+        {
+            max = tmp;
+        }
+    }
+
+    cout << max << "\n";
 
     return 0;
 }

@@ -16,9 +16,9 @@
 
 using namespace std;
 
-const int MAX_N = 525100;
-const int MAX_NODES = 20 * MAX_N;
+const int MAX_N = 1000000;
 const int MAXH = 20;
+const int MAX_NODES = MAXH * MAX_N;
 int ch[MAX_NODES][2], w[MAX_NODES], xorv[MAX_NODES], root[MAX_N];
 int tot = 0;
 
@@ -127,13 +127,10 @@ int main()
     }
     
     long long sum = 0;
-/*
     for (size_t i = 1; i <= n; i++)
     {
-        insert(root[i], vs[i], 1);
-        sum += xorv[root[i]];
+        insert(root[i], vs[i], 0);
     }
-*/
 
     func(1, 0, sum);
 

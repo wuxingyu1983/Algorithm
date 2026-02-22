@@ -19,7 +19,7 @@ using namespace std;
 const int MAX_N = 525100;
 const int MAX_NODES = 20 * MAX_N;
 const int MAXH = 20;
-int ch[MAX_NODES][2], w[MAX_NODES], xorv[MAX_NODES];
+int ch[MAX_NODES][2], w[MAX_NODES], xorv[MAX_NODES], root[MAX_N];
 int tot = 0;
 
 int vs[MAX_N];
@@ -87,6 +87,23 @@ int merge(int a, int b)
     return a;
 }
 
+void func(int curr, int parent, long long &sum)
+{
+    for (size_t i = 0; i < children[curr].size(); i++)
+    {
+        int child = children[curr][i];
+        if (child != parent)
+        {
+            func(child, curr, sum);
+
+            addall(root[child]);
+            merge(root[curr], root[child]);
+        }
+    }
+    
+    sum += xorv[root[curr]];
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -109,7 +126,18 @@ int main()
         children[i].push_back(parent);
     }
     
+    long long sum = 0;
+/*
+    for (size_t i = 1; i <= n; i++)
+    {
+        insert(root[i], vs[i], 1);
+        sum += xorv[root[i]];
+    }
+*/
 
+    func(1, 0, sum);
+
+    cout << sum << "\n";
 
     return 0;
 }

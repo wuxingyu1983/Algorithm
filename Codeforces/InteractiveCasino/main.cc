@@ -17,27 +17,38 @@
 using namespace std;
 
 const int MAX_N = 1048576;
+const long long M = 1e9 + 7;
+const long long B = 233;
+long long power[2 * MAX_N + 2];
+long long hashs[2 * MAX_N + 2];
+string strRes;
 
-long long nxt[MAX_N];
-char wins[MAX_N];   // 0 - loss, 1 - win
-string strHash;
+int getHash(long long arr[], int l, int r)
+{
+    int ret = M + arr[r];
+    if (0 < l)
+        ret -= (arr[l - 1] * power[r - l + 1]) % M;
+    ret %= M;
+
+    return ret;
+}
+
+void initHash(const string &str, long long arr[])
+{
+    arr[0] = str.at(0);
+
+    for (int i = 1; i < str.length(); i++)
+    {
+        arr[i] = str.at(i) + arr[i - 1] * B;
+        arr[i] %= M;
+    }
+}
 
 int main()
 {
     // init
     {
-        for (size_t i = 0; i < MAX_N; i++)
-        {
-            int cnt = __builtin_popcount(i);
-            if (1 & cnt)
-            {
-                // odd
-                wins[i] = 1;
-            }
-        }
-
-        strHash.reserve(2 * MAX_N + 2);
-        memset(nxt, -1, sizeof(nxt));
+        strRes.reserve(2 * MAX_N + 2);
 
         long long x = 0;
         for (size_t i = 0; i < MAX_N; i++)
@@ -48,14 +59,26 @@ int main()
             if (1 & x)
             {
                 // odd
-                strHash += '1';
+                strRes += '1';
             }
             else
             {
-                strHash += '0';
+                strRes += '0';
             }
         }
+
+        strRes += strRes;
+
+        power[0] = 1;
+        for (int i = 1; i < 2 * MAX_N; i++)
+        {
+            power[i] = (power[i - 1] * B) % M;
+        }
+
+        initHash(strRes, hashs);
     }
+
+    
 
     return 0;
 }

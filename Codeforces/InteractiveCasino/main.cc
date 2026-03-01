@@ -83,7 +83,7 @@ int main()
         initHash(strRes, hashs1, M1);
         initHash(strRes, hashs2, M2);
     }
-
+/*
     {
         // get min len
         int l = 3, r = MAX_N, len;
@@ -118,6 +118,65 @@ int main()
         }
 
         cout << "min len is " << len << endl;
+    }
+*/
+    int now, last;
+    scanf("%d", &now);
+    last = now;
+    string strWins;
+    for (int loop = 0; loop < 38; loop++)
+    {
+        puts("1");
+        fflush(stdout);
+        scanf("%d", &now);
+
+        if (-1 == now)
+            return 0;
+        else if (now < last)
+            strWins += '0';
+        else
+            strWins += '1';
+        last = now;
+    }
+
+    unsigned long long hash38_1 = 0, hash38_2 = 0;
+    hash38_1 = hash38_2 = strWins.at(0);
+    for (size_t i = 1; i < 38; i++)
+    {
+        hash38_1 = strWins.at(i) + hash38_1 * B;
+        hash38_1 %= M1;
+        hash38_2 = strWins.at(i) + hash38_2 * B;
+        hash38_2 %= M2;
+    }
+
+    int start = 0;
+    for (start = 0; start < MAX_N; start++)
+    {
+        unsigned long long hash1 = getHash(hashs1, power1, start, start + 37, M1);
+        unsigned long long hash2 = getHash(hashs2, power2, start, start + 37, M2);
+
+        if (hash1 == hash38_1 && hash2 == hash38_2)
+            break;
+    }
+
+    start += 38;
+    while (true)
+    {
+        if ('1' == strRes[start])
+        {
+            printf("%d\n", 200 - now);
+        }
+        else
+        {
+            puts("1");
+        }
+        fflush(stdout);
+
+        scanf("%d", &now);
+        if (now == -1)
+            break;
+
+        start ++;
     }
 
     return 0;

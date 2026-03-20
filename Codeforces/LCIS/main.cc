@@ -21,6 +21,8 @@ const int maxn = MAX_NM * 3;
 const int inf = 1e8;
 int n, q, mx[maxn][maxn], mxidx[maxn][maxn];
 int fg, xo, mxidxans, mxans;
+int preIdx[MAX_NM][MAX_NM];
+int len[MAX_NM][MAX_NM];
 
 void upd2(int l, int r, int o, int x, int y, int v)
 {
@@ -112,27 +114,88 @@ void qy1(int l, int r, int o, int lx, int rx, int ly, int ry)
 
 int main()
 {
-    int n, m;
-    vector<int> vecF;
-    vector<int> vecS;
+    int tmpN, tmpM;
+    vector<long long> vecF;
+    vector<long long> vecS;
 
-    cin >> n;
-    for (size_t i = 0; i < n; i++)
+    cin >> tmpN;
+    for (size_t i = 0; i < tmpN; i++)
     {
-        int tmp;
+        long long tmp;
         cin >> tmp;
         vecF.push_back(tmp);
     }
 
-    cin >> m;
-    for (size_t i = 0; i < m; i++)
+    cin >> tmpM;
+    for (size_t i = 0; i < tmpM; i++)
     {
-        int tmp;
+        long long tmp;
         cin >> tmp;
         vecS.push_back(tmp);
     }
     
+    n = max(tmpN, tmpM);
 
+    vector<long long> vxy;
+    for (size_t i = 0; i < tmpN; i++)
+    {
+        for (size_t j = 0; j < tmpM; j++)
+        {
+            if (vecF[i] == vecS[j])
+            {
+                vxy.push_back((vecF[i] << 18) | ((i + 1) << 9) | (j + 1));
+            }
+        }
+    }
+    
+    // sort
+    sort(vxy.begin(), vxy.end());
+
+    int maxLen = 0;
+    int maxIdx = 0;
+    long long lastV = -1;
+    int beginPos = -1;
+
+    for (size_t i = 0; i < vxy.size(); i++)
+    {
+        long long v = vxy[i] >> 18;
+        int x = (vxy[i] >> 9) & 511;
+        int y = vxy[i] & 511;
+
+        if (lastV != v)
+        {
+            if (0 <= lastV)
+            {
+                while (beginPos < i)
+                {
+                    int tmpX = (vxy[beginPos] >> 9) & 511;
+                    int tmpY = vxy[vxy[beginPos]] & 511;
+
+                    upd1(1, n, 1, tmpX, tmpY, len[tmpX][tmpY]);
+
+                    beginPos++;
+                }
+            }
+
+            beginPos = i;
+        }
+
+        lastV = v;
+
+        // find max in [1 - (x - 1)][1 - (y - 1)]
+        qy1(1, n, 1, 1, x - 1, 1, y - 1);
+
+        int tmpLen = 1 + mxans;
+        len[x][y] = tmpLen;
+        preIdx[x][y] = mxidxans;
+
+        if (tmpLen > maxLen)
+        {
+            maxLen = tmpLen;
+            maxIdx = (x << 9) | y;
+        }
+    }
+    
 
     return 0;
 }

@@ -169,7 +169,7 @@ int main()
                 while (beginPos < i)
                 {
                     int tmpX = (vxy[beginPos] >> 9) & 511;
-                    int tmpY = vxy[vxy[beginPos]] & 511;
+                    int tmpY = vxy[beginPos] & 511;
 
                     upd1(1, n, 1, tmpX, tmpY, len[tmpX][tmpY]);
 
@@ -182,8 +182,13 @@ int main()
 
         lastV = v;
 
+        mxans = 0;
+        mxidxans = 0;
         // find max in [1 - (x - 1)][1 - (y - 1)]
-        qy1(1, n, 1, 1, x - 1, 1, y - 1);
+        if (1 < x && 1 < y)
+        {
+            qy1(1, n, 1, 1, x - 1, 1, y - 1);
+        }
 
         int tmpLen = 1 + mxans;
         len[x][y] = tmpLen;
@@ -196,6 +201,23 @@ int main()
         }
     }
     
+    vector<int> ans;
+    for (size_t i = 0; i < maxLen; i++)
+    {
+        int x = maxIdx >> 9;
+        int y = maxIdx & 511;
+
+        ans.push_back(vecF[x - 1]);
+
+        maxIdx = preIdx[x][y];
+    }
+    
+    cout << maxLen << endl;
+    for (int i = ans.size() - 1; i >= 0; i--)
+    {
+        cout << ans[i] << ' ';
+    }
+    cout << endl;
 
     return 0;
 }

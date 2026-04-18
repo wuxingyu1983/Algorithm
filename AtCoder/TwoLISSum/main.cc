@@ -100,7 +100,7 @@ int main()
     vector<int> da(n * 4 + 10, 0);
     vector<int> db(n * 4 + 10, 0);
     
-    int max = 0;
+    int rslt = 0;
     int maxA = 0, maxB = 0;
 
     for (size_t i = 0; i < n; i++)
@@ -128,7 +128,7 @@ int main()
     }
 
     // get origin LIS(A) + LIS(B)
-    max = maxA + maxB;
+    rslt = maxA + maxB;
     
     da.assign(da.size(), 0);
     db.assign(db.size(), 0);
@@ -140,18 +140,32 @@ int main()
             int tmpA = maxA;
             if (vecA[i] < vecA[i - 1])
             {
+                int maxXY = vecA[i - 1];
+                int aftL = getMax(da, maxXY, n, 1, n, 1);
+                int preL = max(preMaxA[i] + 1, preMaxA[i - 1]);
 
+                if (tmpA < preL + aftL)
+                {
+                    tmpA = preL + aftL;
+                }
             }            
 
             int tmpB = maxB;
             if (vecB[i] < vecB[i - 1])
             {
+                int maxXY = vecB[i - 1];
+                int aftL = getMax(db, maxXY, n, 1, n, 1);
+                int preL = max(preMaxB[i] + 1, preMaxB[i - 1]);
 
+                if (tmpB < preL + aftL)
+                {
+                    tmpB = preL + aftL;
+                }
             }
 
-            if (max < tmpA + tmpB)
+            if (rslt < tmpA + tmpB)
             {
-                max = tmpA + tmpB;
+                rslt = tmpA + tmpB;
             }
         }
 
@@ -164,7 +178,7 @@ int main()
         }
     }
 
-    cout << max << "\n";
+    cout << rslt << "\n";
 
     return 0;
 }

@@ -103,7 +103,6 @@ int main()
     int max = 0;
     int maxA = 0, maxB = 0;
 
-    // get origin LIS(A) + LIS(B)
     for (size_t i = 0; i < n; i++)
     {
         int l = getMax(da, 1, vecA[i], 1, n, 1);
@@ -128,9 +127,42 @@ int main()
         update(db, vecB[i], l + 1, 1, n, 1);
     }
 
+    // get origin LIS(A) + LIS(B)
     max = maxA + maxB;
     
-    
+    da.assign(da.size(), 0);
+    db.assign(db.size(), 0);
+
+    for (int i = n - 1; i >= 0; i--)
+    {
+        if (0 < i)
+        {
+            int tmpA = maxA;
+            if (vecA[i] < vecA[i - 1])
+            {
+
+            }            
+
+            int tmpB = maxB;
+            if (vecB[i] < vecB[i - 1])
+            {
+
+            }
+
+            if (max < tmpA + tmpB)
+            {
+                max = tmpA + tmpB;
+            }
+        }
+
+        {
+            int l = getMax(da, vecA[i], n, 1, n, 1);
+            update(da, vecA[i], l + 1, 1, n, 1);
+
+            l = getMax(db, vecB[i], n, 1, n, 1);
+            update(db, vecB[i], l + 1, 1, n, 1);
+        }
+    }
 
     cout << max << "\n";
 

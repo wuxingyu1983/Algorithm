@@ -107,13 +107,29 @@ int main()
     for (size_t i = 0; i < n; i++)
     {
         int l = getMax(da, 1, vecA[i], 1, n, 1);
-        preMaxA[i] = l;
         if (maxA < l + 1)
         {
             maxA = l + 1;
         }
 
+        preMaxA[i] = l + 1;
+        update(da, vecA[i], l + 1, 1, n, 1);
     }
+    
+    for (size_t i = 0; i < n; i++)
+    {
+        int l = getMax(db, 1, vecB[i], 1, n, 1);
+        if (maxB < l + 1)
+        {
+            maxB = l + 1;
+        }
+
+        preMaxB[i] = l + 1;
+        update(db, vecB[i], l + 1, 1, n, 1);
+    }
+
+    max = maxA + maxB;
+    
     
 
     cout << max << "\n";

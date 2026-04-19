@@ -16,10 +16,10 @@
 
 using namespace std;
 
+// 最优解，A 转换成 全部 递增的，B 的 LIS(B) + n
+
 const int MAX_N = 300001;
 vector<int> vecA, vecB;
-int preMaxA[MAX_N]; // 顺序处理 vecA, idx 时，之前以1 —— vecA[idx]为结尾的 LIS 的最大长度
-int preMaxB[MAX_N];
 
 // segment tree func
 int update(vector<int> &d, int idx, int c, int s, int t, int p)
@@ -97,88 +97,25 @@ int main()
         vecB.push_back(b);
     }
 
-    vector<int> da(n * 4 + 10, 0);
-    vector<int> db(n * 4 + 10, 0);
-    
-    int rslt = 0;
-    int maxA = 0, maxB = 0;
-
+    vector<int> vec(n, 0);
     for (size_t i = 0; i < n; i++)
     {
-        int l = getMax(da, 1, vecA[i], 1, n, 1);
-        if (maxA < l + 1)
-        {
-            maxA = l + 1;
-        }
-
-        preMaxA[i] = l + 1;
-        update(da, vecA[i], l + 1, 1, n, 1);
+        vec[vecA[i] - 1] = vecB[i];
     }
     
+    int maxB = 0;
+    vector<int> d(n * 4 + 10, 0);
     for (size_t i = 0; i < n; i++)
     {
-        int l = getMax(db, 1, vecB[i], 1, n, 1);
+        int l = getMax(d, 1, vec[i], 1, n, 1);
         if (maxB < l + 1)
         {
             maxB = l + 1;
         }
-
-        preMaxB[i] = l + 1;
-        update(db, vecB[i], l + 1, 1, n, 1);
+        update(d, vec[i], l + 1, 1, n, 1);
     }
 
-    // get origin LIS(A) + LIS(B)
-    rslt = maxA + maxB;
-    
-    da.assign(da.size(), 0);
-    db.assign(db.size(), 0);
-
-    for (int i = n - 1; i >= 0; i--)
-    {
-        if (0 < i)
-        {
-            int tmpA = maxA;
-            if (vecA[i] < vecA[i - 1])
-            {
-                int maxXY = vecA[i - 1];
-                int aftL = getMax(da, maxXY, n, 1, n, 1);
-                int preL = max(preMaxA[i] + 1, preMaxA[i - 1]);
-
-                if (tmpA < preL + aftL)
-                {
-                    tmpA = preL + aftL;
-                }
-            }            
-
-            int tmpB = maxB;
-            if (vecB[i] < vecB[i - 1])
-            {
-                int maxXY = vecB[i - 1];
-                int aftL = getMax(db, maxXY, n, 1, n, 1);
-                int preL = max(preMaxB[i] + 1, preMaxB[i - 1]);
-
-                if (tmpB < preL + aftL)
-                {
-                    tmpB = preL + aftL;
-                }
-            }
-
-            if (rslt < tmpA + tmpB)
-            {
-                rslt = tmpA + tmpB;
-            }
-        }
-
-        {
-            int l = getMax(da, vecA[i], n, 1, n, 1);
-            update(da, vecA[i], l + 1, 1, n, 1);
-
-            l = getMax(db, vecB[i], n, 1, n, 1);
-            update(db, vecB[i], l + 1, 1, n, 1);
-        }
-    }
-
-    cout << rslt << "\n";
+    cout << n + maxB << "\n";
 
     return 0;
 }

@@ -88,7 +88,22 @@ int main()
         vecA[i] = a;
     }
     
-    
+    vector< vector<int> > vertices(n + 1);
+    for (size_t i = 1; i < n; i++)
+    {
+        int u, v;
+        cin >> u >> v;
+
+        vertices[u].push_back(v);
+        vertices[v].push_back(u);
+    }
+
+    vector<int> lis(n + 1, 0);
+
+    for (size_t i = 1; i <= n; i++)
+    {
+        cout << lis[i] << "\n";
+    }
 
     return 0;
 }

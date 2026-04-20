@@ -71,12 +71,34 @@ int getMax(vector<int> &d, int l, int r, int s, int t, int p)
     return max;
 }
 
+int n;
+
+void func(int curr, int parent, vector<int> &d, vector< vector<int> > &vertices, vector<int> &lis, vector<int> &vecA)
+{
+    int a = vecA[curr];
+
+    int l = getMax(d, 1, a - 1, 1, n, 1);
+    int old = getMax(d, a, a, 1, n, 1);
+
+    lis[curr] = l + 1;
+    update(d, a, l + 1, 1, n, 1);
+
+    for (size_t i = 0; i < vertices[curr].size(); i++)
+    {
+        if (parent != vertices[curr][i])
+        {
+            func(vertices[curr][i], curr, d, vertices, lis, vecA);
+        }
+    }
+
+    update(d, a, old, 1, n, 1);
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    int n;
     cin >> n;
 
     vector<int> vecA(n + 1, 0);
@@ -99,6 +121,9 @@ int main()
     }
 
     vector<int> lis(n + 1, 0);
+    vector<int> d(n * 4 + 10, 0);
+
+    func(1, 0, d, vertices, lis, vecA);
 
     for (size_t i = 1; i <= n; i++)
     {

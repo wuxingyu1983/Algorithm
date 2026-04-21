@@ -12,11 +12,11 @@
 #include <set>
 #include <queue>
 #include <stack>
-#include <map>
+#include <unordered_map>
 
 using namespace std;
 
-#define DEBUG 0
+unordered_map<int, int> indexs;
 
 // segment tree func
 // 合并左右子树的最大值
@@ -68,9 +68,9 @@ int getMax(vector<int> &d, int l, int r, int s, int t, int p)
 
 int n;
 
-void func(int curr, int parent, vector<int> &d, vector<vector<int>> &vertices, vector<int> &lis, vector<int> &vecA)
+void func(int curr, int parent, vector<int> &d, vector<vector<int>> &vertices, vector<int> &lis, vector<int> &vec)
 {
-    int a = vecA[curr];
+    int a = indexs[vec[curr]];
 
     int l = getMax(d, 1, a - 1, 1, n, 1);
     int old = getMax(d, a, a, 1, n, 1);
@@ -78,33 +78,15 @@ void func(int curr, int parent, vector<int> &d, vector<vector<int>> &vertices, v
     lis[curr] = l + 1;
     update(d, a, l + 1, 1, n, 1);
 
-#if DEBUG
-    for (size_t i = 1; i <= n; i++)
-    {
-        int l = getMax(d, i, i, 1, n, 1);
-        cout << l << " ";
-    }
-    cout << "\n";
-#endif
-
     for (size_t i = 0; i < vertices[curr].size(); i++)
     {
         if (parent != vertices[curr][i])
         {
-            func(vertices[curr][i], curr, d, vertices, lis, vecA);
+            func(vertices[curr][i], curr, d, vertices, lis, vec);
         }
     }
 
     update(d, a, old, 1, n, 1);
-
-#if DEBUG
-    for (size_t i = 1; i <= n; i++)
-    {
-        int l = getMax(d, i, i, 1, n, 1);
-        cout << l << " ";
-    }
-    cout << "\n";
-#endif
 }
 
 int main()
@@ -115,12 +97,24 @@ int main()
     cin >> n;
 
     vector<int> vecA(n + 1, 0);
+    vector<int> tmp;
     for (size_t i = 1; i <= n; i++)
     {
         int a;
         cin >> a;
 
         vecA[i] = a;
+        tmp.push_back(a);
+    }
+
+    // 去重
+    std::sort(tmp.begin(), tmp.end());  // 先对vector进行排序
+    auto last = std::unique(tmp.begin(), tmp.end());  // 去除重复的元素
+    tmp.erase(last, tmp.end());  // 删除多余的元素
+
+    for (size_t i = 0; i < tmp.size(); i++)
+    {
+        indexs.insert({tmp[i], i + 1});
     }
 
     vector<vector<int>> vertices(n + 1);

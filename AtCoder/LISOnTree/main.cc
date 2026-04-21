@@ -41,29 +41,20 @@ void update(vector<int> &tree, int idx, int c, int l, int r, int p)
     push_up(tree, p);
 }
 
-int getMax(vector<int> &d, int l, int r, int s, int t, int p)
+// 区间查询：查询[L, R]内的最大值
+int getMax(vector<int> &tree, int L, int R, int l, int r, int p)
 {
-    if (l > r)
-    {
+    if (L > R)
         return 0;
-    }
-    if (l <= s && t <= r)
-        return d[p];
-    int m = s + ((t - s) >> 1);
-    int max = 0;
-    if (l <= m)
-    {
-        max = getMax(d, l, r, s, m, p * 2);
-    }
-    if (r > m)
-    {
-        int tmp = getMax(d, l, r, m + 1, t, p * 2 + 1);
-        if (tmp > max)
-        {
-            max = tmp;
-        }
-    }
-    return max;
+    if (L <= l && r <= R)
+        return tree[p]; // 完全覆盖
+    int mid = (l + r) >> 1;
+    int res = 0;
+    if (L <= mid)
+        res = max(res, getMax(tree, L, R, l, mid, p << 1));
+    if (R > mid)
+        res = max(res, getMax(tree, L, R, mid + 1, r, p << 1 | 1));
+    return res;
 }
 
 int n;

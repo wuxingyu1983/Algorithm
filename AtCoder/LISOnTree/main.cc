@@ -16,34 +16,29 @@
 
 using namespace std;
 
+#define DEBUG 0
 
 // segment tree func
-int update(vector<int> &d, int idx, int c, int s, int t, int p)
+// 合并左右子树的最大值
+void push_up(vector<int> &tree, int p)
 {
-    if (idx == s && idx == t)
+    tree[p] = max(tree[p << 1], tree[p << 1 | 1]);
+}
+
+void update(vector<int> &tree, int idx, int c, int l, int r, int p)
+{
+    if (idx == l && idx == r)
     {
-        d[p] = c;
-        return c;
-    }
-    int m = s + ((t - s) >> 1);
-    if (idx <= m)
-    {
-        unsigned long long tmp = update(d, idx, c, s, m, p * 2);
-        if (tmp > d[p])
-        {
-            d[p] = tmp;
-        }
-    }
-    if (idx > m)
-    {
-        unsigned long long tmp = update(d, idx, c, m + 1, t, p * 2 + 1);
-        if (tmp > d[p])
-        {
-            d[p] = tmp;
-        }
+        tree[p] = c;
+        return;
     }
 
-    return d[p];
+    int mid = (l + r) >> 1;
+    if (idx <= mid)
+        update(tree, idx, c, l, mid, p << 1);
+    else
+        update(tree, idx, c, mid + 1, r, p << 1 | 1);
+    push_up(tree, p);
 }
 
 int getMax(vector<int> &d, int l, int r, int s, int t, int p)
@@ -73,7 +68,7 @@ int getMax(vector<int> &d, int l, int r, int s, int t, int p)
 
 int n;
 
-void func(int curr, int parent, vector<int> &d, vector< vector<int> > &vertices, vector<int> &lis, vector<int> &vecA)
+void func(int curr, int parent, vector<int> &d, vector<vector<int>> &vertices, vector<int> &lis, vector<int> &vecA)
 {
     int a = vecA[curr];
 
@@ -82,6 +77,15 @@ void func(int curr, int parent, vector<int> &d, vector< vector<int> > &vertices,
 
     lis[curr] = l + 1;
     update(d, a, l + 1, 1, n, 1);
+
+#if DEBUG
+    for (size_t i = 1; i <= n; i++)
+    {
+        int l = getMax(d, i, i, 1, n, 1);
+        cout << l << " ";
+    }
+    cout << "\n";
+#endif
 
     for (size_t i = 0; i < vertices[curr].size(); i++)
     {
@@ -92,6 +96,15 @@ void func(int curr, int parent, vector<int> &d, vector< vector<int> > &vertices,
     }
 
     update(d, a, old, 1, n, 1);
+
+#if DEBUG
+    for (size_t i = 1; i <= n; i++)
+    {
+        int l = getMax(d, i, i, 1, n, 1);
+        cout << l << " ";
+    }
+    cout << "\n";
+#endif
 }
 
 int main()
@@ -109,8 +122,8 @@ int main()
 
         vecA[i] = a;
     }
-    
-    vector< vector<int> > vertices(n + 1);
+
+    vector<vector<int>> vertices(n + 1);
     for (size_t i = 1; i < n; i++)
     {
         int u, v;

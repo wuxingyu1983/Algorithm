@@ -140,7 +140,7 @@ int main()
                 int old = getMax(d, a, a, 1, n, 1);
                 olds.push(old);
 
-                lis[vertices[curr][child]] = l + 1;
+                lis[vertices[curr][child]] = max(l + 1, lis[curr]);
                 update(d, a, l + 1, 1, n, 1);
 
                 currs.push(vertices[curr][child]);

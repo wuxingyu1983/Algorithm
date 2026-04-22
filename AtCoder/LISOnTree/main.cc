@@ -59,27 +59,6 @@ int getMax(vector<int> &tree, int L, int R, int l, int r, int p)
 
 int n;
 
-void func(int curr, int parent, vector<int> &d, vector<vector<int>> &vertices, vector<int> &lis, vector<int> &vec)
-{
-    int a = indexs[vec[curr]];
-
-    int l = getMax(d, 1, a - 1, 1, n, 1);
-    int old = getMax(d, a, a, 1, n, 1);
-
-    lis[curr] = l + 1;
-    update(d, a, l + 1, 1, n, 1);
-
-    for (size_t i = 0; i < vertices[curr].size(); i++)
-    {
-        if (parent != vertices[curr][i])
-        {
-            func(vertices[curr][i], curr, d, vertices, lis, vec);
-        }
-    }
-
-    update(d, a, old, 1, n, 1);
-}
-
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -121,7 +100,54 @@ int main()
     vector<int> lis(n + 1, 0);
     vector<int> d(n * 4 + 10, 0);
 
-    func(1, 0, d, vertices, lis, vecA);
+    vector<int> children(n + 1, 0);
+    stack<int> currs, parents, olds;
+    currs.push(1);
+    parents.push(0);
+
+    // 初始化 root(1)
+    lis[1] = 1;
+    update(d, indexs[vecA[1]], 1, 1, n, 1);
+    olds.push(0);
+
+    while (currs.size() > 0)
+    {
+        int curr = currs.top();
+        int parent = parents.top();
+
+        int child = children[curr];
+
+        if (child >= vertices[curr].size())
+        {
+            // 该节点 curr 的所有子节点都已经处理完了
+            int a = indexs[vecA[curr]];
+
+            int old = olds.top();
+            update(d, a, old, 1, n, 1);
+
+            olds.pop();
+            currs.pop();
+            parents.pop();
+        }
+        else
+        {
+            // 下一个要处理的子节点 child + 1
+            children[curr] = child + 1;
+            if (parent != vertices[curr][child])
+            {
+                int a = indexs[vecA[vertices[curr][child]]];
+                int l = getMax(d, 1, a - 1, 1, n, 1);
+                int old = getMax(d, a, a, 1, n, 1);
+                olds.push(old);
+
+                lis[vertices[curr][child]] = l + 1;
+                update(d, a, l + 1, 1, n, 1);
+
+                currs.push(vertices[curr][child]);
+                parents.push(curr);
+            }
+        }
+    }
 
     for (size_t i = 1; i <= n; i++)
     {

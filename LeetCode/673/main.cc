@@ -14,20 +14,21 @@
 
 using namespace std;
 
-const int MAX_N = 2001;
-
-unordered_map<int, int> indexs;
-
-// root 表示整棵线段树的根结点；cnt 表示当前结点个数
-int cnt, root[MAX_N], lis[MAX_N];
-int sum[MAX_N * 2 * 11], ls[MAX_N * 2 * 11], rs[MAX_N * 2 * 11];
-
 class Solution
 {
 public:
     int findNumberOfLIS(vector<int> &nums)
     {
         int ret = 0;
+        unordered_map<int, int> indexs;
+
+        cnt = 0;
+        const int MAX_N = 2001;
+        // root 表示整棵线段树的根结点；cnt 表示当前结点个数
+        root.resize(MAX_N, 0);
+        sum.resize(MAX_N * 2 * 11, 0);
+        ls.resize(MAX_N * 2 * 11, 0);
+        rs.resize(MAX_N * 2 * 11, 0);
 
         vector<int> tmp(nums);
         // 去重
@@ -56,6 +57,10 @@ public:
 
             // 更新 sum
             int preSum = getSum(root[len], 1, n, 1, idx - 1);
+            if (0 == preSum)
+            {
+                preSum = 1;
+            }
             updateSum(root[len + 1], 1, n, idx, preSum);
         }
 
@@ -65,6 +70,9 @@ public:
     }
 
 private:
+    int cnt;
+    vector<int> root, sum, ls, rs;
+
     // 用法：update(root, 1, n, x, f); 其中 x 为待修改节点的编号
     void updateSum(int &p, int s, int t, int x, int f)
     { // 引用传参

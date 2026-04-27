@@ -16,9 +16,9 @@
 
 using namespace std;
 
-const int MAX_N = 100003;
+const int MAX_N = 100000;
 int cnt;
-int root[MAX_N], ls[MAX_N * 17], rs[MAX_N * 17];
+int root[MAX_N + 1], ls[MAX_N * 17], rs[MAX_N * 17];
 long long sum[MAX_N * 17];
 
 // 用法：update(root, 1, n, x, f); 其中 x 为待修改节点的编号
@@ -121,25 +121,25 @@ int main()
         int idx = nums[i];
 
         // 获取 1 - (idx - 1) 的最长len
-        int len = getMax(d, 1, idx - 1, 1, n, 1);
-        updateMax(d, idx, len + 1, 1, n, 1);
+        int len = getMax(d, 1, idx - 1, 1, MAX_N, 1);
+        updateMax(d, idx, len + 1, 1, MAX_N, 1);
 
         lens[i] = len + 1;
 
         maxLen = max(maxLen, len + 1);
 
         // 更新 sum
-        long long preSum = getSum(root[len], 1, n, 1, idx - 1);
+        long long preSum = getSum(root[len], 1, MAX_N, 1, idx - 1);
         if (0 == preSum)
         {
             preSum = 1;
         }
-        updateSum(root[len + 1], 1, n, idx, preSum);
+        updateSum(root[len + 1], 1, MAX_N, idx, preSum);
 
         counts[i] = preSum;
     }
 
-    long long total = getSum(root[maxLen], 1, n, 1, n);
+    long long total = getSum(root[maxLen], 1, MAX_N, 1, MAX_N);
 
     cnt = 0;
     memset(root, 0, sizeof(root));
@@ -158,18 +158,18 @@ int main()
         int idx = nums[i];
 
         // 获取 (idx + 1) - n 的最长len
-        int len = getMax(d, idx + 1, n, 1, n, 1);
-        updateMax(d, idx, len + 1, 1, n, 1);
+        int len = getMax(d, idx + 1, MAX_N, 1, MAX_N, 1);
+        updateMax(d, idx, len + 1, 1, MAX_N, 1);
 
         rlens[i] = len + 1;
 
         // 更新 sum
-        long long aftSum = getSum(root[len], 1, n, idx + 1, n);
+        long long aftSum = getSum(root[len], 1, MAX_N, idx + 1, MAX_N);
         if (0 == aftSum)
         {
             aftSum = 1;
         }
-        updateSum(root[len + 1], 1, n, idx, aftSum);
+        updateSum(root[len + 1], 1, MAX_N, idx, aftSum);
 
         rcounts[i] = aftSum;
 

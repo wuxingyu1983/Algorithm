@@ -111,6 +111,33 @@ int main()
     }
 
     // 计算 LIS 以及 个数
+    vector<int> d(MAX_N * 17, 0);
+    int maxLen = 0;
+    vector<int> lens(n, 0);
+    vector<long long> counts(n, 0);
+
+    for (size_t i = 0; i < nums.size(); i++)
+    {
+        int idx = nums[i];
+
+        // 获取 1 - (idx - 1) 的最长len
+        int len = getMax(d, 1, idx - 1, 1, n, 1);
+        updateMax(d, idx, len + 1, 1, n, 1);
+
+        lens[i] = len + 1;
+
+        maxLen = max(maxLen, len + 1);
+
+        // 更新 sum
+        long long preSum = getSum(root[len], 1, n, 1, idx - 1);
+        if (0 == preSum)
+        {
+            preSum = 1;
+        }
+        updateSum(root[len + 1], 1, n, idx, preSum);
+
+        counts[i] = preSum;
+    }
 
     return 0;
 }

@@ -16,7 +16,101 @@
 
 using namespace std;
 
+const int MAX_N = 100003;
+int cnt;
+int root[MAX_N], ls[MAX_N * 17], rs[MAX_N * 17];
+long long sum[MAX_N * 17];
+
+// 用法：update(root, 1, n, x, f); 其中 x 为待修改节点的编号
+void updateSum(int &p, int s, int t, int x, long long f)
+{ // 引用传参
+    if (!p)
+        p = ++cnt; // 当结点为空时，创建一个新的结点
+    if (s == t)
+    {
+        sum[p] += f;
+        return;
+    }
+    int m = s + ((t - s) >> 1);
+    if (x <= m)
+        updateSum(ls[p], s, m, x, f);
+    else
+        updateSum(rs[p], m + 1, t, x, f);
+    sum[p] = sum[ls[p]] + sum[rs[p]]; // pushup
+}
+
+// 用法：getSum(root, 1, n, l, r);
+long long getSum(int p, int s, int t, int l, int r)
+{
+    if (!p)
+        return 0; // 如果结点为空，返回 0
+    if (s >= l && t <= r)
+        return sum[p];
+    long long ans = 0;
+    int m = s + ((t - s) >> 1);
+    if (l <= m)
+        ans += getSum(ls[p], s, m, l, r);
+    if (r > m)
+        ans += getSum(rs[p], m + 1, t, l, r);
+    return ans;
+}
+
+// 合并左右子树的最大值
+void push_up(vector<int> &tree, int p)
+{
+    tree[p] = max(tree[p << 1], tree[p << 1 | 1]);
+}
+
+void updateMax(vector<int> &tree, int idx, int c, int l, int r, int p)
+{
+    if (idx == l && idx == r)
+    {
+        tree[p] = c;
+        return;
+    }
+
+    int mid = (l + r) >> 1;
+    if (idx <= mid)
+        updateMax(tree, idx, c, l, mid, p << 1);
+    else
+        updateMax(tree, idx, c, mid + 1, r, p << 1 | 1);
+    push_up(tree, p);
+}
+
+// 区间查询：查询[L, R]内的最大值
+int getMax(vector<int> &tree, int L, int R, int l, int r, int p)
+{
+    if (L > R)
+        return 0;
+    if (L <= l && r <= R)
+        return tree[p]; // 完全覆盖
+    int mid = (l + r) >> 1;
+    int res = 0;
+    if (L <= mid)
+        res = max(res, getMax(tree, L, R, l, mid, p << 1));
+    if (R > mid)
+        res = max(res, getMax(tree, L, R, mid + 1, r, p << 1 | 1));
+    return res;
+}
+
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int n;
+    cin >> n;
+
+    vector<int> nums;
+    for (size_t i = 0; i < n; i++)
+    {
+        int a;
+        cin >> a;
+
+        nums.push_back(a);
+    }
+
+    // 计算 LIS 以及 个数
+
     return 0;
 }

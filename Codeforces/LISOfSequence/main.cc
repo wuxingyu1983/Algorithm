@@ -16,10 +16,11 @@
 
 using namespace std;
 
-const int MAX_N = 100000;
+const int MOD = 100000007;
+const int MAX_N = 100007;
 int cnt;
-int root[MAX_N + 1], ls[MAX_N * 17], rs[MAX_N * 17];
-long long sum[MAX_N * 17];
+int root[MAX_N + 1], ls[MAX_N * 18], rs[MAX_N * 18];
+long long sum[MAX_N * 18];
 
 // 用法：update(root, 1, n, x, f); 其中 x 为待修改节点的编号
 void updateSum(int &p, int s, int t, int x, long long f)
@@ -29,6 +30,7 @@ void updateSum(int &p, int s, int t, int x, long long f)
     if (s == t)
     {
         sum[p] += f;
+        sum[p] %= MOD;
         return;
     }
     int m = s + ((t - s) >> 1);
@@ -37,6 +39,7 @@ void updateSum(int &p, int s, int t, int x, long long f)
     else
         updateSum(rs[p], m + 1, t, x, f);
     sum[p] = sum[ls[p]] + sum[rs[p]]; // pushup
+    sum[p] %= MOD;
 }
 
 // 用法：getSum(root, 1, n, l, r);
@@ -52,6 +55,7 @@ long long getSum(int p, int s, int t, int l, int r)
         ans += getSum(ls[p], s, m, l, r);
     if (r > m)
         ans += getSum(rs[p], m + 1, t, l, r);
+    ans %= MOD;
     return ans;
 }
 
@@ -111,7 +115,7 @@ int main()
     }
 
     // 计算 LIS 以及 个数
-    vector<int> d(MAX_N * 17, 0);
+    vector<int> d(MAX_N * 18, 0);
     int maxLen = 0;
     vector<int> lens(n, 0);
     vector<long long> counts(n, 0);
@@ -149,7 +153,7 @@ int main()
 
     vector<int> ret(n, 0);
 
-    d.assign(MAX_N * 17, 0);
+    d.assign(MAX_N * 18, 0);
     vector<int> rlens(n, 0);
     vector<long long> rcounts(n, 0);
 
@@ -175,7 +179,7 @@ int main()
 
         if (maxLen + 1 == lens[i] + rlens[i])
         {
-            if (total == counts[i] * rcounts[i])
+            if (total == ((counts[i] * rcounts[i]) % MOD))
             {
                 ret[i] = 3;
             }

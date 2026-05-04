@@ -110,23 +110,66 @@ int main()
 
     vector<long long> tree(MAX_HW * 18, 0);
     int maxLen = 0;
-    long long maxVal = 0;
+    long long maxKey = 0;
 
     for (size_t i = 0; i < cells.size(); i++)
     {
         // get MAX from col 1 - cells[i].c
         long long val = getMax(tree, 1, cells[i].c, 1, MAX_HW, 1);
         int preLen = (val >> (2 * BITS)) & MASK;
-        if (maxLen < preLen + 1)
-        {
-            maxLen = preLen + 1;
-            maxVal = val;
-        }
 
         long long key = (((long long)cells[i].r) << BITS) + cells[i].c;
         froms.insert({key, val & MASK2X});
+
+        if (maxLen < preLen + 1)
+        {
+            maxLen = preLen + 1;
+            maxKey = key;
+        }
     }
     
+    cout << maxLen << "\n";
+    long long curr = maxKey;
+    stack<long long> path;
+    
+    while (0 < curr)
+    {
+        path.push(curr);
+        curr = froms[curr];
+    }
+
+    int fromR = 1, fromC = 1;
+    while (0 < path.size())
+    {
+        long long v = path.top();
+        int r = v >> BITS;
+        int c = v & MASK;
+
+        for (size_t i = fromR + 1; i <= r; i++)
+        {
+            cout << "D";
+        }
+
+        for (size_t i = fromC + 1; i <= c; i++)
+        {
+            cout << "R";
+        }
+        
+        fromR = r;
+        fromC = c;
+
+        path.pop();
+    }
+
+    for (size_t i = fromR + 1; i <= h; i++)
+    {
+        cout << "D";
+    }
+
+    for (size_t i = fromC + 1; i <= w; i++)
+    {
+        cout << "R";
+    }
 
     return 0;
 }

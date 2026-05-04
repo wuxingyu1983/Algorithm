@@ -18,7 +18,7 @@ using namespace std;
 
 const int MAX_HW = 200000;
 const int MASK = 262143;
-const long long MASK2X = 2 ^ 36 - 1;
+const long long MASK2X = ((long long)1 << 36) - 1;
 const int BITS = 18;
 unordered_map<long long, long long> froms;
 
@@ -126,6 +126,9 @@ int main()
             maxLen = preLen + 1;
             maxKey = key;
         }
+
+        long long newVal = ((long long)(preLen + 1) << (2 * BITS)) + key;
+        updateMax(tree, cells[i].c, newVal, 1, MAX_HW, 1);
     }
     
     cout << maxLen << "\n";
@@ -170,6 +173,8 @@ int main()
     {
         cout << "R";
     }
+
+    cout << "\n";
 
     return 0;
 }

@@ -18,6 +18,7 @@ using namespace std;
 
 const int MAX_HW = 200000;
 const int MASK = 262143;
+const long long MASK2X = 2 ^ 36 - 1;
 const int BITS = 18;
 unordered_map<long long, long long> froms;
 
@@ -109,12 +110,21 @@ int main()
 
     vector<long long> tree(MAX_HW * 18, 0);
     int maxLen = 0;
+    long long maxVal = 0;
 
     for (size_t i = 0; i < cells.size(); i++)
     {
         // get MAX from col 1 - cells[i].c
-        int coins = getMax(tree, 1, cells[i].c, 1, MAX_HW, 1);
+        long long val = getMax(tree, 1, cells[i].c, 1, MAX_HW, 1);
+        int preLen = (val >> (2 * BITS)) & MASK;
+        if (maxLen < preLen + 1)
+        {
+            maxLen = preLen + 1;
+            maxVal = val;
+        }
 
+        long long key = (((long long)cells[i].r) << BITS) + cells[i].c;
+        froms.insert({key, val & MASK2X});
     }
     
 

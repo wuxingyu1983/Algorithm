@@ -104,7 +104,7 @@ int main()
         xs.push_back(x);
     }
     
-    int v;
+    long long v;
     cin >> v;
 
     // sort
@@ -121,7 +121,58 @@ int main()
         xToIdx.insert({xs[i], i + 1});
     }
 
+    vector<int> tree(MAX_N * 17, 0);
 
+    int rslt = 0;
+    for (size_t i = 0; i < n; i++)
+    {
+        long long x = events[i].x;
+        long long t = events[i].t;
+
+        long long l = x - t * v;
+        long long r = x + t * v;
+
+        // l >=
+        int idxL = 0;
+        {
+            auto it = lower_bound(xs.begin(), xs.end(), l);
+            if (it != xs.end())
+            {
+                idxL = it - xs.begin() + 1;
+            }
+        }
+
+        // < r
+        int idxR = 0;
+        {
+            auto it = upper_bound(xs.begin(), xs.end(), r);
+            if (it != xs.end())
+            {
+                idxR = it - xs.begin();
+            }
+        }
+
+        int preRstl = getMax(tree, idxL, idxR, 1, MAX_N, 1);
+        if (0 < preRstl)
+        {
+            preRstl ++;
+        }
+        else if (l <= 0 && 0 >= r)
+        {
+            preRstl = 1;
+        }
+
+        if (0 < preRstl)
+        {
+            updateMax(tree, xToIdx[events[i].x], preRstl, 1, MAX_N, 1);
+            if (rslt < preRstl)
+            {
+                rslt = preRstl;
+            }
+        }
+    }
+    
+    cout << rslt << "\n";
 
     return 0;
 }

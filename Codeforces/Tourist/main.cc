@@ -52,6 +52,7 @@ int main()
     cin >> n;
 
     vector<Event> events;
+    vector<long long> xs;
     for (size_t i = 0; i < n; i++)
     {
         int x, t;
@@ -62,6 +63,7 @@ int main()
         e.t = t;
 
         events.push_back(e);
+        xs.push_back(x);
     }
     
     int v;
@@ -69,6 +71,17 @@ int main()
 
     // sort
     sort(events.begin(), events.end(), myfunc);
+
+    // x 去重
+    sort(xs.begin(), xs.end());               // 先对vector进行排序
+    auto last = unique(xs.begin(), xs.end()); // 去除重复的元素
+    xs.erase(last, xs.end());                 // 删除多余的元素
+
+    unordered_map<long long, int> xToIdx;
+    for (size_t i = 0; i < xs.size(); i++)
+    {
+        xToIdx.insert({xs[i], i + 1});
+    }
 
     
 

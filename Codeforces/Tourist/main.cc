@@ -24,6 +24,25 @@ public:
     int x, t;
 };
 
+bool myfunc(Event &a, Event &b)
+{
+    bool bRet = false;
+
+    if (a.t < b.t)
+    {
+        bRet = true;
+    }
+    else if (a.t == b.t)
+    {
+        if (a.x < b.x)
+        {
+            bRet = true;
+        }
+    }
+
+    return bRet;
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -47,6 +66,10 @@ int main()
     
     int v;
     cin >> v;
+
+    // sort
+    sort(events.begin(), events.end(), myfunc);
+
     
 
     return 0;

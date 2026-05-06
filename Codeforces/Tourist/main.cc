@@ -136,10 +136,7 @@ int main()
         int idxL = 0;
         {
             auto it = lower_bound(xs.begin(), xs.end(), l);
-            if (it != xs.end())
-            {
-                idxL = it - xs.begin() + 1;
-            }
+            idxL = it - xs.begin() + 1;
         }
 
         // < r
@@ -150,6 +147,10 @@ int main()
             {
                 idxR = it - xs.begin();
             }
+            else
+            {
+                idxR = xs.size();
+            }
         }
 
         int preRstl = getMax(tree, idxL, idxR, 1, MAX_N, 1);
@@ -157,7 +158,7 @@ int main()
         {
             preRstl ++;
         }
-        else if (l <= 0 && 0 >= r)
+        else if (0 >= l && 0 <= r)
         {
             preRstl = 1;
         }
@@ -172,6 +173,50 @@ int main()
         }
     }
     
+    cout << rslt << " ";
+
+    tree.assign(MAX_N * 17, 0);
+    rslt = 0;
+
+    for (size_t i = 0; i < n; i++)
+    {
+        long long x = events[i].x;
+        long long t = events[i].t;
+
+        long long l = x - t * v;
+        long long r = x + t * v;
+
+        // l >=
+        int idxL = 0;
+        {
+            auto it = lower_bound(xs.begin(), xs.end(), l);
+            idxL = it - xs.begin() + 1;
+        }
+
+        // < r
+        int idxR = 0;
+        {
+            auto it = upper_bound(xs.begin(), xs.end(), r);
+            if (it != xs.end())
+            {
+                idxR = it - xs.begin();
+            }
+            else
+            {
+                idxR = xs.size();
+            }
+        }
+
+        int preRstl = getMax(tree, idxL, idxR, 1, MAX_N, 1);
+        preRstl++;
+
+        updateMax(tree, xToIdx[events[i].x], preRstl, 1, MAX_N, 1);
+        if (rslt < preRstl)
+        {
+            rslt = preRstl;
+        }
+    }
+
     cout << rslt << "\n";
 
     return 0;

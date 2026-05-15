@@ -23,10 +23,9 @@ public:
     node_y * lson;
     node_y * rson;
 
-    node_y()
+    node_y(int _l, int _r) : l(_l), r(_r)
     {
         lson = rson = NULL;
-        l = r = 0;
         res = -1;
     }
 };
@@ -37,10 +36,8 @@ class tree_y
 public:
     node_y root;
 
-    void init(int m)
+    tree_y(int _m) : root(1, _m)
     {
-        root.l = 1;
-        root.r = m;
     }
 
     void update(node_y * now, int y, int k)
@@ -55,9 +52,7 @@ public:
         {
             if (NULL == now->lson)
             {
-                now->lson = new node_y();
-                now->lson->l = now->l;
-                now->lson->r = mid;
+                now->lson = new node_y(now->l, mid);
             }
             update(now->lson, y, k);
         }
@@ -65,9 +60,7 @@ public:
         {
             if (NULL == now->rson)
             {
-                now->rson = new node_y();
-                now->rson->l = mid + 1;
-                now->rson->r = now->r;
+                now->rson = new node_y(mid + 1, now->r);
             }
             update(now->rson, y, k);
         }
@@ -116,9 +109,8 @@ public:
     node_x * lson;
     node_x * rson;
 
-    node_x()
+    node_x(int _l, int _r, int _y) : l(_l), r(_r), tr(_y)
     {
-        l = r = 0;
         lson = rson = NULL;
     }
 };
@@ -127,15 +119,11 @@ class tree_x
 {
 public:
     node_x root;
-    int n;
+    int maxy;
 
-    void init(int _m, int _n)
+    tree_x(int _maxx, int _maxy) : root(1, _maxx, _maxy)
     {
-        root.l = 1;
-        root.r = _m;
-
-        n = _n;
-        root.tr.init(_n);
+        maxy = _maxy;
     }
 
     void update(node_x * now, int x, int y, int k)
@@ -148,11 +136,7 @@ public:
         {
             if (NULL == now->lson)
             {
-                now->lson = new node_x();
-                now->lson->l = now->l;
-                now->lson->r = mid;
-
-                now->lson->tr.init(n);
+                now->lson = new node_x(now->l, mid, maxy);
             }
             update(now->lson, x, y, k);
         }
@@ -160,11 +144,7 @@ public:
         {
             if (NULL == now->rson)
             {
-                now->rson = new node_x();
-                now->rson->l = mid + 1;
-                now->rson->r = now->r;
-
-                now->rson->tr.init(n);
+                now->rson = new node_x(mid + 1, now->r, maxy);
             }
             update(now->rson, x, y, k);
         }
@@ -188,14 +168,14 @@ public:
     }
 };
 int n;
-tree_x tree;
+
 int main()
 {
     while (~scanf("%d", &n))
     {
         if (n == 0)
             break;
-        tree.init(1005, 205);
+        tree_x tree(205, 1005);
         while (n--)
         {
             char op[5];

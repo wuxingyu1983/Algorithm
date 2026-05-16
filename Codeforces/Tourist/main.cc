@@ -16,7 +16,8 @@
 
 using namespace std;
 
-const int MAX_N = 100000;
+const int MAX_N = 100005;
+const int RES_INIT = 0;
 
 class node_y
 {
@@ -30,7 +31,7 @@ public:
     node_y(int _l, int _r) : l(_l), r(_r)
     {
         lson = rson = NULL;
-        res = -1;
+        res = RES_INIT;
     }
 };
 
@@ -245,19 +246,47 @@ int main()
     }
     
     int rslt = 0;
-    
+
     // 情况 1
     {
+        tree_x tree(MAX_N, MAX_N);
+        tree.update(&(tree.root), events[0].ai, events[0].bi, 1);
 
+        for (size_t i = 1; i < n; i++)
+        {
+            int pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
+
+            if (0 < pre)
+            {
+                tree.update(&(tree.root), events[i].ai, events[i].bi, pre + 1);
+
+                if (rslt < pre + 1)
+                {
+                    rslt = pre + 1;
+                }
+            }
+        }
     }
-    
+
     cout << rslt << " ";
 
     rslt = 0;
 
     // 情况 2
     {
+        tree_x tree(MAX_N, MAX_N);
 
+        for (size_t i = 1; i < n; i++)
+        {
+            int pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
+
+            tree.update(&(tree.root), events[i].ai, events[i].bi, pre + 1);
+
+            if (rslt < pre + 1)
+            {
+                rslt = pre + 1;
+            }
+        }
     }
 
     cout << rslt << "\n";

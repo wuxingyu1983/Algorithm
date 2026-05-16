@@ -76,7 +76,7 @@ public:
     int query(node_y * now, int l, int r)
     {
         if (NULL == now)
-            return -1;
+            return RES_INIT;
         if (now->l >= l && now->r <= r)
             return now->res;
         int mid = (now->l + now->r) >> 1;
@@ -158,7 +158,7 @@ public:
     int query(node_x * now, int lx, int rx, int ly, int ry)
     {
         if (NULL == now)
-            return -1;
+            return RES_INIT;
         if (now->l >= lx && now->r <= rx)
         {
             return now->tr.query(&(now->tr.root), ly, ry);
@@ -181,6 +181,25 @@ public:
     int ai, bi;
 };
 
+bool myfunc(Event &a, Event &b)
+{
+    bool bRet = false;
+ 
+    if (a.t < b.t)
+    {
+        bRet = true;
+    }
+    else if (a.t == b.t)
+    {
+        if (a.x < b.x)
+        {
+            bRet = true;
+        }
+    }
+
+    return bRet;
+}
+
 void deduplication(vector<long long> &xs)
 {
     sort(xs.begin(), xs.end());               // 先对vector进行排序
@@ -198,14 +217,6 @@ int main()
 
     vector<Event> events;
 
-    {
-        Event e;
-        e.x = 0;
-        e.t = 0;
-
-        events.push_back(e);
-    }
-
     for (size_t i = 0; i < n; i++)
     {
         long long x, t;
@@ -221,8 +232,10 @@ int main()
     long long v;
     cin >> v;
 
+    sort(events.begin(), events.end(), myfunc);
+
     vector<long long> as, bs;
-    for (size_t i = 0; i <= n; i++)
+    for (size_t i = 0; i < n; i++)
     {
         events[i].a = v * events[i].t - events[i].x;
         events[i].b = v * events[i].t + events[i].x;
@@ -236,7 +249,7 @@ int main()
     deduplication(bs);
 
     // 离散化
-    for (size_t i = 0; i <= n; i++)
+    for (size_t i = 0; i < n; i++)
     {
         auto it = lower_bound(as.begin(), as.end(), events[i].a);
         events[i].ai = it - as.begin() + 1;
@@ -250,9 +263,8 @@ int main()
     // 情况 1
     {
         tree_x tree(MAX_N, MAX_N);
-        tree.update(&(tree.root), events[0].ai, events[0].bi, 1);
 
-        for (size_t i = 1; i < n; i++)
+        for (size_t i = 0; i < n; i++)
         {
             int pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
 
@@ -263,6 +275,19 @@ int main()
                 if (rslt < pre + 1)
                 {
                     rslt = pre + 1;
+                }
+            }
+            else
+            {
+                // 0 == pre
+                if (0 <= events[i].a && 0 <= events[i].b)
+                {
+                    tree.update(&(tree.root), events[i].ai, events[i].bi, pre + 1);
+
+                    if (rslt < pre + 1)
+                    {
+                        rslt = pre + 1;
+                    }
                 }
             }
         }
@@ -276,7 +301,7 @@ int main()
     {
         tree_x tree(MAX_N, MAX_N);
 
-        for (size_t i = 1; i < n; i++)
+        for (size_t i = 0; i < n; i++)
         {
             int pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
 
@@ -293,3 +318,5 @@ int main()
 
     return 0;
 }
+
+

@@ -33,7 +33,34 @@ public:
         lson = rson = NULL;
         res = RES_INIT;
     }
+
+    node_y()
+    {
+        l = r = 0;
+        lson = rson = NULL;
+        res = RES_INIT;
+    }
+
+    void init()
+    {
+        l = r = 0;
+        lson = rson = NULL;
+        res = RES_INIT;
+    }
 };
+
+vector<node_y> pooly;
+int idxy;
+
+node_y * getNodeY()
+{
+    node_y * ret = NULL;
+
+    ret = &(pooly[idxy ++]);
+    ret->init();
+
+    return ret;
+}
 
 // 内层线段树
 class tree_y
@@ -57,7 +84,9 @@ public:
         {
             if (NULL == now->lson)
             {
-                now->lson = new node_y(now->l, mid);
+                now->lson = getNodeY();
+                now->lson->l = now->l;
+                now->lson->r = mid;
             }
             update(now->lson, y, k);
         }
@@ -65,7 +94,9 @@ public:
         {
             if (NULL == now->rson)
             {
-                now->rson = new node_y(mid + 1, now->r);
+                now->rson = getNodeY();
+                now->rson->l = mid + 1;
+                now->rson->r = now->r;
             }
             update(now->rson, y, k);
         }
@@ -176,7 +207,7 @@ public:
 class Event 
 {
 public:
-    long long x, t;
+    int x, t;
     long long a, b;
     int ai, bi;
 };
@@ -212,6 +243,8 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
+    pooly.resize(6 * 1000000);
+
     int n;
     cin >> n;
 
@@ -219,7 +252,7 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
-        long long x, t;
+        int x, t;
         cin >> x >> t;
 
         Event e;
@@ -237,8 +270,8 @@ int main()
     vector<long long> as, bs;
     for (size_t i = 0; i < n; i++)
     {
-        events[i].a = v * events[i].t - events[i].x;
-        events[i].b = v * events[i].t + events[i].x;
+        events[i].a = v * (long long)(events[i].t) - events[i].x;
+        events[i].b = v * (long long)(events[i].t) + events[i].x;
 
         as.push_back(events[i].a);
         bs.push_back(events[i].b);
@@ -262,6 +295,8 @@ int main()
 
     // 情况 1
     {
+        idxy = 0;
+
         tree_x tree(MAX_N, MAX_N);
 
         for (size_t i = 0; i < n; i++)
@@ -299,6 +334,8 @@ int main()
 
     // 情况 2
     {
+        idxy = 0;
+
         tree_x tree(MAX_N, MAX_N);
 
         for (size_t i = 0; i < n; i++)

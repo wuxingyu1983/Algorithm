@@ -107,7 +107,24 @@ public:
             update(now->rson, y, k1, k2);
         }
 
-        push_up(now);
+        // push_up(now);
+        {
+            if (now->lson)
+            {
+                now->res1 = now->lson->res1;
+                now->res2 = now->lson->res2;
+            }
+
+            if (now->rson && now->res1 < now->rson->res1)
+            {
+                now->res1 = now->rson->res1;
+            }
+
+            if (now->rson && now->res2 < now->rson->res2)
+            {
+                now->res2 = now->rson->res2;
+            }
+        }
     }
 
     pair<int, int> query(node_y * now, int l, int r)
@@ -126,29 +143,6 @@ public:
             pair<int, int> ls = query(now->lson, l, mid);
             pair<int, int> rs = query(now->rson, mid + 1, r);
             return {max(ls.first, rs.first), max(ls.second, rs.second)};
-        }
-    }
-
-private:
-    void push_up(node_y * now)
-    {
-        if (now)
-        {
-            if (now->lson)
-            {
-                now->res1 = now->lson->res1;
-                now->res2 = now->lson->res2;
-            }
-
-            if (now->rson && now->res1 < now->rson->res1)
-            {
-                now->res1 = now->rson->res1;
-            }
-
-            if (now->rson && now->res2 < now->rson->res2)
-            {
-                now->res2 = now->rson->res2;
-            }
         }
     }
 };
@@ -296,7 +290,7 @@ int main()
     cin.tie(NULL);
 
     pooly.resize(10000000);
-    poolx.resize(600000);
+    poolx.resize(400000);
 
     int n;
     cin >> n;

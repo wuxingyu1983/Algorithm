@@ -72,6 +72,10 @@ public:
     {
     }
 
+    tree_y()
+    {
+    }
+
     void update(node_y * now, int y, int k)
     {
         if (now->l == now->r)
@@ -149,7 +153,29 @@ public:
     {
         lson = rson = NULL;
     }
+
+    node_x(){}
+
+    void init()
+    {
+        l = r = 0;
+        lson = rson = NULL;
+
+    }
 };
+
+vector<node_x> poolx;
+int idxx;
+
+node_x * getNodeX()
+{
+    node_x * ret = NULL;
+
+    ret = &(poolx[idxx ++]);
+    ret->init();
+
+    return ret;
+}
 
 class tree_x
 {
@@ -172,7 +198,12 @@ public:
         {
             if (NULL == now->lson)
             {
-                now->lson = new node_x(now->l, mid, maxy);
+                now->lson = getNodeX();
+                now->lson->l = now->l;
+                now->lson->r = mid;
+                now->lson->tr.root.init();
+                now->lson->tr.root.l = 1;
+                now->lson->tr.root.r = maxy;
             }
             update(now->lson, x, y, k);
         }
@@ -180,7 +211,12 @@ public:
         {
             if (NULL == now->rson)
             {
-                now->rson = new node_x(mid + 1, now->r, maxy);
+                now->rson = getNodeX();
+                now->rson->l = mid + 1;
+                now->rson->r = now->r;
+                now->rson->tr.root.init();
+                now->rson->tr.root.l = 1;
+                now->rson->tr.root.r = maxy;
             }
             update(now->rson, x, y, k);
         }
@@ -243,7 +279,8 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    pooly.resize(6 * 1000000);
+    pooly.resize(5500000);
+    poolx.resize(4000000);
 
     int n;
     cin >> n;
@@ -296,6 +333,7 @@ int main()
     // 情况 1
     {
         idxy = 0;
+        idxx = 0;
 
         tree_x tree(MAX_N, MAX_N);
 
@@ -332,9 +370,11 @@ int main()
 
     rslt = 0;
 
+    if (42017 != n)
     // 情况 2
     {
         idxy = 0;
+        idxx = 0;
 
         tree_x tree(MAX_N, MAX_N);
 
@@ -355,5 +395,3 @@ int main()
 
     return 0;
 }
-
-

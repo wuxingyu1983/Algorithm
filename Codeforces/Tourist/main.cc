@@ -13,6 +13,7 @@
 #include <queue>
 #include <stack>
 #include <unordered_map>
+#include <utility>
 
 using namespace std;
 
@@ -23,7 +24,7 @@ class node_y
 {
 public:
     int l, r;
-    int res;
+    int res1, res2;
 
     node_y * lson;
     node_y * rson;
@@ -31,21 +32,21 @@ public:
     node_y(int _l, int _r) : l(_l), r(_r)
     {
         lson = rson = NULL;
-        res = RES_INIT;
+        res1 = res2 = RES_INIT;
     }
 
     node_y()
     {
         l = r = 0;
         lson = rson = NULL;
-        res = RES_INIT;
+        res1 = res2 = RES_INIT;
     }
 
     void init()
     {
         l = r = 0;
         lson = rson = NULL;
-        res = RES_INIT;
+        res1 = res2 = RES_INIT;
     }
 };
 
@@ -76,11 +77,12 @@ public:
     {
     }
 
-    void update(node_y * now, int y, int k)
+    void update(node_y * now, int y, int k1, int k2)
     {
         if (now->l == now->r)
         {
-            now->res = max(now->res, k);
+            now->res1 = max(now->res1, k1);
+            now->res2 = max(now->res2, k2);
             return;
         }
         int mid = (now->l + now->r) >> 1;
@@ -92,7 +94,7 @@ public:
                 now->lson->l = now->l;
                 now->lson->r = mid;
             }
-            update(now->lson, y, k);
+            update(now->lson, y, k1, k2);
         }
         else
         {
@@ -102,25 +104,29 @@ public:
                 now->rson->l = mid + 1;
                 now->rson->r = now->r;
             }
-            update(now->rson, y, k);
+            update(now->rson, y, k1, k2);
         }
 
         push_up(now);
     }
 
-    int query(node_y * now, int l, int r)
+    pair<int, int> query(node_y * now, int l, int r)
     {
         if (NULL == now)
-            return RES_INIT;
+            return {RES_INIT, RES_INIT};
         if (now->l >= l && now->r <= r)
-            return now->res;
+            return {now->res1, now->res2};
         int mid = (now->l + now->r) >> 1;
         if (r <= mid)
             return query(now->lson, l, r);
         else if (l > mid)
             return query(now->rson, l, r);
         else
-            return max(query(now->lson, l, mid), query(now->rson, mid + 1, r));
+        {
+            pair<int, int> ls = query(now->lson, l, mid);
+            pair<int, int> rs = query(now->rson, mid + 1, r);
+            return {max(ls.first, rs.first), max(ls.second, rs.second)};
+        }
     }
 
 private:
@@ -130,12 +136,18 @@ private:
         {
             if (now->lson)
             {
-                now->res = now->lson->res;
+                now->res1 = now->lson->res1;
+                now->res2 = now->lson->res2;
             }
 
-            if (now->rson && now->res < now->rson->res)
+            if (now->rson && now->res1 < now->rson->res1)
             {
-                now->res = now->rson->res;
+                now->res1 = now->rson->res1;
+            }
+
+            if (now->rson && now->res2 < now->rson->res2)
+            {
+                now->res2 = now->rson->res2;
             }
         }
     }
@@ -188,9 +200,9 @@ public:
         maxy = _maxy;
     }
 
-    void update(node_x * now, int x, int y, int k)
+    void update(node_x * now, int x, int y, int k1, int k2)
     {
-        now->tr.update(&(now->tr.root), y, k);
+        now->tr.update(&(now->tr.root), y, k1, k2);
         if (now->l == now->r)
             return;
         int mid = (now->l + now->r) >> 1;
@@ -205,7 +217,7 @@ public:
                 now->lson->tr.root.l = 1;
                 now->lson->tr.root.r = maxy;
             }
-            update(now->lson, x, y, k);
+            update(now->lson, x, y, k1, k2);
         }
         else
         {
@@ -218,14 +230,14 @@ public:
                 now->rson->tr.root.l = 1;
                 now->rson->tr.root.r = maxy;
             }
-            update(now->rson, x, y, k);
+            update(now->rson, x, y, k1, k2);
         }
     }
 
-    int query(node_x * now, int lx, int rx, int ly, int ry)
+    pair<int, int> query(node_x * now, int lx, int rx, int ly, int ry)
     {
         if (NULL == now)
-            return RES_INIT;
+            return {RES_INIT, RES_INIT};
         if (now->l >= lx && now->r <= rx)
         {
             return now->tr.query(&(now->tr.root), ly, ry);
@@ -236,7 +248,11 @@ public:
         else if (lx > mid)
             return query(now->rson, lx, rx, ly, ry);
         else
-            return max(query(now->lson, lx, mid, ly, ry), query(now->rson, mid + 1, rx, ly, ry));
+        {
+            pair<int, int> ls = query(now->lson, lx, mid, ly, ry);
+            pair<int, int> rs = query(now->rson, mid + 1, rx, ly, ry);
+            return {max(ls.first, rs.first), max(ls.second, rs.second)};
+        }
     }
 };
 
@@ -279,8 +295,8 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    pooly.resize(5500000);
-    poolx.resize(4000000);
+    pooly.resize(10000000);
+    poolx.resize(600000);
 
     int n;
     cin >> n;
@@ -328,7 +344,8 @@ int main()
         events[i].bi = it - bs.begin() + 1; 
     }
     
-    int rslt = 0;
+    int rslt1 = 0;
+    int rslt2 = 0;
 
     // 情况 1
     {
@@ -339,59 +356,38 @@ int main()
 
         for (size_t i = 0; i < n; i++)
         {
-            int pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
-
-            if (0 < pre)
+            pair<int, int> pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
+            pair<int, int> now;
+            if (0 < pre.first)
             {
-                tree.update(&(tree.root), events[i].ai, events[i].bi, pre + 1);
-
-                if (rslt < pre + 1)
-                {
-                    rslt = pre + 1;
-                }
+                now.first = pre.first + 1;
             }
             else
             {
                 // 0 == pre
                 if (0 <= events[i].a && 0 <= events[i].b)
                 {
-                    tree.update(&(tree.root), events[i].ai, events[i].bi, pre + 1);
-
-                    if (rslt < pre + 1)
-                    {
-                        rslt = pre + 1;
-                    }
+                    now.first = 1;
                 }
             }
-        }
-    }
 
-    cout << rslt << " ";
+            now.second = pre.second + 1;
 
-    rslt = 0;
+            tree.update(&(tree.root), events[i].ai, events[i].bi, now.first, now.second);
 
-    if (42017 != n)
-    // 情况 2
-    {
-        idxy = 0;
-        idxx = 0;
-
-        tree_x tree(MAX_N, MAX_N);
-
-        for (size_t i = 0; i < n; i++)
-        {
-            int pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
-
-            tree.update(&(tree.root), events[i].ai, events[i].bi, pre + 1);
-
-            if (rslt < pre + 1)
+            if (rslt1 < now.first)
             {
-                rslt = pre + 1;
+                rslt1 = now.first;
+            }
+
+            if (rslt2 < now.second)
+            {
+                rslt2 = now.second;
             }
         }
     }
 
-    cout << rslt << "\n";
+    cout << rslt1 << " " << rslt2 << "\n";
 
     return 0;
 }

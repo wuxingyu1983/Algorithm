@@ -41,27 +41,10 @@ public:
         lson = rson = NULL;
         res1 = res2 = RES_INIT;
     }
-
-    void init()
-    {
-        l = r = 0;
-        lson = rson = NULL;
-        res1 = res2 = RES_INIT;
-    }
 };
 
 vector<node_y> pooly;
 int idxy;
-
-node_y * getNodeY()
-{
-    node_y * ret = NULL;
-
-    ret = &(pooly[idxy ++]);
-    ret->init();
-
-    return ret;
-}
 
 // 内层线段树
 class tree_y
@@ -90,7 +73,7 @@ public:
         {
             if (NULL == now->lson)
             {
-                now->lson = getNodeY();
+                now->lson = &(pooly[idxy ++]);;
                 now->lson->l = now->l;
                 now->lson->r = mid;
             }
@@ -100,7 +83,7 @@ public:
         {
             if (NULL == now->rson)
             {
-                now->rson = getNodeY();
+                now->rson = &(pooly[idxy ++]);;
                 now->rson->l = mid + 1;
                 now->rson->r = now->r;
             }
@@ -170,28 +153,15 @@ public:
         lson = rson = NULL;
     }
 
-    node_x(){}
-
-    void init()
+    node_x()
     {
         l = r = 0;
         lson = rson = NULL;
-
     }
 };
 
 vector<node_x> poolx;
 int idxx;
-
-node_x * getNodeX()
-{
-    node_x * ret = NULL;
-
-    ret = &(poolx[idxx ++]);
-    ret->init();
-
-    return ret;
-}
 
 class tree_x
 {
@@ -214,10 +184,9 @@ public:
         {
             if (NULL == now->lson)
             {
-                now->lson = getNodeX();
+                now->lson = &(poolx[idxx ++]);
                 now->lson->l = now->l;
                 now->lson->r = mid;
-                now->lson->tr.root.init();
                 now->lson->tr.root.l = 1;
                 now->lson->tr.root.r = maxy;
             }
@@ -227,10 +196,9 @@ public:
         {
             if (NULL == now->rson)
             {
-                now->rson = getNodeX();
+                now->rson = &(poolx[idxx ++]);
                 now->rson->l = mid + 1;
                 now->rson->r = now->r;
-                now->rson->tr.root.init();
                 now->rson->tr.root.l = 1;
                 now->rson->tr.root.r = maxy;
             }

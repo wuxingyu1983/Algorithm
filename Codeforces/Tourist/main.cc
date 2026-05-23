@@ -127,22 +127,32 @@ public:
         }
     }
 
-    pair<int, int> query(node_y * now, int l, int r)
+    void query(node_y * now, int l, int r, int &first, int &second)
     {
         if (NULL == now)
-            return {RES_INIT, RES_INIT};
+        {
+            first = second = RES_INIT;
+            return;
+        }
         if (now->l >= l && now->r <= r)
-            return {now->res1, now->res2};
+        {
+            first = now->res1;
+            second = now->res2;
+            return;
+        }
         int mid = (now->l + now->r) >> 1;
         if (r <= mid)
-            return query(now->lson, l, r);
+            query(now->lson, l, r, first, second);
         else if (l > mid)
-            return query(now->rson, l, r);
+            query(now->rson, l, r, first, second);
         else
         {
-            pair<int, int> ls = query(now->lson, l, mid);
-            pair<int, int> rs = query(now->rson, mid + 1, r);
-            return {max(ls.first, rs.first), max(ls.second, rs.second)};
+            int lfirst = RES_INIT, lsecond = RES_INIT;
+            query(now->lson, l, mid, lfirst, lsecond);
+            int rfirst = RES_INIT, rsecond = RES_INIT;
+            query(now->rson, mid + 1, r, rfirst, rsecond);
+            first = max(lfirst, rfirst);
+            second = max(lsecond, rsecond);
         }
     }
 };
@@ -228,24 +238,31 @@ public:
         }
     }
 
-    pair<int, int> query(node_x * now, int lx, int rx, int ly, int ry)
+    void query(node_x * now, int lx, int rx, int ly, int ry, int &first, int &second)
     {
         if (NULL == now)
-            return {RES_INIT, RES_INIT};
+        {
+            first = second = RES_INIT;
+            return;
+        }
         if (now->l >= lx && now->r <= rx)
         {
-            return now->tr.query(&(now->tr.root), ly, ry);
+            now->tr.query(&(now->tr.root), ly, ry, first, second);
+            return;
         }
         int mid = (now->l + now->r) >> 1;
         if (rx <= mid)
-            return query(now->lson, lx, rx, ly, ry);
+            query(now->lson, lx, rx, ly, ry, first, second);
         else if (lx > mid)
-            return query(now->rson, lx, rx, ly, ry);
+            return query(now->rson, lx, rx, ly, ry, first, second);
         else
         {
-            pair<int, int> ls = query(now->lson, lx, mid, ly, ry);
-            pair<int, int> rs = query(now->rson, mid + 1, rx, ly, ry);
-            return {max(ls.first, rs.first), max(ls.second, rs.second)};
+            int lfirst = RES_INIT, lsecond = RES_INIT;
+            query(now->lson, lx, mid, ly, ry, lfirst, lsecond);
+            int rfirst = RES_INIT, rsecond = RES_INIT;
+            query(now->rson, mid + 1, rx, ly, ry, rfirst, rsecond);
+            first = max(lfirst, rfirst);
+            second = max(lsecond, rsecond);
         }
     }
 };
@@ -296,7 +313,7 @@ int main()
     cin >> n;
 
     vector<Event> events;
-
+    events.reserve(n);
     for (size_t i = 0; i < n; i++)
     {
         int x, t;
@@ -315,6 +332,8 @@ int main()
     sort(events.begin(), events.end(), myfunc);
 
     vector<long long> as, bs;
+    as.reserve(n);
+    bs.reserve(n);
     for (size_t i = 0; i < n; i++)
     {
         events[i].a = v * (long long)(events[i].t) - events[i].x;
@@ -350,33 +369,33 @@ int main()
 
         for (size_t i = 0; i < n; i++)
         {
-            pair<int, int> pre = tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi);
-            pair<int, int> now;
-            if (0 < pre.first)
+            int first = 0, second = 0;
+            tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi, first, second);
+            if (0 < first)
             {
-                now.first = pre.first + 1;
+                first += 1;
             }
             else
             {
                 // 0 == pre
                 if (0 <= events[i].a && 0 <= events[i].b)
                 {
-                    now.first = 1;
+                    first = 1;
                 }
             }
 
-            now.second = pre.second + 1;
+            second += 1;
 
-            tree.update(&(tree.root), events[i].ai, events[i].bi, now.first, now.second);
+            tree.update(&(tree.root), events[i].ai, events[i].bi, first, second);
 
-            if (rslt1 < now.first)
+            if (rslt1 < first)
             {
-                rslt1 = now.first;
+                rslt1 = first;
             }
 
-            if (rslt2 < now.second)
+            if (rslt2 < second)
             {
-                rslt2 = now.second;
+                rslt2 = second;
             }
         }
     }

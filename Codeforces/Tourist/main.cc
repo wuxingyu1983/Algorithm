@@ -18,222 +18,6 @@
 using namespace std;
 
 const int MAX_N = 100005;
-const int RES_INIT = 0;
-
-class node_y
-{
-public:
-    int l, r;
-    int res1, res2;
-
-    node_y * lson;
-    node_y * rson;
-
-    node_y(int _l, int _r) : l(_l), r(_r)
-    {
-        lson = rson = NULL;
-        res1 = res2 = RES_INIT;
-    }
-
-    node_y()
-    {
-        l = r = 0;
-        lson = rson = NULL;
-        res1 = res2 = RES_INIT;
-    }
-};
-
-vector<node_y> pooly;
-int idxy;
-
-// 内层线段树
-class tree_y
-{
-public:
-    node_y root;
-
-    tree_y(int _m) : root(1, _m)
-    {
-    }
-
-    tree_y()
-    {
-    }
-
-    void update(node_y * now, int y, int k1, int k2)
-    {
-        if (now->l == now->r)
-        {
-            now->res1 = max(now->res1, k1);
-            now->res2 = max(now->res2, k2);
-            return;
-        }
-        int mid = (now->l + now->r) >> 1;
-        if (y <= mid)
-        {
-            if (NULL == now->lson)
-            {
-                now->lson = &(pooly[idxy ++]);;
-                now->lson->l = now->l;
-                now->lson->r = mid;
-            }
-            update(now->lson, y, k1, k2);
-        }
-        else
-        {
-            if (NULL == now->rson)
-            {
-                now->rson = &(pooly[idxy ++]);;
-                now->rson->l = mid + 1;
-                now->rson->r = now->r;
-            }
-            update(now->rson, y, k1, k2);
-        }
-
-        // push_up(now);
-        {
-            if (now->lson)
-            {
-                now->res1 = now->lson->res1;
-                now->res2 = now->lson->res2;
-            }
-
-            if (now->rson && now->res1 < now->rson->res1)
-            {
-                now->res1 = now->rson->res1;
-            }
-
-            if (now->rson && now->res2 < now->rson->res2)
-            {
-                now->res2 = now->rson->res2;
-            }
-        }
-    }
-
-    void query(node_y * now, int l, int r, int &first, int &second)
-    {
-        if (NULL == now)
-        {
-            first = second = RES_INIT;
-            return;
-        }
-        if (now->l >= l && now->r <= r)
-        {
-            first = now->res1;
-            second = now->res2;
-            return;
-        }
-        int mid = (now->l + now->r) >> 1;
-        if (r <= mid)
-            query(now->lson, l, r, first, second);
-        else if (l > mid)
-            query(now->rson, l, r, first, second);
-        else
-        {
-            int lfirst = RES_INIT, lsecond = RES_INIT;
-            query(now->lson, l, mid, lfirst, lsecond);
-            int rfirst = RES_INIT, rsecond = RES_INIT;
-            query(now->rson, mid + 1, r, rfirst, rsecond);
-            first = max(lfirst, rfirst);
-            second = max(lsecond, rsecond);
-        }
-    }
-};
-
-class node_x
-{
-public:
-    int l, r;
-    tree_y tr;
-    node_x * lson;
-    node_x * rson;
-
-    node_x(int _l, int _r, int _y) : l(_l), r(_r), tr(_y)
-    {
-        lson = rson = NULL;
-    }
-
-    node_x()
-    {
-        l = r = 0;
-        lson = rson = NULL;
-    }
-};
-
-vector<node_x> poolx;
-int idxx;
-
-class tree_x
-{
-public:
-    node_x root;
-    int maxy;
-
-    tree_x(int _maxx, int _maxy) : root(1, _maxx, _maxy)
-    {
-        maxy = _maxy;
-    }
-
-    void update(node_x * now, int x, int y, int k1, int k2)
-    {
-        now->tr.update(&(now->tr.root), y, k1, k2);
-        if (now->l == now->r)
-            return;
-        int mid = (now->l + now->r) >> 1;
-        if (x <= mid)
-        {
-            if (NULL == now->lson)
-            {
-                now->lson = &(poolx[idxx ++]);
-                now->lson->l = now->l;
-                now->lson->r = mid;
-                now->lson->tr.root.l = 1;
-                now->lson->tr.root.r = maxy;
-            }
-            update(now->lson, x, y, k1, k2);
-        }
-        else
-        {
-            if (NULL == now->rson)
-            {
-                now->rson = &(poolx[idxx ++]);
-                now->rson->l = mid + 1;
-                now->rson->r = now->r;
-                now->rson->tr.root.l = 1;
-                now->rson->tr.root.r = maxy;
-            }
-            update(now->rson, x, y, k1, k2);
-        }
-    }
-
-    void query(node_x * now, int lx, int rx, int ly, int ry, int &first, int &second)
-    {
-        if (NULL == now)
-        {
-            first = second = RES_INIT;
-            return;
-        }
-        if (now->l >= lx && now->r <= rx)
-        {
-            now->tr.query(&(now->tr.root), ly, ry, first, second);
-            return;
-        }
-        int mid = (now->l + now->r) >> 1;
-        if (rx <= mid)
-            query(now->lson, lx, rx, ly, ry, first, second);
-        else if (lx > mid)
-            return query(now->rson, lx, rx, ly, ry, first, second);
-        else
-        {
-            int lfirst = RES_INIT, lsecond = RES_INIT;
-            query(now->lson, lx, mid, ly, ry, lfirst, lsecond);
-            int rfirst = RES_INIT, rsecond = RES_INIT;
-            query(now->rson, mid + 1, rx, ly, ry, rfirst, rsecond);
-            first = max(lfirst, rfirst);
-            second = max(lsecond, rsecond);
-        }
-    }
-};
 
 class Event 
 {
@@ -243,7 +27,7 @@ public:
     int ai, bi;
 };
 
-bool myfunc(Event &a, Event &b)
+bool cmp(Event &a, Event &b)
 {
     bool bRet = false;
  
@@ -262,6 +46,25 @@ bool myfunc(Event &a, Event &b)
     return bRet;
 }
 
+bool cmp1(Event &a, Event &b)
+{
+    bool bRet = false;
+ 
+    if (a.ai < b.ai)
+    {
+        bRet = true;
+    }
+    else if (a.ai == b.ai)
+    {
+        if (a.bi < b.bi)
+        {
+            bRet = true;
+        }
+    }
+
+    return bRet;
+}
+
 void deduplication(vector<long long> &xs)
 {
     sort(xs.begin(), xs.end());               // 先对vector进行排序
@@ -269,13 +72,49 @@ void deduplication(vector<long long> &xs)
     xs.erase(last, xs.end());                 // 删除多余的元素
 }
 
+
+// 合并左右子树的最大值
+void push_up(vector<int> &tree, int p)
+{
+    tree[p] = max(tree[p << 1], tree[p << 1 | 1]);
+}
+
+void updateMax(vector<int> &tree, int idx, int c, int l, int r, int p)
+{
+    if (idx == l && idx == r)
+    {
+        tree[p] = c;
+        return;
+    }
+
+    int mid = (l + r) >> 1;
+    if (idx <= mid)
+        updateMax(tree, idx, c, l, mid, p << 1);
+    else
+        updateMax(tree, idx, c, mid + 1, r, p << 1 | 1);
+    push_up(tree, p);
+}
+
+// 区间查询：查询[L, R]内的最大值
+int getMax(vector<int> &tree, int L, int R, int l, int r, int p)
+{
+    if (L > R)
+        return 0;
+    if (L <= l && r <= R)
+        return tree[p]; // 完全覆盖
+    int mid = (l + r) >> 1;
+    int res = 0;
+    if (L <= mid)
+        res = max(res, getMax(tree, L, R, l, mid, p << 1));
+    if (R > mid)
+        res = max(res, getMax(tree, L, R, mid + 1, r, p << 1 | 1));
+    return res;
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
-
-    pooly.resize(10000000);
-    poolx.resize(400000);
 
     int n;
     cin >> n;
@@ -297,7 +136,7 @@ int main()
     long long v;
     cin >> v;
 
-    sort(events.begin(), events.end(), myfunc);
+    sort(events.begin(), events.end(), cmp);
 
     vector<long long> as, bs;
     as.reserve(n);
@@ -324,47 +163,47 @@ int main()
         it = lower_bound(bs.begin(), bs.end(), events[i].b);
         events[i].bi = it - bs.begin() + 1; 
     }
+
+    sort(events.begin(), events.end(), cmp1);
+
+    vector<int> tree1(MAX_N * 4, 0);
+    vector<int> tree2(MAX_N * 4, 0);
     
     int rslt1 = 0;
     int rslt2 = 0;
 
-    // 情况 1
+    for (size_t i = 0; i < n; i++)
     {
-        idxy = 0;
-        idxx = 0;
+        int pre = getMax(tree1, 1, events[i].bi, 1, n, 1);
 
-        tree_x tree(MAX_N, MAX_N);
-
-        for (size_t i = 0; i < n; i++)
+        if (0 < pre)
         {
-            int first = 0, second = 0;
-            tree.query(&(tree.root), 1, events[i].ai, 1, events[i].bi, first, second);
-            if (0 < first)
+            pre += 1;
+        }
+        else
+        {
+            // 0 == pre
+            if (0 <= events[i].a && 0 <= events[i].b)
             {
-                first += 1;
+                pre = 1;
             }
-            else
-            {
-                // 0 == pre
-                if (0 <= events[i].a && 0 <= events[i].b)
-                {
-                    first = 1;
-                }
-            }
+        }
 
-            second += 1;
+        updateMax(tree1, events[i].bi, pre, 1, n, 1);
 
-            tree.update(&(tree.root), events[i].ai, events[i].bi, first, second);
+        if (rslt1 < pre)
+        {
+            rslt1 = pre;
+        }
 
-            if (rslt1 < first)
-            {
-                rslt1 = first;
-            }
+        pre = getMax(tree2, 1, events[i].bi, 1, n, 1);
+        pre += 1;
 
-            if (rslt2 < second)
-            {
-                rslt2 = second;
-            }
+        updateMax(tree2, events[i].bi, pre, 1, n, 1);
+
+        if (rslt2 < pre)
+        {
+            rslt2 = pre;
         }
     }
 

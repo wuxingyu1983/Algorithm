@@ -17,7 +17,6 @@
 
 using namespace std;
 
-
 // 合并左右子树的最大值
 void push_up(vector<int> &tree, int p)
 {
@@ -58,6 +57,41 @@ int getMax(vector<int> &tree, int L, int R, int l, int r, int p)
 
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int n;
+    cin >> n;
+
+    vector<int> vec(n);
+    vector<int> negt, post;
+    negt.reserve(n);
+    post.reserve(n);
+    for (size_t i = 0; i < n; i++)
+    {
+        cin >> vec[i];
+        if (0 < vec[i])
+            post.push_back(vec[i]);
+        else
+            negt.push_back(0 - vec[i]);
+    }
+
+    // 去重
+    {
+        sort(negt.begin(), negt.end());               // 先对vector进行排序
+        auto last = unique(negt.begin(), negt.end()); // 去除重复的元素
+        negt.erase(last, negt.end());                 // 删除多余的元素
+
+        sort(post.begin(), post.end());          // 先对vector进行排序
+        last = unique(post.begin(), post.end()); // 去除重复的元素
+        post.erase(last, post.end());            // 删除多余的元素
+    }
+
+    
+
+    int ans = 0;
+
+    cout << ans << "\n";
 
     return 0;
 }

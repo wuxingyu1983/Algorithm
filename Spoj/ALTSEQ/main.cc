@@ -94,11 +94,11 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
-        int a = vec[n];
+        int a = vec[i];
+        int pre = 0;
         if (0 < a)
         {
             // 正数 a 在负数组里面位置
-            int pre = 0;
             if (negt[0] < a)
             {
                 auto it = lower_bound(negt.begin(), negt.end(), a);
@@ -124,7 +124,29 @@ int main()
         }
         else
         {
+            a = 0 - a;
+            if (post[0] < a)
+            {
+                auto it = lower_bound(post.begin(), post.end(), a);
 
+                int idx = 0;
+                if (it == post.end())
+                    idx = post.size();
+                else
+                    idx = it - post.begin();
+
+                pre = getMax(tree2, 1, idx, 1, post.size(), 1);
+            }
+
+            pre += 1;
+            if (ans < pre)
+                ans = pre;
+
+            {
+                auto it = lower_bound(negt.begin(), negt.end(), a);
+                int idx = it - negt.begin() + 1;
+                updateMax(tree1, idx, pre, 1, negt.size(), 1);
+            }
         }
     }
 

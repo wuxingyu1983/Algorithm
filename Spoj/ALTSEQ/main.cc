@@ -87,9 +87,46 @@ int main()
         post.erase(last, post.end());            // 删除多余的元素
     }
 
-    
-
     int ans = 0;
+
+    vector<int> tree1(negt.size() * 4, 0);    // negt
+    vector<int> tree2(post.size() * 4, 0);    // post
+
+    for (size_t i = 0; i < n; i++)
+    {
+        int a = vec[n];
+        if (0 < a)
+        {
+            // 正数 a 在负数组里面位置
+            int pre = 0;
+            if (negt[0] < a)
+            {
+                auto it = lower_bound(negt.begin(), negt.end(), a);
+
+                int idx = 0;
+                if (it == negt.end())
+                    idx = negt.size();
+                else
+                    idx = it - negt.begin();
+
+                pre = getMax(tree1, 1, idx, 1, negt.size(), 1);
+            }
+
+            pre += 1;
+            if (ans < pre)
+                ans = pre;
+
+            {
+                auto it = lower_bound(post.begin(), post.end(), a);
+                int idx = it - post.begin() + 1;
+                updateMax(tree2, idx, pre, 1, post.size(), 1);
+            }
+        }
+        else
+        {
+
+        }
+    }
 
     cout << ans << "\n";
 

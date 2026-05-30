@@ -39,8 +39,11 @@ int getSubtrees(int curr, int parent)
     return ret;
 }
 
-void func(int curr, int parent, vector<int> &flags, long long &remain)
+void func(int curr, int n, vector<int> &flags, long long &remain)
 {
+    if (curr > n)
+        return;
+
     if (subtrees[curr] == remain)
     {
         flags[curr] = 1;
@@ -51,20 +54,23 @@ void func(int curr, int parent, vector<int> &flags, long long &remain)
         if (subtrees[curr] < remain)
         {
             flags[curr] = 1;
+            int bak = remain;
             remain -= subtrees[curr];
-        }
 
-        for (size_t i = 0; i < vertices[curr].size(); i++)
-        {
-            if (parent != vertices[curr][i])
+            func(curr + 1, n, flags, remain);
+
+            if (0 < remain)
             {
-                func(vertices[curr][i], curr, flags, remain);
-
-                if (0 == remain)
-                {
-                    return;
-                }
+                flags[curr] = 0;
+                remain = bak;
+            
+                func(curr + 1, n, flags, remain);
             }
+        }
+        else
+        {
+            // subtrees[curr] > remain
+            func(curr + 1, n, flags, remain);
         }
     }
 }
@@ -118,7 +124,7 @@ int main()
         long long remain = k;
         vector<int> flags(n + 1, 0);
 
-        func(1, 0, flags, remain);
+        func(1, n, flags, remain);
 
         int ones = 0;
         for (size_t i = 1; i <= n; i++)

@@ -34,7 +34,10 @@ public:
 
 bool cmp(Node &a, Node &b)
 {
-    return !(a.subtree < b.subtree);
+    if (a.subtree <= b.subtree)
+        return false;
+    else
+        return true;
 }
 
 vector<Node> nodes;
@@ -112,6 +115,7 @@ int main()
         long long remain = k;
         vector<int> flags(n + 1, 0);
 
+        // greedy
         int ones = 0;
         for (size_t i = 0; i < n; i++)
         {

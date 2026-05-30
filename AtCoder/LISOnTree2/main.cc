@@ -69,6 +69,20 @@ void func(int curr, int parent, vector<int> &flags, long long &remain)
     }
 }
 
+void func1(int curr, int parent, int &one, int &zero, vector<int> &flags, vector<int> &ans)
+{
+    if (1 == flags[curr])
+        ans[curr] = one ++;
+    else
+        ans[curr] = zero --;
+
+    for (size_t i = 0; i < vertices[curr].size(); i++)
+    {
+        if (parent != vertices[curr][i])
+            func1(vertices[curr][i], curr, one, zero, flags, ans);
+    }
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -117,6 +131,17 @@ int main()
         
         int one = n - ones + 1;
         int zero = n - ones;
+
+        vector<int> ans(n + 1, 0);
+
+        func1(1, 0, one, zero, flags, ans);
+
+        cout << "Yes\n";
+        for (size_t i = 1; i <= n; i++)
+        {
+            cout << ans[i] << " ";
+        }
+        cout << "\n";
     }
 
     return 0;

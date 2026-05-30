@@ -17,9 +17,10 @@
 using namespace std;
 
 vector<vector<int>> vertices;
+vector<int> subtrees;
 long long minK = 0, maxK = 0;
 
-int getSubtrees(int curr, int parent, vector<int> &subtrees)
+int getSubtrees(int curr, int parent)
 {
     int ret = 0;
 
@@ -27,7 +28,7 @@ int getSubtrees(int curr, int parent, vector<int> &subtrees)
     {
         if (parent != vertices[curr][i])
         {
-            ret += getSubtrees(vertices[curr][i], curr, subtrees);
+            ret += getSubtrees(vertices[curr][i], curr);
         }
     }
 
@@ -36,6 +37,36 @@ int getSubtrees(int curr, int parent, vector<int> &subtrees)
     maxK += ret;
 
     return ret;
+}
+
+void func(int curr, int parent, vector<int> &flags, long long &remain)
+{
+    if (subtrees[curr] == remain)
+    {
+        flags[curr] = 1;
+        remain = 0;
+    }
+    else
+    {
+        if (subtrees[curr] < remain)
+        {
+            flags[curr] = 1;
+            remain -= subtrees[curr];
+        }
+
+        for (size_t i = 0; i < vertices[curr].size(); i++)
+        {
+            if (parent != vertices[curr][i])
+            {
+                func(vertices[curr][i], curr, flags, remain);
+
+                if (0 == remain)
+                {
+                    return;
+                }
+            }
+        }
+    }
 }
 
 int main()
@@ -59,9 +90,9 @@ int main()
         vertices[v].push_back(u);
     }
 
-    vector<int> subtrees(n + 1, 0);
+    subtrees.resize(n + 1, 0);
 
-    getSubtrees(1, 0, subtrees);
+    getSubtrees(1, 0);
     minK = n;
 
     if (k < minK || k > maxK)
@@ -70,7 +101,10 @@ int main()
     }
     else
     {
-        
+        long long remain = k;
+        vector<int> flags(n + 1, 0);
+
+        func(1, 0, flags, remain);
     }
 
     return 0;

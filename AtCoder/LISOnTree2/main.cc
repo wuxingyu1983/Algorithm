@@ -105,6 +105,18 @@ int main()
         vector<int> flags(n + 1, 0);
 
         func(1, 0, flags, remain);
+
+        int ones = 0;
+        for (size_t i = 1; i <= n; i++)
+        {
+            if (flags[i])
+            {
+                ones ++;
+            }
+        }
+        
+        int one = n - ones + 1;
+        int zero = n - ones;
     }
 
     return 0;

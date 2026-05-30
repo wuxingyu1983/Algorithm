@@ -20,6 +20,25 @@ vector<vector<int>> vertices;
 vector<int> subtrees;
 long long minK = 0, maxK = 0;
 
+class Node
+{
+public:
+    int idx;
+    int subtree;
+
+    Node()
+    {
+        idx = subtree = 0;
+    }
+};
+
+bool cmp(Node &a, Node &b)
+{
+    return !(a.subtree < b.subtree);
+}
+
+vector<Node> nodes;
+
 int getSubtrees(int curr, int parent)
 {
     int ret = 0;
@@ -34,45 +53,11 @@ int getSubtrees(int curr, int parent)
 
     ret += 1;
     subtrees[curr] = ret;
+    nodes[curr].idx = curr;
+    nodes[curr].subtree = ret;
     maxK += ret;
 
     return ret;
-}
-
-void func(int curr, int n, vector<int> &flags, long long &remain)
-{
-    if (curr > n)
-        return;
-
-    if (subtrees[curr] == remain)
-    {
-        flags[curr] = 1;
-        remain = 0;
-    }
-    else
-    {
-        if (subtrees[curr] < remain)
-        {
-            flags[curr] = 1;
-            int bak = remain;
-            remain -= subtrees[curr];
-
-            func(curr + 1, n, flags, remain);
-
-            if (0 < remain)
-            {
-                flags[curr] = 0;
-                remain = bak;
-            
-                func(curr + 1, n, flags, remain);
-            }
-        }
-        else
-        {
-            // subtrees[curr] > remain
-            func(curr + 1, n, flags, remain);
-        }
-    }
 }
 
 void func1(int curr, int parent, int &one, int &zero, vector<int> &flags, vector<int> &ans)
@@ -100,6 +85,7 @@ int main()
     cin >> n >> k;
 
     vertices.resize(n + 1);
+    nodes.resize(n + 1);
 
     for (size_t i = 1; i < n; i++)
     {
@@ -121,17 +107,26 @@ int main()
     }
     else
     {
+        sort(nodes.begin(), nodes.end(), cmp);
+
         long long remain = k;
         vector<int> flags(n + 1, 0);
 
-        func(1, n, flags, remain);
-
         int ones = 0;
-        for (size_t i = 1; i <= n; i++)
+        for (size_t i = 0; i < n; i++)
         {
-            if (flags[i])
+            if (nodes[i].subtree == remain)
             {
+                flags[nodes[i].idx] = 1;
                 ones ++;
+                remain = 0;
+                break;
+            }
+            else if (nodes[i].subtree < remain)
+            {
+                flags[nodes[i].idx] = 1;
+                ones ++;
+                remain -= nodes[i].subtree;
             }
         }
         

@@ -248,5 +248,22 @@ int main()
         }
     }
 
+    sort(ans0.begin(), ans0.end());
+    sort(ans1.begin(), ans1.end());
+
+    cout << ans0.size() << " ";
+    for (size_t i = 0; i < ans0.size(); i++)
+    {
+        cout << ans0[i] << " ";
+    }
+    cout << "\n";
+
+    cout << ans1.size() << " ";
+    for (size_t i = 0; i < ans1.size(); i++)
+    {
+        cout << ans1[i] << " ";
+    }
+    cout << "\n";
+
     return 0;
 }

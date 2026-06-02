@@ -56,8 +56,8 @@ void deduplication(vector<int> &vec)
 const int MAX_N = 100007;
 const int MOD = 100000007;
 int cnt;
-int root[MAX_N + 1], ls[MAX_N * 16], rs[MAX_N * 16];
-long long sum[MAX_N * 16];
+int root[MAX_N + 1], ls[MAX_N * 18], rs[MAX_N * 18];
+long long sum[MAX_N * 18];
 
 // 用法：update(root, 1, n, x, f); 其中 x 为待修改节点的编号
 void updateSum(int &p, int s, int t, int x, long long f)
@@ -209,7 +209,7 @@ int main()
     memset(rs, 0, sizeof(rs));
     memset(sum, 0, sizeof(sum));
 
-    d.assign(MAX_N * 16, 0);
+    d.assign(MAX_N * 18, 0);
     vector<int> rlens(n, 0);
     vector<long long> rcounts(n, 0);
 

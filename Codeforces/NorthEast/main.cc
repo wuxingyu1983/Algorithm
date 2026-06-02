@@ -23,9 +23,8 @@ public:
     int idx;
     int x, y;
     int ix, iy;
-    int flag;
 
-    City() : idx(0), x(0), y(0), ix(0), iy(0), flag(0) {}
+    City() : idx(0), x(0), y(0), ix(0), iy(0) {}
 };
 
 bool cmp(City &a, City &b)
@@ -203,6 +202,51 @@ int main()
     }
 
     long long total = getSum(root[maxLen], 1, n, 1, n);
+
+     cnt = 0;
+    memset(root, 0, sizeof(root));
+    memset(ls, 0, sizeof(ls));
+    memset(rs, 0, sizeof(rs));
+    memset(sum, 0, sizeof(sum));
+
+    d.assign(MAX_N * 16, 0);
+    vector<int> rlens(n, 0);
+    vector<long long> rcounts(n, 0);
+
+    vector<int> ans0, ans1;
+
+    for (int i = n - 1; i >= 0; i--)
+    {
+        int idx = cites[i].idx;
+
+        // 获取 (idx + 1) - n 的最长len
+        int len = getMax(d, idx + 1, n, 1, n, 1);
+        updateMax(d, idx, len + 1, 1, n, 1);
+
+        rlens[i] = len + 1;
+
+        // 更新 sum
+        long long aftSum = getSum(root[len], 1, n, idx + 1, n);
+        if (0 == aftSum)
+        {
+            aftSum = 1;
+        }
+        updateSum(root[len + 1], 1, n, idx, aftSum);
+
+        rcounts[i] = aftSum;
+
+        if (maxLen + 1 == lens[i] + rlens[i])
+        {
+            if (total == ((counts[i] * rcounts[i]) % MOD))
+            {
+                ans1.push_back(idx);
+            }
+            else
+            {
+                ans0.push_back(idx);
+            }
+        }
+    }
 
     return 0;
 }

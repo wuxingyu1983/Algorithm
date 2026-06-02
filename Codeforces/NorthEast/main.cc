@@ -37,7 +37,7 @@ bool cmp(City &a, City &b)
     }
     else if (a.x == b.x)
     {
-        if (a.y < b.y)
+        if (a.y > b.y)
         {
             bRet = true;
         }
@@ -180,7 +180,7 @@ int main()
 
     for (size_t i = 0; i < n; i++)
     {
-        int idx = cites[i].idx;
+        int idx = cites[i].iy;
 
         // 获取 1 - (idx - 1) 的最长len
         int len = getMax(d, 1, idx - 1, 1, n, 1);
@@ -217,7 +217,7 @@ int main()
 
     for (int i = n - 1; i >= 0; i--)
     {
-        int idx = cites[i].idx;
+        int idx = cites[i].iy;
 
         // 获取 (idx + 1) - n 的最长len
         int len = getMax(d, idx + 1, n, 1, n, 1);
@@ -237,13 +237,11 @@ int main()
 
         if (maxLen + 1 == lens[i] + rlens[i])
         {
+            ans0.push_back(cites[i].idx);
+            
             if (total == ((counts[i] * rcounts[i]) % MOD))
             {
-                ans1.push_back(idx);
-            }
-            else
-            {
-                ans0.push_back(idx);
+                ans1.push_back(cites[i].idx);
             }
         }
     }

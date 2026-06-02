@@ -27,6 +27,25 @@ public:
     City() : idx(0), x(0), y(0), ix(0), iy(0) {}
 };
 
+bool cmp(City &a, City &b)
+{
+    bool bRet = false;
+ 
+    if (a.x < b.x)
+    {
+        bRet = true;
+    }
+    else if (a.x == b.x)
+    {
+        if (a.y < b.y)
+        {
+            bRet = true;
+        }
+    }
+
+    return bRet;
+}
+
 void deduplication(vector<int> &vec)
 {
     sort(vec.begin(), vec.end());               // 先对vector进行排序
@@ -70,7 +89,9 @@ int main()
         cites[i].iy = it - ys.begin() + 1;
     }
 
+    sort(cites.begin(), cites.end(), cmp);
 
+    
 
     return 0;
 }

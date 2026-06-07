@@ -18,7 +18,8 @@
 using namespace std;
 
 const int MAX_N = 501;
-short dp[MAX_N][MAX_N];
+int dp[MAX_N][MAX_N];     // dp[bottom][top]
+char flag[MAX_N];
 
 void deduplication(vector<int> &vec)
 {
@@ -57,7 +58,64 @@ int main()
 
         deduplication(tmps);
 
+        for (size_t i = 0; i < n; i++)
+        {
+            auto it = lower_bound(tmps.begin(), tmps.end(), ks[i]);
+            ks[i] = it - tmps.begin() + 1;
+        }
+
+        memset(dp, 0, sizeof(dp));
+        memset(flag, 0, sizeof(flag));
+
+        // init
+        int maxK = tmps.size();
+        dp[ks[0]][ks[0]] = 1;
+        flag[ks[0]] = 1;
+
+        int ans = 1;
+
+        for (size_t i = 1; i < n; i++)
+        {
+            for (int bottom = maxK; bottom >= ks[i]; bottom--)
+            {
+                if (flag[bottom])
+                {
+                    // dp[bottom][top] => dp[bottom][ks[i]]
+                    if (dp[bottom][ks[i]])
+                        dp[bottom][ks[i]] += 1;
+                    
+                    for (int top = ks[i] + 1; top <= bottom; top++)
+                    {
+                        if (dp[bottom][top])
+                            dp[bottom][ks[i]] = max(dp[bottom][ks[i]], dp[bottom][top] + 1);
+                    }
+                    
+                    if (ans < dp[bottom][ks[i]])
+                        ans = dp[bottom][ks[i]];
+                }
+            }
+
+            for (int bottom = ks[i] - 1; bottom >= 1; bottom--)
+            {
+                if (flag[bottom])
+                {
+                    // dp[bottom][top] => dp[ks[i]][top]
+                    for (int top = 1; top <= bottom; top++)
+                    {
+                        if (dp[bottom][top])
+                        {
+                            dp[ks[i]][top] = max(dp[ks[i]][top], dp[bottom][top] + 1);
+                            if (ans < dp[ks[i]][top])
+                                ans = dp[ks[i]][top];
+                        }
+                    }
+
+                    flag[ks[i]] = 1;
+                }
+            }
+        }
         
+        cout << ans << "\n";
     }
 
     return 0;

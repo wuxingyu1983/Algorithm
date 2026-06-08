@@ -18,14 +18,51 @@
 using namespace std;
 
 const int MAX_N = 501;
-int dp[MAX_N][MAX_N];     // dp[bottom][top]
-char flag[MAX_N];
+int lens[MAX_N], rlens[MAX_N];
 
 void deduplication(vector<int> &vec)
 {
     sort(vec.begin(), vec.end());               // 先对vector进行排序
     auto last = unique(vec.begin(), vec.end()); // 去除重复的元素
     vec.erase(last, vec.end());                 // 删除多余的元素
+}
+
+// 合并左右子树的最大值
+void push_up(vector<int> &tree, int p)
+{
+    tree[p] = max(tree[p << 1], tree[p << 1 | 1]);
+}
+
+void updateMax(vector<int> &tree, int idx, int c, int l, int r, int p)
+{
+    if (idx == l && idx == r)
+    {
+        tree[p] = c;
+        return;
+    }
+
+    int mid = (l + r) >> 1;
+    if (idx <= mid)
+        updateMax(tree, idx, c, l, mid, p << 1);
+    else
+        updateMax(tree, idx, c, mid + 1, r, p << 1 | 1);
+    push_up(tree, p);
+}
+
+// 区间查询：查询[L, R]内的最大值
+int getMax(vector<int> &tree, int L, int R, int l, int r, int p)
+{
+    if (L > R)
+        return 0;
+    if (L <= l && r <= R)
+        return tree[p]; // 完全覆盖
+    int mid = (l + r) >> 1;
+    int res = 0;
+    if (L <= mid)
+        res = max(res, getMax(tree, L, R, l, mid, p << 1));
+    if (R > mid)
+        res = max(res, getMax(tree, L, R, mid + 1, r, p << 1 | 1));
+    return res;
 }
 
 int main()
@@ -36,6 +73,9 @@ int main()
     vector<int> ks, tmps;
     ks.reserve(MAX_N);
     tmps.reserve(MAX_N);
+
+    vector<int> tree(MAX_N * 4, 0);
+    vector<int> rtree(MAX_N * 4, 0);
 
     for (;;)
     {
@@ -63,57 +103,17 @@ int main()
             auto it = lower_bound(tmps.begin(), tmps.end(), ks[i]);
             ks[i] = it - tmps.begin() + 1;
         }
-
-        memset(dp, 0, sizeof(dp));
-        memset(flag, 0, sizeof(flag));
-
+       
         // init
-        int maxK = tmps.size();
-        dp[ks[0]][ks[0]] = 1;
-        flag[ks[0]] = 1;
+        memset(lens, 0, sizeof(lens));
+        memset(rlens, 0, sizeof(rlens));
+        tree.assign(tree.size(), 0);
+        rtree.assign(rtree.size(), 0);
+        int maxIdx = tmps.size();
 
-        int ans = 1;
+        int ans = 0;
 
-        for (size_t i = 1; i < n; i++)
-        {
-            for (int bottom = maxK; bottom >= ks[i]; bottom--)
-            {
-                if (flag[bottom])
-                {
-                    // dp[bottom][top] => dp[bottom][ks[i]]
-                    if (dp[bottom][ks[i]])
-                        dp[bottom][ks[i]] += 1;
-                    
-                    for (int top = ks[i] + 1; top <= bottom; top++)
-                    {
-                        if (dp[bottom][top])
-                            dp[bottom][ks[i]] = max(dp[bottom][ks[i]], dp[bottom][top] + 1);
-                    }
-                    
-                    if (ans < dp[bottom][ks[i]])
-                        ans = dp[bottom][ks[i]];
-                }
-            }
-
-            for (int bottom = ks[i] - 1; bottom >= 1; bottom--)
-            {
-                if (flag[bottom])
-                {
-                    // dp[bottom][top] => dp[ks[i]][top]
-                    for (int top = 1; top <= bottom; top++)
-                    {
-                        if (dp[bottom][top])
-                        {
-                            dp[ks[i]][top] = max(dp[ks[i]][top], dp[bottom][top] + 1);
-                            if (ans < dp[ks[i]][top])
-                                ans = dp[ks[i]][top];
-                        }
-                    }
-
-                    flag[ks[i]] = 1;
-                }
-            }
-        }
+        
         
         cout << ans << "\n";
     }

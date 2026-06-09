@@ -17,7 +17,7 @@
 
 using namespace std;
 
-const int MAX_N = 501;
+const int MAX_N = 505;
 int lens[MAX_N], rlens[MAX_N];
 
 void deduplication(vector<int> &vec)
@@ -74,8 +74,8 @@ int main()
     ks.reserve(MAX_N);
     tmps.reserve(MAX_N);
 
-    vector<int> tree(MAX_N * 4, 0);
-    vector<int> rtree(MAX_N * 4, 0);
+    vector<int> tree(MAX_N * 5, 0);
+    vector<int> rtree(MAX_N * 5, 0);
 
     for (;;)
     {
@@ -113,8 +113,21 @@ int main()
 
         int ans = 0;
 
-        
-        
+        for (int i = n - 1; i >= 0; i--)
+        {
+            int l = getMax(tree, 1, ks[i], 1, maxIdx, 1);
+            updateMax(tree, ks[i], l + 1, 1, maxIdx, 1);
+
+            lens[i] = l + 1;
+
+            l = getMax(rtree, ks[i], maxIdx, 1, maxIdx, 1);
+            updateMax(rtree, ks[i], l + 1, 1, maxIdx, 1);
+
+            rlens[i] = l + 1;
+
+            ans = max(ans, lens[i] + rlens[i] - 1);
+        }
+
         cout << ans << "\n";
     }
 

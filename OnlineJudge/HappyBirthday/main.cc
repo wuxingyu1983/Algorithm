@@ -18,7 +18,7 @@
 using namespace std;
 
 const int MAX_N = 505;
-int lens[MAX_N], rlens[MAX_N];
+int lis[MAX_N], lds[MAX_N];
 
 void deduplication(vector<int> &vec)
 {
@@ -105,8 +105,8 @@ int main()
         }
        
         // init
-        memset(lens, 0, sizeof(lens));
-        memset(rlens, 0, sizeof(rlens));
+        memset(lis, 0, sizeof(lis));
+        memset(lds, 0, sizeof(lds));
         tree.assign(tree.size(), 0);
         rtree.assign(rtree.size(), 0);
         int maxIdx = tmps.size();
@@ -118,14 +118,30 @@ int main()
             int l = getMax(tree, 1, ks[i], 1, maxIdx, 1);
             updateMax(tree, ks[i], l + 1, 1, maxIdx, 1);
 
-            lens[i] = l + 1;
+            lds[i] = l + 1;
 
             l = getMax(rtree, ks[i], maxIdx, 1, maxIdx, 1);
             updateMax(rtree, ks[i], l + 1, 1, maxIdx, 1);
 
-            rlens[i] = l + 1;
+            lis[i] = l + 1;
+        }
 
-            ans = max(ans, lens[i] + rlens[i] - 1);
+        for (int i = n - 1; i >= 0; i--)
+        {
+            ans = max(ans, lis[i]);
+            ans = max(ans, lds[i]);
+
+            for (int j = i + 1; j < n; j++)
+            {
+                if (ks[i] < ks[j])
+                {
+                    ans = max(ans, lds[i] + lis[j]);
+                }
+                else if (ks[i] > ks[j])
+                {
+                    ans = max(ans, lis[i] + lds[j]);
+                }
+            }
         }
 
         cout << ans << "\n";

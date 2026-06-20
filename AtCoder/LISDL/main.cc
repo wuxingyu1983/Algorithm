@@ -29,9 +29,31 @@ int main()
     {
         cout << "-1\n";
     }
+    else if (n > a * b)
+    {
+        cout << "-1\n";
+    }
     else
     {
-        
+        int lds_begin = 1;
+        for (int lis = n - a + 1; lis <= n; lis++)
+        {
+            cout << lis << " ";
+
+            if (lds_begin < n - a + 1)
+            {
+                int lds_end = lds_begin + b - 2;
+
+                for (int l = min(lds_end, n - a); l >= lds_begin; l--)
+                {
+                    cout << l << " ";
+                }
+
+                lds_begin = min(lds_end, n - a) + 1;
+            }
+        }
+
+        cout << "\n";
     }
 
     return 0;

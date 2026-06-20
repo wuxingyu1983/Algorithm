@@ -29,7 +29,7 @@ int main()
     {
         cout << "-1\n";
     }
-    else if (n > a * b)
+    else if ((long long)n > (long long)a * (long long)b)
     {
         cout << "-1\n";
     }

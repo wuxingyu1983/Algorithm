@@ -17,12 +17,79 @@
 
 using namespace std;
 
+const int MAX_N = 1000;
+const int MAX_M = 10;
+
+char calendar[MAX_N][MAX_M];
+int dp[2][1024];
+char flag[2][1024];
+
 int main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
+    int n, m;
+    cin >> n >> m;
+
+    for (size_t row = 0; row < n; row++)
+    {
+        for (size_t col = 0; col < m; col++)
+        {
+            cin >> calendar[row][col];
+        }
+
+//        cin.ignore();
+    }
     
+    int ans = 0;
+
+    int maxSt = (1 << m) - 1;
+    int act = 0;
+
+    for (size_t row = 0; row < n; row++)
+    {
+        for (size_t col = 0; col < m; col++)
+        {
+            // state = 0 => | or blocked
+            // state = 1 => --
+
+            memset(flag[act], 0, 1024);
+            memset(dp[act], 0, sizeof(int) * 1024);
+
+            if (0 == row && 0 == col)
+            {
+                if ('#' == calendar[row][col])
+                {
+                    dp[act][0] = 1;
+                    flag[act][0] = 1;
+
+                    dp[act][1] = 1;
+                    flag[act][1] = 1;
+                }
+                else
+                {
+                    flag[act][0] = 1;
+                }
+            }
+            else if (0 == row)
+            {
+
+            }
+            else if (0 == col)
+            {
+
+            }
+            else
+            {
+
+            }
+
+            act = 1 - act;
+        }
+    }
+
+    cout << ans << "\n";
 
     return 0;
 }

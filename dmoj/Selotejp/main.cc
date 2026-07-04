@@ -51,7 +51,7 @@ int main()
 //        cin.ignore();
     }
     
-    int ans = 0;
+    int ans = 10000;
 
     int maxSt = (1 << m) - 1;
     int act = 0;
@@ -183,7 +183,77 @@ int main()
             }
             else
             {
+                for (size_t st = 0; st <= maxSt; st++)
+                {
+                    if (flag[1 - act][st])
+                    {
+                        int newSt = st;
+                        if ('#' == calendar[row][col])
+                        {
+                            int upSt = getVal4St(st, col);
+                            int leftSt = getVal4St(st, col - 1);
 
+                            if (0 == leftSt)
+                            {
+                                if (0 == upSt && '#' == calendar[row - 1][col])
+                                {
+                                    if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                                    {
+                                        dp[act][newSt] = dp[1 - act][st];
+                                        flag[act][newSt] = 1;
+                                    }
+                                }
+                                else
+                                {
+                                    // 0
+                                    setVal4St(newSt, col, 0);
+                                    if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st] + 1)
+                                    {
+                                        dp[act][newSt] = dp[1 - act][st] + 1;
+                                        flag[act][newSt] = 1;
+                                    }
+
+                                    // 1
+                                    setVal4St(newSt, col, 1);
+                                    if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st] + 1)
+                                    {
+                                        dp[act][newSt] = dp[1 - act][st] + 1;
+                                        flag[act][newSt] = 1;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // 1 == leftSt
+                                setVal4St(newSt, col, 1);
+                                if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                                {
+                                    dp[act][newSt] = dp[1 - act][st];
+                                    flag[act][newSt] = 1;
+                                }
+
+                                if (0 == upSt && '#' == calendar[row - 1][col])
+                                {
+                                    setVal4St(newSt, col, 0);
+                                    if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                                    {
+                                        dp[act][newSt] = dp[1 - act][st];
+                                        flag[act][newSt] = 1;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            setVal4St(newSt, col, 0);
+                            if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                            {
+                                dp[act][newSt] = dp[1 - act][st];
+                                flag[act][newSt] = 1;
+                            }
+                        }
+                    }
+                }
             }
 
             act = 1 - act;

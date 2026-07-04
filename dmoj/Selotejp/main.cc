@@ -134,7 +134,52 @@ int main()
             }
             else if (0 == col)
             {
+                for (size_t st = 0; st <= maxSt; st++)
+                {
+                    if (flag[1 - act][st])
+                    {
+                        int newSt = st;
+                        if ('#' == calendar[row][col])
+                        {
+                            int upSt = getVal4St(st, col);
+                            if (0 == upSt && '#' == calendar[row - 1][col])
+                            {
+                                if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                                {
+                                    dp[act][newSt] = dp[1 - act][st];
+                                    flag[act][newSt] = 1;
+                                }
+                            }
+                            else
+                            {
+                                // 0
+                                setVal4St(newSt, col, 0);
+                                if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st] + 1)
+                                {
+                                    dp[act][newSt] = dp[1 - act][st] + 1;
+                                    flag[act][newSt] = 1;
+                                }
 
+                                // 1
+                                setVal4St(newSt, col, 1);
+                                if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st] + 1)
+                                {
+                                    dp[act][newSt] = dp[1 - act][st] + 1;
+                                    flag[act][newSt] = 1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            setVal4St(newSt, col, 0);
+                            if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                            {
+                                dp[act][newSt] = dp[1 - act][st];
+                                flag[act][newSt] = 1;
+                            }
+                        }
+                    }
+                }
             }
             else
             {

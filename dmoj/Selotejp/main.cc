@@ -20,7 +20,7 @@ using namespace std;
 const int MAX_N = 1000;
 const int MAX_M = 10;
 const int ST_BITS = 1;
-const int ST_MASK = 1023;
+const int ST_MASK = 1;
 
 char calendar[MAX_N][MAX_M];
 int dp[2][1024];
@@ -48,7 +48,7 @@ int main()
             cin >> calendar[row][col];
         }
 
-//        cin.ignore();
+        cin.ignore();
     }
     
     int ans = 10000;
@@ -75,6 +75,9 @@ int main()
 
                     dp[act][1] = 1;
                     flag[act][1] = 1;
+
+                    if (row == n - 1 && col == m - 1 && ans > 1)
+                        ans = 1;
                 }
                 else
                 {
@@ -99,6 +102,9 @@ int main()
                                 {
                                     dp[act][newSt] = dp[1 - act][st];
                                     flag[act][newSt] = 1;
+
+                                    if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                        ans = dp[act][newSt];
                                 }
                             }
                             else
@@ -109,6 +115,9 @@ int main()
                                 {
                                     dp[act][newSt] = dp[1 - act][st] + 1;
                                     flag[act][newSt] = 1;
+
+                                    if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                        ans = dp[act][newSt];
                                 }
 
                                 // 1
@@ -117,6 +126,9 @@ int main()
                                 {
                                     dp[act][newSt] = dp[1 - act][st] + 1;
                                     flag[act][newSt] = 1;
+
+                                    if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                        ans = dp[act][newSt];
                                 }
                             }
                         }
@@ -127,6 +139,9 @@ int main()
                             {
                                 dp[act][newSt] = dp[1 - act][st];
                                 flag[act][newSt] = 1;
+
+                                if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                    ans = dp[act][newSt];
                             }
                         }
                     }
@@ -148,6 +163,9 @@ int main()
                                 {
                                     dp[act][newSt] = dp[1 - act][st];
                                     flag[act][newSt] = 1;
+
+                                    if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                        ans = dp[act][newSt];
                                 }
                             }
                             else
@@ -158,6 +176,9 @@ int main()
                                 {
                                     dp[act][newSt] = dp[1 - act][st] + 1;
                                     flag[act][newSt] = 1;
+
+                                    if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                        ans = dp[act][newSt];
                                 }
 
                                 // 1
@@ -166,6 +187,9 @@ int main()
                                 {
                                     dp[act][newSt] = dp[1 - act][st] + 1;
                                     flag[act][newSt] = 1;
+
+                                    if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                        ans = dp[act][newSt];
                                 }
                             }
                         }
@@ -176,6 +200,9 @@ int main()
                             {
                                 dp[act][newSt] = dp[1 - act][st];
                                 flag[act][newSt] = 1;
+
+                                if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                    ans = dp[act][newSt];
                             }
                         }
                     }
@@ -201,6 +228,9 @@ int main()
                                     {
                                         dp[act][newSt] = dp[1 - act][st];
                                         flag[act][newSt] = 1;
+
+                                        if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                            ans = dp[act][newSt];
                                     }
                                 }
                                 else
@@ -211,6 +241,9 @@ int main()
                                     {
                                         dp[act][newSt] = dp[1 - act][st] + 1;
                                         flag[act][newSt] = 1;
+
+                                        if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                            ans = dp[act][newSt];
                                     }
 
                                     // 1
@@ -219,6 +252,9 @@ int main()
                                     {
                                         dp[act][newSt] = dp[1 - act][st] + 1;
                                         flag[act][newSt] = 1;
+
+                                        if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                            ans = dp[act][newSt];
                                     }
                                 }
                             }
@@ -230,6 +266,9 @@ int main()
                                 {
                                     dp[act][newSt] = dp[1 - act][st];
                                     flag[act][newSt] = 1;
+
+                                    if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                        ans = dp[act][newSt];
                                 }
 
                                 if (0 == upSt && '#' == calendar[row - 1][col])
@@ -239,6 +278,9 @@ int main()
                                     {
                                         dp[act][newSt] = dp[1 - act][st];
                                         flag[act][newSt] = 1;
+
+                                        if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                            ans = dp[act][newSt];
                                     }
                                 }
                             }
@@ -250,6 +292,9 @@ int main()
                             {
                                 dp[act][newSt] = dp[1 - act][st];
                                 flag[act][newSt] = 1;
+
+                                if (row == n - 1 && col == m - 1 && ans > dp[act][newSt])
+                                    ans = dp[act][newSt];
                             }
                         }
                     }

@@ -19,10 +19,19 @@ using namespace std;
 
 const int MAX_N = 1000;
 const int MAX_M = 10;
+const int ST_BITS = 1;
+const int ST_MASK = 1023;
 
 char calendar[MAX_N][MAX_M];
 int dp[2][1024];
 char flag[2][1024];
+
+#define getVal4St(ST, POS) ((ST) >> ((POS) * ST_BITS)) & ST_MASK
+
+#define setVal4St(ST, POS, VAL)            \
+    ST &= ~(ST_MASK << ((POS) * ST_BITS)); \
+    if (VAL)                               \
+        ST |= (VAL) << ((POS) * ST_BITS);
 
 int main()
 {
@@ -69,12 +78,59 @@ int main()
                 }
                 else
                 {
+                    // blocked
                     flag[act][0] = 1;
                 }
             }
             else if (0 == row)
             {
+                for (size_t st = 0; st <= maxSt; st++)
+                {
+                    if (flag[1 - act][st])
+                    {
+                        int newSt = st;
+                        if ('#' == calendar[row][col])
+                        {
+                            int leftSt = getVal4St(st, col - 1);
+                            if (1 == leftSt)
+                            {
+                                setVal4St(newSt, col, 1);
+                                if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                                {
+                                    dp[act][newSt] = dp[1 - act][st];
+                                    flag[act][newSt] = 1;
+                                }
+                            }
+                            else
+                            {
+                                // 0
+                                setVal4St(newSt, col, 0);
+                                if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st] + 1)
+                                {
+                                    dp[act][newSt] = dp[1 - act][st] + 1;
+                                    flag[act][newSt] = 1;
+                                }
 
+                                // 1
+                                setVal4St(newSt, col, 1);
+                                if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st] + 1)
+                                {
+                                    dp[act][newSt] = dp[1 - act][st] + 1;
+                                    flag[act][newSt] = 1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            setVal4St(newSt, col, 0);
+                            if (0 == flag[act][newSt] || dp[act][newSt] > dp[1 - act][st])
+                            {
+                                dp[act][newSt] = dp[1 - act][st];
+                                flag[act][newSt] = 1;
+                            }
+                        }
+                    }
+                }
             }
             else if (0 == col)
             {

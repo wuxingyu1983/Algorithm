@@ -25,9 +25,14 @@ short dp0[8][8][99];            // dp[st1][st2][interval] : 第i行的状态st1,
 short dp1[MAX_N][8][MAX_K];     // dp[i][st][k] : 第 i 行的状态为st,选了k个点的最大距离
 short dp2[MAX_N][64][MAX_K];    // dp[i][st][k] : 第 i - 1, i 行的状态为st,选了k个点的最大距离
 char flags[8][8];
+char bits[8];
 
 void init()
 {
+    bits[1] = bits[2] = bits[4] = 1;
+    bits[3] = bits[5] = bits[6] = 2;
+    bits[7] = 3;
+
     for (int st1 = 0; st1 < 8; st1++)
     {
         int max = 0;
@@ -128,7 +133,27 @@ int main()
 
     // init
     init();
-    
+
+    int ans = 0;
+
+    // row = 1;
+    for (int st = 1; st < 8; st++)
+    {
+        if (cells[1] & st)
+            continue;
+
+        int num = bits[st];
+        if (num > k)
+            continue;
+
+        dp1[1][st][num] = dp2[1][st][num] = dp0[0][st][0];
+
+        if (num ==k)
+        {
+            if (ans == 0 || dp1[1][st][num] < ans)
+                ans = dp1[1][st][num];
+        }
+    }
 
     return 0;
 }

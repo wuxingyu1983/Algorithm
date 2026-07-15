@@ -29,6 +29,9 @@ char bits[8];
 
 void init()
 {
+    memset(dp1, -1, sizeof(dp1));
+    memset(dp2, -1, sizeof(dp2));
+
     bits[1] = bits[2] = bits[4] = 1;
     bits[3] = bits[5] = bits[6] = 2;
     bits[7] = 3;
@@ -48,8 +51,7 @@ void init()
 
             if (7 == st2 || 3 == st2 || 6 == st2)
             {
-                if (0 == max || max > 1)
-                    max = 1;
+                max = 1;
             }
             else if (5 == st2)
             {
@@ -148,12 +150,117 @@ int main()
 
         dp1[1][st][num] = dp2[1][st][num] = dp0[0][st][0];
 
-        if (num ==k)
+        if (num == k)
         {
-            if (ans == 0 || dp1[1][st][num] < ans)
+            if (dp1[1][st][num] > ans)
                 ans = dp1[1][st][num];
         }
     }
+
+    if (2 <= n)
+    {
+        // row == 2
+        for (int st = 1; st < 64; st++)
+        {
+            int st1 = st >> 3;
+            int st2 = st & 7;
+
+            if (cells[1] & st1 || cells[2] & st2)
+                continue;
+            
+            int num = bits[st1] + bits[st2];
+            if (num > k)
+                continue;
+            
+            dp2[2][st][num] = dp1[2][st2][num] = dp0[st1][st2][0];
+
+            if (num == k)
+            {
+                if (dp2[2][st][num] > ans)
+                    ans = dp2[2][st][num];
+            }
+        }
+    }
+
+    if (2 < n)
+    {
+        for (int row = 3; row <= n; row++)
+        {
+            for (int st = 1; st < 64; st++)
+            {
+                int st1 = st >> 3;
+                int st2 = st & 7;
+ 
+                if (cells[row - 1] & st1 || cells[row] & st2)
+                    continue;
+
+                int num = bits[st1] + bits[st2];
+                if (num > k)
+                    continue;
+
+                // row - 2
+                {
+                    for (int preSt = 1; preSt < 64; preSt++)
+                    {
+                        int st_1 = preSt >> 3;    // row - 3
+                        int st_2 = preSt & 7;     // row - 2
+
+                        if (cells[row - 2] & st_2 || cells[row - 3] & st_1)
+                            continue;
+                        
+                        for (int cnt = 0; cnt <= k - num; cnt++)
+                        {
+                            if (0 <= dp2[row - 2][preSt][cnt])
+                            {
+                                int max = dp2[row - 2][preSt][cnt];
+                                if (0 < dp0[st1][st2][0])
+                                {
+                                    if (0 == max || max > dp0[st1][st2][0])
+                                        max = dp0[st1][st2][0];
+                                }
+
+                                if (0 < dp0[st_2][st2][1])
+                                {
+                                    if (0 == max || max > dp0[st_2][st2][1])
+                                        max = dp0[st_2][st2][1];
+                                }
+
+                                if (0 < dp0[st_1][st1][1])
+                                {
+                                    if (0 == max || max > dp0[st_1][st1][1])
+                                        max = dp0[st_1][st1][1];
+                                }
+ 
+                                if (0 < dp0[st_2][st1][0])
+                                {
+                                    if (0 == max || max > dp0[st_2][st1][0])
+                                        max = dp0[st_2][st1][0];
+                                }
+
+                                if (max > dp2[row][st][num + cnt])
+                                {
+                                    dp2[row][st][num + cnt] = max;
+                                }
+
+                                if (max > dp1[row][st2][num + cnt])
+                                {
+                                    dp1[row][st2][num + cnt] = max;
+                                }
+
+                                if (k == num + cnt)
+                                {
+                                    if (max > ans)
+                                        ans = max;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    cout << fixed << setprecision(6) << sqrt(ans) << "\n";
 
     return 0;
 }

@@ -17,10 +17,13 @@
 
 using namespace std;
 
-const int MAX_N = 100;
+const int MAX_N = 101;
+const int MAX_K = 301;
 char cells[MAX_N];  // 每行为 3 bits 的状态
 
-short dp0[8][8][99];    // dp[st1][st2][interval] : 第i行的状态st1,第j行的状态st2,i行和j行中间还有interval行的最大距离
+short dp0[8][8][99];            // dp[st1][st2][interval] : 第i行的状态st1,第j行的状态st2,i行和j行中间还有interval行的最大距离
+short dp1[MAX_N][8][MAX_K];     // dp[i][st][k] : 第 i 行的状态为st,选了k个点的最大距离
+short dp2[MAX_N][64][MAX_K];    // dp[i][st][k] : 第 i - 1, i 行的状态为st,选了k个点的最大距离
 char flags[8][8];
 
 void init()
@@ -97,7 +100,7 @@ int main()
     int usable = 0;
     for (int i = 0; i < 3; i++)
     {
-        for (int j = 0; j < n; j++)
+        for (int j = 1; j <= n; j++)
         {
             char ch;
             cin >> ch;
@@ -115,6 +118,7 @@ int main()
 
         cin.ignore();
     }
+    cells[0] = 7;
 
     if (usable < k)
     {

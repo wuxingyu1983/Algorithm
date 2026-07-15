@@ -20,6 +20,9 @@ using namespace std;
 const int MAX_N = 100;
 char cells[MAX_N][3];
 
+short dp0[8][8][99];    // dp[st1][st2][interval] : 第i行的状态st1,第j行的状态st2,i行和j行中间还有interval行的最大距离
+
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -50,7 +53,31 @@ int main()
         return 0;
     }
 
-    
+    // init
+    {
+        for (int st1 = 0; st1 < 8; st1++)
+        {
+            int max = 0;
+            if (7 == st1 || 3 == st1 || 6 == st1) 
+                max = 1;
+            else if (5 == st1)
+                max = 4;
+            
+            for (int st2 = 0; st2 < 8; st2++)
+            {
+                if (7 == st2 || 3 == st2 || 6 == st2)
+                {
+                    if (0 == max || max > 1)
+                        max = 1;
+                }
+                else if (5 == st2)
+                {
+                    if (0 == max)
+                        max = 4;
+                }
+            }
+        }
+    }
     
 
     return 0;

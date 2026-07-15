@@ -247,11 +247,49 @@ int main()
                                     dp1[row][st2][num + cnt] = max;
                                 }
 
-                                if (k == num + cnt)
+                                if (k == num + cnt && max > ans)
+                                    ans = max;
+                            }
+                        }
+                    }
+                }
+
+                for (int r = row - 4; r >= 1; r--)
+                {
+                    for (int preSt = 1; preSt < 8; preSt++)
+                    {
+                        if (cells[r] & preSt)
+                            continue;
+
+                        for (int cnt = 0; cnt <= k - num; cnt++)
+                        {
+                            if (0 <= dp1[r][preSt][cnt])
+                            {
+                                int max = dp1[r][preSt][cnt];
+                                if (0 < dp0[st1][st2][0])
                                 {
-                                    if (max > ans)
-                                        ans = max;
+                                    if (0 == max || max > dp0[st1][st2][0])
+                                        max = dp0[st1][st2][0];
                                 }
+
+                                if (0 < dp0[preSt][st1][row - r - 1])
+                                {
+                                    if (0 == max || max > dp0[preSt][st1][row - r - 1])
+                                        max = dp0[preSt][st1][row - r - 1];
+                                }
+
+                                if (max > dp2[row][st][num + cnt])
+                                {
+                                    dp2[row][st][num + cnt] = max;
+                                }
+
+                                if (max > dp1[row][st2][num + cnt])
+                                {
+                                    dp1[row][st2][num + cnt] = max;
+                                }
+
+                                if (k == num + cnt && max > ans)
+                                    ans = max;
                             }
                         }
                     }

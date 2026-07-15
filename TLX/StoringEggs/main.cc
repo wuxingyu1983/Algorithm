@@ -95,8 +95,24 @@ int main()
                     else
                     {
                         // 4 == max or 0 == max
-                        
+                        for (int p1 = 0; p1 < 3; p1++)
+                        {
+                            if (st1 & (1 << p1))
+                            {
+                                for (int p2 = 0; p2 < 3; p2++)
+                                {
+                                    if (st2 & (1 << p2))
+                                    {
+                                        int dist = (p1 - p2) * (p1 - p2) + (inter + 1) * (inter + 1);
+                                        if (0 == max || dist < max)
+                                            max = dist;
+                                    }
+                                }
+                            }
+                        }
 
+                        dp0[st1][st2][inter] = max;
+                        dp0[st2][st1][inter] = max;
                     }
                 }
 

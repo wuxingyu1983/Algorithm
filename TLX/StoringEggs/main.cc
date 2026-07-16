@@ -59,16 +59,20 @@ void init()
                     max = 4;
             }
 
-            for (int inter = 0; inter < 99; inter++)
+            if (1 == max)
             {
-                if (1 == max)
+                for (int inter = 0; inter < 99; inter++)
                 {
                     dp0[st1][st2][inter] = 1;
                     dp0[st2][st1][inter] = 1;
                 }
-                else
+            }
+            else
+            {
+                for (int inter = 0; inter < 99; inter++)
                 {
                     // 4 == max or 0 == max
+                    int tmp = max;
                     for (int p1 = 0; p1 < 3; p1++)
                     {
                         if (st1 & (1 << p1))
@@ -78,15 +82,15 @@ void init()
                                 if (st2 & (1 << p2))
                                 {
                                     int dist = (p1 - p2) * (p1 - p2) + (inter + 1) * (inter + 1);
-                                    if (0 == max || dist < max)
-                                        max = dist;
+                                    if (0 == tmp || dist < tmp)
+                                        tmp = dist;
                                 }
                             }
                         }
                     }
 
-                    dp0[st1][st2][inter] = max;
-                    dp0[st2][st1][inter] = max;
+                    dp0[st1][st2][inter] = tmp;
+                    dp0[st2][st1][inter] = tmp;
                 }
             }
 
@@ -112,7 +116,7 @@ int main()
             char ch;
             cin >> ch;
 
-            if ('.' == cells[j])
+            if ('.' == ch)
             {
                 usable ++;
             }

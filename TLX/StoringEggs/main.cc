@@ -266,10 +266,16 @@ int main()
                                         max = dp0[st1][st2][0];
                                 }
 
-                                if (0 < dp0[preSt][st1][row - r - 1])
+                                if (0 < dp0[preSt][st1][row - r - 2])
                                 {
-                                    if (0 == max || max > dp0[preSt][st1][row - r - 1])
-                                        max = dp0[preSt][st1][row - r - 1];
+                                    if (0 == max || max > dp0[preSt][st1][row - r - 2])
+                                        max = dp0[preSt][st1][row - r - 2];
+                                }
+
+                                if (0 < dp0[preSt][st2][row - r - 1])
+                                {
+                                    if (0 == max || max > dp0[preSt][st2][row - r - 1])
+                                        max = dp0[preSt][st2][row - r - 1];
                                 }
 
                                 if (max > dp2[row][st][num + cnt])
@@ -292,8 +298,7 @@ int main()
         }
     }
 
-    //    cout << fixed << setprecision(6) << sqrt(ans) << "\n";
-    cout << fixed << setprecision(6) << ans << "\n";
+    cout << fixed << setprecision(6) << sqrt(ans) << "\n";
 
     return 0;
 }

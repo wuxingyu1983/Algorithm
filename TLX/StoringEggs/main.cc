@@ -21,7 +21,7 @@ using namespace std;
 const int MAX_N = 101;
 const int MAX_K = 301;
 char cells[MAX_N]; // 每行为 3 bits 的状态
-short sums[MAX_N];
+int sums[MAX_N];
 
 short dp0[8][8][99];         // dp[st1][st2][interval] : 第i行的状态st1,第j行的状态st2,i行和j行中间还有interval行的最大距离
 short dp1[MAX_N][8][MAX_K];  // dp[i][st][k] : 第 i 行的状态为st,选了k个点的最大距离
@@ -137,12 +137,12 @@ int main()
     // init
     init(n);
 
-    int ans = 0;
+    int ans = 1;
 
     // row = 1;
     for (int st = 0; st < 8; st++)
     {
-        if (cells[1] & st)
+        if (cells[1] & st || 1 == dp0[0][st][0])
             continue;
 
         int num = bits[st];
@@ -166,7 +166,7 @@ int main()
             int st1 = st >> 3;
             int st2 = st & 7;
 
-            if (0 == st2 || (cells[1] & st1) || (cells[2] & st2))
+            if (0 == st2 || (cells[1] & st1) || (cells[2] & st2) || 1 == dp0[st1][st2][0])
                 continue;
 
             int num = bits[st1] + bits[st2];
@@ -192,7 +192,7 @@ int main()
                 int st1 = st >> 3;
                 int st2 = st & 7;
 
-                if (0 == st2 || cells[row - 1] & st1 || cells[row] & st2)
+                if (0 == st2 || cells[row - 1] & st1 || cells[row] & st2 || 1 == dp0[st1][st2][0])
                     continue;
 
                 int num = bits[st1] + bits[st2];
@@ -206,10 +206,10 @@ int main()
                         int st_1 = preSt >> 3; // row - 3
                         int st_2 = preSt & 7;  // row - 2
 
-                        if (0 == st_2 || cells[row - 2] & st_2 || cells[row - 3] & st_1)
+                        if (0 == st_2 || cells[row - 2] & st_2 || cells[row - 3] & st_1 || 1 == dp0[st_1][st_2][0] || 1 == dp0[st_2][st1][0])
                             continue;
 
-                        for (int cnt = 0; cnt <= sums[row - 2]; cnt++)
+                        for (int cnt = 0; cnt <= min(sums[row - 2], k - num); cnt++)
                         {
                             if (0 <= dp2[row - 2][preSt][cnt])
                             {
@@ -259,10 +259,10 @@ int main()
                 {
                     for (int preSt = 1; preSt < 8; preSt++)
                     {
-                        if (cells[r] & preSt)
+                        if (cells[r] & preSt || 1 == dp0[0][preSt][0])
                             continue;
 
-                        for (int cnt = 0; cnt <= sums[r]; cnt++)
+                        for (int cnt = 0; cnt <= min(sums[r], k - num); cnt++)
                         {
                             if (0 <= dp1[r][preSt][cnt])
                             {

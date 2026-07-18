@@ -24,10 +24,11 @@ char cells[MAX_N]; // 每行为 3 bits 的状态
 int sums[MAX_N];
 
 short dp0[8][8][99];         // dp[st1][st2][interval] : 第i行的状态st1,第j行的状态st2,i行和j行中间还有interval行的最大距离
-short dp1[MAX_N][8][MAX_K];  // dp[i][st][k] : 第 i 行的状态为st,选了k个点的最大距离
 short dp2[MAX_N][64][MAX_K]; // dp[i][st][k] : 第 i - 1, i 行的状态为st,选了k个点的最大距离
 char flags[8][8];
 char bits[8];
+
+vector<int> states;
 
 void init(int n)
 {
@@ -36,7 +37,6 @@ void init(int n)
         sums[i] = sums[i - 1] + 3 - bits[cells[i]];
     }
 
-    memset(dp1, -1, sizeof(dp1));
     memset(dp2, -1, sizeof(dp2));
 
     bits[1] = bits[2] = bits[4] = 1;
@@ -83,6 +83,18 @@ void init(int n)
                                         tmp = dist;
                                 }
                             }
+                        }
+                    }
+
+                    if (0 == inter && 1 != tmp && 0 < st1 + st2)
+                    {
+                        if (0 < st1)
+                        {
+                            states.push_back((st2 << 3) | st1);
+                        }
+                        if (0 < st2)
+                        {
+                            states.push_back((st1 << 3) | st2);
                         }
                     }
 
@@ -140,8 +152,9 @@ int main()
     int ans = 1;
 
     // row = 1;
-    for (int st = 0; st < 8; st++)
+    for (int i = 0; i < 4; i++)
     {
+        int st = states[i];
         if (cells[1] & st || 1 == dp0[0][st][0])
             continue;
 
@@ -149,20 +162,21 @@ int main()
         if (num > k)
             continue;
 
-        dp1[1][st][num] = dp2[1][st][num] = dp0[0][st][0];
+        dp2[1][st][num] = dp0[0][st][0];
 
         if (num == k)
         {
-            if (dp1[1][st][num] > ans)
-                ans = dp1[1][st][num];
+            if (dp2[1][st][num] > ans)
+                ans = dp2[1][st][num];
         }
     }
 
     if (2 <= n)
     {
         // row == 2
-        for (int st = 0; st < 64; st++)
+        for (int i = 0; i < states.size(); i++)
         {
+            int st = states[i];
             int st1 = st >> 3;
             int st2 = st & 7;
 
@@ -173,7 +187,7 @@ int main()
             if (num > k)
                 continue;
 
-            dp2[2][st][num] = dp1[2][st2][num] = dp0[st1][st2][0];
+            dp2[2][st][num] = dp0[st1][st2][0];
 
             if (num == k)
             {
@@ -187,65 +201,62 @@ int main()
     {
         for (int row = 3; row <= n; row++)
         {
-            for (int st = 1; st < 64; st++)
+            for (int i = 0; i < states.size(); i++)
             {
+                int st = states[i];
                 int st1 = st >> 3;
                 int st2 = st & 7;
 
-                if (0 == st2 || cells[row - 1] & st1 || cells[row] & st2 || 1 == dp0[st1][st2][0])
+                if (cells[row - 1] & st1 || cells[row] & st2)
                     continue;
 
                 int num = bits[st1] + bits[st2];
                 if (num > k)
                     continue;
 
-                // row - 2
+                for (int r = row - 2; r >= 1 && r >= row - 4; r--)
                 {
-                    for (int preSt = 1; preSt < 64; preSt++)
+                    for (int j = 0; j < states.size(); j++)
                     {
+                        int preSt = states[j];
                         int st_1 = preSt >> 3; // row - 3
                         int st_2 = preSt & 7;  // row - 2
 
-                        if (0 == st_2 || cells[row - 2] & st_2 || cells[row - 3] & st_1 || 1 == dp0[st_1][st_2][0] || 1 == dp0[st_2][st1][0])
+                        if (cells[r] & st_2 || cells[r - 1] & st_1)
                             continue;
 
-                        for (int cnt = 0; cnt <= min(sums[row - 2], k - num); cnt++)
+                        for (int cnt = 0; cnt <= min(sums[r], k - num); cnt++)
                         {
-                            if (0 <= dp2[row - 2][preSt][cnt])
+                            if (0 <= dp2[r][preSt][cnt])
                             {
-                                int max = dp2[row - 2][preSt][cnt];
+                                int max = dp2[r][preSt][cnt];
                                 if (0 < dp0[st1][st2][0])
                                 {
                                     if (0 == max || max > dp0[st1][st2][0])
                                         max = dp0[st1][st2][0];
                                 }
 
-                                if (0 < dp0[st_2][st2][1])
+                                if (0 < dp0[st_2][st2][row - r - 1])
                                 {
-                                    if (0 == max || max > dp0[st_2][st2][1])
-                                        max = dp0[st_2][st2][1];
+                                    if (0 == max || max > dp0[st_2][st2][row - r - 1])
+                                        max = dp0[st_2][st2][row - r - 1];
                                 }
 
-                                if (0 < dp0[st_1][st1][1])
+                                if (0 < dp0[st_1][st1][row - r - 1])
                                 {
-                                    if (0 == max || max > dp0[st_1][st1][1])
-                                        max = dp0[st_1][st1][1];
+                                    if (0 == max || max > dp0[st_1][st1][row - r - 1])
+                                        max = dp0[st_1][st1][row - r - 1];
                                 }
 
-                                if (0 < dp0[st_2][st1][0])
+                                if (0 < dp0[st_2][st1][row - r - 2])
                                 {
-                                    if (0 == max || max > dp0[st_2][st1][0])
-                                        max = dp0[st_2][st1][0];
+                                    if (0 == max || max > dp0[st_2][st1][row - r - 2])
+                                        max = dp0[st_2][st1][row - r - 2];
                                 }
 
                                 if (max > dp2[row][st][num + cnt])
                                 {
                                     dp2[row][st][num + cnt] = max;
-                                }
-
-                                if (max > dp1[row][st2][num + cnt])
-                                {
-                                    dp1[row][st2][num + cnt] = max;
                                 }
 
                                 if (k == num + cnt && max > ans)
@@ -254,45 +265,64 @@ int main()
                         }
                     }
                 }
+            }
 
-                for (int r = row - 4; r >= 1; r--)
+            for (int i = 0; i < 3; i++)
+            {
+                int st = states[i];
+                int st1 = st >> 3;
+                int st2 = st & 7;
+
+                if (cells[row - 1] & st1 || cells[row] & st2)
+                    continue;
+
+                int num = bits[st1] + bits[st2];
+                if (num > k)
+                    continue;
+
+                for (int r = row - 5; r >= 1; r--)
                 {
-                    for (int preSt = 1; preSt < 8; preSt++)
+                    for (int j = 0; j < 3; j++)
                     {
-                        if (cells[r] & preSt || 1 == dp0[0][preSt][0])
+                        int preSt = states[j];
+                        int st_1 = preSt >> 3; // row - 3
+                        int st_2 = preSt & 7;  // row - 2
+
+                        if (cells[r] & st_2 || cells[r - 1] & st_1)
                             continue;
 
                         for (int cnt = 0; cnt <= min(sums[r], k - num); cnt++)
                         {
-                            if (0 <= dp1[r][preSt][cnt])
+                            if (0 <= dp2[r][preSt][cnt])
                             {
-                                int max = dp1[r][preSt][cnt];
+                                int max = dp2[r][preSt][cnt];
                                 if (0 < dp0[st1][st2][0])
                                 {
                                     if (0 == max || max > dp0[st1][st2][0])
                                         max = dp0[st1][st2][0];
                                 }
 
-                                if (0 < dp0[preSt][st1][row - r - 2])
+                                if (0 < dp0[st_2][st2][row - r - 1])
                                 {
-                                    if (0 == max || max > dp0[preSt][st1][row - r - 2])
-                                        max = dp0[preSt][st1][row - r - 2];
+                                    if (0 == max || max > dp0[st_2][st2][row - r - 1])
+                                        max = dp0[st_2][st2][row - r - 1];
                                 }
 
-                                if (0 < dp0[preSt][st2][row - r - 1])
+                                if (0 < dp0[st_1][st1][row - r - 1])
                                 {
-                                    if (0 == max || max > dp0[preSt][st2][row - r - 1])
-                                        max = dp0[preSt][st2][row - r - 1];
+                                    if (0 == max || max > dp0[st_1][st1][row - r - 1])
+                                        max = dp0[st_1][st1][row - r - 1];
+                                }
+
+                                if (0 < dp0[st_2][st1][row - r - 2])
+                                {
+                                    if (0 == max || max > dp0[st_2][st1][row - r - 2])
+                                        max = dp0[st_2][st1][row - r - 2];
                                 }
 
                                 if (max > dp2[row][st][num + cnt])
                                 {
                                     dp2[row][st][num + cnt] = max;
-                                }
-
-                                if (max > dp1[row][st2][num + cnt])
-                                {
-                                    dp1[row][st2][num + cnt] = max;
                                 }
 
                                 if (k == num + cnt && max > ans)
@@ -305,7 +335,8 @@ int main()
         }
     }
 
-    cout << fixed << setprecision(6) << sqrt(ans) << "\n";
+//    cout << fixed << setprecision(6) << sqrt(ans) << "\n";
+    cout << fixed << setprecision(6) << ans << "\n";
 
     return 0;
 }

@@ -214,8 +214,13 @@ int main()
                 if (num > k)
                     continue;
 
-//                for (int r = row - 2; r >= 1 && r >= row - 4; r--)
-                for (int r = row - 2; r >= 1; r--)
+                // start st from row
+                dp2[row][st][num] = dp0[st1][st2][0];
+                if (k == num && dp2[row][st][num] > ans)
+                    ans = dp2[row][st][num];
+
+                for (int r = row - 2; r >= 1 && r >= row - 5; r--)
+//                for (int r = row - 2; r >= 1; r--)
                 {
                     for (int j = 0; j < states.size(); j++)
                     {
@@ -267,7 +272,7 @@ int main()
                     }
                 }
             }
-#if 0
+
             for (int i = 0; i < 3; i++)
             {
                 int st = states[i];
@@ -281,7 +286,12 @@ int main()
                 if (num > k)
                     continue;
 
-                for (int r = row - 5; r >= 1; r--)
+                // start st from row
+                dp2[row][st][num] = dp0[st1][st2][0];
+                if (k == num && dp2[row][st][num] > ans)
+                    ans = dp2[row][st][num];
+
+                for (int r = row - 6; r >= 1; r--)
                 {
                     for (int j = 0; j < 3; j++)
                     {
@@ -333,7 +343,6 @@ int main()
                     }
                 }
             }
-#endif
         }
     }
 

@@ -23,10 +23,10 @@ const int MAX_K = 301;
 char cells[MAX_N]; // 每行为 3 bits 的状态
 int sums[MAX_N];
 
-short dp0[8][8][99];         // dp[st1][st2][interval] : 第i行的状态st1,第j行的状态st2,i行和j行中间还有interval行的最大距离
-short dp2[MAX_N][64][MAX_K]; // dp[i][st][k] : 第 i - 1, i 行的状态为st,选了k个点的最大距离
+int dp0[8][8][99];         // dp[st1][st2][interval] : 第i行的状态st1,第j行的状态st2,i行和j行中间还有interval行的最大距离
+int dp2[MAX_N][64][MAX_K]; // dp[i][st][k] : 第 i - 1, i 行的状态为st,选了k个点的最大距离
 char flags[8][8];
-char bits[8];
+int bits[8];
 
 vector<int> states;
 
@@ -180,7 +180,7 @@ int main()
             int st1 = st >> 3;
             int st2 = st & 7;
 
-            if (0 == st2 || (cells[1] & st1) || (cells[2] & st2) || 1 == dp0[st1][st2][0])
+            if ((cells[1] & st1) || (cells[2] & st2) || 1 == dp0[st1][st2][0])
                 continue;
 
             int num = bits[st1] + bits[st2];
@@ -214,7 +214,8 @@ int main()
                 if (num > k)
                     continue;
 
-                for (int r = row - 2; r >= 1 && r >= row - 4; r--)
+//                for (int r = row - 2; r >= 1 && r >= row - 4; r--)
+                for (int r = row - 2; r >= 1; r--)
                 {
                     for (int j = 0; j < states.size(); j++)
                     {
@@ -266,7 +267,7 @@ int main()
                     }
                 }
             }
-
+#if 0
             for (int i = 0; i < 3; i++)
             {
                 int st = states[i];
@@ -332,11 +333,11 @@ int main()
                     }
                 }
             }
+#endif
         }
     }
 
-//    cout << fixed << setprecision(6) << sqrt(ans) << "\n";
-    cout << fixed << setprecision(6) << ans << "\n";
+    cout << fixed << setprecision(6) << sqrt(ans) << "\n";
 
     return 0;
 }

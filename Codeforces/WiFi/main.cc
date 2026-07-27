@@ -18,6 +18,7 @@ using namespace std;
 
 const int MAXN = 200010;
 char rooms[MAXN];
+int n, k;
 
 // segment tree func
 // 合并左右子树的最大值
@@ -58,12 +59,29 @@ long long getMax(vector<long long> &tree, int L, int R, int l, int r, int p)
     return res;
 }
 
+int my_upper_bound(vector<long long> &tree, int lo, int hi, long long target)
+{
+    while (lo < hi)
+    {
+        int mid = (lo + hi) / 2;
+        long long val = getMax(tree, mid, mid, 1, n, 1);
+        if (val <= target)
+        {
+            lo = mid + 1;
+        }
+        else
+        {
+            hi = mid;
+        }
+    }
+    return lo;
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    int n, k;
     cin >> n >> k;
 
     for (int i = 1; i <= n; i++)
@@ -105,7 +123,17 @@ int main()
                 before = getMax(dp, left - 1, left - 1, 1, n, 1);
             }
 
+            long long now = before + (long long)i;
 
+            // 找到 left - rI 之间第一个大于now的下标
+            int pos = 1;
+            if (1 < i)
+            {
+                pos = my_upper_bound(dp, left, rI + 1, now);
+            }
+
+            int right = min(i + k, n);
+            
         }
     }
 

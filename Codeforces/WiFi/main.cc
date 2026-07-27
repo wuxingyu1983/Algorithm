@@ -72,8 +72,9 @@ int main()
     }
 
     vector<long long> dp(n * 4 + 10, 0);
+    int rI = 0;     // 已经接入网络最右边room的下标
 
-    for (long long i = 1; i <= n; i++)
+    for (int i = 1; i <= n; i++)
     {
         if ('0' == rooms[i])
         {
@@ -85,14 +86,25 @@ int main()
 
             long long now = getMax(dp, i, i, 1, n, 1);
 
-            if (0 == now || before + i < now)
+            if (0 == now || before + (long long)i < now)
             {
-                update(dp, i, before + i, 1, n, 1);
+                update(dp, i, before + (long long)i, 1, n, 1);
+                if (rI < i)
+                {
+                    rI = i;
+                }
             }
         }
         else
         {
             // '1' == rooms[i]
+            int left = max(1, i - k);
+            long long before = 0;
+            if (1 < left)
+            {
+                before = getMax(dp, left - 1, left - 1, 1, n, 1);
+            }
+
 
         }
     }

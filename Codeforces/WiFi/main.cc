@@ -20,51 +20,91 @@ const int MAXN = 200010;
 char rooms[MAXN];
 int n, k;
 
-// segment tree func
-// 合并左右子树的最大值
-void push_up(vector<long long> &tree, int p)
-{
-    tree[p] = max(tree[p << 1], tree[p << 1 | 1]);
-}
+template <typename T>
+class SegmentTree {
+private:
+    int n;
+    std::vector<T> tree;
+    std::vector<T> lazy;
+    std::vector<bool> has_lazy; // Tracks if a lazy value is pending
 
-void update(vector<long long> &tree, int idx, long long c, int l, int r, int p)
-{
-    if (idx == l && idx == r)
-    {
-        tree[p] = c;
-        return;
+    void push(int node) {
+        if (has_lazy[node]) {
+            // Pass the assignment value to the left child
+            tree[2 * node] = lazy[node];
+            lazy[2 * node] = lazy[node];
+            has_lazy[2 * node] = true;
+
+            // Pass the assignment value to the right child
+            tree[2 * node + 1] = lazy[node];
+            lazy[2 * node + 1] = lazy[node];
+            has_lazy[2 * node + 1] = true;
+
+            // Clear the lazy flag for the current node
+            has_lazy[node] = false;
+        }
     }
 
-    int mid = (l + r) >> 1;
-    if (idx <= mid)
-        update(tree, idx, c, l, mid, p << 1);
-    else
-        update(tree, idx, c, mid + 1, r, p << 1 | 1);
-    push_up(tree, p);
-}
+    void update_range(int node, int start, int end, int l, int r, T val) {
+        if (r < start || end < l) {
+            return; // No overlap
+        }
+        if (l <= start && end <= r) {
+            // Complete overlap: update node value and mark it lazy
+            tree[node] = val;
+            lazy[node] = val;
+            has_lazy[node] = true;
+            return;
+        }
+        // Partial overlap: push pending updates down, then recurse
+        push(node);
+        int mid = start + (end - start) / 2;
+        update_range(2 * node, start, mid, l, r, val);
+        update_range(2 * node + 1, mid + 1, end, l, r, val);
+        
+        // Merge step: parent maximum is the max of its children
+        tree[node] = std::max(tree[2 * node], tree[2 * node + 1]);
+    }
 
-// 区间查询：查询[L, R]内的最大值
-long long getMax(vector<long long> &tree, int L, int R, int l, int r, int p)
-{
-    if (L > R)
-        return 0;
-    if (L <= l && r <= R)
-        return tree[p]; // 完全覆盖
-    int mid = (l + r) >> 1;
-    long long res = 0;
-    if (L <= mid)
-        res = max(res, getMax(tree, L, R, l, mid, p << 1));
-    if (R > mid)
-        res = max(res, getMax(tree, L, R, mid + 1, r, p << 1 | 1));
-    return res;
-}
+    T query_range(int node, int start, int end, int l, int r) {
+        if (r < start || end < l) {
+            return std::numeric_limits<T>::min(); // No overlap return minimum infinity
+        }
+        if (l <= start && end <= r) {
+            return tree[node]; // Complete overlap
+        }
+        // Partial overlap: resolve lazy evaluations before moving down
+        push(node);
+        int mid = start + (end - start) / 2;
+        T left_res = query_range(2 * node, start, mid, l, r);
+        T right_res = query_range(2 * node + 1, mid + 1, end, l, r);
+        
+        return std::max(left_res, right_res);
+    }
 
-int my_upper_bound(vector<long long> &tree, int lo, int hi, long long target)
+public:
+    SegmentTree(int size) {
+        n = size;
+        tree.assign(4 * n, 0);
+        lazy.assign(4 * n, 0);
+        has_lazy.assign(4 * n, false);
+    }
+
+    void update(int l, int r, T val) {
+        update_range(1, 0, n - 1, l, r, val);
+    }
+
+    T query(int l, int r) {
+        return query_range(1, 0, n - 1, l, r);
+    }
+};
+
+int my_upper_bound(SegmentTree<long long> &st, int lo, int hi, long long target)
 {
     while (lo < hi)
     {
         int mid = (lo + hi) / 2;
-        long long val = getMax(tree, mid, mid, 1, n, 1);
+        long long val = st.query(mid, mid);
         if (val <= target)
         {
             lo = mid + 1;
@@ -91,6 +131,7 @@ int main()
 
     vector<long long> dp(n * 4 + 10, 0);
     int rI = 0;     // 已经接入网络最右边room的下标
+    SegmentTree<long long> st(n + 1);
 
     for (int i = 1; i <= n; i++)
     {
@@ -99,14 +140,14 @@ int main()
             long long before = 0;
             if (1 < i)
             {
-                before = getMax(dp, i - 1, i - 1, 1, n, 1);
+                before = st.query(i - 1, i - 1);
             }
 
-            long long now = getMax(dp, i, i, 1, n, 1);
+            long long now = st.query(i, i);
 
             if (0 == now || before + (long long)i < now)
             {
-                update(dp, i, before + (long long)i, 1, n, 1);
+                st.update(i, i, before + (long long)i);
                 if (rI < i)
                 {
                     rI = i;
@@ -120,7 +161,7 @@ int main()
             long long before = 0;
             if (1 < left)
             {
-                before = getMax(dp, left - 1, left - 1, 1, n, 1);
+                before = st.query(left - 1, left - 1);
             }
 
             long long now = before + (long long)i;
@@ -129,13 +170,16 @@ int main()
             int pos = 1;
             if (1 < i)
             {
-                pos = my_upper_bound(dp, left, rI + 1, now);
+                pos = my_upper_bound(st, left, rI + 1, now);
             }
 
             int right = min(i + k, n);
-            
+            st.update(pos, right, now);
+            rI = right;
         }
     }
+
+    cout << st.query(n, n) << "\n";
 
     return 0;
 }

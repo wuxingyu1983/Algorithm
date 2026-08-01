@@ -127,7 +127,7 @@ int main()
                     }
                 }
             }
-            cout << 2 * ans * fixed << "\n";
+            cout << 2 * ans + fixed << "\n";
         }
     }
 

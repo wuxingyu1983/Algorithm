@@ -63,17 +63,71 @@ int main()
 
             memset(sum, 0, sizeof(sum));
             memset(dp, 0, sizeof(dp));
-            int active = 0;
+            int act = 0;
 
             for (int iN = n; iN >= 1; iN--)
             {
                 sum[iN] = sum[iN + 1] + a[iN] + b[iN];
             }
 
+            // iN = n - 1
+            {
+                // a[n - 1], a[n] and b[n - 1], b[n]
+                dp[act][a[n - 1] + a[n]] = a[n - 1] * a[n] + b[n - 1] * b[n];
+                int s = b[n - 1] + a[n];
+                long long v = b[n - 1] * a[n] + a[n - 1] * b[n];
+                if (0 == dp[act][s] || v < dp[act][s])
+                {
+                    dp[act][s] = v;
+                }
+            }
 
+            for (int iN = n - 2; iN >= 1; iN--)
+            {
+                act = 1 - act;
+                memset(dp[act], 0, sizeof(dp[act]));
+
+                for (int s = 1; s <= 10000; s++)
+                {
+                    if (0 < dp[1 - act][s])
+                    {
+                        // a[iN] 和 b[iN] 没有交换
+                        int newS = s + a[iN];
+                        long long newV = dp[1 - act][s] + a[iN] * s + b[iN] * (sum[iN + 1] - s);
+                        if (0 == dp[act][newS] || newV < dp[act][newS])
+                        {
+                            dp[act][newS] = newV;
+
+                            if (1 == iN)
+                            {
+                                if (0 == ans || newV < ans)
+                                {
+                                    ans = newV;
+                                }
+                            }
+                        }
+
+                        // a[iN] 和 b[iN] 交换
+                        newS = s + b[iN];
+                        newV = dp[1 - act][s] + b[iN] * s + a[iN] * (sum[iN + 1] - s);
+                        if (0 == dp[act][newS] || newV < dp[act][newS])
+                        {
+                            dp[act][newS] = newV;
+
+                            if (1 == iN)
+                            {
+                                if (0 == ans || newV < ans)
+                                {
+                                    ans = newV;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        cout << ans << "\n";
+        cout << 2 * ans * fixed << "\n";
     }
 
     return 0;

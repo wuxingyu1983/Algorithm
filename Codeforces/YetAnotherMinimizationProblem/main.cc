@@ -52,10 +52,12 @@ int main()
 
         if (1 == n)
         {
+            cout << 0 << "\n";
         }
         else if (2 == n)
         {
             ans = max((a[1] + a[2]) * (a[1] + a[2]) + (b[1] + b[2]) * (b[1] + b[2]), (a[1] + b[2]) * (a[1] + b[2]) + (b[1] + a[2]) * (b[1] + a[2]));
+            cout << ans << "\n";
         }
         else
         {
@@ -125,9 +127,8 @@ int main()
                     }
                 }
             }
+            cout << 2 * ans * fixed << "\n";
         }
-
-        cout << 2 * ans * fixed << "\n";
     }
 
     return 0;

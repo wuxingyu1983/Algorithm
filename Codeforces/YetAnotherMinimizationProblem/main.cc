@@ -16,6 +16,10 @@
 
 using namespace std;
 
+const int MAXN = 102;
+int sum[MAXN];
+long long dp[2][10001];
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -29,20 +33,19 @@ int main()
         int n;
         cin >> n;
 
-        vector<int> a, b;
+        vector<int> a(n + 1), b(n + 1);
+        long long fixed = 0;
 
-        for (int iN = 0; iN < n; iN++)
+        for (int iN = 1; iN <= n; iN++)
         {
-            int x;
-            cin >> x;
-            a.push_back(x);
+            cin >> a[iN];
+            fixed += a[iN] * a[iN];
         }
         
-        for (int iN = 0; iN < n; iN++)
+        for (int iN = 1; iN <= n; iN++)
         {
-            int x;
-            cin >> x;
-            b.push_back(x);
+            cin >> b[iN];
+            fixed += b[iN] * b[iN];
         }
 
         long long ans = 0;
@@ -52,10 +55,21 @@ int main()
         }
         else if (2 == n)
         {
-            ans = max((a[0] + a[1]) * (a[0] + a[1]) + (b[0] + b[1]) * (b[0] + b[1]), (a[0] + b[1]) * (a[0] + b[1]) + (b[0] + a[1]) * (b[0] + a[1]));
+            ans = max((a[1] + a[2]) * (a[1] + a[2]) + (b[1] + b[2]) * (b[1] + b[2]), (a[1] + b[2]) * (a[1] + b[2]) + (b[1] + a[2]) * (b[1] + a[2]));
         }
         else
         {
+            fixed *= (n - 1);
+
+            memset(sum, 0, sizeof(sum));
+            memset(dp, 0, sizeof(dp));
+            int active = 0;
+
+            for (int iN = n; iN >= 1; iN--)
+            {
+                sum[iN] = sum[iN + 1] + a[iN] + b[iN];
+            }
+
 
         }
 

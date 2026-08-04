@@ -54,11 +54,6 @@ int main()
 
     for (int i = 0; i < n; i++)
     {
-        if (0 == cnt2[i] && 0 == cnt5[i])
-        {
-            continue;
-        }
-
         for (int j = k - 1; j >= 1; j--)
         {
             for (auto it = dp[j].begin(); it != dp[j].end(); it++)

@@ -65,7 +65,7 @@ int main()
     int n0 = n - n1;
     for (int i = 0; i < n1; i++)
     {
-        for (int j = min(k, i) - 1; j >= max(k - n0 + i - n1, 0); j--)
+        for (int j = min(k - 1, i); j >= max(k - n0 + i - n1, 0); j--)
         {
             for (auto it = dp[j].begin(); it != dp[j].end(); it++)
             {

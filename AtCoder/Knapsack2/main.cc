@@ -28,13 +28,13 @@ int main()
     cin >> n >> w;
 
     int ans = 0;
-    for (int i = 0; i < n; i ++)
+    for (int i = 0; i < n; i++)
     {
         long long wi;
         int vi;
         cin >> wi >> vi;
 
-        for (int j = 100000; j > 0; j --)
+        for (int j = 100000; j > 0; j--)
         {
             if (0 < dp[j])
             {

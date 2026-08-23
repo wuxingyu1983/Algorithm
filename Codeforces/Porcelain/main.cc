@@ -20,6 +20,7 @@ const int MAXM = 10001;
 
 vector<int> shelves[MAXN];
 vector<int> sums[MAXN];
+int sdp[MAXN][MAXM];
 int dp[MAXM];
 
 int main()
@@ -48,6 +49,25 @@ int main()
                 sums[i].push_back(val + sums[i][j - 1]);
         }
     }
+
+    for (int i = 0; i < n; i++)
+    {
+        int size = shelves[i].size();
+        for (int j = 1; j <= min(size, m); j++)
+        {
+            for (int start = 0; start + size - j - 1 <= size - 1; start++)
+            {
+                int end = start + size - j - 1;
+
+                int tmp = sums[i][end];
+                if (0 < start)
+                    tmp -= sums[i][start - 1];
+
+                sdp[i][j] = max(sdp[i][j], tmp);
+            }
+        }
+    }
+    
     
     return 0;
 }

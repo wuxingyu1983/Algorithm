@@ -63,11 +63,30 @@ int main()
                 if (0 < start)
                     tmp -= sums[i][start - 1];
 
-                sdp[i][j] = max(sdp[i][j], tmp);
+                sdp[i][j] = max(sdp[i][j], sums[i][size - 1] - tmp);
+            }
+        }
+    }
+
+    // i = 0
+    for (int j = m; j >= 1; j--)
+    {
+        dp[j] = sdp[0][j];
+    }
+    
+
+    for (int i = 1; i < n; i++)
+    {
+        for (int j = m; j > 0; j--)
+        {
+            for (int l = 1; l < j; l ++)
+            {
+                dp[j] = max(dp[j], dp[l] + sdp[i][j - l]);
             }
         }
     }
     
-    
+    cout << dp[m] << "\n";
+
     return 0;
 }

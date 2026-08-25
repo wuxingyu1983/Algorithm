@@ -19,8 +19,8 @@ const int MAXN = 101;
 const int MAXM = 10001;
 
 vector<int> shelves[MAXN];
-vector<int> sums[MAXN];
-int sdp[MAXN][MAXM];
+vector<int> sums[MAXN], rsums[MAXN];
+int total[MAXN][101];
 int dp[MAXM];
 
 int main()
@@ -36,56 +36,71 @@ int main()
         int num;
         cin >> num;
 
-        for (int j = 0; j < num; j++)
+        sums[i].push_back(0);
+
+        for (int j = 1; j <= num; j++)
         {
             int val;
             cin >> val;
 
             shelves[i].push_back(val);
 
-            if (0 == j)
-                sums[i].push_back(val);
-            else
-                sums[i].push_back(val + sums[i][j - 1]);
+            sums[i].push_back(val + sums[i][j - 1]);
         }
     }
 
     for (int i = 0; i < n; i++)
     {
-        int size = shelves[i].size();
-        for (int j = 1; j <= min(size, m); j++)
+        reverse(shelves[i].begin(), shelves[i].end());
+
+        rsums[i].push_back(0);
+
+        if (1 == shelves[i].size())
         {
-            for (int start = 0; start + size - j - 1 <= size - 1; start++)
+            rsums[i].push_back(0);
+        }
+        else
+        {
+            for (int j = 1; j <= shelves[i].size(); j++)
             {
-                int end = start + size - j - 1;
-
-                int tmp = sums[i][end];
-                if (0 < start)
-                    tmp -= sums[i][start - 1];
-
-                sdp[i][j] = max(sdp[i][j], sums[i][size - 1] - tmp);
+                rsums[i].push_back(shelves[i][j - 1] + rsums[i][j - 1]);
             }
         }
     }
 
-    // i = 0
-    for (int j = m; j >= 1; j--)
+    for (int i = 0; i < n; i++)
     {
-        dp[j] = sdp[0][j];
-    }
-    
-
-    for (int i = 1; i < n; i++)
-    {
-        for (int j = m; j > 0; j--)
+        for (int j = 1; j <= shelves[i].size(); j++)
         {
-            for (int l = 1; l < j; l ++)
+            for (int l = 0; l <= j; l++)
             {
-                dp[j] = max(dp[j], dp[l] + sdp[i][j - l]);
+                total[i][j] = max(total[i][j], sums[i][l] + rsums[i][j - l]);
             }
         }
     }
-    
+
+    {
+        // i = 0
+        for (int j = min(m, (int)shelves[0].size()); j >= 1; j--)
+        {
+            dp[j] = total[0][j];
+        }
+
+        for (int i = 1; i < n; i++)
+        {
+            for (int j = m - 1; j >= 0; j--)
+            {
+                if (0 < dp[j] || 0 == j)
+                {
+                    for (int l = 1; l <= min(m, (int)shelves[i].size()) && j + l <= m; l++)
+                    {
+                        dp[j + l] = max(dp[j + l], dp[j] + total[i][l]);
+                    }
+                }
+            }
+        }
+    }
+
     cout << dp[m] << "\n";
 
     return 0;

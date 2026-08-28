@@ -37,6 +37,49 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
+    // init dp
+    {
+        for (int i = 1; i < 63; i++)
+        {
+            dp[i][0].left = dp[0][i].left = i;
+            dp[i][0].xy = dp[0][i].xy = (long long)1 << i;
+        }
+
+        for (int j = 0; j <= 57; j++)
+        {
+            for (int i = 0; i <= 57; i++)
+            {
+                if (0 < dp[i][j].xy)
+                {
+                    for (int l = dp[i][j].left + 1; l < 63; l++)
+                    {
+                        if (63 > i + l)
+                        {
+                            long long tmp = dp[i][j].xy | ((long long)1 << l);
+
+                            if (0 == dp[i + l][j].xy || tmp < dp[i + l][j].xy)
+                            {
+                                dp[i + l][j].xy = tmp;
+                                dp[i + l][j].left = l;
+                            }
+                        }
+
+                        if (63 > j + l)
+                        {
+                            long long tmp = dp[i][j].xy | ((long long)1 << l);
+
+                            if (0 == dp[i][j + l].xy || tmp < dp[i][j + l].xy)
+                            {
+                                dp[i][j + l].xy = tmp;
+                                dp[i][j + l].left = l;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     int t;
     cin >> t;
 
@@ -44,8 +87,6 @@ int main()
     {
         long long x, y;
         cin >> x >> y;
-
-        memset(dp, 0, sizeof(dp));
 
         long long ans = 0;
 
@@ -152,82 +193,26 @@ int main()
             }
             else
             {
-                // init
+                for (int i = eqI, j = eqJ; i <= maxI; i++, j++)
                 {
-                    for (int i = 1; i <= maxI + 1; i++)
+                    if (dp[i][j].xy)
                     {
-                        dp[i][0].left = i;
-                        dp[i][0].xy = (long long)1 << i;
-
-                        if (i == eqI && 0 == eqJ)
+                        if (0 == ans || ans > dp[i][j].xy)
                         {
-                            if (0 == ans || ans > dp[i][0].xy)
-                            {
-                                ans = dp[i][0].xy;
-                            }
-                        }
-                    }
-
-                    for (int j = 1; j <= maxJ + 1; j++)
-                    {
-                        dp[0][j].left = j;
-                        dp[0][j].xy = (long long)1 << j;
-
-                        if (0 == eqI && j == eqJ)
-                        {
-                            if (0 == ans || ans > dp[0][j].xy)
-                            {
-                                ans = dp[0][j].xy;
-                            }
+                            ans = dp[i][j].xy;
                         }
                     }
                 }
 
-                for (int j = 0; j <= 57; j++)
+                for (int i = maxI + 1; i <= 57; i++)
                 {
-                    for (int i = 0; i <= 57; i++)
+                    for (int j = maxJ + 1; j <= 57; j++)
                     {
-                        if (0 < dp[i][j].xy)
+                        if (dp[i][j].xy)
                         {
-                            for (int l = dp[i][j].left + 1; l < 63; l++)
+                            if (0 == ans || ans > dp[i][j].xy)
                             {
-                                if (63 > i + l)
-                                {
-                                    long long tmp = dp[i][j].xy | ((long long)1 << l);
-
-                                    if (0 == dp[i + l][j].xy || tmp < dp[i + l][j].xy)
-                                    {
-                                        dp[i + l][j].xy = tmp;
-                                        dp[i + l][j].left = l;
-
-                                        if ((i + l > maxI && j > maxJ) || (i + l - j == eqI - eqJ && j >= eqJ))
-                                        {
-                                            if (0 == ans || ans > dp[i + l][j].xy)
-                                            {
-                                                ans = dp[i + l][j].xy;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (63 > j + l)
-                                {
-                                    long long tmp = dp[i][j].xy | ((long long)1 << l);
-
-                                    if (0 == dp[i][j + l].xy || tmp < dp[i][j + l].xy)
-                                    {
-                                        dp[i][j + l].xy = tmp;
-                                        dp[i][j + l].left = l;
-
-                                        if ((i > maxI && j + l > maxJ) || (i >= eqI && j + l - i == eqJ - eqI))
-                                        {
-                                            if (0 == ans || ans > dp[i][j + l].xy)
-                                            {
-                                                ans = dp[i][j + l].xy;
-                                            }
-                                        }
-                                    }
-                                }
+                                ans = dp[i][j].xy;
                             }
                         }
                     }

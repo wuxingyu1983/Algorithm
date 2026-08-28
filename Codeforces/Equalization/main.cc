@@ -21,7 +21,10 @@ public:
     long long xy;
     int left; // xy 最高位的位置
 
-    Item() {}
+    Item()
+    {
+        xy = left = 0;
+    }
 };
 
 Item dp[65][65];
@@ -45,11 +48,43 @@ int main()
 
         if (x == y)
         {
-            cout << 0 << "\n";
         }
         else if (0 == x || 0 == y)
         {
+            long long tmp = x + y;
+            int maxT = 63;
+            for (; maxT >= 0; maxT--)
+            {
+                if (tmp & ((long long)1 << maxT))
+                {
+                    break;
+                }
+            }
 
+            vector<Item> odp(64);
+            for (int i = 0; i <= maxT + 1; i++)
+            {
+                if (0 == i || 0 < odp[i].xy)
+                {
+                    for (int l = odp[i].left + 1; l + i < 63; l++)
+                    {
+                        long long newXY = odp[i].xy | ((long long)1 << l);
+                        if (0 == odp[l + i].xy || newXY < odp[l + i].xy)
+                        {
+                            odp[l + i].xy = newXY;
+                            odp[l + i].left = l;
+
+                            if (l + i > maxT)
+                            {
+                                if (0 == ans || ans > newXY)
+                                {
+                                    ans = newXY;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         else
         {
@@ -101,7 +136,7 @@ int main()
                     dp[i][0].left = i;
                     dp[i][0].xy = (long long)1 << i;
 
-                    if (i >= eqI && 0 >= eqJ)
+                    if (i == eqI && 0 == eqJ)
                     {
                         if (0 == ans || ans > dp[i][0].xy)
                         {
@@ -115,7 +150,7 @@ int main()
                     dp[0][j].left = j;
                     dp[0][j].xy = (long long)1 << j;
 
-                    if (0 >= eqI && j >= eqJ)
+                    if (0 == eqI && j == eqJ)
                     {
                         if (0 == ans || ans > dp[0][j].xy)
                         {
@@ -142,7 +177,7 @@ int main()
                                     dp[i + l][j].xy = tmp;
                                     dp[i + l][j].left = l;
 
-                                    if (i + l >= eqI && j >= eqJ)
+                                    if ((i + l > maxI && j > maxJ) || (i + l - j == eqI - eqJ && j >= eqJ))
                                     {
                                         if (0 == ans || ans > dp[i + l][j].xy)
                                         {
@@ -156,12 +191,12 @@ int main()
                             {
                                 long long tmp = dp[i][j].xy | ((long long)1 << l);
 
-                                if (0 == dp[i][j + l].xy || tmp < dp[i + l][j + l].xy)
+                                if (0 == dp[i][j + l].xy || tmp < dp[i][j + l].xy)
                                 {
                                     dp[i][j + l].xy = tmp;
                                     dp[i][j + l].left = l;
 
-                                    if (i >= eqI && j + l >= eqJ)
+                                    if ((i > maxI && j + l > maxJ) || (i >= eqI && j + l - i == eqJ - eqI))
                                     {
                                         if (0 == ans || ans > dp[i][j + l].xy)
                                         {
@@ -174,9 +209,9 @@ int main()
                     }
                 }
             }
-
-            cout << ans << "\n";
         }
+        
+        cout << ans << "\n";
     }
 
     return 0;

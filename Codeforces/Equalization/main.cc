@@ -132,12 +132,12 @@ int main()
                     break;
                 }
 
-                if (0 != (x & (1 << (eqI - 1))) && 0 == (y & (1 << (eqJ - 1))))
+                if (0 != (x & ((long long)1 << (eqI - 1))) && 0 == (y & ((long long)1 << (eqJ - 1))))
                 {
                     break;
                 }
 
-                if (0 == (x & (1 << (eqI - 1))) && 0 != (y & (1 << (eqJ - 1))))
+                if (0 == (x & ((long long)1 << (eqI - 1))) && 0 != (y & ((long long)1 << (eqJ - 1))))
                 {
                     break;
                 }

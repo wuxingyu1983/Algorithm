@@ -29,6 +29,9 @@ public:
 
 Item dp[65][65];
 
+long long record1[65];           // record1[maxI]
+long long record2[65][65][65];       // record2[maxI][maxJ][eqI];
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -61,33 +64,47 @@ int main()
                 }
             }
 
-            vector<Item> odp(64);
-            for (int i = 0; i <= maxT + 1; i++)
+            if (record1[maxT])
             {
-                if (0 == i || 0 < odp[i].xy)
+                ans = record1[maxT];
+            }
+            else
+            {
+                vector<Item> odp(64);
+                for (int i = 0; i <= maxT + 1; i++)
                 {
-                    for (int l = odp[i].left + 1; l + i < 63; l++)
+                    if (0 == i || 0 < odp[i].xy)
                     {
-                        long long newXY = odp[i].xy | ((long long)1 << l);
-                        if (0 == odp[l + i].xy || newXY < odp[l + i].xy)
+                        for (int l = odp[i].left + 1; l + i < 63; l++)
                         {
-                            odp[l + i].xy = newXY;
-                            odp[l + i].left = l;
-
-                            if (l + i > maxT)
+                            long long newXY = odp[i].xy | ((long long)1 << l);
+                            if (0 == odp[l + i].xy || newXY < odp[l + i].xy)
                             {
-                                if (0 == ans || ans > newXY)
+                                odp[l + i].xy = newXY;
+                                odp[l + i].left = l;
+
+                                if (l + i > maxT)
                                 {
-                                    ans = newXY;
+                                    if (0 == ans || ans > newXY)
+                                    {
+                                        ans = newXY;
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
+                record1[maxT] = ans;
             }
         }
         else
         {
+            if (x > y)
+            {
+                swap(x, y);
+            }
+
             int maxI = 63, eqI = -1;
             for (; maxI >= 0; maxI--)
             {
@@ -129,78 +146,85 @@ int main()
                 eqJ--;
             }
 
-            // init
+            if (record2[maxI][maxJ][eqI])
             {
-                for (int i = 1; i <= maxI + 1; i++)
-                {
-                    dp[i][0].left = i;
-                    dp[i][0].xy = (long long)1 << i;
-
-                    if (i == eqI && 0 == eqJ)
-                    {
-                        if (0 == ans || ans > dp[i][0].xy)
-                        {
-                            ans = dp[i][0].xy;
-                        }
-                    }
-                }
-
-                for (int j = 1; j <= maxJ + 1; j++)
-                {
-                    dp[0][j].left = j;
-                    dp[0][j].xy = (long long)1 << j;
-
-                    if (0 == eqI && j == eqJ)
-                    {
-                        if (0 == ans || ans > dp[0][j].xy)
-                        {
-                            ans = dp[0][j].xy;
-                        }
-                    }
-                }
+                ans = record2[maxI][maxJ][eqI];
             }
-
-            for (int j = 0; j <= 57; j++)
+            else
             {
-                for (int i = 0; i <= 57; i++)
+                // init
                 {
-                    if (0 < dp[i][j].xy)
+                    for (int i = 1; i <= maxI + 1; i++)
                     {
-                        for (int l = dp[i][j].left + 1; l < 63; l++)
+                        dp[i][0].left = i;
+                        dp[i][0].xy = (long long)1 << i;
+
+                        if (i == eqI && 0 == eqJ)
                         {
-                            if (63 > i + l)
+                            if (0 == ans || ans > dp[i][0].xy)
                             {
-                                long long tmp = dp[i][j].xy | ((long long)1 << l);
+                                ans = dp[i][0].xy;
+                            }
+                        }
+                    }
 
-                                if (0 == dp[i + l][j].xy || tmp < dp[i + l][j].xy)
+                    for (int j = 1; j <= maxJ + 1; j++)
+                    {
+                        dp[0][j].left = j;
+                        dp[0][j].xy = (long long)1 << j;
+
+                        if (0 == eqI && j == eqJ)
+                        {
+                            if (0 == ans || ans > dp[0][j].xy)
+                            {
+                                ans = dp[0][j].xy;
+                            }
+                        }
+                    }
+                }
+
+                for (int j = 0; j <= 57; j++)
+                {
+                    for (int i = 0; i <= 57; i++)
+                    {
+                        if (0 < dp[i][j].xy)
+                        {
+                            for (int l = dp[i][j].left + 1; l < 63; l++)
+                            {
+                                if (63 > i + l)
                                 {
-                                    dp[i + l][j].xy = tmp;
-                                    dp[i + l][j].left = l;
+                                    long long tmp = dp[i][j].xy | ((long long)1 << l);
 
-                                    if ((i + l > maxI && j > maxJ) || (i + l - j == eqI - eqJ && j >= eqJ))
+                                    if (0 == dp[i + l][j].xy || tmp < dp[i + l][j].xy)
                                     {
-                                        if (0 == ans || ans > dp[i + l][j].xy)
+                                        dp[i + l][j].xy = tmp;
+                                        dp[i + l][j].left = l;
+
+                                        if ((i + l > maxI && j > maxJ) || (i + l - j == eqI - eqJ && j >= eqJ))
                                         {
-                                            ans = dp[i + l][j].xy;
+                                            if (0 == ans || ans > dp[i + l][j].xy)
+                                            {
+                                                ans = dp[i + l][j].xy;
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            if (63 > j + l)
-                            {
-                                long long tmp = dp[i][j].xy | ((long long)1 << l);
-
-                                if (0 == dp[i][j + l].xy || tmp < dp[i][j + l].xy)
+                                if (63 > j + l)
                                 {
-                                    dp[i][j + l].xy = tmp;
-                                    dp[i][j + l].left = l;
+                                    long long tmp = dp[i][j].xy | ((long long)1 << l);
 
-                                    if ((i > maxI && j + l > maxJ) || (i >= eqI && j + l - i == eqJ - eqI))
+                                    if (0 == dp[i][j + l].xy || tmp < dp[i][j + l].xy)
                                     {
-                                        if (0 == ans || ans > dp[i][j + l].xy)
+                                        dp[i][j + l].xy = tmp;
+                                        dp[i][j + l].left = l;
+
+                                        if ((i > maxI && j + l > maxJ) || (i >= eqI && j + l - i == eqJ - eqI))
                                         {
-                                            ans = dp[i][j + l].xy;
+                                            if (0 == ans || ans > dp[i][j + l].xy)
+                                            {
+                                                ans = dp[i][j + l].xy;
+                                            }
                                         }
                                     }
                                 }
@@ -208,6 +232,8 @@ int main()
                         }
                     }
                 }
+
+                record2[maxI][maxJ][eqI] = ans;
             }
         }
         

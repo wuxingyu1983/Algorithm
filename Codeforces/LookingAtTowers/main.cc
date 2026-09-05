@@ -127,22 +127,36 @@ int func(vector<int> &a, vector<long long> &out)
     }
 
     vector<long long> dp(a.size(), 0);          // dp[i] 在 lis 中第一次出现的数目
-    unordered_map<int, int> pos;                // lis 中的某一位在 lis 中出现的位置
+    unordered_multimap<int, int> pos;           // lis 中的某一位在 lis 中出现的位置
     vector<int> preCnt(a.size(), 0);            // preCnt[i] 表示 a[0 - i] 之间小于等于a[i]的个数
     SegmentTree<int> segTree(highest + 1);      // 线段树，用于计算 preCnt
 
     for (int i = 0; i < a.size(); i++)
     {
+        segTree.update(a[i], a[i], 1);      // a[i] 出现的个数 + 1
+
         int idx = lower_bound(lis.begin(), lis.end(), a[i]) - lis.begin();
         if (a[i] == lis[idx])
         {
             // a[i] 元素在 lis 中出现
+            if (0 == idx)
+            {
+                dp[i] = 1;
+            }
+            else
+            {
+                int cnt = segTree.query(0, lis[idx - 1]); // 截止到现在，0 - lis[idx - 1] 的个数
+                auto range = pos.equal_range(lis[idx - 1]);
 
+                for (auto it = range.first; it != range.second; ++it)
+                {
+                    dp[i] += dp[it->second] * pw2[cnt - preCnt[it->second]];
+                    dp[i] %= MOD;
+                }
+            }
 
-        }
-        else
-        {
-
+            pos.insert({a[i], i});
+            preCnt[i] = segTree.query(0, a[i]); // 计算 preCnt[i]
         }
     }
 

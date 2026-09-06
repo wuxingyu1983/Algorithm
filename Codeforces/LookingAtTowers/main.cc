@@ -110,23 +110,32 @@ public:
     }
 };
 
-int func(vector<int> &a, vector<long long> &out)
+int func(vector<int> &a, vector<long long> &dp, vector<int> &hpos)
 {
     int highest = 0;
 
     vector<int> lis;
     lis.push_back(a[0]);
     highest = a[0];
+    hpos.push_back(0);
     for (int i = 1; i < a.size(); i++)
     {
         if (highest < a[i])
         {
             lis.push_back(a[i]);
             highest = a[i];
+
+            hpos.clear();
+            hpos.push_back(i);
+        }
+        else if (highest == a[i])
+        {
+            hpos.push_back(i);
         }
     }
 
-    vector<long long> dp(a.size(), 0);          // dp[i] 在 lis 中第一次出现的数目
+    // dp[i] 在 lis 中第一次出现的数目
+    // vector<long long> dp(a.size(), 0);
     unordered_multimap<int, int> pos;           // lis 中的某一位在 lis 中出现的位置
     vector<int> preCnt(a.size(), 0);            // preCnt[i] 表示 a[0 - i] 之间小于等于a[i]的个数
     SegmentTree<int> segTree(highest + 1);      // 线段树，用于计算 preCnt
@@ -206,13 +215,37 @@ int main()
         }
 
         vector<long long> out(n, 0);
-        int highest = func(a, out);
+        vector<int> hpos;
+        int highest = func(a, out, hpos);
 
         reverse(a.begin(), a.end());
         vector<long long> rout(n, 0);
-        func(a, rout);
+        vector<int> rhpos;
+        func(a, rout, rhpos);
 
+        long long ans = 0;
 
+        for (int i = 0; i < hpos.size(); i++)
+        {
+            for (int j = i; j < hpos.size(); j++)
+            {
+                int lpos = hpos[i];
+                int rpos = n - 1 - hpos[j];
+
+                long long cnt = out[lpos] * rout[rpos];
+                cnt %= MOD;
+
+                if (hpos[j] - hpos[i] - 1 > 0)
+                {
+                    cnt *= pw2[hpos[j] - hpos[i] - 1];
+                }
+
+                ans += cnt;
+                ans %= MOD;
+            }
+        }
+
+        cout << ans << "\n";
     }
 
     return 0;

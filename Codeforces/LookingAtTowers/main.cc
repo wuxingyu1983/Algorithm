@@ -22,7 +22,6 @@ const int MAXN = 300000;
 
 long long pw2[MAXN + 1];
 
-
 template <typename T>
 class SegmentTree {
 private:

@@ -135,9 +135,12 @@ int func(vector<int> &a, vector<long long> &dp, vector<int> &hpos)
 
     // dp[i] 在 lis 中第一次出现的数目
     // vector<long long> dp(a.size(), 0);
-    unordered_multimap<int, int> pos;           // lis 中的某一位在 lis 中出现的位置
+//    unordered_multimap<int, int> pos;           // lis 中的某一位在 lis 中出现的位置
     vector<int> preCnt(a.size(), 0);            // preCnt[i] 表示 a[0 - i] 之间小于等于a[i]的个数
     SegmentTree<int> segTree(highest + 1);      // 线段树，用于计算 preCnt
+    vector<int> lastPos(highest + 1, -1);
+    vector<long long> sum(highest + 1, 0
+    );
 
     for (int i = 0; i < a.size(); i++)
     {
@@ -154,6 +157,10 @@ int func(vector<int> &a, vector<long long> &dp, vector<int> &hpos)
             else
             {
                 int cnt = segTree.query(0, lis[idx - 1]); // 截止到现在，0 - lis[idx - 1] 的个数
+
+                dp[i] = sum[lis[idx - 1]] * pw2[cnt - preCnt[lastPos[lis[idx - 1]]]];
+                dp[i] %= MOD;
+/*
                 auto range = pos.equal_range(lis[idx - 1]);
 
                 for (auto it = range.first; it != range.second; ++it)
@@ -161,10 +168,24 @@ int func(vector<int> &a, vector<long long> &dp, vector<int> &hpos)
                     dp[i] += dp[it->second] * pw2[cnt - preCnt[it->second]];
                     dp[i] %= MOD;
                 }
+*/
             }
 
-            pos.insert({a[i], i});
+//            pos.insert({a[i], i});
             preCnt[i] = segTree.query(0, a[i]); // 计算 preCnt[i]
+ 
+            if (0 > lastPos[a[i]])
+            {
+                sum[a[i]] = dp[i];
+            }
+            else
+            {
+                sum[a[i]] *= pw2[preCnt[i] - preCnt[lastPos[a[i]]]];
+                sum[a[i]] += dp[i];
+                sum[a[i]] %= MOD;
+            }
+
+            lastPos[a[i]] = i;
         }
     }
 

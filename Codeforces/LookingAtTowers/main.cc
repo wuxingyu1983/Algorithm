@@ -244,25 +244,26 @@ int main()
         func(a, rout, rhpos);
 
         long long ans = 0;
-
+        long long tmpV = 0;
         for (int i = 0; i < hpos.size(); i++)
         {
-            for (int j = i; j < hpos.size(); j++)
+            if (0 == i)
             {
-                int lpos = hpos[i];
-                int rpos = n - 1 - hpos[j];
-
-                long long cnt = out[lpos] * rout[rpos];
-                cnt %= MOD;
-
-                if (hpos[j] - hpos[i] - 1 > 0)
-                {
-                    cnt *= pw2[hpos[j] - hpos[i] - 1];
-                }
-
-                ans += cnt;
-                ans %= MOD;
+                tmpV = out[hpos[i]];
+                ans += tmpV * rout[n - 1 - hpos[i]];
             }
+            else
+            {
+                ans += ((tmpV * pw2[hpos[i] - hpos[i - 1] - 1]) % MOD) * rout[n - 1 - hpos[i]];
+                ans %= MOD;
+                ans += out[hpos[i]] * rout[n - 1 - hpos[i]];
+
+                tmpV *= pw2[hpos[i] - hpos[i - 1]];
+                tmpV += out[hpos[i]];
+                tmpV %= MOD;
+            }
+
+            ans %= MOD;
         }
 
         cout << ans << "\n";

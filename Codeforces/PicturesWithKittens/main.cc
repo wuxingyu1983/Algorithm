@@ -105,35 +105,47 @@ int main()
     cin >> n >> k >> x;
 
     vector<long long> a(n + 1, 0);
+    long long sum = 0;
     for (int i = 1; i <= n; i++)
     {
         cin >> a[i];
+        sum += a[i];
     }
-
-    vector<SegmentTree<long long>> segTrees(x + 1, SegmentTree<long long>(n + 1));
-
-    // init
-    for (int i = 0; i <= x; i++)
-    {
-        segTrees[i].update(0, n, -1);
-    }
-    segTrees[0].update(0, 0, 0);
 
     long long ans = -1;
-    for (int i = 1; i <= n; i++)
+    if (n == x)
     {
-        int lpos = max(0, i - k);
+        ans = sum;
+    }
+    else
+    {
+        vector<SegmentTree<long long>> segTrees(x, SegmentTree<long long>(n + 1));
 
-        for (int j = 1; j <= x; j++)
+        // init
+        for (int i = 0; i < x; i++)
         {
-            long long max_val = segTrees[j - 1].query(lpos, i - 1);
-            if (max_val != -1)
-            {
-                segTrees[j].update(i, i, max_val + a[i]);
+            segTrees[i].update(0, n, -1);
+        }
+        segTrees[0].update(0, 0, 0);
 
-                if (j == x && i + k > n)
+        for (int i = 1; i <= n; i++)
+        {
+            int lpos = max(0, i - k);
+
+            for (int j = 1; j <= x; j++)
+            {
+                long long max_val = segTrees[j - 1].query(lpos, i - 1);
+                if (max_val != -1)
                 {
-                    ans = max(ans, max_val + a[i]);
+                    if (j < x)
+                    {
+                        segTrees[j].update(i, i, max_val + a[i]);
+                    }
+
+                    if (j == x && i + k > n)
+                    {
+                        ans = max(ans, max_val + a[i]);
+                    }
                 }
             }
         }

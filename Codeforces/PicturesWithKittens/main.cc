@@ -119,27 +119,27 @@ int main()
     }
     else
     {
-        vector<SegmentTree<long long>> segTrees(x, SegmentTree<long long>(n + 1));
+        vector<SegmentTree<long long>> segTrees(2, SegmentTree<long long>(n + 1));
 
         // init
-        for (int i = 0; i < x; i++)
-        {
-            segTrees[i].update(0, n, -1);
-        }
+        segTrees[0].update(0, n, -1);
         segTrees[0].update(0, 0, 0);
+        int act = 1;
 
-        for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= x; j++)
         {
-            int lpos = max(0, i - k);
+            segTrees[act].update(0, n, -1);
 
-            for (int j = 1; j <= x; j++)
+            for (int i = j; i <= n; i++)
             {
-                long long max_val = segTrees[j - 1].query(lpos, i - 1);
+                int lpos = max(0, i - k);
+
+                long long max_val = segTrees[1 - act].query(lpos, i - 1);
                 if (max_val != -1)
                 {
                     if (j < x)
                     {
-                        segTrees[j].update(i, i, max_val + a[i]);
+                        segTrees[act].update(i, i, max_val + a[i]);
                     }
 
                     if (j == x && i + k > n)
@@ -147,7 +147,13 @@ int main()
                         ans = max(ans, max_val + a[i]);
                     }
                 }
+                else
+                {
+                    break;
+                }
             }
+
+            act = 1 - act;
         }
     }
 

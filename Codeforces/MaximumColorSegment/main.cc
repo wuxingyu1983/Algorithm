@@ -70,13 +70,72 @@ int main()
                     dp[i][j] += dp[pos][j];
                 }
             }
-            else
+            else if (1 == j)
             {
-                if (1 == j)
+                if (0 == i)
                 {
+                    dp[i][j]++;
                 }
                 else
                 {
+                    if (str.at(i - 1) == str.at(i))
+                    {
+                        dp[i][j]++;
+                    }
+                }
+
+                if (i + k < n)
+                {
+                    if (str.at(i + k) == str.at(i + k - 1))
+                    {
+                        dp[i][j]++;
+                    }
+                }
+            }
+            else
+            {
+                // 1 < j
+                if (0 <= i - k * j)
+                {
+                    int aft = 0;
+                    if (i + k < n)
+                    {
+                        if (str.at(i + k) == str.at(i + k - 1))
+                        {
+                            aft = 1;
+                        }
+                    }
+
+                    if (dp[i - k][j - 1])
+                    {
+                        if (str.at(i - 1) != str.at(i))
+                        {
+                            dp[i][j] ++;
+                        }
+
+                        dp[i][j] += dp[i - k][j - 1];
+                        dp[i][j] += aft;
+                    }
+
+                    int pre = 0;
+                    if (str.at(i - 1) == str.at(i))
+                    {
+                        pre = 1;
+                    }
+
+                    int pos = i - 2 * k;
+                    while (0 <= pos)
+                    {
+                        if (dp[pos][j - 1])
+                        {
+                            if (dp[i][j] < pre + dp[pos][j - 1] + aft)
+                            {
+                                dp[i][j] = pre + dp[pos][j - 1] + aft;
+                            }
+                        }
+
+                        pos -= k;
+                    }
                 }
             }
         }

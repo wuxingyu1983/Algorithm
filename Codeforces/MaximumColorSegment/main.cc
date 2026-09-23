@@ -91,6 +91,62 @@ int main()
                 }
                 else
                 {
+                    if (ir + 1 >= im)
+                    {
+                        dp[ik][ir][im] = dp[ik][ir - 1][im - 1];
+
+                        if (str.at(leftPos) == str.at(leftPos - 1))
+                        {
+                            dp[ik][ir][im] --;
+                        }
+                        else
+                        {
+                            dp[ik][ir][im] ++;
+                        }
+
+                        if (rightPos < n - 1)
+                        {
+                            if (str.at(rightPos) == str.at(rightPos + 1))
+                            {
+                                dp[ik][ir][im]++;
+                            }
+                            else
+                            {
+                                dp[ik][ir][im]--;
+                            }
+                        }
+                    }
+
+                    int pre = 0;
+                    if (0 < leftPos)
+                    {
+                        if (str.at(leftPos) == str.at(leftPos - 1))
+                        {
+                            pre = 1;
+                        }
+                        else
+                        {
+                            pre = -1;
+                        }
+                    }
+                    int aft = 0;
+                    if (rightPos < n - 1)
+                    {
+                        if (str.at(rightPos) == str.at(rightPos + 1))
+                        {
+                            aft = 1;
+                        }
+                        else
+                        {
+                            aft = -1;
+                        }
+                    }
+
+                    for (int j = im - 2; j < ir - 1; j++)
+                    {
+                        dp[ik][ir][im] = max(dp[ik][ir][im], dp[ik][j][im - 1] + pre + aft);
+                    }
+
 
                 }
             }

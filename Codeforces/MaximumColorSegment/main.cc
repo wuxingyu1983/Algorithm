@@ -19,7 +19,8 @@ using namespace std;
 
 const int MAX_MN = 3001;
 
-short dp[MAX_MN][MAX_MN];       // dp[pos][已经执行过的反转次数] = segments 个数
+int sum[MAX_MN][MAX_MN];
+int anes[MAX_MN];
 
 int main()
 {
@@ -32,114 +33,71 @@ int main()
     string str;
     cin >> str;
 
-    for (int j = 0; j <= m; j++)
+    int ans = 1;
+    
+    for (int i = 1; i < n; i++)
     {
-        for (int i = 0; i < n; i++)
+        if (str.at(i - 1) != str.at(i))
+            ans ++;
+    }
+    
+    int round = n / k;
+
+    vector<vector<vector<int>>> dp(
+        k,
+        vector<vector<int>>(
+            round + 1,
+            vector<int>(round + 1, 0)));
+
+    for (int ik = 0; ik < k; ik++)
+    {
+        for (int ir = 0; ir < round; ir++)
         {
-            if (i + k >= n)
+            int leftPos = ik + ir * k;
+            int rightPos = leftPos + k - 1;
+            
+            if (n <= rightPos)
             {
                 break;
             }
 
-            if (0 == j)
+            for (int im = 1; im <= min(m, round); im++)
             {
-                int pos = i;
-                if (0 == pos)
+                if (1 == im)
                 {
-                    dp[i][j] += 1;
+                    if (0 < leftPos)
+                    {
+                        if (str.at(leftPos) == str.at(leftPos - 1))
+                        {
+                            dp[ik][ir][im] ++;
+                        }
+                        else
+                        {
+                            dp[ik][ir][im] --;
+                        }
+                    }
+
+                    if (rightPos < n - 1)
+                    {
+                        if (str.at(rightPos) == str.at(rightPos + 1))
+                        {
+                            dp[ik][ir][im] ++;
+                        }
+                        else
+                        {
+                            dp[ik][ir][im] --;
+                        }
+                    }
                 }
                 else
                 {
-                    if (str.at(pos - 1) != str.at(pos))
-                    {
-                        dp[i][j] ++;
-                    }
-                }
 
-                if (pos + k < n)
-                {
-                    if (str.at(pos + k) != str.at(pos + k - 1))
-                    {
-                        dp[i][j] ++;
-                    }
-                }
-
-                pos -= k;
-                if (0 <= pos)
-                {
-                    dp[i][j] += dp[pos][j];
-                }
-            }
-            else if (1 == j)
-            {
-                if (0 == i)
-                {
-                    dp[i][j]++;
-                }
-                else
-                {
-                    if (str.at(i - 1) == str.at(i))
-                    {
-                        dp[i][j]++;
-                    }
-                }
-
-                if (i + k < n)
-                {
-                    if (str.at(i + k) == str.at(i + k - 1))
-                    {
-                        dp[i][j]++;
-                    }
-                }
-            }
-            else
-            {
-                // 1 < j
-                if (0 <= i - k * j)
-                {
-                    int aft = 0;
-                    if (i + k < n)
-                    {
-                        if (str.at(i + k) == str.at(i + k - 1))
-                        {
-                            aft = 1;
-                        }
-                    }
-
-                    if (dp[i - k][j - 1])
-                    {
-                        if (str.at(i - 1) != str.at(i))
-                        {
-                            dp[i][j] ++;
-                        }
-
-                        dp[i][j] += dp[i - k][j - 1];
-                        dp[i][j] += aft;
-                    }
-
-                    int pre = 0;
-                    if (str.at(i - 1) == str.at(i))
-                    {
-                        pre = 1;
-                    }
-
-                    int pos = i - 2 * k;
-                    while (0 <= pos)
-                    {
-                        if (dp[pos][j - 1])
-                        {
-                            if (dp[i][j] < pre + dp[pos][j - 1] + aft)
-                            {
-                                dp[i][j] = pre + dp[pos][j - 1] + aft;
-                            }
-                        }
-
-                        pos -= k;
-                    }
                 }
             }
         }
     }
+
+    cout << ans << "\n";
 
     return 0;
 }

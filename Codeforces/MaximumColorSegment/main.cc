@@ -33,12 +33,12 @@ int main()
     string str;
     cin >> str;
 
-    int ans = 1;
+    int base = 1;
     
     for (int i = 1; i < n; i++)
     {
         if (str.at(i - 1) != str.at(i))
-            ans ++;
+            base ++;
     }
     
     int round = n / k;
@@ -88,6 +88,8 @@ int main()
                             dp[ik][ir][im] --;
                         }
                     }
+
+                    sum[ik][im] = max(sum[ik][im], dp[ik][ir][im]);
                 }
                 else
                 {
@@ -147,13 +149,37 @@ int main()
                         dp[ik][ir][im] = max(dp[ik][ir][im], dp[ik][j][im - 1] + pre + aft);
                     }
 
-
+                    sum[ik][im] = max(sum[ik][im], dp[ik][ir][im]);
                 }
             }
         }
     }
 
-    cout << ans << "\n";
+    int ans = 0;
+    for (int ik = 0; ik < k; ik++)
+    {
+        for (int j = round; j >= 0; j--)
+        {
+            if (0 == ik)
+            {
+                anes[j] = sum[ik][j];
+                ans = max(ans, anes[j]);
+            }
+            else
+            {
+                for (int l = round; l >= 0; l--)
+                {
+                    if (j + l <= m)
+                    {
+                        anes[j + l] = max(anes[j + l], sum[ik][j] + anes[l]);
+                        ans = max(ans, anes[j + l]);
+                    }
+                }
+            }
+        }
+    }
+    
+    cout << ans + base << "\n";
 
     return 0;
 }

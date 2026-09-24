@@ -17,11 +17,6 @@
 
 using namespace std;
 
-const int MAX_MN = 3001;
-
-int sum[MAX_MN][MAX_MN];
-int anes[MAX_MN];
-
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -48,6 +43,16 @@ int main()
         vector<vector<int>>(
             round + 1,
             vector<int>(round + 1, 0)));
+
+    vector<vector<int>> sum(
+        k,
+        vector<int>(m + 1, 0)
+    );
+
+    vector<vector<int>> anes(
+        k,
+        vector<int>(m + 1, 0)
+    );
 
     for (int ik = 0; ik < k; ik++)
     {
@@ -156,29 +161,32 @@ int main()
     }
 
     int ans = 0;
-    for (int ik = 0; ik < k; ik++)
+    if (0 < m)
     {
-        for (int j = round; j >= 0; j--)
+        for (int ik = 0; ik < k; ik++)
         {
-            if (0 == ik)
+            for (int j = m; j >= 0; j--)
             {
-                anes[j] = sum[ik][j];
-                ans = max(ans, anes[j]);
-            }
-            else
-            {
-                for (int l = round; l >= 0; l--)
+                if (0 == ik)
                 {
-                    if (j + l <= m)
+                    anes[ik][j] = sum[ik][j];
+                    ans = max(ans, anes[ik][j]);
+                }
+                else
+                {
+                    for (int l = m; l >= 0; l--)
                     {
-                        anes[j + l] = max(anes[j + l], sum[ik][j] + anes[l]);
-                        ans = max(ans, anes[j + l]);
+                        if (j + l <= m)
+                        {
+                            anes[ik][j + l] = max(anes[ik][j + l], sum[ik][j] + anes[ik - 1][l]);
+                            ans = max(ans, anes[ik][j + l]);
+                        }
                     }
                 }
             }
         }
     }
-    
+
     cout << ans + base << "\n";
 
     return 0;

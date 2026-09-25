@@ -44,6 +44,12 @@ int main()
             round + 1,
             vector<int>(round + 1, 0)));
 
+    vector<vector<vector<int>>> preMax(
+        k,
+        vector<vector<int>>(
+            round + 1,
+            vector<int>(round + 1, 0)));
+
     vector<vector<int>> sum(
         k,
         vector<int>(m + 1, 0)
@@ -95,6 +101,10 @@ int main()
                     }
 
                     sum[ik][im] = max(sum[ik][im], dp[ik][ir][im]);
+                    if (0 == ir)
+                        preMax[ik][ir][im] = dp[ik][ir][im];
+                    else
+                        preMax[ik][ir][im] = max(preMax[ik][ir - 1][im], dp[ik][ir][im]);
                 }
                 else
                 {
@@ -149,12 +159,15 @@ int main()
                         }
                     }
 
-                    for (int j = im - 2; j < ir - 1; j++)
+                    if (1 < ir)
                     {
-                        dp[ik][ir][im] = max(dp[ik][ir][im], dp[ik][j][im - 1] + pre + aft);
+                        dp[ik][ir][im] = max(dp[ik][ir][im], preMax[ik][ir - 2][im - 1] + pre + aft);
                     }
-
                     sum[ik][im] = max(sum[ik][im], dp[ik][ir][im]);
+                    if (0 == ir)
+                        preMax[ik][ir][im] = dp[ik][ir][im];
+                    else
+                        preMax[ik][ir][im] = max(preMax[ik][ir - 1][im], dp[ik][ir][im]);
                 }
             }
         }

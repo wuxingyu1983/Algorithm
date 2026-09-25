@@ -178,7 +178,7 @@ int main()
     {
         for (int ik = 0; ik < k; ik++)
         {
-            for (int j = m; j >= 0; j--)
+            for (int j = min(m, round); j >= 0; j--)
             {
                 if (0 == ik)
                 {

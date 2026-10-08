@@ -86,19 +86,17 @@ int main()
     vector<unordered_set<int>> indexes(n + 1);
 
     // init
+    init_factorial();
+
+    vector<vector<int>> can_reach(n);
+
+    for (int i = 0; i < n; i++)
     {
-        init_factorial();
-
-        vector<vector<int>> can_reach(n);
-
-        for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
         {
-            for (int j = 0; j < n; j++)
+            if (i != j && squares[i].r <= squares[j].r && squares[i].c <= squares[j].c)
             {
-                if (i != j && squares[i].r <= squares[j].r && squares[i].c <= squares[j].c)
-                {
-                    can_reach[i].push_back(j);
-                }
+                can_reach[i].push_back(j);
             }
         }
     }
@@ -112,6 +110,30 @@ int main()
         dp[1][i] = get_comb(squares[i].r - 1 + squares[i].c - 1, squares[i].r - 1);
 
         ans = (ans - dp[1][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD + MOD) % MOD;
+    }
+
+    int round = 2;
+    while (!indexes[round - 1].empty())
+    {
+        for (int i : indexes[round - 1])
+        {
+            for (int j : can_reach[i])
+            {
+                dp[round][j] = (dp[round][j] + dp[round - 1][i] * get_comb(squares[j].r - squares[i].r + squares[j].c - squares[i].c, squares[j].r - squares[i].r) % MOD) % MOD;
+
+                indexes[round].insert(j);
+            }
+        }
+
+        for (int i : indexes[round])
+        {
+            if (round & 1)
+                ans = (ans - dp[round][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD + MOD) % MOD;
+            else
+                ans = (ans + dp[round][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD) % MOD;
+        }
+
+        round++;
     }
 
     cout << ans << "\n";

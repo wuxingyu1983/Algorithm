@@ -12,6 +12,7 @@
 #include <set>
 #include <queue>
 #include <stack>
+#include <unordered_set>
 #include <unordered_map>
 #include <deque>
 
@@ -66,6 +67,8 @@ public:
     Square() : r(0), c(0) {}
 };
 
+long long dp[3001][3001];   // dp[round][]
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -80,27 +83,36 @@ int main()
         cin >> squares[i].r >> squares[i].c;
     }
 
+    vector<unordered_set<int>> indexes(n + 1);
+
     // init
-    init_factorial();
-
-    vector<vector<int>> can_reach(
-        n,
-        vector<int>()
-    );
-
-    for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j < n; j++)
+        init_factorial();
+
+        vector<vector<int>> can_reach(n);
+
+        for (int i = 0; i < n; i++)
         {
-            if (i != j && squares[i].r <= squares[j].r && squares[i].c <= squares[j].c)
+            for (int j = 0; j < n; j++)
             {
-                can_reach[i].push_back(j);
+                if (i != j && squares[i].r <= squares[j].r && squares[i].c <= squares[j].c)
+                {
+                    can_reach[i].push_back(j);
+                }
             }
         }
     }
 
-    long long ans = 0;
+    long long ans = get_comb(h - 1 + w - 1, h - 1);
 
+    for (int i = 0; i < n; i++)
+    {
+        indexes[1].insert(i);
+
+        dp[1][i] = get_comb(squares[i].r - 1 + squares[i].c - 1, squares[i].r - 1);
+
+        ans = (ans - dp[1][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD + MOD) % MOD;
+    }
 
     cout << ans << "\n";
 

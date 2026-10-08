@@ -80,5 +80,29 @@ int main()
         cin >> squares[i].r >> squares[i].c;
     }
 
+    // init
+    init_factorial();
+
+    vector<vector<int>> can_reach(
+        n,
+        vector<int>()
+    );
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (i != j && squares[i].r <= squares[j].r && squares[i].c <= squares[j].c)
+            {
+                can_reach[i].push_back(j);
+            }
+        }
+    }
+
+    long long ans = 0;
+
+
+    cout << ans << "\n";
+
     return 0;
 }

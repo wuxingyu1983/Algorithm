@@ -67,8 +67,6 @@ public:
     Square() : r(0), c(0) {}
 };
 
-long long dp[3003][3003];   // dp[round][]
-
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -82,61 +80,35 @@ int main()
     {
         cin >> squares[i].r >> squares[i].c;
     }
+    squares.push_back(Square(h, w));
 
-    vector<unordered_set<int>> indexes(n + 10);
+    // sort
+    sort(squares.begin(), squares.end(), [](const Square &a, const Square &b) {
+        if (a.r == b.r)
+            return a.c < b.c;
+        return a.r < b.r;
+    });
 
     // init
     init_factorial();
 
-    vector<vector<int>> can_reach(n);
+    vector<long long> dp(n + 1, 0);
+    dp[0] = get_comb(squares[0].r + squares[0].c - 2, squares[0].r - 1);
 
-    for (int i = 0; i < n; i++)
+    for (int i = 1; i <= n; i++)
     {
-        for (int j = 0; j < n; j++)
+        dp[i] = get_comb(squares[i].r + squares[i].c - 2, squares[i].r - 1);
+        for (int j = 0; j < i; j++)
         {
-            if (i != j && squares[i].r <= squares[j].r && squares[i].c <= squares[j].c)
+            if (squares[j].r <= squares[i].r && squares[j].c <= squares[i].c)
             {
-                can_reach[i].push_back(j);
+                long long ways = get_comb(squares[i].r - squares[j].r + squares[i].c - squares[j].c, squares[i].r - squares[j].r);
+                dp[i] = (dp[i] - dp[j] * ways % MOD + MOD) % MOD;
             }
         }
     }
 
-    long long ans = get_comb(h - 1 + w - 1, h - 1);
-
-    for (int i = 0; i < n; i++)
-    {
-        indexes[1].insert(i);
-
-        dp[1][i] = get_comb(squares[i].r - 1 + squares[i].c - 1, squares[i].r - 1);
-
-        ans = (ans - dp[1][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD + MOD) % MOD;
-    }
-
-    int round = 2;
-    while (!indexes[round - 1].empty())
-    {
-        for (int i : indexes[round - 1])
-        {
-            for (int j : can_reach[i])
-            {
-                dp[round][j] = (dp[round][j] + dp[round - 1][i] * get_comb(squares[j].r - squares[i].r + squares[j].c - squares[i].c, squares[j].r - squares[i].r)) % MOD;
-
-                indexes[round].insert(j);
-            }
-        }
-
-        for (int i : indexes[round])
-        {
-            if (round & 1)
-                ans = (ans - dp[round][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD + MOD) % MOD;
-            else
-                ans = (ans + dp[round][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r)) % MOD;
-        }
-
-        round++;
-    }
-
-    cout << ans << "\n";
+    cout << dp[n] << "\n";
 
     return 0;
 }

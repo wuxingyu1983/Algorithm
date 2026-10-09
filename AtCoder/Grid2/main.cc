@@ -67,7 +67,7 @@ public:
     Square() : r(0), c(0) {}
 };
 
-long long dp[3001][3001];   // dp[round][]
+long long dp[3003][3003];   // dp[round][]
 
 int main()
 {
@@ -83,7 +83,7 @@ int main()
         cin >> squares[i].r >> squares[i].c;
     }
 
-    vector<unordered_set<int>> indexes(n + 1);
+    vector<unordered_set<int>> indexes(n + 10);
 
     // init
     init_factorial();
@@ -119,7 +119,7 @@ int main()
         {
             for (int j : can_reach[i])
             {
-                dp[round][j] = (dp[round][j] + dp[round - 1][i] * get_comb(squares[j].r - squares[i].r + squares[j].c - squares[i].c, squares[j].r - squares[i].r) % MOD) % MOD;
+                dp[round][j] = (dp[round][j] + dp[round - 1][i] * get_comb(squares[j].r - squares[i].r + squares[j].c - squares[i].c, squares[j].r - squares[i].r)) % MOD;
 
                 indexes[round].insert(j);
             }
@@ -130,7 +130,7 @@ int main()
             if (round & 1)
                 ans = (ans - dp[round][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD + MOD) % MOD;
             else
-                ans = (ans + dp[round][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r) % MOD) % MOD;
+                ans = (ans + dp[round][i] * get_comb(h - squares[i].r + w - squares[i].c, h - squares[i].r)) % MOD;
         }
 
         round++;

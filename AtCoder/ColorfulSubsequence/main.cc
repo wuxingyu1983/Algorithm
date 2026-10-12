@@ -75,17 +75,22 @@ int main()
             dp[i][0] = dp[i - 1][0] + balls[i].v;
         }
 
-        for (int ik = 1; ik <= k; ik++)
+        for (int i = 1; i < balls.size(); i++)
         {
-            for (int i = ik; i < balls.size(); i++)
+            for (int ik = 1; ik <= min(k, i); ik++)
             {
-                dp[i][ik] = dp[i - 1][ik] + balls[i].v;
-
-                for (int j = i - 2; j >= max(0, i - ik - 1); j--)
+                if (i == ik)
                 {
-                    if (balls[i].c != balls[j].c)
+                    dp[i][ik] = balls[i].v;
+                }
+                else
+                {
+                    for (int j = i - 1; j >= max(0, i - ik - 1); j--)
                     {
-                        dp[i][ik] = max(dp[i][ik], dp[j][ik - (i - j - 1)] + balls[i].v);
+                        if (balls[i].c != balls[j].c && 0 < dp[j][ik - (i - j - 1)])
+                        {
+                            dp[i][ik] = max(dp[i][ik], dp[j][ik - (i - j - 1)] + balls[i].v);
+                        }
                     }
                 }
             }

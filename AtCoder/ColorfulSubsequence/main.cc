@@ -61,6 +61,8 @@ int main()
         }
     }
 
+    balls.push_back(Ball(0, 0));
+
     if (0 > k)
     {
         cout << -1 << "\n";

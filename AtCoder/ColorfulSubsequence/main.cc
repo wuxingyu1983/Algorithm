@@ -21,9 +21,10 @@ using namespace std;
 class Ball
 {
 public:
-    int c, v;
+    int c; 
+    long long v;
 
-    Ball(int _c, int _v) : c(_c), v(_v) {}
+    Ball(int _c, long long _v) : c(_c), v(_v) {}
     Ball() : c(0), v(0) {}
 };
 
@@ -38,7 +39,8 @@ int main()
     vector<Ball> balls;
     for (int i = 0; i < n; i++)
     {
-        int c, v;
+        int c;
+        long long v;
         cin >> c >> v;
 
         if (balls.empty())
@@ -49,7 +51,7 @@ int main()
         {
             if (balls.back().c == c)
             {
-                balls.back().v += max(balls.back().v, v);
+                balls.back().v = max(balls.back().v, v);
                 k--;
             }
             else
@@ -65,6 +67,31 @@ int main()
     }
     else
     {
+        vector<vector<long long>> dp(balls.size(), vector<long long>(k + 1, 0));
+        // init
+        dp[0][0] = balls[0].v;
+        for (int i = 1; i < balls.size(); i++)
+        {
+            dp[i][0] = dp[i - 1][0] + balls[i].v;
+        }
+
+        for (int ik = 1; ik <= k; ik++)
+        {
+            for (int i = ik; i < balls.size(); i++)
+            {
+                dp[i][ik] = dp[i - 1][ik] + balls[i].v;
+
+                for (int j = i - 2; j >= max(0, i - ik - 1); j--)
+                {
+                    if (balls[i].c != balls[j].c)
+                    {
+                        dp[i][ik] = max(dp[i][ik], dp[j][ik - (i - j - 1)] + balls[i].v);
+                    }
+                }
+            }
+        }
+
+        cout << dp[balls.size() - 1][k] << "\n";
     }
 
     return 0;

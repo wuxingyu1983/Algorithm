@@ -35,13 +35,37 @@ int main()
     int n, k;
     cin >> n >> k;
 
-    vector<Ball> balls(n);
+    vector<Ball> balls;
     for (int i = 0; i < n; i++)
     {
-        cin >> balls[i].c >> balls[i].v;
+        int c, v;
+        cin >> c >> v;
+
+        if (balls.empty())
+        {
+            balls.push_back(Ball(c, v));
+        }
+        else
+        {
+            if (balls.back().c == c)
+            {
+                balls.back().v += max(balls.back().v, v);
+                k--;
+            }
+            else
+            {
+                balls.push_back(Ball(c, v));
+            }
+        }
     }
 
-    
+    if (0 > k)
+    {
+        cout << -1 << "\n";
+    }
+    else
+    {
+    }
 
     return 0;
 }

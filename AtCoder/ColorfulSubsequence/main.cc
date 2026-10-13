@@ -28,6 +28,16 @@ public:
     Ball() : c(0), v(0) {}
 };
 
+class Item
+{
+public:
+    long long fstV, sndV;
+    int fstC, sndC;
+
+    Item(long long _fstV, long long _sndV, int _fstC, int _sndC) : fstV(_fstV), sndV(_sndV), fstC(_fstC), sndC(_sndC) {}
+    Item() : fstV(-1), sndV(-1), fstC(-1), sndC(-1) {}
+};
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -61,44 +71,90 @@ int main()
         }
     }
 
-    balls.push_back(Ball(0, 0));
-
     if (0 > k)
     {
         cout << -1 << "\n";
     }
     else
     {
-        vector<vector<long long>> dp(balls.size(), vector<long long>(k + 1, 0));
+        vector<vector<Item>> dp(2, vector<Item>(k + 1));
+
+        Item initItem;
+        int act = 0;
+
         // init
-        dp[0][0] = balls[0].v;
-        for (int i = 1; i < balls.size(); i++)
+        dp[act][0].fstC = balls[0].c;
+        dp[act][0].fstV = balls[0].v;
+
+        if (0 < k)
         {
-            dp[i][0] = dp[i - 1][0] + balls[i].v;
+            dp[act][1].fstC = 0;
+            dp[act][1].fstV = 0;
         }
 
-        for (int i = 1; i < balls.size(); i++)
+        act = 1 - act;
+
+        for (int i = 2; i <= balls.size(); i++)
         {
-            for (int ik = 1; ik <= min(k, i); ik++)
+            fill(dp[act].begin(), dp[act].end(), initItem);
+
+            for (int j = 0; j <= min(k, i); j++)
             {
-                if (i == ik)
+                // dp[i][j], balls[i - 1]
+                if (j > 0)
                 {
-                    dp[i][ik] = balls[i].v;
-                }
-                else
-                {
-                    for (int j = i - 1; j >= max(0, i - ik - 1); j--)
+                    // balls[i - 1] 删掉
+                    dp[act][j].fstV = dp[1 - act][j - 1].fstV;
+                    dp[act][j].fstC = dp[1 - act][j - 1].fstC;
+                    dp[act][j].sndV = dp[1 - act][j - 1].sndV;
+                    dp[act][j].sndC = dp[1 - act][j - 1].sndC;
+
+                    // balls[i - 1] 保留
+                    long long newV = -1;
+                    if (0 <= dp[1 - act][j].fstV && dp[1 - act][j].fstC != balls[i - 1].c)
                     {
-                        if (balls[i].c != balls[j].c && 0 < dp[j][ik - (i - j - 1)])
+                        newV = dp[1 - act][j].fstV + balls[i - 1].v;
+                    }
+                    else if (0 <= dp[1 - act][j].sndV && dp[1 - act][j].sndC != balls[i - 1].c)
+                    {
+                        newV = dp[1 - act][j].sndV + balls[i - 1].v;
+                    }
+
+                    if (0 <= newV)
+                    {
+                        if (newV >= dp[act][j].fstV)
                         {
-                            dp[i][ik] = max(dp[i][ik], dp[j][ik - (i - j - 1)] + balls[i].v);
+                            if (dp[act][j].fstC != balls[i - 1].c)
+                            {
+                                dp[act][j].sndV = dp[act][j].fstV;
+                                dp[act][j].sndC = dp[act][j].fstC;
+                            }
+
+                            dp[act][j].fstV = newV;
+                            dp[act][j].fstC = balls[i - 1].c;
+                        }
+                        else if (newV > dp[act][j].sndV && dp[act][j].fstC != balls[i - 1].c)
+                        {
+                            dp[act][j].sndV = newV;
+                            dp[act][j].sndC = balls[i - 1].c;
                         }
                     }
                 }
+                else
+                {
+                    // 0 == j
+                    dp[act][j].fstV = dp[1 - act][j].fstV + balls[i - 1].v;
+                    dp[act][j].fstC = balls[i - 1].c;
+                }
+            }
+
+            if (i != balls.size())
+            {
+                act = 1 - act;
             }
         }
 
-        cout << dp[balls.size() - 1][k] << "\n";
+        cout << dp[act][k].fstV << "\n";
     }
 
     return 0;

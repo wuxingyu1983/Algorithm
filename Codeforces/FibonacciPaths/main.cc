@@ -20,6 +20,15 @@ using namespace std;
 
 const long long MOD = 998244353;
 
+class Edge
+{
+public:
+    int u, v;
+
+    Edge(int _u, int _v):u(_u), v(_v){}
+    Edge():u(0), v(0){}
+};
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -33,7 +42,19 @@ int main()
         int n, m;
         cin >> n >> m;
 
-        
+        vector<long long> a(n + 1);
+        for (int i = 1; i <= n; i++)
+        {
+            cin >> a[i];
+        }
+
+        vector<Edge> edges(m);
+        for (int i = 0; i < m; i++)
+        {
+            cin >> edges[i].u >> edges[i].v;
+        }
+
+
     }
 
     return 0;

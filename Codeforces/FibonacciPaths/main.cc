@@ -38,6 +38,21 @@ public:
     Vertex(int _id, long long _value):id(_id), value(_value){}
 };
 
+class Item
+{
+public:
+    int curr;
+    long long need;
+
+    Item(int _curr, long long _need):curr(_curr), need(_need){}
+
+    bool operator<(const Item& other) const {
+        if (curr != other.curr)
+            return curr < other.curr;
+        return need < other.need;
+    }
+};
+
 int main()
 {
     ios_base::sync_with_stdio(false);

@@ -100,6 +100,14 @@ int main()
 
         for (int i = 0; i < m; i++)
         {
+            auto vit = lower_bound(vertices[edges[i].u].begin(), vertices[edges[i].u].end(), Vertex(0, a[edges[i].u] + a[edges[i].v]), [](const Vertex &v1, const Vertex &v2)
+                               { return v1.value < v2.value; });
+
+            if (vit == vertices[edges[i].u].end() || vit->value != a[edges[i].u] + a[edges[i].v])
+            {
+                continue;
+            }
+
             Item key(edges[i].u, a[edges[i].u] + a[edges[i].v]);
 
             auto it = dp[act].find(key);
@@ -112,9 +120,9 @@ int main()
             {
                 it->second++;
             }
-
-            ans ++;
         }
+
+        ans = m;
 
         act = 1 - act;
 
@@ -133,6 +141,18 @@ int main()
 
                 while (vit != vertices[curr].end() && vit->value == need)
                 {
+                    ans += count;
+                    ans %= MOD;
+
+                    auto tmpit = lower_bound(vertices[vit->id].begin(), vertices[vit->id].end(), Vertex(0, need + a[curr]), [](const Vertex &v1, const Vertex &v2)
+                                       { return v1.value < v2.value; });
+
+                    if (tmpit == vertices[vit->id].end() || tmpit->value != need + a[curr])
+                    {
+                        vit++;
+                        continue;
+                    }
+
                     Item key(vit->id, need + a[curr]);
 
                     auto it2 = dp[act].find(key);
@@ -146,9 +166,6 @@ int main()
                         it2->second += count;
                         dp[act][key] %= MOD;
                     }
-
-                    ans += count;
-                    ans %= MOD;
 
                     vit++;
                 }

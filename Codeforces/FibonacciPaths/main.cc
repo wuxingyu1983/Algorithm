@@ -29,6 +29,15 @@ public:
     Edge():u(0), v(0){}
 };
 
+class Vertex
+{
+public:
+    int id;
+    long long value;
+
+    Vertex(int _id, long long _value):id(_id), value(_value){}
+};
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -49,12 +58,27 @@ int main()
         }
 
         vector<Edge> edges(m);
+        vector<vector<Vertex>> vertices(n + 1);
         for (int i = 0; i < m; i++)
         {
-            cin >> edges[i].u >> edges[i].v;
+            cin >> edges[i].v >> edges[i].u;
+
+            vertices[edges[i].v].push_back(Vertex(edges[i].u, a[edges[i].u]));
         }
 
+        // sort
+        for (int i = 1; i <= n; i++)
+        {
+            if (0 < vertices[i].size())
+            {
+                sort(vertices[i].begin(), vertices[i].end(), [](const Vertex &v1, const Vertex &v2)
+                     { return v1.value < v2.value; });
+            }
+        }
 
+        long long ans = 0;
+
+        cout << ans << "\n";
     }
 
     return 0;

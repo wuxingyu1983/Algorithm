@@ -100,7 +100,7 @@ int main()
 
         for (int i = 0; i < m; i++)
         {
-            Item key(edges[i].v, a[edges[i].u] + a[edges[i].v]);
+            Item key(edges[i].u, a[edges[i].u] + a[edges[i].v]);
 
             auto it = dp[act].find(key);
 
@@ -133,7 +133,7 @@ int main()
 
                 while (vit != vertices[curr].end() && vit->value == need)
                 {
-                    Item key(vit->id, need + a[vit->id]);
+                    Item key(vit->id, need + a[curr]);
 
                     auto it2 = dp[act].find(key);
 

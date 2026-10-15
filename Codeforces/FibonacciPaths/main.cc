@@ -14,6 +14,7 @@
 #include <stack>
 #include <unordered_set>
 #include <unordered_map>
+#include <map>
 #include <deque>
 
 using namespace std;
@@ -92,6 +93,69 @@ int main()
         }
 
         long long ans = 0;
+
+        // init
+        vector<map<Item, long long>> dp(2);
+        int act = 0;
+
+        for (int i = 0; i < m; i++)
+        {
+            Item key(edges[i].v, a[edges[i].u] + a[edges[i].v]);
+
+            auto it = dp[act].find(key);
+
+            if (it == dp[act].end())
+            {
+                dp[act][key] = 1;
+            }
+            else
+            {
+                it->second++;
+            }
+
+            ans ++;
+        }
+
+        act = 1 - act;
+
+        while (dp[1 - act].size())
+        {
+            dp[act].clear();
+
+            for (auto it = dp[1 - act].begin(); it != dp[1 - act].end(); it++)
+            {
+                int curr = it->first.curr;
+                long long need = it->first.need;
+                long long count = it->second;
+
+                auto vit = lower_bound(vertices[curr].begin(), vertices[curr].end(), Vertex(0, need), [](const Vertex &v1, const Vertex &v2)
+                                       { return v1.value < v2.value; });
+
+                while (vit != vertices[curr].end() && vit->value == need)
+                {
+                    Item key(vit->id, need + a[vit->id]);
+
+                    auto it2 = dp[act].find(key);
+
+                    if (it2 == dp[act].end())
+                    {
+                        dp[act][key] = count;
+                    }
+                    else
+                    {
+                        it2->second += count;
+                        dp[act][key] %= MOD;
+                    }
+
+                    ans += count;
+                    ans %= MOD;
+
+                    vit++;
+                }
+            }
+
+            act = 1 - act;
+        }
 
         cout << ans << "\n";
     }

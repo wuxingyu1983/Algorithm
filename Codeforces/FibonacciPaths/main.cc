@@ -25,33 +25,10 @@ class Edge
 {
 public:
     int u, v;
+    long long next;
 
-    Edge(int _u, int _v):u(_u), v(_v){}
-    Edge():u(0), v(0){}
-};
-
-class Vertex
-{
-public:
-    int id;
-    long long value;
-
-    Vertex(int _id, long long _value):id(_id), value(_value){}
-};
-
-class Item
-{
-public:
-    int curr;
-    long long need;
-
-    Item(int _curr, long long _need):curr(_curr), need(_need){}
-
-    bool operator<(const Item& other) const {
-        if (curr != other.curr)
-            return curr < other.curr;
-        return need < other.need;
-    }
+    Edge(int _u, int _v, long long _next):u(_u), v(_v), next(_next){}
+    Edge():u(0), v(0), next(0){}
 };
 
 int main()
@@ -74,105 +51,42 @@ int main()
         }
 
         vector<Edge> edges(m);
-        vector<vector<Vertex>> vertices(n + 1);
         for (int i = 0; i < m; i++)
         {
+            // v --> u
             cin >> edges[i].v >> edges[i].u;
-
-            vertices[edges[i].v].push_back(Vertex(edges[i].u, a[edges[i].u]));
+            edges[i].next = a[edges[i].v] + a[edges[i].u];
         }
 
         // sort
-        for (int i = 1; i <= n; i++)
-        {
-            if (0 < vertices[i].size())
-            {
-                sort(vertices[i].begin(), vertices[i].end(), [](const Vertex &v1, const Vertex &v2)
-                     { return v1.value < v2.value; });
-            }
-        }
+        sort(edges.begin(), edges.end(), [](const Edge &e1, const Edge &e2) {
+            return e1.next < e2.next;
+        });
+        
+        // init
+        vector<map<long long, long long>> dp(n + 1);
 
         long long ans = 0;
-
-        // init
-        vector<map<Item, long long>> dp(2);
-        int act = 0;
+        ans = m;
 
         for (int i = 0; i < m; i++)
         {
-            auto vit = lower_bound(vertices[edges[i].u].begin(), vertices[edges[i].u].end(), Vertex(0, a[edges[i].u] + a[edges[i].v]), [](const Vertex &v1, const Vertex &v2)
-                               { return v1.value < v2.value; });
+            int v = edges[i].v;
+            int u = edges[i].u;
+            long long need = a[u];
 
-            if (vit == vertices[edges[i].u].end() || vit->value != a[edges[i].u] + a[edges[i].v])
+            long long paths = 0;
+            if (dp[v].find(need) != dp[v].end())
             {
-                continue;
+                paths = dp[v][need];
             }
+            
+            dp[u][a[v] + a[u]] = (dp[u][a[v] + a[u]] + paths + 1) % MOD;
 
-            Item key(edges[i].u, a[edges[i].u] + a[edges[i].v]);
+            ans += paths;
+            ans %= MOD;
+        }       
 
-            auto it = dp[act].find(key);
-
-            if (it == dp[act].end())
-            {
-                dp[act][key] = 1;
-            }
-            else
-            {
-                it->second++;
-            }
-        }
-
-        ans = m;
-
-        act = 1 - act;
-
-        while (dp[1 - act].size())
-        {
-            dp[act].clear();
-
-            for (auto it = dp[1 - act].begin(); it != dp[1 - act].end(); it++)
-            {
-                int curr = it->first.curr;
-                long long need = it->first.need;
-                long long count = it->second;
-
-                auto vit = lower_bound(vertices[curr].begin(), vertices[curr].end(), Vertex(0, need), [](const Vertex &v1, const Vertex &v2)
-                                       { return v1.value < v2.value; });
-
-                while (vit != vertices[curr].end() && vit->value == need)
-                {
-                    ans += count;
-                    ans %= MOD;
-
-                    auto tmpit = lower_bound(vertices[vit->id].begin(), vertices[vit->id].end(), Vertex(0, need + a[curr]), [](const Vertex &v1, const Vertex &v2)
-                                       { return v1.value < v2.value; });
-
-                    if (tmpit == vertices[vit->id].end() || tmpit->value != need + a[curr])
-                    {
-                        vit++;
-                        continue;
-                    }
-
-                    Item key(vit->id, need + a[curr]);
-
-                    auto it2 = dp[act].find(key);
-
-                    if (it2 == dp[act].end())
-                    {
-                        dp[act][key] = count;
-                    }
-                    else
-                    {
-                        it2->second += count;
-                        dp[act][key] %= MOD;
-                    }
-
-                    vit++;
-                }
-            }
-
-            act = 1 - act;
-        }
 
         cout << ans << "\n";
     }

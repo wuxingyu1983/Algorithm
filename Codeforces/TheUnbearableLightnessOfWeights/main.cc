@@ -52,9 +52,10 @@ int main()
 
     if (diff < n)
     {
+        int len = 0;
         for (int i = 0; i < a.size(); i++)
         {
-            for (int j = i; j >= 1; j--)
+            for (int j = len; j >= 1; j--)
             {
                 for (int k = 1; k < sum; k++)
                 {
@@ -76,6 +77,8 @@ int main()
 
                 dp[l][l * a[i]] = min(dp[l][l * a[i]], 10);
             }
+
+            len += cnt[a[i]];
         }
     }
 

@@ -33,26 +33,74 @@ int main()
 
     int sum = 0;
     int diff = 0;
-    vector<int> a(n);
+    vector<int> a;
     for (int i = 0; i < n; i++)
     {
-        cin >> a[i];
-        sum += a[i];
+        int tmp;
+        cin >> tmp;
+        sum += tmp;
 
-        cnt[a[i]]++;
-        if (1 == cnt[a[i]])
+        cnt[tmp]++;
+        if (1 == cnt[tmp])
         {
+            a.push_back(tmp);
             diff++;
         }
     }
 
     sort(a.begin(), a.end());
 
-    int ans = 1;
-
     if (diff < n)
     {
-        
+        for (int i = 0; i < a.size(); i++)
+        {
+            for (int j = i; j >= 1; j--)
+            {
+                for (int k = 1; k < sum; k++)
+                {
+                    if (0 < dp[j][k])
+                    {
+                        for (int l = 1; l <= cnt[a[i]]; l++)
+                        {
+                            dp[j + l][k + l * a[i]] += dp[j][k];
+
+                            dp[j + l][k + l * a[i]] = min(10, dp[j + l][k + l * a[i]]);
+                        }
+                    }
+                }
+            }
+
+            for (int l = 1; l <= cnt[a[i]]; l++)
+            {
+                dp[l][l * a[i]] +=1;
+
+                dp[l][l * a[i]] = min(dp[l][l * a[i]], 10);
+            }
+        }
+    }
+
+    int ans = 1;
+
+    if (2 == diff)
+    {
+        ans = n;
+    }
+    else
+    {
+        for (int i = 0; i < a.size(); i++)
+        {
+            if (1 < cnt[a[i]])
+            {
+                for (int j = cnt[a[i]]; j > 1; j--)
+                {
+                    if (1 == dp[j][j * a[i]])
+                    {
+                        ans = max(ans, j);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     cout << ans << "\n";

@@ -91,11 +91,14 @@ int main()
         {
             if (1 < cnt[a[i]])
             {
-                for (int j = cnt[a[i]]; j > 1; j--)
+                for (int j = 2; j <= cnt[a[i]]; j++)
                 {
                     if (1 == dp[j][j * a[i]])
                     {
                         ans = max(ans, j);
+                    }
+                    else
+                    {
                         break;
                     }
                 }

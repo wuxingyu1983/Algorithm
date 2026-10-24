@@ -36,16 +36,21 @@ int main()
     vector<char> flags(n + 1, 0);
     vector<int> rings(n + 1, 0);
 
-    int cnt = 0;
     for (int i = 1; i <= n; i++)
     {
-        flags[i] = 1;
-        cnt ++;
-
-        if (flags[p[i]])
+        if (0 == flags[i])
         {
-            rings[cnt] ++;
-            cnt = 0;
+            int cnt = 0;
+            int j = i;
+            while (0 == flags[j])
+            {
+                flags[j] = 1;
+                cnt++;
+
+                j = p[j];
+            }
+
+            rings[cnt]++;
         }
     }
 
@@ -54,7 +59,7 @@ int main()
         int ans = 0;
         int tmp = k;
         int i = 2;
-        while (k > 0)
+        while (tmp > 0)
         {
             while (0 == rings[i])
             {
@@ -62,17 +67,22 @@ int main()
             }
             
             {
-                if (rings[i] * i <= k)
+                if (rings[i] * i <= tmp)
                 {
                     ans += rings[i] * i;
-                    k -= rings[i] * i;
+                    tmp -= rings[i] * i;
                 }
                 else
                 {
-                    ans += i * (k / i);
-                    ans += (k % i) + 1;
-                    k = 0;
+                    ans += i * (tmp / i);
+                    if (0 != tmp % i)
+                    {
+                        ans += (tmp % i) + 1;
+                    }
+                    tmp = 0;
                 }
+
+                i ++;
             }
         }
         
@@ -81,11 +91,39 @@ int main()
 
     // maximum
     {
+        // greedy
         int ans = 0;
         int tmp = k;
-        while (k > 0)
+        int i = 2;
+        while (tmp > 0)
         {
+            while (n >= i && 0 == rings[i])
+            {
+                i ++;
+            }
+
+            if (n < i)
+            {
+                break;
+            }
+
+            {
+                if ((i / 2) * rings[i] <= tmp)
+                {
+                    ans += (i / 2) * 2 * rings[i];
+                    tmp -= (i / 2) * rings[i];
+                }
+                else
+                {
+                    ans += tmp * 2;
+                    tmp = 0;
+                }
+
+                i ++;
+            }
         }
+
+        ans += min(tmp, n - ans);
         
         cout << ans << "\n";
     }

@@ -56,37 +56,52 @@ int main()
 
     // minimum
     {
-        int ans = 0;
-        int tmp = k;
-        int i = 2;
-        while (tmp > 0)
+        vector<int> dp(k + 1, -1);
+        dp[k] = 0;
+        for (int i = 2; i <= n; i++)
         {
-            while (0 == rings[i])
+            if (rings[i])
             {
-                i ++;
-            }
-            
-            {
-                if (rings[i] * i <= tmp)
+                for (int j = 1; j <= k; j++)
                 {
-                    ans += rings[i] * i;
-                    tmp -= rings[i] * i;
-                }
-                else
-                {
-                    ans += i * (tmp / i);
-                    if (0 != tmp % i)
+                    if (0 <= dp[j])
                     {
-                        ans += (tmp % i) + 1;
-                    }
-                    tmp = 0;
-                }
+                        for (int r = 0; r < rings[i]; r++)
+                        {
+                            if (r * i > j)
+                            {
+                                break;
+                            }
 
-                i ++;
+                            for (int l = 1; l <= i; l++)
+                            {
+                                if (l + r * i > j)
+                                {
+                                    break;
+                                }
+
+                                int tmp = dp[j] + r * i;
+                                if (l == i)
+                                {
+                                    tmp += l;
+                                }
+                                else
+                                {
+                                    tmp += l + 1;
+                                }
+
+                                if (0 > dp[j - l - r * i] || dp[j - l - r * i] > tmp)
+                                {
+                                    dp[j - l - r * i] = tmp;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         
-        cout << ans << " ";
+        cout << dp[0] << " ";
     }
 
     // maximum

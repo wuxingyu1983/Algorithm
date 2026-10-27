@@ -16,8 +16,11 @@
 #include <unordered_map>
 #include <map>
 #include <deque>
+#include <bitset>
 
 using namespace std;
+
+bitset<2000002> dp;
 
 int main()
 {
@@ -56,52 +59,43 @@ int main()
 
     // minimum
     {
-        vector<int> dp(k + 1, -1);
-        dp[k] = 0;
+        vector<int> v;
         for (int i = 2; i <= n; i++)
         {
             if (rings[i])
             {
-                for (int j = 1; j <= k; j++)
+                int sum = rings[i];
+                int tmp = 1;
+
+                v.push_back(tmp * i);
+                sum -= tmp;
+                tmp <<= 1;
+
+                while (tmp <= sum)
                 {
-                    if (0 <= dp[j])
-                    {
-                        for (int r = 0; r < rings[i]; r++)
-                        {
-                            if (r * i > j)
-                            {
-                                break;
-                            }
-
-                            for (int l = 1; l <= i; l++)
-                            {
-                                if (l + r * i > j)
-                                {
-                                    break;
-                                }
-
-                                int tmp = dp[j] + r * i;
-                                if (l == i)
-                                {
-                                    tmp += l;
-                                }
-                                else
-                                {
-                                    tmp += l + 1;
-                                }
-
-                                if (0 > dp[j - l - r * i] || dp[j - l - r * i] > tmp)
-                                {
-                                    dp[j - l - r * i] = tmp;
-                                }
-                            }
-                        }
-                    }
+                    v.push_back(tmp * i);
+                    sum -= tmp;
+                    tmp <<= 1;
+                }
+                
+                if (0 < sum)
+                {
+                    v.push_back(sum * i);
                 }
             }
         }
-        
-        cout << dp[0] << " ";
+
+        dp[0] = 1;
+
+        for (int i = 0; i < v.size(); i++)
+        {
+            dp |= dp << v[i];
+        }
+       
+        if (0 < dp[k])
+            cout << k << " ";
+        else
+            cout << k + 1 << " ";
     }
 
     // maximum

@@ -41,19 +41,51 @@ void solve(int n, const vector<vector<int>>& children, vector<long long>& sums, 
     {
         if (1 < children[node].size())
         {
+            vector<long long> vec;
+            for (int child : children[node])
+            {
+                vec.push_back(sums[child]);
+            }
+            sort(vec.begin(), vec.end());
+            vec.push_back(0);
+            
             dp.reset();
             dp[0] = 1;
 
-            for (int child : children[node])
+            int pre = 0;
+            int cnt = 0;
+            for (int i = 0; i < vec.size(); i++)
             {
-                dp |= dp << sums[child];
+                if (pre != vec[i])
+                {
+                    int step = 1;
+                    while (step <= cnt)
+                    {
+                        dp |= dp << (step * pre);
+                        cnt -= step;
+                        step <<= 1;
+                    }
+
+                    if (0 < cnt)
+                    {
+                        dp |= dp << (cnt * pre);
+                    }
+
+                    pre = vec[i];
+                    cnt = 1;
+                }
+                else
+                {
+                    cnt ++;
+                }
             }
 
-            for (int i = 1; i <= (sums[node] - 1) / 2; i++)
+            for (int i = (sums[node] - 1) / 2; i >= 1; i--)
             {
                 if (dp[i])
                 {
                     max = i;
+                    break;
                 }
             }
 

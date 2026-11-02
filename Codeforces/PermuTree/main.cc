@@ -20,7 +20,9 @@
 
 using namespace std;
 
-void dfs(int node, const vector<vector<int>>& children, vector<int>& sums)
+bitset<1000002> dp;
+
+void dfs(int node, const vector<vector<int>>& children, vector<long long>& sums)
 {
     sums[node] = 1; // Count the current node
 
@@ -31,27 +33,33 @@ void dfs(int node, const vector<vector<int>>& children, vector<int>& sums)
     }
 }
 
-void solve(int node, const vector<vector<int>>& children, vector<int>& sums, long long &ans)
+void solve(int n, const vector<vector<int>>& children, vector<long long>& sums, long long &ans)
 {
     long long max = 0;
 
-    int left = 0;
-    int right = sums[node] - 1; // Exclude the current node
-
-    for (int child : children[node])
+    for (int node = 1; node <= n; node++)
     {
-        left += sums[child];
-        right -= sums[child];
-        long long current = (long long)left * (long long)right;
-        if (current > max)
+        if (1 < children[node].size())
         {
-            max = current;
+            dp.reset();
+            dp[0] = 1;
+
+            for (int child : children[node])
+            {
+                dp |= dp << sums[child];
+            }
+
+            for (int i = 1; i <= (sums[node] - 1) / 2; i++)
+            {
+                if (dp[i])
+                {
+                    max = i;
+                }
+            }
+
+            ans += max * (sums[node] - 1 - max);
         }
-
-        solve(child, children, sums, ans);
     }
-
-    ans += max;
 }
 
 int main()
@@ -71,13 +79,13 @@ int main()
         children[p].push_back(i);
     }
 
-    vector<int> sums(n + 1, 0);
+    vector<long long> sums(n + 1, 0);
 
     dfs(1, children, sums);
 
     long long ans = 0;
 
-    solve(1, children, sums, ans);
+    solve(n, children, sums, ans);
 
     cout << ans << "\n";
 

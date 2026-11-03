@@ -21,25 +21,25 @@
 using namespace std;
 
 bitset<3> dp1;
-bitset<5> dp2;
-bitset<9> dp3;
-bitset<17> dp4;
-bitset<33> dp5;
-bitset<65> dp6;
-bitset<129> dp7;
-bitset<257> dp8;
-bitset<513> dp9;
-bitset<1025> dp10;
-bitset<2049> dp11;
-bitset<4097> dp12;
-bitset<8193> dp13;
-bitset<16385> dp14;
-bitset<32769> dp15;
-bitset<65537> dp16;
-bitset<131073> dp17;
-bitset<262145> dp18;
-bitset<524289> dp19;
-bitset<1000001> dp20;
+bitset<3> dp2;
+bitset<5> dp3;
+bitset<9> dp4;
+bitset<17> dp5;
+bitset<33> dp6;
+bitset<65> dp7;
+bitset<129> dp8;
+bitset<257> dp9;
+bitset<513> dp10;
+bitset<1025> dp11;
+bitset<2049> dp12;
+bitset<4097> dp13;
+bitset<8193> dp14;
+bitset<16385> dp15;
+bitset<32769> dp16;
+bitset<65537> dp17;
+bitset<131073> dp18;
+bitset<262145> dp19;
+bitset<524289> dp20;
 
 inline void init(int x)
 {
@@ -222,6 +222,14 @@ void solve(const int n, const vector<vector<int>>& children, vector<long long>& 
                 vec.push_back(sums[child]);
             }
             sort(vec.begin(), vec.end());
+
+            // 最重要的优化点，直接计算出最大值
+            if (vec.back() >= (sums[node] - 1) / 2)
+            {
+                ans += vec.back() * (sums[node] - 1 - vec.back());
+                continue;
+            }
+
             vec.push_back(0);
             
             // get dpX

@@ -28,12 +28,16 @@ vector<int> belong(MAXN, 0);
 
 void dfs(int u, int parent, int group_id)
 {
+    if (0 == belong[u])
+    {
+        belong[u] = group_id;
+        groups[group_id].insert(u);
+    }
+
     for (int v : roads[u])
     {
         if (v != parent && belong[v] == 0)
         {
-            belong[v] = group_id;
-            groups[group_id].insert(v);
             dfs(v, u, group_id);
         }
     }
@@ -52,10 +56,13 @@ int main()
         int u, v;
         cin >> u >> v;
 
-        roads[u].push_back(v);
-        roads[v].push_back(u);
+        if (u != v)
+        {
+            roads[u].push_back(v);
+            roads[v].push_back(u);
+        }
     }
-    
+
     // init
     for (int i = 1; i <= n; i++)
     {
@@ -88,7 +95,136 @@ int main()
             group_id ++;
         }
     }
-    
+
+    vector<int> group_sizes;
+    for (int i = 1; i < group_id; i++)
+    {
+        group_sizes.push_back(groups[i].size());
+    }
+
+    sort(group_sizes.begin(), group_sizes.end());
+    group_sizes.push_back(0); // sentinel
+
+    vector<int> dp(n + 1, -1);
+    int ans = -1;
+    dp[0] = 0;
+
+    int pre = 0;
+    int cnt = 0;
+    for (int i = 0; i < group_sizes.size(); i++)
+    {
+        if (pre != group_sizes[i])
+        {
+            int step = 1;
+            while (step <= cnt)
+            {
+                for (int j = n; j >= 0; j--)
+                {
+                    if (0 <= dp[j])
+                    {
+                        int x = j + step * pre;
+                        if (x <= n)
+                        {
+                            if (-1 == dp[x])
+                            {
+                                if (0 == j)
+                                {
+                                    dp[x] = step - 1;
+                                }
+                                else
+                                {
+                                    dp[x] = dp[j] + step;
+                                }
+                            }
+                            else
+                            {
+                                if (0 == j)
+                                {
+                                    dp[x] = min(dp[x], step - 1);
+                                }
+                                else
+                                {
+                                    dp[x] = min(dp[x], dp[j] + step);
+                                }
+                            }
+
+                            if (is_lucky[x])
+                            {
+                                if (-1 == ans)
+                                {
+                                    ans = dp[x];
+                                }
+                                else
+                                {
+                                    ans = min(ans, dp[x]);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                cnt -= step;
+                step <<= 1;
+            }
+
+            if (0 < cnt)
+            {
+                for (int j = n; j >= 0; j--)
+                {
+                    if (0 <= dp[j])
+                    {
+                        int x = j + cnt * pre;
+                        if (x <= n)
+                        {
+                            if (-1 == dp[x])
+                            {
+                                if (0 == j)
+                                {
+                                    dp[x] = cnt - 1;
+                                }
+                                else
+                                {
+                                    dp[x] = dp[j] + cnt;
+                                }
+                            }
+                            else
+                            {
+                                if (0 == j)
+                                {
+                                    dp[x] = min(dp[x], cnt - 1);
+                                }
+                                else
+                                {
+                                    dp[x] = min(dp[x], dp[j] + cnt);
+                                }
+                            }
+
+                            if (is_lucky[x])
+                            {
+                                if (-1 == ans)
+                                {
+                                    ans = dp[x];
+                                }
+                                else
+                                {
+                                    ans = min(ans, dp[x]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            pre = group_sizes[i];
+            cnt = 1;
+        }
+        else
+        {
+            cnt++;
+        }
+    }
+
+    cout << ans << "\n";
 
     return 0;
 }

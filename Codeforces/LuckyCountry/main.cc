@@ -26,6 +26,19 @@ vector<vector<int>> roads(MAXN);
 vector<unordered_set<int>> groups(MAXN);
 vector<int> belong(MAXN, 0);
 
+void dfs(int u, int parent, int group_id)
+{
+    for (int v : roads[u])
+    {
+        if (v != parent && belong[v] == 0)
+        {
+            belong[v] = group_id;
+            groups[group_id].insert(v);
+            dfs(v, u, group_id);
+        }
+    }
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
@@ -59,7 +72,23 @@ int main()
         }
     }
 
+    int group_id = 1;
+    for (int i = 1; i <= n; i++)
+    {
+        if (0 == belong[i])
+        {
+            belong[i] = group_id;
+            groups[group_id].insert(i);
 
+            for (int j : roads[i])
+            {
+                dfs(j, i, group_id);
+            }
+
+            group_id ++;
+        }
+    }
+    
 
     return 0;
 }

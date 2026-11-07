@@ -22,6 +22,9 @@ using namespace std;
 
 const int MAXN = 1e5 + 1;
 vector<bool> is_lucky(MAXN, true);
+vector<vector<int>> roads(MAXN);
+vector<unordered_set<int>> groups(MAXN);
+vector<int> belong(MAXN, 0);
 
 int main()
 {
@@ -35,6 +38,9 @@ int main()
     {
         int u, v;
         cin >> u >> v;
+
+        roads[u].push_back(v);
+        roads[v].push_back(u);
     }
     
     // init
@@ -53,7 +59,7 @@ int main()
         }
     }
 
-    
+
 
     return 0;
 }

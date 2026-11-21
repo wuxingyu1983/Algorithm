@@ -61,7 +61,28 @@ int main()
         int n, k;
         cin >> n >> k;
 
+        vector<vector<int>> edges(n + 1);
+        for (int i = 1; i < n; i++)
+        {
+            int u, v;
+            cin >> u >> v;
 
+            edges[u].push_back(v);
+            edges[v].push_back(u);
+        }
+
+        long long ans = 0;
+
+        if (2 == k)
+        {
+            ans = C[n][2];
+        }
+        else
+        {
+            
+        }
+
+        cout << ans << "\n";
     }
 
     return 0;

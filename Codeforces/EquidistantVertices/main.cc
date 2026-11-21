@@ -79,7 +79,31 @@ int main()
         }
         else
         {
-            
+            vector<vector<int>> groups[2];
+            for (int node = 1; node <= n; node++)
+            {
+                // init
+                int curr = 1;
+                groups[curr].clear();
+                for (int i = 0; i < edges[node].size(); i++)
+                {
+                    groups[curr].push_back(vector<int>(1, edges[node][i]));
+                }
+
+                for (int len = 1; len <= n; len++)
+                {
+                    if (k > groups[curr].size())
+                    {
+                        break;
+                    }
+
+                    groups[1 - curr].clear();
+
+                    
+
+                    curr = 1 - curr;
+                }
+            }
         }
 
         cout << ans << "\n";

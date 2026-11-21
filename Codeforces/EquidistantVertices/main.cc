@@ -64,6 +64,13 @@ void bfs(vector<vector<int>> &inVec, vector<vector<int>> &outVec, vector<bool> &
     }
 }
 
+long long func(int k, vector<vector<int>> &group)
+{
+    long long ret = 0;
+
+    return ret;
+}
+
 int main()
 {
     ios::sync_with_stdio(false);
@@ -117,20 +124,23 @@ int main()
                 if (k <= groups[curr].size())
                 {
                     ans += C[groups[curr].size()][k];
-                }
 
-                for (int len = 1; len <= n; len++)
-                {
-                    if (k > groups[curr].size())
+                    for (int len = 1; len <= n; len++)
                     {
-                        break;
+                        groups[1 - curr].clear();
+
+                        bfs(groups[curr], groups[1 - curr], flags);
+
+                        if (k > groups[1 - curr].size())
+                        {
+                            break;
+                        }
+
+                        ans += func(k, groups[1 - curr]);
+                        ans %= MOD;
+
+                        curr = 1 - curr;
                     }
-
-                    groups[1 - curr].clear();
-
-                    bfs(groups[curr], groups[1 - curr], flags);
-
-                    curr = 1 - curr;
                 }
             }
         }

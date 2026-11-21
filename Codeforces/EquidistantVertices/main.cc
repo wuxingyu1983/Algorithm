@@ -43,17 +43,20 @@ void init()
     }
 }
 
-void bfs(vector<vector<int>> &inVec, vector<vector<int>> &outVec, vector<bool> &flags)
+void bfs(vector<vector<int>> &inVec, vector<vector<int>> &outVec, vector<bool> &flags, vector<vector<int>> &edges)
 {
     for (int i = 0; i < inVec.size(); i++)
     {
         vector<int> vec;
         for (int j = 0; j < inVec[i].size(); j++)
         {
-            if (false == flags[inVec[i][j]])
+            for (int l = 0; l < edges[inVec[i][j]].size(); l++)
             {
-                flags[inVec[i][j]] = true;
-                vec.push_back(inVec[i][j]);
+                if (false == flags[edges[inVec[i][j]][l]])
+                {
+                    flags[edges[inVec[i][j]][l]] = true;
+                    vec.push_back(edges[inVec[i][j]][l]);
+                }
             }
         }
 
@@ -146,7 +149,7 @@ int main()
                     {
                         groups[1 - curr].clear();
 
-                        bfs(groups[curr], groups[1 - curr], flags);
+                        bfs(groups[curr], groups[1 - curr], flags, edges);
 
                         if (k > groups[1 - curr].size())
                         {

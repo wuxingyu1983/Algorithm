@@ -68,6 +68,23 @@ long long func(int k, vector<vector<int>> &group)
 {
     long long ret = 0;
 
+    vector<long long> dp(k + 1, 0);
+    dp[0] = 1;
+
+    for (int i = 0; i < group.size(); i++)
+    {
+        for (int j = k - 1; j >= 0; j--)
+        {
+            if (0 < dp[j])
+            {
+                dp[j + 1] += dp[j] * group[i].size();
+                dp[j + 1] %= MOD;
+            }
+        }
+    }
+
+    ret = dp[k];
+
     return ret;
 }
 

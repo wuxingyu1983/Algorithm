@@ -45,7 +45,23 @@ void init()
 
 void bfs(vector<vector<int>> &inVec, vector<vector<int>> &outVec, vector<bool> &flags)
 {
+    for (int i = 0; i < inVec.size(); i++)
+    {
+        vector<int> vec;
+        for (int j = 0; j < inVec[i].size(); j++)
+        {
+            if (false == flags[inVec[i][j]])
+            {
+                flags[inVec[i][j]] = true;
+                vec.push_back(inVec[i][j]);
+            }
+        }
 
+        if (0 < vec.size())
+        {
+            outVec.push_back(vec);
+        }
+    }
 }
 
 int main()

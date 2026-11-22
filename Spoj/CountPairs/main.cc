@@ -51,5 +51,27 @@ int main()
         }
     }
 
+    long long ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        if (0 < neighbors[i].size())
+        {
+            bitset<MAXNM> flag;
+            for (int j = 0; j < neighbors[i].size(); j++)
+            {
+                flag |= adj[neighbors[i][j]];
+            }
+
+            int cnt = flag.count();
+            if (0 < cnt)
+            {
+                ans += cnt - 1;
+            }
+        }
+    }
+    ans >>= 1;
+
+    cout << ans << "\n";
+
     return 0;
 }

@@ -32,10 +32,18 @@ int main()
     int n, a, b;
     cin >> n >> a >> b;
 
+    int sum = 0;
     vector<int> d(n + 1);
     for (int i = 1; i <= n; i++)
     {
         cin >> d[i];
+        sum += d[i];
+    }
+
+    if (sum < abs(a) + abs(b))
+    {
+        cout << "No" << "\n";
+        return 0;
     }
 
     int p = a + b + 3600000;
@@ -44,6 +52,121 @@ int main()
     if (1000 < n)
     {
         // 2 段
+        dp[0][3600000] = 1;
+        for (int i = 1; i <= n - 1000; i++)
+        {
+            dp[i] = dp[i - 1] << d[i];
+            dp[i] |= dp[i - 1] >> d[i];
+        }
+
+        dp[0] = dp[n - 1000];
+        for (int i = 1; i <= 1000; i++)
+        {
+            int j = i + n - 1000;
+            dp[i] = dp[i - 1] << d[j];
+            dp[i] |= dp[i - 1] >> d[j];
+        }
+ 
+        if (dp[1000][p] && dp[1000][q])
+        {
+            int preP = p;
+            int preQ = q;
+
+            for (int i = 1000; i > 0; i--)
+            {
+                int j = i + n - 1000;
+                int type = 0;
+                if (dp[i - 1][preP - d[j]])
+                {
+                    preP -= d[j];
+                    type += 0;
+                }
+                else if (dp[i - 1][preP + d[j]])
+                {
+                    preP += d[j];
+                    type += 1;
+                }
+
+                if (dp[i - 1][preQ - d[j]])
+                {
+                    preQ -= d[j];
+                    type += 0;
+                }
+                else if (dp[i - 1][preQ + d[j]])
+                {
+                    preQ += d[j];
+                    type += 2;
+                }
+
+                switch (type)
+                {
+                case 0:
+                    ans.push_back('R');
+                    break;
+                case 1:
+                    ans.push_back('D');
+                    break;
+                case 2:
+                    ans.push_back('U');
+                    break;
+                case 3:
+                default:
+                    ans.push_back('L');
+                    break;
+                }
+            }
+
+            dp[0].reset();
+            dp[0][3600000] = 1;
+            for (int i = 1; i <= n - 1000; i++)
+            {
+                dp[i] = dp[i - 1] << d[i];
+                dp[i] |= dp[i - 1] >> d[i];
+            }
+
+            for (int i = n - 1000; i > 0; i--)
+            {
+                int type = 0;
+                if (dp[i - 1][preP - d[i]])
+                {
+                    preP -= d[i];
+                    type += 0;
+                }
+                else if (dp[i - 1][preP + d[i]])
+                {
+                    preP += d[i];
+                    type += 1;
+                }
+
+                if (dp[i - 1][preQ - d[i]])
+                {
+                    preQ -= d[i];
+                    type += 0;
+                }
+                else if (dp[i - 1][preQ + d[i]])
+                {
+                    preQ += d[i];
+                    type += 2;
+                }
+
+                switch (type)
+                {
+                case 0:
+                    ans.push_back('R');
+                    break;
+                case 1:
+                    ans.push_back('D');
+                    break;
+                case 2:
+                    ans.push_back('U');
+                    break;
+                case 3:
+                default:
+                    ans.push_back('L');
+                    break;
+                }
+            }
+        }
     }
     else
     {
@@ -116,8 +239,8 @@ int main()
         {
             cout << ans[i];
         }
+        cout << "\n";
     }
-    cout << "\n";
 
     return 0;
 }

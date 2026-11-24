@@ -38,8 +38,8 @@ int main()
         cin >> d[i];
     }
 
-    int p = a + b;
-    int q = a - b;
+    int p = a + b + 3600000;
+    int q = a - b + 3600000;
     vector<char> ans;
     if (1000 < n)
     {
@@ -64,19 +64,23 @@ int main()
                 int type = 0;
                 if (dp[i - 1][preP - d[i]])
                 {
+                    preP -= d[i];
                     type += 0;
                 }
                 else if (dp[i - 1][preP + d[i]])
                 {
+                    preP += d[i];
                     type += 1;
                 }
 
                 if (dp[i - 1][preQ - d[i]])
                 {
+                    preQ -= d[i];
                     type += 0;
                 }
                 else if (dp[i - 1][preQ + d[i]])
                 {
+                    preQ += d[i];
                     type += 2;
                 }
 

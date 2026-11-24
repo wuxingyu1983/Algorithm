@@ -76,23 +76,23 @@ int main()
             {
                 int j = i + n - 1000;
                 int type = 0;
-                if (dp[i - 1][preP - d[j]])
+                if (0 <= preP - d[j] && dp[i - 1][preP - d[j]])
                 {
                     preP -= d[j];
                     type += 0;
                 }
-                else if (dp[i - 1][preP + d[j]])
+                else if (7200000 >= preP + d[j] && dp[i - 1][preP + d[j]])
                 {
                     preP += d[j];
                     type += 1;
                 }
 
-                if (dp[i - 1][preQ - d[j]])
+                if (0 <= preQ - d[j] && dp[i - 1][preQ - d[j]])
                 {
                     preQ -= d[j];
                     type += 0;
                 }
-                else if (dp[i - 1][preQ + d[j]])
+                else if (7200000 >= preQ + d[j] && dp[i - 1][preQ + d[j]])
                 {
                     preQ += d[j];
                     type += 2;
@@ -127,23 +127,23 @@ int main()
             for (int i = n - 1000; i > 0; i--)
             {
                 int type = 0;
-                if (dp[i - 1][preP - d[i]])
+                if (0 <= preP - d[i] && dp[i - 1][preP - d[i]])
                 {
                     preP -= d[i];
                     type += 0;
                 }
-                else if (dp[i - 1][preP + d[i]])
+                else if (7200000 >= preP + d[i] && dp[i - 1][preP + d[i]])
                 {
                     preP += d[i];
                     type += 1;
                 }
 
-                if (dp[i - 1][preQ - d[i]])
+                if (0 <= preQ - d[i] && dp[i - 1][preQ - d[i]])
                 {
                     preQ -= d[i];
                     type += 0;
                 }
-                else if (dp[i - 1][preQ + d[i]])
+                else if (7200000 >= preQ + d[i] && dp[i - 1][preQ + d[i]])
                 {
                     preQ += d[i];
                     type += 2;
@@ -185,23 +185,23 @@ int main()
             for (int i = n; i > 0; i--)
             {
                 int type = 0;
-                if (dp[i - 1][preP - d[i]])
+                if (0 <= preP - d[i] && dp[i - 1][preP - d[i]])
                 {
                     preP -= d[i];
                     type += 0;
                 }
-                else if (dp[i - 1][preP + d[i]])
+                else if (7200000 >= preP + d[i] && dp[i - 1][preP + d[i]])
                 {
                     preP += d[i];
                     type += 1;
                 }
 
-                if (dp[i - 1][preQ - d[i]])
+                if (0 <= preQ - d[i] && dp[i - 1][preQ - d[i]])
                 {
                     preQ -= d[i];
                     type += 0;
                 }
-                else if (dp[i - 1][preQ + d[i]])
+                else if (7200000 >= preQ + d[i] && dp[i - 1][preQ + d[i]])
                 {
                     preQ += d[i];
                     type += 2;
